@@ -1,0 +1,28 @@
+package {{packageName}}
+
+import {{entityPackageName}}.{{entityClassName}}
+import {{tablePackageName}}.{{tableClassName}}
+import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.SessionService
+import github.afezeria.hymn.common.util.TableCache
+import org.springframework.stereotype.Component
+import org.ktorm.dsl.*
+import java.time.LocalDateTime
+import java.util.*
+import {{daoPackageName}}.{{daoClassName}}
+
+/**
+* @author afezeria
+*/
+@Component
+@TableCache(tableName = "{{_table.name}}")
+class {{name}}(
+private val dbService: DataBaseService,
+private val sessionService:SessionService,
+) : {{daoClassName}}{
+
+    val table = {{tableClassName}}()
+
+{{#functions}}{{{impl}}}{{/functions}}
+
+}

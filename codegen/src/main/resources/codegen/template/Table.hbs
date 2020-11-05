@@ -1,0 +1,38 @@
+package {{packageName}}
+
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.*
+import {{entityPackageName}}.{{entityClassName}}
+
+/**
+* @author afezeria
+*/
+class {{name}}(alias: String? = null) : BaseTable<{{entityClassName}}>("{{_table.name}}", alias) {
+
+{{#fields}}
+    val {{fieldName}} = {{ktormType}}("{{columnname}}")
+{{/fields}}
+{{#lateinitFields}}
+    val {{fieldName}} = {{ktormType}}("{{columnname}}")
+{{/lateinitFields}}
+
+    override fun doCreateEntity(row: QueryRowSet, withReferences: Boolean) = {{entityClassName}}(
+      {{#fields}}
+        {{#notnull}}
+        {{fieldName}} = requireNotNull(row[this.{{fieldName}}]) {"Field {{entityClassName}}.{{fieldName}} should not be null"},
+        {{/notnull}}
+        {{^notnull}}
+        {{fieldName}} = row[this.{{fieldName}}]{{default}},
+        {{/notnull}}
+      {{/fields}}
+    ).also{
+      {{#lateinitFields}}
+        {{#notnull}}
+        it.{{fieldName}} = requireNotNull(row[this.{{fieldName}}]) {"Field {{entityClassName}}.{{fieldName}} should not be null"}
+        {{/notnull}}
+        {{^notnull}}
+        it.{{fieldName}} = row[this.{{fieldName}}]{{default}}
+        {{/notnull}}
+      {{/lateinitFields}}
+    }
+}

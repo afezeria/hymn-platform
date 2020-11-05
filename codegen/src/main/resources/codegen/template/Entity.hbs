@@ -1,0 +1,33 @@
+package {{packageName}}
+
+{{#imports}}
+import {{.}}
+{{/imports}}
+
+/**
+ *
+{{#tableComment}} * {{{.}}}
+{{/tableComment}}
+{{#fields}}{{#comment}} * @property {{fieldName}} {{comment}}
+{{/comment}}{{/fields}}
+ * @author afezeria
+ */
+@ApiModel(value="{{tableTag}}",description = """{{{tableDescription}}}""")
+data class {{name}}(
+
+{{#fields}}
+
+    @ApiModelProperty(value = "{{#comment}}{{comment}}{{/comment}}", {{#notnull}}required = true{{/notnull}})
+    var {{fieldName}}: {{javaType}}{{^notnull}}? = null{{/notnull}},
+{{/fields}}
+) {
+{{#lateinitFields}}
+
+  {{#comment}}
+    /**
+    * {{comment}}
+    */
+  {{/comment}}
+    lateinit var {{fieldName}}: {{javaType}}
+{{/lateinitFields}}
+}

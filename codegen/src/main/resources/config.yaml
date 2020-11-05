@@ -1,0 +1,12 @@
+db:
+  url: jdbc:postgresql://localhost:5432/afezeria
+  user: afezeria
+  password: 123456
+  driver: org.postgresql.Driver
+schema: hymn
+packageName: github.afezeria.hymn.admin
+moduleName: admin
+tableRegex: ^sys_core
+templates: [ Controller,Dto,Entity,Service,ServiceImpl,Table ]
+systemOutput: false
+outputPath:
