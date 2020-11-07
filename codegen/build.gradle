@@ -7,6 +7,10 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-sql:3.0.5'
     compile 'org.codehaus.groovy:groovy-yaml:3.0.5'
     compile 'org.codehaus.groovy:groovy-templates:3.0.5'
+    implementation "com.fasterxml.jackson.core:jackson-core:2.11.3"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.11.3"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.11.3"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.3"
 
     compile group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.9.7'
 
