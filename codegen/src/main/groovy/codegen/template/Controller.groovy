@@ -18,7 +18,7 @@ class Controller extends Gen {
   }
 
   def router() {
-    "/api/${_config.moduleName}/${(_table.name - /^sys_core_/).replace('_', '-')}"
+    "/module/${_config.moduleName}/api/${(_table.name - /^sys_core_/).replace('_', '-')}"
   }
 
   def functions() {
