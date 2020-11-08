@@ -15,6 +15,7 @@ create table hymn.sys_core_account
     admin        boolean          default false not null,
     leader_id    text,
     org_id       text                           not null,
+    role_id      text                           not null,
     create_by_id text                           not null,
     create_by    text                           not null,
     modify_by_id text                           not null,
@@ -192,7 +193,6 @@ create table hymn.sys_core_custom_interface
     code                     text                           not null,
     active                   boolean          default false not null,
     lang                     text                           not null,
-    ref_object_or_field_list text,
     option_text              text,
     remark                   text,
     create_by_id             text                           not null,
@@ -208,7 +208,6 @@ comment on column hymn.sys_core_custom_interface.name is '接口名称';
 comment on column hymn.sys_core_custom_interface.code is '接口代码';
 comment on column hymn.sys_core_custom_interface.active is '是否启用';
 comment on column hymn.sys_core_custom_interface.lang is '语言';
-comment on column hymn.sys_core_custom_interface.ref_object_or_field_list is '引用对象或字段列表，用于在删除字段或对象时给出提示，各项之间以 , 分割，对象和字段间用 . 链接。例： a_obj,b_obj.k1,b_obj.k2';
 comment on column hymn.sys_core_custom_interface.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
 
 
@@ -524,7 +523,25 @@ comment on column hymn.sys_core_b_object_record_type.object_id is '所属业务�
 comment on column hymn.sys_core_b_object_record_type.name is '记录类型名称';
 comment on column hymn.sys_core_b_object_record_type.active is '是否启用';
 
--- todo(字段依赖性表还未定义)
+drop table if exists hymn.sys_core_b_object_record_type_available_options cascade;
+create table hymn.sys_core_b_object_record_type_available_options
+(
+    id             text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    record_type_id text      not null,
+    field_id       text      not null,
+    dict_item_id   text      not null,
+    create_by_id   text      not null,
+    create_by      text      not null,
+    modify_by_id   text      not null,
+    modify_by      text      not null,
+    create_date    timestamp not null,
+    modify_date    timestamp not null
+);
+comment on table hymn.sys_core_b_object_record_type_available_options is '业务对象记录类型限制
+限制指定记录类型时指定字段（多选/单选）的可用选项';
+comment on column hymn.sys_core_b_object_record_type_available_options.record_type_id is '记录类型id';
+comment on column hymn.sys_core_b_object_record_type_available_options.dict_item_id is '字段关联的字典项id';
+comment on column hymn.sys_core_b_object_record_type_available_options.field_id is '字段id';
 
 
 drop table if exists hymn.sys_core_b_object_record_layout cascade;
@@ -559,7 +576,6 @@ create table hymn.sys_core_b_object_trigger
     name                     text                           not null,
     api                      text                           not null unique,
     lang                     text                           not null,
-    ref_object_or_field_list text,
     option_text              text,
     ord                      integer                        not null,
     event                    integer                        not null,
@@ -580,7 +596,6 @@ comment on column hymn.sys_core_b_object_trigger.ord is '优先级';
 comment on column hymn.sys_core_b_object_trigger.event is '触发时间 BEFORE_INSERT,BEFORE_UPDATE,BEFORE_UPSERT,BEFORE_DELETE,AFTER_INSERT,AFTER_UPDATE,AFTER_UPSERT,AFTER_DELETE;';
 comment on column hymn.sys_core_b_object_trigger.code is '触发器代码';
 comment on column hymn.sys_core_b_object_trigger.lang is '语言';
-comment on column hymn.sys_core_b_object_trigger.ref_object_or_field_list is '引用对象或字段列表，用于在删除字段或对象时给出提示，各项之间以 , 分割，对象和字段间用 . 链接。例： a_obj,b_obj.k1,b_obj.k2';
 comment on column hymn.sys_core_b_object_trigger.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
 
 
@@ -853,7 +868,6 @@ create table hymn.sys_core_shared_code
     type                     text      not null,
     code                     text      not null,
     lang                     text      not null,
-    ref_object_or_field_list text,
     option_text              text,
     create_by_id             text      not null,
     create_by                text      not null,
@@ -867,27 +881,26 @@ comment on column hymn.sys_core_shared_code.type is '代码类型 可选值 函�
 comment on column hymn.sys_core_shared_code.code is '代码';
 comment on column hymn.sys_core_shared_code.api is 'api名称,也是代码中的函数名称';
 comment on column hymn.sys_core_shared_code.lang is '语言';
-comment on column hymn.sys_core_shared_code.ref_object_or_field_list is '引用对象或字段列表，用于在删除字段或对象时给出提示，各项之间以 , 分割，对象和字段_shared_code间用 . 链接。例： a_obj,b_obj.k1,b_obj.k2';
 comment on column hymn.sys_core_shared_code.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
 
 
 drop table if exists hymn.sys_core_business_code_ref;
 create table hymn.sys_core_business_code_ref
 (
-    id                       text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    trigger_id text,
-    interface_id text,
+    id             text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    trigger_id     text,
+    interface_id   text,
     shared_code_id text,
-    object_id text,
-    field_id text,
-    org_id text,
-    role_id text,
-    create_by_id             text      not null,
-    create_by                text      not null,
-    modify_by_id             text      not null,
-    modify_by                text      not null,
-    create_date              timestamp not null,
-    modify_date              timestamp not null
+    object_id      text,
+    field_id       text,
+    org_id         text,
+    role_id        text,
+    create_by_id   text      not null,
+    create_by      text      not null,
+    modify_by_id   text      not null,
+    modify_by      text      not null,
+    create_date    timestamp not null,
+    modify_date    timestamp not null
 );
 comment on table hymn.sys_core_business_code_ref is '业务代码引用关系表';
 comment on column hymn.sys_core_business_code_ref.trigger_id is '触发器id';

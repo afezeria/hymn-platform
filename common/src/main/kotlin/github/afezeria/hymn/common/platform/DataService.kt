@@ -1,6 +1,7 @@
 package github.afezeria.hymn.common.platform
 
 /**
+ * 用于自定义对象和部分标准对象的增删改查接口
  * @author afezeria
  */
 interface DataService {
