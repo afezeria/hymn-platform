@@ -25,6 +25,8 @@ alter table hymn.sys_core_account_menu_layout
     add foreign key (create_by_id) references hymn.sys_core_account;
 alter table hymn.sys_core_account_menu_layout
     add foreign key (modify_by_id) references hymn.sys_core_account;
+alter table hymn.sys_core_account_menu_layout
+    add check ( client_type in ('browser','android') );
 
 
 alter table hymn.sys_core_account_object_view
@@ -40,6 +42,11 @@ alter table hymn.sys_core_custom_button
     add foreign key (create_by_id) references hymn.sys_core_account;
 alter table hymn.sys_core_custom_button
     add foreign key (modify_by_id) references hymn.sys_core_account;
+alter table hymn.sys_core_custom_button
+    add check ( action in ('eval', 'open_in_current_tab', 'open_in_new_tab', 'open_in_new_window') );
+alter table hymn.sys_core_custom_button
+    add check ( client_type in ('browser','android') );
+
 
 alter table hymn.sys_core_custom_component
     add foreign key (create_by_id) references hymn.sys_core_account;
@@ -55,6 +62,13 @@ alter table hymn.sys_core_custom_menu_item
     add foreign key (create_by_id) references hymn.sys_core_account;
 alter table hymn.sys_core_custom_menu_item
     add foreign key (modify_by_id) references hymn.sys_core_account;
+alter table hymn.sys_core_custom_menu_item
+    add check ( path_type in ('path','url'));
+alter table hymn.sys_core_custom_menu_item
+    add check ( action in ('iframe','current_tab','new_tab'));
+alter table hymn.sys_core_custom_menu_item
+    add check ( client_type in ('browser','android'));
+
 
 alter table hymn.sys_core_custom_page
     add foreign key (create_by_id) references hymn.sys_core_account;
@@ -85,12 +99,12 @@ alter table hymn.sys_core_b_object_field
 alter table hymn.sys_core_b_object_field
     add foreign key (modify_by_id) references hymn.sys_core_account;
 alter table hymn.sys_core_b_object_field
-    add constraint object_field_type_check check ( type in ('text', 'check_box', 'select',
-                                                            'multiple_select', 'integer', 'float',
-                                                            'money', 'date', 'datetime', 'picture',
-                                                            'percentage', 'relation'));
+    add check ( type in ('text', 'check_box', 'select',
+                         'multiple_select', 'integer', 'float',
+                         'money', 'date', 'datetime', 'picture',
+                         'percentage', 'relation'));
 alter table hymn.sys_core_b_object_field
-    add constraint object_field_standard_type_check check (
+    add check (
             standard_type in (
                               'create_by_id',
                               'create_by',
@@ -203,6 +217,8 @@ alter table hymn.sys_core_b_object_trigger
     add foreign key (create_by_id) references hymn.sys_core_account;
 alter table hymn.sys_core_b_object_trigger
     add foreign key (modify_by_id) references hymn.sys_core_account;
+alter table hymn.sys_core_b_object_trigger
+    add check ( event in ('before_insert','before_update','before_upsert','before_delete','after_insert','after_update','after_upsert','after_delete') );
 
 alter table hymn.sys_core_business_code_ref
     add foreign key (trigger_id) references hymn.sys_core_b_object_trigger;

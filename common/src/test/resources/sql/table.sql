@@ -13,6 +13,7 @@ create table hymn.sys_core_account
     online_rule  text                           not null,
     active       boolean          default false not null,
     admin        boolean          default false not null,
+    root         boolean          default false not null,
     leader_id    text,
     org_id       text                           not null,
     role_id      text                           not null,
@@ -25,11 +26,13 @@ create table hymn.sys_core_account
 );
 comment on table hymn.sys_core_account is '用户';
 comment on column hymn.sys_core_account.lock_time is '锁定时间，当前时间小于等于lock_time表示帐号被锁定';
-comment on column hymn.sys_core_account.online_rule is '在线规则，限制每客户端在线数量或登录ip等';
+comment on column hymn.sys_core_account.online_rule is '在线规则，限制每客户端在线数量或登录ip等, none为无限制';
 comment on column hymn.sys_core_account.active is '是否启用';
 comment on column hymn.sys_core_account.admin is '是否是管理员';
 comment on column hymn.sys_core_account.leader_id is '直接上级id';
 comment on column hymn.sys_core_account.org_id is '所属组织id';
+comment on column hymn.sys_core_account.root is '是否是初始帐号';
+
 
 
 drop table if exists hymn.sys_core_org cascade;
@@ -37,8 +40,7 @@ create table hymn.sys_core_org
 (
     id                 text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     name               text      not null,
-    code               text      not null,
-    director_id        text      not null,
+    director_id        text,
     deputy_director_id text,
     parent_id          uuid,
     create_by_id       text      not null,
@@ -49,7 +51,7 @@ create table hymn.sys_core_org
     modify_date        timestamp not null
 );
 comment on table hymn.sys_core_org is '组织';
-comment on column hymn.sys_core_org.code is '组织代码，数字加小写字母的字符串，父组织的代码为子组织前缀，每个组织最多36个子组织，eg： 总公司：1a 子公司1：1a0 子公司2：1a1';
+-- comment on column hymn.sys_core_org.code is '组织代码，数字加小写字母的字符串，父组织的代码为子组织前缀，每个组织最多36个子组织，eg： 总公司：1a 子公司1：1a0 子公司2：1a1';
 comment on column hymn.sys_core_org.parent_id is '上级组织id';
 comment on column hymn.sys_core_org.director_id is '部门领导id';
 comment on column hymn.sys_core_org.deputy_director_id is '部门副领导id';
@@ -59,7 +61,7 @@ create table hymn.sys_core_role
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     name         text      not null,
-    type         text      not null,
+--     type         text      not null,
     remark       text,
     create_by_id text      not null,
     create_by    text      not null,
@@ -70,7 +72,6 @@ create table hymn.sys_core_role
 );
 comment on table hymn.sys_core_role is '角色';
 comment on column hymn.sys_core_role.name is '角色名称';
-comment on column hymn.sys_core_role.type is '角色类型';
 
 drop table if exists hymn.sys_core_config cascade;
 create table hymn.sys_core_config
@@ -158,8 +159,8 @@ create table hymn.sys_core_custom_button
 comment on table hymn.sys_core_custom_button is '自定义按钮';
 comment on column hymn.sys_core_custom_button.object_id is '业务对象id，不为空时表示该按钮只能在该对象相关页面中使用';
 comment on column hymn.sys_core_custom_button.client_type is '客户端类型，表示只能用在特定类型客户端中';
-comment on column hymn.sys_core_custom_button.action is '按钮行为：1、EVAL 执行js代码，2、OPEN_IN_CURRENT_TAB 在当前页面中打开链接，3、OPEN_IN_NEW_TAB 在新标签页中打开链接，4、OPEN_IN_NEW_WINDOW 在新窗口中打开链接';
-comment on column hymn.sys_core_custom_button.content is '按钮内容，当action为EVAL时为js代码，其他情况为url';
+comment on column hymn.sys_core_custom_button.action is '按钮行为 可选值： eval 执行js代码, open_in_current_tab 在当前页面中打开链接, open_in_new_tab 在新标签页中打开链接, open_in_new_window 在新窗口中打开链接';
+comment on column hymn.sys_core_custom_button.content is '按钮内容，当action为eval时为js代码，其他情况为url';
 
 
 
@@ -187,20 +188,20 @@ comment on column hymn.sys_core_custom_component.code is '组件html代码';
 drop table if exists hymn.sys_core_custom_interface cascade;
 create table hymn.sys_core_custom_interface
 (
-    id                       text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    api                      text                           not null,
-    name                     text                           not null,
-    code                     text                           not null,
-    active                   boolean          default false not null,
-    lang                     text                           not null,
-    option_text              text,
-    remark                   text,
-    create_by_id             text                           not null,
-    create_by                text                           not null,
-    modify_by_id             text                           not null,
-    modify_by                text                           not null,
-    create_date              timestamp                      not null,
-    modify_date              timestamp                      not null
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    api          text                           not null,
+    name         text                           not null,
+    code         text                           not null,
+    active       boolean          default false not null,
+    lang         text                           not null,
+    option_text  text,
+    remark       text,
+    create_by_id text                           not null,
+    create_by    text                           not null,
+    modify_by_id text                           not null,
+    modify_by    text                           not null,
+    create_date  timestamp                      not null,
+    modify_date  timestamp                      not null
 );
 comment on table hymn.sys_core_custom_interface is '自定义接口';
 comment on column hymn.sys_core_custom_interface.api is '接口api名称，唯一标识';
@@ -217,10 +218,9 @@ create table hymn.sys_core_custom_menu_item
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     name         text      not null,
-    path         text      not null unique,
+    path         text      not null,
     path_type    text      not null,
---     constraint ck_sys_core_menu_item
---         check (path_type = ANY (ARRAY ['path'::text, 'inner_url'::text, 'outer_url'::text])),
+    action       text      not null,
     client_type  text      not null,
     icon         text      not null,
     create_by_id text      not null,
@@ -233,8 +233,10 @@ create table hymn.sys_core_custom_menu_item
 comment on table hymn.sys_core_custom_menu_item is '菜单项';
 comment on column hymn.sys_core_custom_menu_item.name is '菜单项名称';
 comment on column hymn.sys_core_custom_menu_item.path is 'url path';
-comment on column hymn.sys_core_custom_menu_item.path_type is '路径类型';
-comment on column hymn.sys_core_custom_menu_item.client_type is '客户端类型';
+comment on column hymn.sys_core_custom_menu_item.path_type is 'path类型 可选值： path 路径, url 外部url';
+comment on column hymn.sys_core_custom_menu_item.action is '行为 可选值： iframe 在iframe中打开, current_tab 当前标签页中打开, new_tab 新标签页中打开';
+
+comment on column hymn.sys_core_custom_menu_item.client_type is '客户端类型  可选值： browser 浏览器, android 安卓';
 comment on column hymn.sys_core_custom_menu_item.icon is '图标';
 
 
@@ -246,6 +248,7 @@ create table hymn.sys_core_custom_page
     api          text      not null,
     name         text      not null,
     template     text      not null,
+    static       boolean   not null,
     remark       text,
     create_by_id text      not null,
     create_by    text      not null,
@@ -258,6 +261,7 @@ comment on table hymn.sys_core_custom_page is '自定义页面';
 comment on column hymn.sys_core_custom_page.api is 'api名称，唯一标识';
 comment on column hymn.sys_core_custom_page.template is '页面模板';
 comment on column hymn.sys_core_custom_page.name is '自定义页面名称，用于后台查看';
+comment on column hymn.sys_core_custom_page.static is '是否为静态页面';
 
 
 
@@ -569,23 +573,23 @@ comment on column hymn.sys_core_b_object_record_layout.layout_id is '页面布�
 drop table if exists hymn.sys_core_b_object_trigger cascade;
 create table hymn.sys_core_b_object_trigger
 (
-    id                       text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    active                   boolean          default false not null,
-    remark                   text,
-    object_id                text                           not null,
-    name                     text                           not null,
-    api                      text                           not null unique,
-    lang                     text                           not null,
-    option_text              text,
-    ord                      integer                        not null,
-    event                    integer                        not null,
-    code                     text                           not null,
-    create_by_id             text                           not null,
-    create_by                text                           not null,
-    modify_by_id             text                           not null,
-    modify_by                text                           not null,
-    create_date              timestamp                      not null,
-    modify_date              timestamp                      not null
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    active       boolean          default false not null,
+    remark       text,
+    object_id    text                           not null,
+    name         text                           not null,
+    api          text                           not null unique,
+    lang         text                           not null,
+    option_text  text,
+    ord          integer                        not null,
+    event        integer                        not null,
+    code         text                           not null,
+    create_by_id text                           not null,
+    create_by    text                           not null,
+    modify_by_id text                           not null,
+    modify_by    text                           not null,
+    create_date  timestamp                      not null,
+    modify_date  timestamp                      not null
 );
 comment on table hymn.sys_core_b_object_trigger is '触发器';
 comment on column hymn.sys_core_b_object_trigger.active is '是否启用';
@@ -863,18 +867,18 @@ comment on column hymn.sys_core_b_object_field_store.used is '是否已被使用
 drop table if exists hymn.sys_core_shared_code;
 create table hymn.sys_core_shared_code
 (
-    id                       text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    api                      text      not null,
-    type                     text      not null,
-    code                     text      not null,
-    lang                     text      not null,
-    option_text              text,
-    create_by_id             text      not null,
-    create_by                text      not null,
-    modify_by_id             text      not null,
-    modify_by                text      not null,
-    create_date              timestamp not null,
-    modify_date              timestamp not null
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    api          text      not null,
+    type         text      not null,
+    code         text      not null,
+    lang         text      not null,
+    option_text  text,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
 );
 comment on table hymn.sys_core_shared_code is '共享代码 可以在接口、触发器中调用或使用在定时任务中';
 comment on column hymn.sys_core_shared_code.type is '代码类型 可选值 函数代码 function， 任务代码 job';
