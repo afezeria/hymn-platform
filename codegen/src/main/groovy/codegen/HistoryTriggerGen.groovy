@@ -61,16 +61,19 @@ begin
     return null;
 end
 \$\$;
+drop trigger if exists ${it.name}_history_ins on hymn.${it.name};
 create trigger ${it.name}_history_ins
     after insert
     on hymn.${it.name}
     for each row
 execute function hymn.${it.name}_history_ins();
+drop trigger if exists ${it.name}_history_upd on hymn.${it.name};
 create trigger ${it.name}_history_upd
     after update
     on hymn.${it.name}
     for each row
 execute function hymn.${it.name}_history_upd();
+drop trigger if exists ${it.name}_history_del on hymn.${it.name};
 create trigger ${it.name}_history_del
     after delete
     on hymn.${it.name}
