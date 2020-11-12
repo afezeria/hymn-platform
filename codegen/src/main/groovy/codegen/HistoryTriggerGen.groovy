@@ -2,6 +2,7 @@ package codegen
 
 import groovy.sql.Sql
 
+import static codegen.Constant.getQueryColumn
 import static codegen.Constant.getQueryTable
 
 /**
@@ -15,16 +16,27 @@ class HistoryTriggerGen {
   def run() {
     config.init()
     def sql = Sql.newInstance(db)
-    sql.rows(queryTable, [schema, schema])
-        .findAll {
-          !lineFile.ignoreTableList.contains(it['name'])
-              &&
-              it['name'] =~ ~tableRegex
-        }
+    def tables = sql.rows(queryTable, [schema, schema])
+        .findAll { it['name'] =~ ~tableRegex }
         .collect { new DbTable(it) }
+        .each {
+          it.fields = sql.rows(queryColumn, [it.name, schema])
+              .collect { new Field(it) }
+        }
+        .findAll {
+          it.fields.collect { it.columnname }
+              .containsAll(Constant.standardFieldName)
+        }
         .each {
 
           println """
+drop table if exists hymn.${it.name}_history cascade;
+create table hymn.${it.name}_history
+(
+    operation    text,
+    stamp        timestamp,
+${it.fields.collect {"    ${it.columnname} ${it.sqltype}"}.join(",\n")}
+);
 create or replace function hymn.${it.name}_history_ins() returns trigger
     language plpgsql as
 \$\$
@@ -69,6 +81,7 @@ execute function hymn.${it.name}_history_del();
 
         }
 
+    println()
 
   }
 
