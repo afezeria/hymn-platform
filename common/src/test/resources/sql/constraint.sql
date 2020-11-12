@@ -57,6 +57,8 @@ alter table hymn.sys_core_custom_interface
     add foreign key (create_by_id) references hymn.sys_core_account;
 alter table hymn.sys_core_custom_interface
     add foreign key (modify_by_id) references hymn.sys_core_account;
+alter table hymn.sys_core_custom_interface
+    add constraint sys_core_custom_interface_api_key unique (api) ;
 
 alter table hymn.sys_core_custom_menu_item
     add foreign key (create_by_id) references hymn.sys_core_account;
@@ -79,6 +81,8 @@ alter table hymn.sys_core_dict
     add foreign key (create_by_id) references hymn.sys_core_account;
 alter table hymn.sys_core_dict
     add foreign key (modify_by_id) references hymn.sys_core_account;
+alter table hymn.sys_core_dict
+    add constraint sys_core_dict_api_key unique (api);
 
 alter table hymn.sys_core_dict_item
     add foreign key (dict_id) references hymn.sys_core_dict;
@@ -219,6 +223,8 @@ alter table hymn.sys_core_b_object_trigger
     add foreign key (modify_by_id) references hymn.sys_core_account;
 alter table hymn.sys_core_b_object_trigger
     add check ( event in ('before_insert','before_update','before_upsert','before_delete','after_insert','after_update','after_upsert','after_delete') );
+alter table hymn.sys_core_b_object_trigger
+    add constraint sys_core_b_object_trigger_api_key unique (api);
 
 alter table hymn.sys_core_business_code_ref
     add foreign key (trigger_id) references hymn.sys_core_b_object_trigger;
