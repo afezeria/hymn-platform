@@ -19,6 +19,7 @@ dependencies {
     implementation "com.fasterxml.jackson.module:jackson-module-parameter-names:2.11.3"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3"
 
+
     implementation 'org.springframework.boot:spring-boot-starter-aop'
 
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
@@ -27,13 +28,17 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
     compile group: "org.ktorm", name: "ktorm-core", version: "$ktormVersion"
-    compile group: "org.ktorm", name: "ktorm-support-postgresql", version: "$ktormVersion"
-    compile group: "org.ktorm", name: "ktorm-jackson", version: "$ktormVersion"
 
-    testCompile group: 'org.graalvm.js', name: 'js', version: '20.1.0'
-    testCompile group: 'org.graalvm.js', name: 'js-scriptengine', version: '20.1.0'
-    testCompile group: 'org.graalvm.sdk', name: 'graal-sdk', version: '20.1.0'
+    testCompile "org.postgresql:postgresql:42.2.10"
+    testImplementation(platform("org.junit:junit-bom:5.7.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+}
 
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
 
 compileKotlin {
