@@ -1,28 +1,28 @@
-drop schema hymn cascade;
+drop schema if exists hymn cascade;
 create schema hymn;
 
 
 drop table if exists hymn.sys_core_account cascade;
 create table hymn.sys_core_account
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    lock_time    timestamp                      not null default make_timestamp(1970, 1, 1, 0, 0, 0),
-    name         text                           not null,
-    username     text                           not null,
-    password     text                           not null,
-    online_rule  text                           not null,
-    active       boolean          default false not null,
-    admin        boolean          default false not null,
-    root         boolean          default false not null,
+    id           text primary key   default replace(public.uuid_generate_v4()::text, '-', ''),
+    lock_time    timestamp not null default make_timestamp(1970, 1, 1, 0, 0, 0),
+    name         text      not null,
+    username     text      not null,
+    password     text      not null,
+    online_rule  text      not null,
+    active       boolean   not null,
+    admin        boolean   not null,
+    root         boolean            default false not null,
     leader_id    text,
-    org_id       text                           not null,
-    role_id      text                           not null,
-    create_by_id text                           not null,
-    create_by    text                           not null,
-    modify_by_id text                           not null,
-    modify_by    text                           not null,
-    create_date  timestamp                      not null,
-    modify_date  timestamp                      not null
+    org_id       text      not null,
+    role_id      text      not null,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
 );
 comment on table hymn.sys_core_account is '用户';
 comment on column hymn.sys_core_account.lock_time is '锁定时间，当前时间小于等于lock_time表示帐号被锁定';
@@ -42,7 +42,7 @@ create table hymn.sys_core_org
     name               text      not null,
     director_id        text,
     deputy_director_id text,
-    parent_id          uuid,
+    parent_id          text,
     create_by_id       text      not null,
     create_by          text      not null,
     modify_by_id       text      not null,
@@ -113,7 +113,7 @@ drop table if exists hymn.sys_core_account_object_view cascade;
 create table hymn.sys_core_account_object_view
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    copy_id      uuid,
+    copy_id      text,
     remark       text,
     global_view  boolean   not null,
     default_view boolean   not null,
@@ -143,7 +143,7 @@ create table hymn.sys_core_custom_button
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     remark       text,
-    object_id    uuid,
+    object_id    text,
     name         text      not null,
     api          text      not null,
     client_type  text      not null,
@@ -189,19 +189,19 @@ drop table if exists hymn.sys_core_custom_interface cascade;
 create table hymn.sys_core_custom_interface
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    api          text                           not null,
-    name         text                           not null,
-    code         text                           not null,
-    active       boolean          default false not null,
-    lang         text                           not null,
+    api          text      not null,
+    name         text      not null,
+    code         text      not null,
+    active       boolean   not null,
+    lang         text      not null,
     option_text  text,
     remark       text,
-    create_by_id text                           not null,
-    create_by    text                           not null,
-    modify_by_id text                           not null,
-    modify_by    text                           not null,
-    create_date  timestamp                      not null,
-    modify_date  timestamp                      not null
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
 );
 comment on table hymn.sys_core_custom_interface is '自定义接口';
 comment on column hymn.sys_core_custom_interface.api is '接口api名称，唯一标识';
@@ -269,8 +269,8 @@ drop table if exists hymn.sys_core_dict cascade;
 create table hymn.sys_core_dict
 (
     id             text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    field_id       uuid,
-    parent_dict_id uuid,
+    field_id       text,
+    parent_dict_id text,
     name           text      not null,
     api            text      not null,
     remark         text,
@@ -352,15 +352,15 @@ create table hymn.sys_core_b_object_field
     max_length       integer,
     min_length       integer,
     visible_row      integer,
-    dict_id          uuid,
-    master_field_id  uuid,
+    dict_id          text,
+    master_field_id  text,
     optional_number  integer,
-    ref_id           uuid,
+    ref_id           text,
     ref_list_label   text,
     ref_allow_delete boolean,
     query_filter     text,
-    s_id             uuid,
-    s_field_id       uuid,
+    s_id             text,
+    s_field_id       text,
     s_type           text,
     gen_rule         text,
     remark           text,
@@ -574,22 +574,22 @@ drop table if exists hymn.sys_core_b_object_trigger cascade;
 create table hymn.sys_core_b_object_trigger
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    active       boolean          default false not null,
+    active       boolean   not null,
     remark       text,
-    object_id    text                           not null,
-    name         text                           not null,
-    api          text                           not null,
-    lang         text                           not null,
+    object_id    text      not null,
+    name         text      not null,
+    api          text      not null,
+    lang         text      not null,
     option_text  text,
-    ord          integer                        not null,
-    event        text                           not null,
-    code         text                           not null,
-    create_by_id text                           not null,
-    create_by    text                           not null,
-    modify_by_id text                           not null,
-    modify_by    text                           not null,
-    create_date  timestamp                      not null,
-    modify_date  timestamp                      not null
+    ord          integer   not null,
+    event        text      not null,
+    code         text      not null,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
 );
 comment on table hymn.sys_core_b_object_trigger is '触发器';
 comment on column hymn.sys_core_b_object_trigger.active is '是否启用';
@@ -689,7 +689,7 @@ create table hymn.sys_core_module_function_perm
     id                 text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id            text      not null,
     module_function_id text      not null,
-    perm               boolean          default false,
+    perm               boolean,
     create_by_id       text      not null,
     create_by          text      not null,
     modify_by_id       text      not null,
@@ -706,15 +706,15 @@ drop table if exists hymn.sys_core_button_perm cascade;
 create table hymn.sys_core_button_perm
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id      text                           not null,
-    button_id    text                           not null,
-    visible      boolean          default false not null,
-    create_by_id text                           not null,
-    create_by    text                           not null,
-    modify_by_id text                           not null,
-    modify_by    text                           not null,
-    create_date  timestamp                      not null,
-    modify_date  timestamp                      not null
+    role_id      text      not null,
+    button_id    text      not null,
+    visible      boolean   not null,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
 );
 comment on table hymn.sys_core_button_perm is '按钮权限';
 comment on column hymn.sys_core_button_perm.role_id is '角色id';
@@ -727,15 +727,15 @@ drop table if exists hymn.sys_core_menu_item_perm cascade;
 create table hymn.sys_core_menu_item_perm
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id      text                           not null,
-    menu_item_id text                           not null,
-    visible      boolean          default false not null,
-    create_by_id text                           not null,
-    create_by    text                           not null,
-    modify_by_id text                           not null,
-    modify_by    text                           not null,
-    create_date  timestamp                      not null,
-    modify_date  timestamp                      not null
+    role_id      text      not null,
+    menu_item_id text      not null,
+    visible      boolean   not null,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
 );
 comment on table hymn.sys_core_menu_item_perm is '菜单项权限';
 
@@ -744,19 +744,19 @@ comment on table hymn.sys_core_menu_item_perm is '菜单项权限';
 drop table if exists hymn.sys_core_b_object_perm cascade;
 create table hymn.sys_core_b_object_perm
 (
-    id                      text primary key   default replace(public.uuid_generate_v4()::text, '-', ''),
+    id                      text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id                 text      not null,
     object_id               text      not null,
     object_api_name         text      not null,
-    ins                     bool      not null default false,
-    upd                     bool      not null default false,
-    del                     bool      not null default false,
-    que                     bool      not null default false,
-    query_with_account_tree bool      not null default false,
-    query_with_dept         bool      not null default false,
-    query_with_dept_tree    bool      not null default false,
-    query_all               bool      not null default false,
-    edit_all                bool      not null default false,
+    ins                     bool      not null,
+    upd                     bool      not null,
+    del                     bool      not null,
+    que                     bool      not null,
+    query_with_account_tree bool      not null,
+    query_with_dept         bool      not null,
+    query_with_dept_tree    bool      not null,
+    query_all               bool      not null,
+    edit_all                bool      not null,
     create_by_id            text      not null,
     create_by               text      not null,
     modify_by_id            text      not null,
@@ -780,12 +780,12 @@ comment on column hymn.sys_core_b_object_perm.edit_all is '编辑全部';
 drop table if exists hymn.sys_core_b_object_field_perm cascade;
 create table hymn.sys_core_b_object_field_perm
 (
-    id           text primary key   default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id      text      not null,
     object_id    text      not null,
     field_id     text      not null,
-    p_read       bool      not null default false,
-    p_edit       bool      not null default false,
+    p_read       bool      not null,
+    p_edit       bool      not null,
     create_by_id text      not null,
     create_by    text      not null,
     modify_by_id text      not null,
@@ -803,16 +803,16 @@ drop table if exists hymn.sys_core_b_object_record_type_perm cascade;
 create table hymn.sys_core_b_object_record_type_perm
 (
     id             text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id        text                           not null,
-    object_id      text                           not null,
-    record_type_id text                           not null,
-    visible        boolean          default false not null,
-    create_by_id   text                           not null,
-    create_by      text                           not null,
-    modify_by_id   text                           not null,
-    modify_by      text                           not null,
-    create_date    timestamp                      not null,
-    modify_date    timestamp                      not null
+    role_id        text      not null,
+    object_id      text      not null,
+    record_type_id text      not null,
+    visible        boolean   not null,
+    create_by_id   text      not null,
+    create_by      text      not null,
+    modify_by_id   text      not null,
+    modify_by      text      not null,
+    create_date    timestamp not null,
+    modify_date    timestamp not null
 );
 comment on table hymn.sys_core_b_object_record_type_perm is '记录类型权限';
 comment on column hymn.sys_core_b_object_record_type_perm.visible is '创建数据时选择特定记录类型的权限';
@@ -826,7 +826,7 @@ create table hymn.sys_core_data_share
     data_id         text,
     role_id         text,
     org_code        text,
-    user_id         uuid,
+    user_id         text,
     read_only       boolean
 );
 comment on table hymn.sys_core_data_share is '业务对象共享权限';

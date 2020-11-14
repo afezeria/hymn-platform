@@ -1,6 +1,6 @@
 db:
-  url: jdbc:postgresql://localhost:5432/afezeria
-  user: afezeria
+  url: jdbc:postgresql://localhost:5432/test
+  user: test
   password: 123456
   driver: org.postgresql.Driver
 schema: hymn

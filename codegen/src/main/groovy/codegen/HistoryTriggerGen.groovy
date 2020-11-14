@@ -35,7 +35,7 @@ create table hymn.${it.name}_history
 (
     operation    text,
     stamp        timestamp,
-${it.fields.collect {"    ${it.columnname} ${it.sqltype}"}.join(",\n")}
+${it.fields.collect { "    ${it.columnname} ${it.sqltype}" }.join(",\n")}
 );
 create or replace function hymn.${it.name}_history_ins() returns trigger
     language plpgsql as
@@ -83,9 +83,7 @@ execute function hymn.${it.name}_history_del();
 """
 
         }
-
     println()
-
   }
 
   static void main(String[] args) {
