@@ -290,6 +290,7 @@ create table hymn.sys_core_b_object_field_history
     help             text,
     tmp              text,
     standard_type    text,
+    is_standard      bool,
     create_by_id     text,
     create_by        text,
     modify_by_id     text,

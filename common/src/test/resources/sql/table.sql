@@ -367,6 +367,7 @@ create table hymn.sys_core_b_object_field
     help             text,
     tmp              text,
     standard_type    text,
+    is_standard      boolean,
     create_by_id     text      not null,
     create_by        text      not null,
     modify_by_id     text      not null,
@@ -471,7 +472,8 @@ comment on column hymn.sys_core_b_object_field.s_type is '汇总类型，可选�
 comment on column hymn.sys_core_b_object_field.help is '说明，显示在页面上的帮助信息';
 comment on column hymn.sys_core_b_object_field.remark is '备注';
 comment on column hymn.sys_core_b_object_field.tmp is '辅助列，新建与字典相关的字段时存储字典项数据';
-comment on column hymn.sys_core_b_object_field.standard_type is '标准类型，可选值：create_by_id 创建人id, create_by 创建人, modify_by_id 修改人id, modify_by 修改人, create_date 创建时间, modify_date 修改时间, org_id 组织id, 自定义字段不能设置该值，用于处理模块对象和标准对象的特点字段的类型';
+comment on column hymn.sys_core_b_object_field.standard_type is '标准类型，可选值：create_by_id 创建人id, create_by 创建人, modify_by_id 修改人id, modify_by 修改人, create_date 创建时间, modify_date 修改时间, org_id 组织id, 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型';
+comment on column hymn.sys_core_b_object_field.is_standard is '是否是标准字段，区分模块对象中的自定义字段与默认字段，默认字段该值为true且source_column与api相等';
 
 
 drop table if exists hymn.sys_core_b_object_layout cascade;
@@ -825,16 +827,16 @@ create table hymn.sys_core_data_share
     object_api_name text,
     data_id         text,
     role_id         text,
-    org_code        text,
-    user_id         text,
+    org_id          text,
+    account_id      text,
     read_only       boolean
 );
-comment on table hymn.sys_core_data_share is '业务对象共享权限';
+comment on table hymn.sys_core_data_share is '对象权限共享';
 comment on column hymn.sys_core_data_share.data_id is '要共享的数据id';
 comment on column hymn.sys_core_data_share.object_api_name is '共享数据所属对象api名称';
-comment on column hymn.sys_core_data_share.user_id is '共享数据的目标用户id';
+comment on column hymn.sys_core_data_share.account_id is '共享数据的目标用户id';
 comment on column hymn.sys_core_data_share.role_id is '共享数据的目标角色id';
-comment on column hymn.sys_core_data_share.org_code is '共享数据目标组织代码';
+comment on column hymn.sys_core_data_share.org_id is '共享数据目标组织id';
 
 
 -- 业务对象对象code库

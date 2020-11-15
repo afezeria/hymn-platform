@@ -1,9 +1,11 @@
-package codegen
+package codegen.sqlgen
 
+import codegen.Config
+import codegen.DbTable
+import codegen.Field
 import groovy.sql.Sql
 
-import static codegen.Constant.getQueryColumn
-import static codegen.Constant.getQueryTable
+import static codegen.Constant.*
 
 /**
  * @author afezeria
@@ -25,7 +27,7 @@ class HistoryTriggerGen {
         }
         .findAll {
           it.fields.collect { it.columnname }
-              .containsAll(Constant.standardFieldName)
+              .containsAll(standardFieldName)
         }
         .each {
 

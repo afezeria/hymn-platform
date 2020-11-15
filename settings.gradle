@@ -2,4 +2,3 @@ rootProject.name = 'hymn-platform'
 include 'codegen'
 include 'common'
 include 'compiler-js'
-
