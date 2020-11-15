@@ -31,10 +31,10 @@ dependencies {
 
     testCompile "org.postgresql:postgresql:42.2.10"
     testCompile group: "com.zaxxer", name: "HikariCP", version: "3.4.5"
+//    testImplementation 'io.kotest:kotest-runner-junit5:4.3.1'
 //    testImplementation 'io.kotest:kotest-assertions-core:4.3.1'
-//    testImplementation 'io.kotest:kotest-runner-junit5:4.3.1' // for kotest framework
-    testImplementation 'io.kotest:kotest-assertions-core-jvm:4.3.1' // for kotest core jvm assertions
-//    testImplementation 'io.kotest:kotest-property:4.3.1' // for kotest property test
+//    testImplementation 'io.kotest:kotest-property:4.3.1'
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:4.3.1' //单独使用kotest的断言库时引入的依赖
     testImplementation(platform("org.junit:junit-bom:5.7.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }

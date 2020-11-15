@@ -13,11 +13,8 @@ import javax.sql.DataSource
  * @author afezeria
  */
 open class BaseDbTest {
-    val conn: Connection
-        get() = ds.connection
 
     companion object {
-        val ds: DataSource
         private val prop = Properties()
 
         init {
@@ -35,8 +32,6 @@ open class BaseDbTest {
             for (script in scripts) {
                 runSqlScript("$path/src/test/resources/sql/$script")
             }
-            val config = HikariConfig("/database.properties")
-            ds = HikariDataSource(config)
             println("========== db init end ==========")
         }
 
