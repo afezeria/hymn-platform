@@ -7,6 +7,13 @@ schema: hymn
 packageName: github.afezeria.hymn.admin
 moduleName: admin
 tableRegex: ^sys_core
-templates: [ Controller,Dto,Entity,Service,ServiceImpl,Table ]
+templates: [
+#    Controller,
+#    Dto,
+    Entity,
+#    Service,
+#    ServiceImpl,
+    Table
+]
 systemOutput: false
 outputPath:

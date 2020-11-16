@@ -7,6 +7,7 @@ import codegen.Field
 import groovy.sql.Sql
 
 /**
+ * 生成约束
  * @author afezeria
  */
 class ConstraintGen {

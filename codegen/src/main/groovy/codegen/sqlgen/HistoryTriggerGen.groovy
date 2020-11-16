@@ -8,6 +8,7 @@ import groovy.sql.Sql
 import static codegen.Constant.*
 
 /**
+ * 生成历史记录表及历史记录触发器
  * @author afezeria
  */
 class HistoryTriggerGen {
@@ -18,7 +19,7 @@ class HistoryTriggerGen {
   def run() {
     config.init()
     def sql = Sql.newInstance(db)
-    def tables = sql.rows(queryTable, [schema, schema])
+    def res = sql.rows(queryTable, [schema, schema])
         .findAll { it['name'] =~ ~tableRegex }
         .collect { new DbTable(it) }
         .each {
@@ -29,9 +30,8 @@ class HistoryTriggerGen {
           it.fields.collect { it.columnname }
               .containsAll(standardFieldName)
         }
-        .each {
-
-          println """
+        .collect {
+          """
 drop table if exists hymn.${it.name}_history cascade;
 create table hymn.${it.name}_history
 (
@@ -83,13 +83,13 @@ create trigger ${it.name}_history_del
 execute function hymn.${it.name}_history_del();
 
 """
-
         }
     println()
+    return res
   }
 
   static void main(String[] args) {
-    new HistoryTriggerGen().run()
+    new HistoryTriggerGen().run().each { println it }
 
   }
 }
