@@ -1,7 +1,7 @@
-package codegen.template
+package codegen.kt.template
 
 import codegen.Config
-import codegen.Gen
+import codegen.kt.Gen
 
 import static codegen.Constant.standardFieldName
 
