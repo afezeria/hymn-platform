@@ -1,5 +1,6 @@
-package codegen
+package codegen.kt
 
+import codegen.Constant
 import groovy.transform.Canonical
 import static codegen.Constant.*
 import static codegen.Constant.sqlType2JavaType
@@ -23,10 +24,10 @@ class Field {
   }
 
   def getJavaType(){
-    sqlType2JavaType[sqltype]
+    Constant.sqlType2JavaType[sqltype]
   }
   def getKtormType(){
-    sqlType2KtormType[sqltype]
+    Constant.sqlType2KtormType[sqltype]
   }
 
 

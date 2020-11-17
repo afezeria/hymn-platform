@@ -1,4 +1,4 @@
-package codegen.template
+package codegen.kt.template
 
 /**
  * @author afezeria

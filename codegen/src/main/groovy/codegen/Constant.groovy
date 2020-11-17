@@ -60,4 +60,13 @@ ORDER BY a.attnum;
       "timestamp"  : "LocalDateTime",
       "timestamptz": "LocalDateTime",
   ]
+
+  static def specTitle = [
+      "schema", "table", "column", "comment", "type", "defaultValue", "notnull", "primaryKey", "foreignKey", "f_rel_table", "delaction", "updaction", "unique", "check_name", "check_expr",
+  ]
+
+  static isNullOrEmptyOrBlank(String str) {
+    return str == null || str.isEmpty() || str.isBlank()
+  }
+
 }

@@ -1,9 +1,9 @@
-package codegen.sqlgen
+package codegen.struct.sqlgen
 
 import codegen.Config
 import codegen.Constant
-import codegen.DbTable
-import codegen.Field
+import codegen.kt.DbTable
+import codegen.kt.Field
 import groovy.sql.Sql
 
 /**
@@ -49,8 +49,8 @@ alter table hymn.${it.name}
           .containsAll("create_by_id", "modify_by_id")
     }, {
       """
-create index ${it.name.replace("sys_core_","")}_create_by_id_idx on hymn.${it.name} (create_by_id);
-create index ${it.name.replace("sys_core_","")}_modify_by_id_idx on hymn.${it.name} (modify_by_id);
+create index ${it.name.replace("sys_core_", "")}_create_by_id_idx on hymn.${it.name} (create_by_id);
+create index ${it.name.replace("sys_core_", "")}_modify_by_id_idx on hymn.${it.name} (modify_by_id);
 """
     })
   }

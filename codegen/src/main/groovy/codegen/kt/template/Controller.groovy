@@ -1,6 +1,6 @@
-package codegen.template
+package codegen.kt.template
 
-import codegen.Gen
+import codegen.kt.Gen
 
 /**
  * @author afezeria

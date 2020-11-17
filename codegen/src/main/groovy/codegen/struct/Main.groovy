@@ -1,7 +1,8 @@
-package codegen.spec
+package codegen.struct
 
 import codegen.Config
 import groovy.sql.GroovyRowResult
+import groovy.sql.Sql
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -14,48 +15,21 @@ class Main {
   Config config = Config.instance
 
   static void main(String[] args) {
-//    Config.instance.init()
+    Config.instance.init()
 //    new Main().genSpec('hymn','./spec.xlsx')
-    genScript("./spec.xlsx")
+//    genScript("./spec.xlsx")
+    db2List('hymn')
   }
 
-  static def genScript(String specPath) {
-    def file = new File(specPath)
-    def wb = new XSSFWorkbook(file.newInputStream())
-    def list = workbook2List(wb)
-    def map = list.groupBy { it["table"] }
-    def builder = new StringBuilder()
-    def schema = list[0]["schema"]
-    builder.append("""
-drop schema if exists $schema cascade;
-create schema $schema;
-
-""")
-    map.entrySet().each {
-      def k = it.key
-      def v = it.value.findAll { !isNullOrEmptyOrBlank(it["column"]) }
-      def table = k
-      builder.append("""
-drop table if exists $schema.$table cascade;
-create table $schema.$table
-(
-${v.collect {
-        "    ${it["column"]} ${it["type"]} ${it["notnull"] ? "not null" : ""} ${!isNullOrEmptyOrBlank(it["default"]) ? "default ${it.default}" : ""}"
-      }.join(",\n")
-      }
-);
-comment on table $schema.$table is '${it.value.find { isNullOrEmptyOrBlank(it["column"]) }.get("comment").replace("'","''")}';
-${v.findAll { !isNullOrEmptyOrBlank(it["comment"]) }.collect {
-        "comment on column $schema.$table.${it["column"]} is '${it["comment"].replace("'","''")}';"
-      }.join("\n")
-      }
-
-""")
-    }
-    println builder.toString()
-
-
+  static def db2List(schemaName) {
+    def sql = Sql.newInstance(Config.instance.db)
+    def rows = sql.rows(str, schemaName, schemaName)
+    def schema = Schema.fromList(rows)
+    println schema.toScript()
+    def list = schema.toList()
+    println()
   }
+
 
   static def workbook2List(Workbook wb) {
     def sheet = wb.getSheetAt(0)
@@ -76,19 +50,16 @@ ${v.findAll { !isNullOrEmptyOrBlank(it["comment"]) }.collect {
     }
   }
 
-  def genSpec(schemaName, writePath) {
-    def sql = Sql.newInstance(db)
-    def rows = sql.rows(str, schemaName, schemaName)
-//    schema.fromListMap(rows)
+  def list2workbook(List<Map<String, Object>> list) {
     def wb = new XSSFWorkbook()
     def sheet = wb.createSheet()
-    def keys = rows[0].keySet() as Set<String>
+    def keys = list[0].keySet() as Set<String>
     sheet.createRow(0).with {
       keys.eachWithIndex { entry, i ->
         it.createCell(i).setCellValue(entry)
       }
     }
-    rows.eachWithIndex { GroovyRowResult entry, int i ->
+    list.eachWithIndex { GroovyRowResult entry, int i ->
       sheet.createRow(i + 1).with { row ->
         keys.eachWithIndex { String key, int j ->
           row.createCell(j).setCellValue(entry[key])
@@ -101,6 +72,12 @@ ${v.findAll { !isNullOrEmptyOrBlank(it["comment"]) }.collect {
     stream.close()
   }
 
+  def genSpec(schemaName, writePath) {
+    def sql = Sql.newInstance(db)
+    def rows = sql.rows(str, schemaName, schemaName)
+    list2workbook(rows)
+  }
+
   static isNullOrEmptyOrBlank(String str) {
     return str == null || str.isEmpty() || str.isBlank()
   }
@@ -111,16 +88,25 @@ select t.schema,
        "column",
        comment,
        type,
-       "default",
+       "default" as "defaultValue",
        "notnull",
-       p_constraint_name,
-       f_constraint_name,
+       case
+           when p_constraint_name is null then false
+           else true
+           end           as "primaryKey",
+       case
+           when f_constraint_name is null then false
+           else true
+           end           as "foreignKey",
        f_rel_table,
        delaction,
        updaction,
-       u_constraint_name,
-       c_constraint_name,
-       "check"
+       case
+           when u_constraint_name is null then false
+           else true
+           end           as "unique",
+       c_constraint_name as "check_name",
+       "check"           as "check_expr"
 from (
          with pkey as (
              select pns.nspname  as "schema",
@@ -246,5 +232,6 @@ from (
      ) as t
 
 order by "table", t.ord;
+
 """
 }

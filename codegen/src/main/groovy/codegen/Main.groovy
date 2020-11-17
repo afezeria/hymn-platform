@@ -1,11 +1,14 @@
 package codegen
 
-import codegen.template.Controller
-import codegen.template.Dto
-import codegen.template.Entity
-import codegen.template.Dao
-import codegen.template.DaoImpl
-import codegen.template.Table
+import codegen.kt.DbTable
+import codegen.kt.Field
+import codegen.kt.Gen
+import codegen.kt.template.Controller
+import codegen.kt.template.Dto
+import codegen.kt.template.Entity
+import codegen.kt.template.Dao
+import codegen.kt.template.DaoImpl
+import codegen.kt.template.Table
 import groovy.sql.Sql
 
 import static codegen.Constant.getQueryTable

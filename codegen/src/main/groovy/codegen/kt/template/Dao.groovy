@@ -1,9 +1,9 @@
-package codegen.template
+package codegen.kt.template
 
 import codegen.Config
-import codegen.Function
-import codegen.FunctionGenerator
-import codegen.Gen
+import codegen.kt.Function
+import codegen.kt.FunctionGenerator
+import codegen.kt.Gen
 
 /**
  * @author afezeria

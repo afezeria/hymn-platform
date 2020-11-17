@@ -1,8 +1,8 @@
-package codegen.sqlgen
+package codegen.struct.sqlgen
 
 import codegen.Config
-import codegen.DbTable
-import codegen.Field
+import codegen.kt.DbTable
+import codegen.kt.Field
 import groovy.sql.Sql
 
 import static codegen.Constant.*

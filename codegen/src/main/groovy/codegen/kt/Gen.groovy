@@ -1,7 +1,8 @@
-package codegen
+package codegen.kt
 
-
-import static codegen.Constant.getStandardFieldName
+import codegen.Config
+import codegen.Constant
+import codegen.Mustache
 
 /**
  * @author afezeria
@@ -88,7 +89,7 @@ abstract class Gen extends Mustache {
   }
 
   def getLateinitFields() {
-    _table.fields.findAll { standardFieldName.contains(it.columnname) }
+    _table.fields.findAll { Constant.standardFieldName.contains(it.columnname) }
   }
 
 
