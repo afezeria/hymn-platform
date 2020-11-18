@@ -318,7 +318,7 @@ create table hymn.sys_core_b_object
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     name         text                          not null,
     api          text                          not null,
-    code         text                          not null,
+    source_table text                          not null,
     active       boolean          default true not null,
     module_api   text             default null,
     remark       text,
@@ -333,7 +333,7 @@ comment on table hymn.sys_core_b_object is '业务对象';
 comment on column hymn.sys_core_b_object.name is '业务对象名称，用于页面显示';
 comment on column hymn.sys_core_b_object.api is '业务对象api，用于触发器和自定义接口';
 comment on column hymn.sys_core_b_object.active is '是否启用，停用后无法进行增删改查等操作';
-comment on column hymn.sys_core_b_object.code is '对象编码，从001到500，于创建对象时从hymn.sys_core_b_object_code_store中获取，表示该对象对应的真实表表名的后缀 eg:sys_b_data_table_001';
+comment on column hymn.sys_core_b_object.source_table is '实际表名，例： sys_core_data_table_500';
 comment on column hymn.sys_core_b_object.module_api is '模块api名称，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 sys_core_b_object 和 sys_core_b_object_field 数据来支持在触发器中使用DataService提供的通用操作';
 
 
@@ -839,16 +839,15 @@ comment on column hymn.sys_core_data_share.role_id is '共享数据的目标角�
 comment on column hymn.sys_core_data_share.org_id is '共享数据目标组织id';
 
 
--- 业务对象对象code库
-drop table if exists hymn.sys_core_b_object_code_store cascade;
-create table hymn.sys_core_b_object_code_store
+drop table if exists hymn.sys_core_table_obj_mapping cascade;
+create table hymn.sys_core_table_obj_mapping
 (
-    code text primary key,
-    used boolean not null default false
+    table_name text primary key,
+    obj_api    text default null
 );
-comment on table hymn.sys_core_b_object_code_store is '对象代码库 共500条数据，从1到500';
-comment on column hymn.sys_core_b_object_code_store.code is '对象编码';
-comment on column hymn.sys_core_b_object_code_store.used is '是否已被使用';
+comment on table hymn.sys_core_table_obj_mapping is '数据表与对象映射表，默认业务对象最高500条，表名从 sys_core_data_table_001 到 sys_core_data_table_500, 表示模块对象时 table_name 与 obj_api 相同';
+comment on column hymn.sys_core_table_obj_mapping.table_name is '表名称';
+comment on column hymn.sys_core_table_obj_mapping.obj_api is '业务对象api名称';
 
 
 -- 业务对象字段库
