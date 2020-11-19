@@ -139,8 +139,8 @@ create or replace function hymn.throw_if_api_is_illegal(api_name text, api_value
 $$
 declare
 begin
-    if api_value ~ '^[a-zA-Z0-9_]{2,40}$' then
-        raise exception 'invalid %, must match ^[a-zA-Z0-9_]{2,40}$',api_name;
+    if api_value not similar to '[a-zA-Z][a-zA-Z0-9_]{1,40}' then
+        raise exception 'invalid %, must match [a-zA-Z][a-zA-Z0-9_]{1,40}',api_name;
     end if;
     perform keyword from hymn.sql_keyword where keyword = lower(api_value);
     if FOUND then
@@ -148,7 +148,7 @@ begin
     end if;
 end;
 $$;
-comment on function hymn.throw_if_api_is_illegal(api_name text, api_value text) is '检查api是否合法，不合法时抛出异常，api必须匹配 ^[a-zA-Z0-9_]{2,40}$ ，且不能为数据库关键字';
+comment on function hymn.throw_if_api_is_illegal(api_name text, api_value text) is '检查api是否合法，不合法时抛出异常，api必须匹配 [a-zA-Z][a-zA-Z0-9_]{1,40} ，且不能为数据库关键字';
 
 create or replace function hymn.reset_increment_seq_of_data_table(obj_id text) returns void
     language plpgsql as
@@ -223,11 +223,10 @@ $$;
 comment on function hymn.object_trigger_fun_before_insert() is '业务对象 before insert 触发器函数, 申请数据表';
 drop trigger if exists object_before_insert_trigger on hymn.sys_core_b_object;
 create trigger object_before_insert_trigger
-    before insert 
+    before insert
     on hymn.sys_core_b_object
     for each row
-    execute function hymn.object_trigger_fun_before_insert();
-    
+execute function hymn.object_trigger_fun_before_insert();
 
 create or replace function hymn.object_trigger_fun_after_insert() returns trigger
     language plpgsql as
@@ -250,3 +249,4 @@ create trigger object_after_insert_trigger
     on hymn.sys_core_b_object
     for each row
 execute function hymn.object_trigger_fun_after_insert();
+

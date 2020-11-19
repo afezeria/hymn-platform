@@ -27,7 +27,7 @@ open class BaseDbTest {
                 "table.sql",
                 "init-data.sql",
                 "history-table-and-trigger.sql",
-//                "function.sql"
+                "function.sql"
             )
             for (script in scripts) {
                 runSqlScript("$path/src/test/resources/sql/$script")
