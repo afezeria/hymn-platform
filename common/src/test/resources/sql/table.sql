@@ -315,19 +315,19 @@ comment on column hymn.sys_core_dict_item.parent_code is '父字典中的字典�
 drop table if exists hymn.sys_core_b_object cascade;
 create table hymn.sys_core_b_object
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    name         text                          not null,
-    api          text                          not null,
-    source_table text                          not null,
-    active       boolean          default true not null,
-    module_api   text             default null,
-    remark       text,
-    create_by_id text                          not null,
-    create_by    text                          not null,
-    modify_by_id text                          not null,
-    modify_by    text                          not null,
-    create_date  timestamp                     not null,
-    modify_date  timestamp                     not null
+    id           text primary key   default replace(public.uuid_generate_v4()::text, '-', ''),
+    name         text      not null,
+    api          text      not null,
+    source_table text      not null,
+    active       boolean            default true not null,
+    module_api   text               default null,
+    remark       text      not null default '',
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
 );
 comment on table hymn.sys_core_b_object is '业务对象';
 comment on column hymn.sys_core_b_object.name is '业务对象名称，用于页面显示';
@@ -377,7 +377,7 @@ create table hymn.sys_core_b_object_field
 );
 comment on table hymn.sys_core_b_object_field is '业务对象字段
 
-字段类型：文本、选择框、下拉菜单、下拉多选、整型、浮点型、货币、日期、日期时间、主详、关联关系、汇总、自动编号;
+字段类型：文本、单选框、选择框、下拉菜单、下拉多选、整型、浮点型、货币、日期、日期时间、主详、关联关系、汇总、自动编号;
 公共可选字段：remark（备注，只显示在管理员界面），help（帮助文本，显示在对象详情界面）
 通用字段：default_value（默认值，后端处理，字段间不能联动），formula（前端处理）
 
@@ -453,6 +453,7 @@ comment on column hymn.sys_core_b_object_field.object_id is '所属业务对象i
 comment on column hymn.sys_core_b_object_field.api is 'api名称，用于触发器和自定义接口';
 comment on column hymn.sys_core_b_object_field.name is '名称，用于页面显示';
 comment on column hymn.sys_core_b_object_field.type is '字段类型';
+comment on column hymn.sys_core_b_object_field.active is '字段启用状态，false表示停用，字段停用时从视图中移除，删除时清空没一行中对应字段数据';
 comment on column hymn.sys_core_b_object_field.default_value is '默认值，可选择其他表中的字段，由后端处理，新建时与页面布局一起返回给前端';
 comment on column hymn.sys_core_b_object_field.formula is '公式，js代码，由前端处理，新建和编辑时拼接成监听函数与页面布局一起返回给前端';
 comment on column hymn.sys_core_b_object_field.max_length is '文本类型最大长度/浮点型整数位长度/整型最大值/图片最大数量';
@@ -464,16 +465,16 @@ comment on column hymn.sys_core_b_object_field.optional_number is '副选框和�
 comment on column hymn.sys_core_b_object_field.ref_id is '关联的自定义对象id';
 comment on column hymn.sys_core_b_object_field.ref_list_label is '相关列表标签，当前对象在被关联对象的相关列表中显示的标签';
 comment on column hymn.sys_core_b_object_field.ref_allow_delete is '当字段为关联字段时，引用数据被删除时是否阻止删除';
-comment on column hymn.sys_core_b_object_field.query_filter is '过滤条件，sql where表达式';
 comment on column hymn.sys_core_b_object_field.gen_rule is '编号规则，{000} 递增序列，必填，实际序号大小小于0的个数时将会在前面补0 ; {yyyy}/{yy} 年; {mm} 月; {dd} 日';
 comment on column hymn.sys_core_b_object_field.s_id is '汇总对象id';
 comment on column hymn.sys_core_b_object_field.s_field_id is '汇总字段id';
 comment on column hymn.sys_core_b_object_field.s_type is '汇总类型，可选值：sum/count/min/max';
+comment on column hymn.sys_core_b_object_field.query_filter is '字段为汇总字段时表示对子表的过滤条件，字段为引用/主从字段时表示在创建当前对象时查找引用对象的过滤条件，sql where表达式';
 comment on column hymn.sys_core_b_object_field.help is '说明，显示在页面上的帮助信息';
 comment on column hymn.sys_core_b_object_field.remark is '备注';
 comment on column hymn.sys_core_b_object_field.tmp is '辅助列，新建与字典相关的字段时存储字典项数据';
-comment on column hymn.sys_core_b_object_field.standard_type is '标准类型，可选值：create_by_id 创建人id, create_by 创建人, modify_by_id 修改人id, modify_by 修改人, create_date 创建时间, modify_date 修改时间, org_id 组织id, 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型';
-comment on column hymn.sys_core_b_object_field.is_standard is '是否是标准字段，区分模块对象中的自定义字段与默认字段，默认字段该值为true且source_column与api相等';
+comment on column hymn.sys_core_b_object_field.standard_type is '标准类型，可选值：create_by_id 创建人id, create_by 创建人, modify_by_id 修改人id, modify_by 修改人, create_date 创建时间, modify_date 修改时间, org_id 组织id, lock_state 锁定状态, name 名称, type 业务类型 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型';
+comment on column hymn.sys_core_b_object_field.is_standard is '是否是标准字段，区分模块对象中的自定义字段与默认字段，默认字段该值为true且source_column与api相等，标准字段不能删除和修改';
 
 
 drop table if exists hymn.sys_core_b_object_layout cascade;
@@ -509,8 +510,8 @@ comment on column hymn.sys_core_b_object_layout.preview_layout_json is '小窗�
 
 
 
-drop table if exists hymn.sys_core_b_object_record_type cascade;
-create table hymn.sys_core_b_object_record_type
+drop table if exists hymn.sys_core_b_object_type cascade;
+create table hymn.sys_core_b_object_type
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     object_id    text                           not null,
@@ -524,51 +525,51 @@ create table hymn.sys_core_b_object_record_type
     create_date  timestamp                      not null,
     modify_date  timestamp                      not null
 );
-comment on table hymn.sys_core_b_object_record_type is '业务对象记录类型';
-comment on column hymn.sys_core_b_object_record_type.object_id is '所属业务对象id';
-comment on column hymn.sys_core_b_object_record_type.name is '记录类型名称';
-comment on column hymn.sys_core_b_object_record_type.active is '是否启用';
+comment on table hymn.sys_core_b_object_type is '业务对象记录类型';
+comment on column hymn.sys_core_b_object_type.object_id is '所属业务对象id';
+comment on column hymn.sys_core_b_object_type.name is '记录类型名称';
+comment on column hymn.sys_core_b_object_type.active is '是否启用';
 
-drop table if exists hymn.sys_core_b_object_record_type_available_options cascade;
-create table hymn.sys_core_b_object_record_type_available_options
+drop table if exists hymn.sys_core_b_object_type_available_options cascade;
+create table hymn.sys_core_b_object_type_available_options
 (
-    id             text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    record_type_id text      not null,
-    field_id       text      not null,
-    dict_item_id   text      not null,
-    create_by_id   text      not null,
-    create_by      text      not null,
-    modify_by_id   text      not null,
-    modify_by      text      not null,
-    create_date    timestamp not null,
-    modify_date    timestamp not null
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    type_id      text      not null,
+    field_id     text      not null,
+    dict_item_id text      not null,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
 );
-comment on table hymn.sys_core_b_object_record_type_available_options is '业务对象记录类型限制
+comment on table hymn.sys_core_b_object_type_available_options is '业务对象记录类型限制
 限制指定记录类型时指定字段（多选/单选）的可用选项';
-comment on column hymn.sys_core_b_object_record_type_available_options.record_type_id is '记录类型id';
-comment on column hymn.sys_core_b_object_record_type_available_options.dict_item_id is '字段关联的字典项id';
-comment on column hymn.sys_core_b_object_record_type_available_options.field_id is '字段id';
+comment on column hymn.sys_core_b_object_type_available_options.type_id is '记录类型id';
+comment on column hymn.sys_core_b_object_type_available_options.dict_item_id is '字段关联的字典项id';
+comment on column hymn.sys_core_b_object_type_available_options.field_id is '字段id';
 
 
-drop table if exists hymn.sys_core_b_object_record_layout cascade;
-create table hymn.sys_core_b_object_record_layout
+drop table if exists hymn.sys_core_b_object_type_layout cascade;
+create table hymn.sys_core_b_object_type_layout
 (
-    id             text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id        text      not null,
-    object_id      text      not null,
-    record_type_id text      not null,
-    layout_id      text      not null,
-    create_by_id   text      not null,
-    create_by      text      not null,
-    modify_by_id   text      not null,
-    modify_by      text      not null,
-    create_date    timestamp not null,
-    modify_date    timestamp not null
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    role_id      text      not null,
+    object_id    text      not null,
+    type_id      text      not null,
+    layout_id    text      not null,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
 );
-comment on table hymn.sys_core_b_object_record_layout is '业务对象页面布局和记录类型映射表和角色';
-comment on column hymn.sys_core_b_object_record_layout.object_id is '业务对象id';
-comment on column hymn.sys_core_b_object_record_layout.record_type_id is '记录类型id';
-comment on column hymn.sys_core_b_object_record_layout.layout_id is '页面布局id';
+comment on table hymn.sys_core_b_object_type_layout is '业务对象页面布局和记录类型映射表和角色';
+comment on column hymn.sys_core_b_object_type_layout.object_id is '业务对象id';
+comment on column hymn.sys_core_b_object_type_layout.type_id is '记录类型id';
+comment on column hymn.sys_core_b_object_type_layout.layout_id is '页面布局id';
 
 
 
@@ -609,23 +610,23 @@ comment on column hymn.sys_core_b_object_trigger.option_text is '用于给编译
 drop table if exists hymn.sys_core_b_object_mapping cascade;
 create table hymn.sys_core_b_object_mapping
 (
-    id                    text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    source_object_id      text      not null,
-    target_object_id      text      not null,
-    source_record_type_id text      not null,
-    target_record_type_id text      not null,
-    create_by_id          text      not null,
-    create_by             text      not null,
-    modify_by_id          text      not null,
-    modify_by             text      not null,
-    create_date           timestamp not null,
-    modify_date           timestamp not null
+    id               text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    source_object_id text      not null,
+    target_object_id text      not null,
+    source_type_id   text      not null,
+    target_type_id   text      not null,
+    create_by_id     text      not null,
+    create_by        text      not null,
+    modify_by_id     text      not null,
+    modify_by        text      not null,
+    create_date      timestamp not null,
+    modify_date      timestamp not null
 );
 comment on table hymn.sys_core_b_object_mapping is '对象映射关系 描述以一个对象为基础新建对象时字段间的映射关系';
 comment on column hymn.sys_core_b_object_mapping.source_object_id is '源对象id';
 comment on column hymn.sys_core_b_object_mapping.target_object_id is '目标对象id';
-comment on column hymn.sys_core_b_object_mapping.source_record_type_id is '源对象记录类型id';
-comment on column hymn.sys_core_b_object_mapping.target_record_type_id is '目标对象记录类型id';
+comment on column hymn.sys_core_b_object_mapping.source_type_id is '源对象记录类型id';
+comment on column hymn.sys_core_b_object_mapping.target_type_id is '目标对象记录类型id';
 
 
 drop table if exists hymn.sys_core_b_object_mapping_item cascade;
@@ -801,23 +802,23 @@ comment on column hymn.sys_core_b_object_field_perm.p_edit is '可编辑';
 
 
 
-drop table if exists hymn.sys_core_b_object_record_type_perm cascade;
-create table hymn.sys_core_b_object_record_type_perm
+drop table if exists hymn.sys_core_b_object_type_perm cascade;
+create table hymn.sys_core_b_object_type_perm
 (
-    id             text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id        text      not null,
-    object_id      text      not null,
-    record_type_id text      not null,
-    visible        boolean   not null,
-    create_by_id   text      not null,
-    create_by      text      not null,
-    modify_by_id   text      not null,
-    modify_by      text      not null,
-    create_date    timestamp not null,
-    modify_date    timestamp not null
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    role_id      text      not null,
+    object_id    text      not null,
+    type_id      text      not null,
+    visible      boolean   not null,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
 );
-comment on table hymn.sys_core_b_object_record_type_perm is '记录类型权限';
-comment on column hymn.sys_core_b_object_record_type_perm.visible is '创建数据时选择特定记录类型的权限';
+comment on table hymn.sys_core_b_object_type_perm is '记录类型权限';
+comment on column hymn.sys_core_b_object_type_perm.visible is '创建数据时选择特定记录类型的权限';
 
 
 -- 数据权限表

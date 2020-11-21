@@ -1,12 +1,7 @@
 package github.afezeria.hymn.common.sql
 
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
-import org.ktorm.database.Database
 import java.io.InputStreamReader
-import java.sql.Connection
 import java.util.*
-import javax.sql.DataSource
 
 
 /**
@@ -25,6 +20,7 @@ open class BaseDbTest {
             val path = System.getProperty("user.dir")
             val scripts = listOf(
                 "table.sql",
+                "data-table.sql",
                 "init-data.sql",
                 "history-table-and-trigger.sql",
                 "function.sql"
