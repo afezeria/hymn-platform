@@ -68,7 +68,7 @@ alter table hymn.sys_core_b_object_field
 alter table hymn.sys_core_account_menu_layout
     add foreign key (account_id) references hymn.sys_core_account on delete cascade;
 
-alter table hymn.sys_core_b_object_record_type
+alter table hymn.sys_core_b_object_type
     add foreign key (object_id) references hymn.sys_core_b_object on delete cascade;
 
 alter table hymn.sys_core_b_object_layout
@@ -90,19 +90,19 @@ alter table hymn.sys_core_b_object_perm
     add foreign key (object_id) references hymn.sys_core_b_object on delete cascade;
 
 
-alter table hymn.sys_core_b_object_record_layout
+alter table hymn.sys_core_b_object_type_layout
     add foreign key (role_id) references hymn.sys_core_role on delete cascade;
-alter table hymn.sys_core_b_object_record_layout
+alter table hymn.sys_core_b_object_type_layout
     add foreign key (layout_id) references hymn.sys_core_b_object_layout on delete cascade;
-alter table hymn.sys_core_b_object_record_layout
-    add foreign key (record_type_id) references hymn.sys_core_b_object_record_type on delete cascade;
+alter table hymn.sys_core_b_object_type_layout
+    add foreign key (type_id) references hymn.sys_core_b_object_type on delete cascade;
 
-alter table hymn.sys_core_b_object_record_type_perm
+alter table hymn.sys_core_b_object_type_perm
     add foreign key (role_id) references hymn.sys_core_role on delete cascade;
-alter table hymn.sys_core_b_object_record_type_perm
+alter table hymn.sys_core_b_object_type_perm
     add foreign key (object_id) references hymn.sys_core_b_object on delete cascade;
-alter table hymn.sys_core_b_object_record_type_perm
-    add foreign key (record_type_id) references hymn.sys_core_b_object_record_type on delete cascade;
+alter table hymn.sys_core_b_object_type_perm
+    add foreign key (type_id) references hymn.sys_core_b_object_type on delete cascade;
 
 alter table hymn.sys_core_business_code_ref
     add foreign key (role_id) references hymn.sys_core_role on delete cascade;
@@ -141,11 +141,11 @@ alter table hymn.sys_core_menu_item_perm
 alter table hymn.sys_core_menu_item_perm
     add foreign key (menu_item_id) references hymn.sys_core_custom_menu_item on delete cascade;
 
-alter table hymn.sys_core_b_object_record_type_available_options
-    add foreign key (record_type_id) references hymn.sys_core_b_object_record_type on delete cascade;
-alter table hymn.sys_core_b_object_record_type_available_options
+alter table hymn.sys_core_b_object_type_available_options
+    add foreign key (type_id) references hymn.sys_core_b_object_type on delete cascade;
+alter table hymn.sys_core_b_object_type_available_options
     add foreign key (field_id) references hymn.sys_core_b_object_field on delete cascade;
-alter table hymn.sys_core_b_object_record_type_available_options
+alter table hymn.sys_core_b_object_type_available_options
     add foreign key (dict_item_id) references hymn.sys_core_dict_item on delete cascade;
 
 alter table hymn.sys_core_module_function_perm
@@ -158,9 +158,9 @@ alter table hymn.sys_core_b_object_mapping
 alter table hymn.sys_core_b_object_mapping
     add foreign key (target_object_id) references hymn.sys_core_b_object on delete cascade;
 alter table hymn.sys_core_b_object_mapping
-    add foreign key (source_record_type_id) references hymn.sys_core_b_object_record_type on delete cascade;
+    add foreign key (source_type_id) references hymn.sys_core_b_object_type on delete cascade;
 alter table hymn.sys_core_b_object_mapping
-    add foreign key (target_record_type_id) references hymn.sys_core_b_object_record_type on delete cascade;
+    add foreign key (target_type_id) references hymn.sys_core_b_object_type on delete cascade;
 alter table hymn.sys_core_b_object_mapping_item
     add foreign key (source_object_api) references hymn.sys_core_b_object on delete cascade;
 alter table hymn.sys_core_b_object_mapping_item
@@ -213,20 +213,20 @@ create index b_object_perm_create_by_id_idx on hymn.sys_core_b_object_perm (crea
 create index b_object_perm_modify_by_id_idx on hymn.sys_core_b_object_perm (modify_by_id);
 
 
-create index b_object_record_layout_create_by_id_idx on hymn.sys_core_b_object_record_layout (create_by_id);
-create index b_object_record_layout_modify_by_id_idx on hymn.sys_core_b_object_record_layout (modify_by_id);
+create index b_object_type_layout_create_by_id_idx on hymn.sys_core_b_object_type_layout (create_by_id);
+create index b_object_type_layout_modify_by_id_idx on hymn.sys_core_b_object_type_layout (modify_by_id);
 
 
-create index b_object_record_type_create_by_id_idx on hymn.sys_core_b_object_record_type (create_by_id);
-create index b_object_record_type_modify_by_id_idx on hymn.sys_core_b_object_record_type (modify_by_id);
+create index b_object_type_create_by_id_idx on hymn.sys_core_b_object_type (create_by_id);
+create index b_object_type_modify_by_id_idx on hymn.sys_core_b_object_type (modify_by_id);
 
 
-create index b_object_record_type_available_options_create_by_id_idx on hymn.sys_core_b_object_record_type_available_options (create_by_id);
-create index b_object_record_type_available_options_modify_by_id_idx on hymn.sys_core_b_object_record_type_available_options (modify_by_id);
+create index b_object_type_available_options_create_by_id_idx on hymn.sys_core_b_object_type_available_options (create_by_id);
+create index b_object_type_available_options_modify_by_id_idx on hymn.sys_core_b_object_type_available_options (modify_by_id);
 
 
-create index b_object_record_type_perm_create_by_id_idx on hymn.sys_core_b_object_record_type_perm (create_by_id);
-create index b_object_record_type_perm_modify_by_id_idx on hymn.sys_core_b_object_record_type_perm (modify_by_id);
+create index b_object_type_perm_create_by_id_idx on hymn.sys_core_b_object_type_perm (create_by_id);
+create index b_object_type_perm_modify_by_id_idx on hymn.sys_core_b_object_type_perm (modify_by_id);
 
 
 create index b_object_trigger_create_by_id_idx on hymn.sys_core_b_object_trigger (create_by_id);

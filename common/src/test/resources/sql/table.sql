@@ -11,9 +11,9 @@ create table hymn.sys_core_account
     username     text      not null,
     password     text      not null,
     online_rule  text      not null,
-    active       boolean   not null,
-    admin        boolean   not null,
-    root         boolean            default false not null,
+    active       bool      not null,
+    admin        bool      not null,
+    root         bool               default false not null,
     leader_id    text,
     org_id       text      not null,
     role_id      text      not null,
@@ -115,8 +115,8 @@ create table hymn.sys_core_account_object_view
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     copy_id      text,
     remark       text,
-    global_view  boolean   not null,
-    default_view boolean   not null,
+    global_view  bool      not null,
+    default_view bool      not null,
     account_id   text      not null,
     object_id    text      not null,
     name         text      not null,
@@ -192,7 +192,7 @@ create table hymn.sys_core_custom_interface
     api          text      not null,
     name         text      not null,
     code         text      not null,
-    active       boolean   not null,
+    active       bool      not null,
     lang         text      not null,
     option_text  text,
     remark       text,
@@ -248,7 +248,7 @@ create table hymn.sys_core_custom_page
     api          text      not null,
     name         text      not null,
     template     text      not null,
-    static       boolean   not null,
+    static       bool      not null,
     remark       text,
     create_by_id text      not null,
     create_by    text      not null,
@@ -319,7 +319,7 @@ create table hymn.sys_core_b_object
     name         text      not null,
     api          text      not null,
     source_table text      not null,
-    active       boolean            default true not null,
+    active       bool               default true not null,
     module_api   text               default null,
     remark       text      not null default '',
     create_by_id text      not null,
@@ -346,7 +346,8 @@ create table hymn.sys_core_b_object_field
     name             text      not null,
     api              text      not null,
     type             text      not null,
-    active           boolean          default true,
+    active           bool             default true,
+    history          bool             default false,
     default_value    text,
     formula          text,
     max_length       integer,
@@ -357,7 +358,7 @@ create table hymn.sys_core_b_object_field
     optional_number  integer,
     ref_id           text,
     ref_list_label   text,
-    ref_allow_delete boolean,
+    ref_allow_delete bool,
     query_filter     text,
     s_id             text,
     s_field_id       text,
@@ -367,7 +368,7 @@ create table hymn.sys_core_b_object_field
     help             text,
     tmp              text,
     standard_type    text,
-    is_standard      boolean,
+    is_standard      bool,
     create_by_id     text      not null,
     create_by        text      not null,
     modify_by_id     text      not null,
@@ -516,7 +517,7 @@ create table hymn.sys_core_b_object_type
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     object_id    text                           not null,
     name         text                           not null,
-    active       boolean          default false not null,
+    active       bool             default false not null,
     remark       text                           not null,
     create_by_id text                           not null,
     create_by    text                           not null,
@@ -577,7 +578,7 @@ drop table if exists hymn.sys_core_b_object_trigger cascade;
 create table hymn.sys_core_b_object_trigger
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    active       boolean   not null,
+    active       bool      not null,
     remark       text,
     object_id    text      not null,
     name         text      not null,
@@ -692,7 +693,7 @@ create table hymn.sys_core_module_function_perm
     id                 text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id            text      not null,
     module_function_id text      not null,
-    perm               boolean,
+    perm               bool,
     create_by_id       text      not null,
     create_by          text      not null,
     modify_by_id       text      not null,
@@ -711,7 +712,7 @@ create table hymn.sys_core_button_perm
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id      text      not null,
     button_id    text      not null,
-    visible      boolean   not null,
+    visible      bool      not null,
     create_by_id text      not null,
     create_by    text      not null,
     modify_by_id text      not null,
@@ -732,7 +733,7 @@ create table hymn.sys_core_menu_item_perm
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id      text      not null,
     menu_item_id text      not null,
-    visible      boolean   not null,
+    visible      bool      not null,
     create_by_id text      not null,
     create_by    text      not null,
     modify_by_id text      not null,
@@ -809,7 +810,7 @@ create table hymn.sys_core_b_object_type_perm
     role_id      text      not null,
     object_id    text      not null,
     type_id      text      not null,
-    visible      boolean   not null,
+    visible      bool      not null,
     create_by_id text      not null,
     create_by    text      not null,
     modify_by_id text      not null,
@@ -830,7 +831,7 @@ create table hymn.sys_core_data_share
     role_id         text,
     org_id          text,
     account_id      text,
-    read_only       boolean
+    read_only       bool
 );
 comment on table hymn.sys_core_data_share is '对象权限共享';
 comment on column hymn.sys_core_data_share.data_id is '要共享的数据id';
@@ -852,18 +853,18 @@ comment on column hymn.sys_core_table_obj_mapping.obj_api is '业务对象api名
 
 
 -- 业务对象字段库
-drop table if exists hymn.sys_core_b_object_field_store cascade;
-create table hymn.sys_core_b_object_field_store
+drop table if exists hymn.sys_core_column_field_mapping cascade;
+create table hymn.sys_core_column_field_mapping
 (
-    id          serial primary key,
-    code        text    not null,
-    column_name text    not null,
-    used        boolean not null
+    table_name  text not null,
+    column_name text not null,
+    field_api   text,
+    primary key (table_name, column_name)
 );
-comment on table hymn.sys_core_b_object_field_store is '业务对象字段库';
-comment on column hymn.sys_core_b_object_field_store.code is '业务对象代码';
-comment on column hymn.sys_core_b_object_field_store.column_name is 'code表示的业务对象对应的真实表中的字段名称';
-comment on column hymn.sys_core_b_object_field_store.used is '是否已被使用';
+comment on table hymn.sys_core_column_field_mapping is '业务对象字段库';
+comment on column hymn.sys_core_column_field_mapping.table_name is '实际的数据表的名称';
+comment on column hymn.sys_core_column_field_mapping.column_name is '表中的字段名称';
+comment on column hymn.sys_core_column_field_mapping.field_api is '视图中的字段名称';
 
 
 drop table if exists hymn.sys_core_shared_code;
@@ -921,7 +922,7 @@ drop table if exists hymn.sys_core_cron_job;
 create table hymn.sys_core_cron_job
 (
     id              text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    active          boolean   not null,
+    active          bool      not null,
     shared_code_id  text      not null,
     cron            text      not null,
     start_date_time timestamp not null,
