@@ -182,6 +182,8 @@ declare
     field   hymn.sys_core_b_object_field;
     columns text := ' id as id ';
 begin
+    raise notice 'rebuild_object_view';
+    raise notice 'obj_id is %',obj_id;
     select * into obj from hymn.sys_core_b_object where id = obj_id;
     if not FOUND then
         raise exception 'object [id:%] does not exist',obj_id;
@@ -200,25 +202,26 @@ end;
 $$;
 comment on function hymn.rebuild_object_view(obj_id text) is '重建对象视图';
 
-create or replace function hymn.field_type_2_sql_type(field_type text) returns text
+create or replace function hymn.field_type_2_column_prefix(field_type text) returns text
     language plpgsql as
 $$
 declare
     sql_type text;
 begin
+    raise notice 'field_type_2_sql_type';
     case field_type
         when 'text', 'check_box', 'select', 'multiple_select', 'master_slave', 'reference', 'auto', 'picture'
             then sql_type := 'text';
-        when 'integer' then sql_type := 'integer';
-        when 'float' then sql_type := 'float';
+        when 'integer' then sql_type := 'bigint';
+        when 'double' then sql_type := 'double';
         when 'money' then sql_type := 'decimal';
-        when 'datetime','date' then sql_type := 'timestamp' ;
+        when 'datetime','date' then sql_type := 'datetime' ;
         else raise exception 'unknown field type: %',field_type;
     end case;
     return sql_type;
 end;
 $$;
-comment on function hymn.field_type_2_sql_type(field_type text) is '根据字段类型获取对应的sql字段';
+comment on function hymn.field_type_2_column_prefix(field_type text) is '根据字段类型获取对应的sql列名前缀';
 
 -- 创建数据字典，用于创建多选和单选的字段时生成字典数据
 create or replace function hymn.create_dict_by_field(field hymn.sys_core_b_object_field) returns uuid
@@ -231,6 +234,7 @@ declare
     new_dict_id text;
     item        record;
 begin
+    raise notice 'create_dict_by_field';
     select * into object_row from hymn.sys_core_b_object where id = field.object_id;
     if not FOUND then
         raise exception 'sys_core_b_object [id:%] not found',field.object_id;
@@ -290,8 +294,7 @@ end;
 $$;
 comment on function hymn.create_dict_by_field(field hymn.sys_core_b_object_field) is '根据字段内容创建数据字典，在创建字段的触发器中调用';
 
-comment on function hymn.replace_auto_numbering_trigger(obj_id uuid) is '覆盖自动编号触发器，创建或更新自动编号字段时更新触发器代码';
-create or replace function hymn.replace_auto_numbering_trigger(obj_id uuid) returns void
+create or replace function hymn.replace_auto_numbering_trigger(obj_id text) returns void
     language plpgsql as
 $BODY$
 declare
@@ -302,10 +305,9 @@ declare
     data_table_auto_numbering_seq_name text;
     fun_header                         text;
     fun_body                           text := E'begin\n';
-    fun_tail                           text := E'    return new;\n'
-        E'end;\n'
-        E'$$;\n';
+    fun_tail                           text := E'    return new;\nend;\n$$;\n';
 begin
+    raise notice 'replace_auto_numbering_trigger';
     select * into obj from hymn.sys_core_b_object where id = obj_id;
     if not FOUND then
         raise exception 'object [%] does not exist',obj_id;
@@ -316,18 +318,18 @@ begin
     data_table_name := obj.source_table;
     fun_header := format(
             E'create or replace function hymn.%s_auto_numbering_trigger_fun() returns void\n'
-                E'   language plpgsql as\n'
-                E'$$\n'
-                E'declare\n'
-                E'seq             bigint    := nextval(''hymn.%s'');\n'
-                E'now             timestamp := now();\n'
-                E'year            text      := date_part(''year'', now);\n'
-                E'yy              text      := substr(year, 3);\n'
-                E'month           text      := date_part(''month'', now);\n'
-                E'day             text      := date_part(''day'', now);\n'
-                E'hour            text      := date_part(''hour'', now);\n'
-                E'minute          text      := date_part(''minute'', now);\n'
-                E'tmp             text;\n', data_table_name, data_table_auto_numbering_seq_name);
+                '   language plpgsql as\n'
+                '$$\n'
+                'declare\n'
+                'seq             bigint    := nextval(''hymn.%s'');\n'
+                'now             timestamp := now();\n'
+                'year            text      := date_part(''year'', now);\n'
+                'yy              text      := substr(year, 3);\n'
+                'month           text      := date_part(''month'', now);\n'
+                'day             text      := date_part(''day'', now);\n'
+                'hour            text      := date_part(''hour'', now);\n'
+                'minute          text      := date_part(''minute'', now);\n'
+                'tmp             text;\n', data_table_name, data_table_auto_numbering_seq_name);
 
     for field in select *
                  from hymn.sys_core_b_object_field
@@ -340,17 +342,17 @@ begin
 
             fun_body := fun_body ||
                         format(E'\n'
-                                   E'%s := replace(%s, ''{yyyy}'', year);\n'
-                                   E'%s := replace(%s, ''{yy}'', yy);\n'
-                                   E'%s := replace(%s, ''{mm}'', month);\n'
-                                   E'%s := replace(%s, ''{dd}'', day);\n'
-                                   E'%s := replace(%s, ''{hh}'', hour);\n'
-                                   E'%s := replace(%s, ''{mm}'', minute);\n'
-                                   E'for tmp in select (regexp_matches(%s, ''\{(0+)\}'', ''g''))[1]\n'
-                                   E'    loop\n'
-                                   E'        %s := replace(%s, ''{'' || tmp || ''}'', seq);\n'
-                                   E'    end loop;\n'
-                                   E'new.%s := %s;\n', template_name, template_name,
+                                   '%s := replace(%s, ''{yyyy}'', year);\n'
+                                   '%s := replace(%s, ''{yy}'', yy);\n'
+                                   '%s := replace(%s, ''{mm}'', month);\n'
+                                   '%s := replace(%s, ''{dd}'', day);\n'
+                                   '%s := replace(%s, ''{hh}'', hour);\n'
+                                   '%s := replace(%s, ''{mm}'', minute);\n'
+                                   'for tmp in select (regexp_matches(%s, ''\{(0+)\}'', ''g''))[1]\n'
+                                   '    loop\n'
+                                   '        %s := replace(%s, ''{'' || tmp || ''}'', seq);\n'
+                                   '    end loop;\n'
+                                   'new.%s := %s;\n', template_name, template_name,
                                template_name, template_name, template_name,
                                template_name, template_name, template_name,
                                template_name, template_name, template_name,
@@ -368,6 +370,7 @@ begin
 
 end;
 $BODY$;
+comment on function hymn.replace_auto_numbering_trigger(obj_id text) is '覆盖自动编号触发器，创建或更新自动编号字段时更新触发器代码';
 
 
 
@@ -378,6 +381,7 @@ declare
     own_obj   hymn.sys_core_b_object;
     ref_field hymn.sys_core_b_object_field;
 begin
+    raise notice 'check_field_properties';
     if record_new.type = 'text' then
 --         文本类型：最小值 最大值 显示行数
         if record_new.min_length IS NULL or record_new.max_length is null or
@@ -607,7 +611,10 @@ declare
     name_gen_rule text ;
     name_type     text ;
 begin
+    raise notice 'object_trigger_fun_after_insert';
+    raise notice 'new object id is %',obj_id;
     if record_new.module_api is null then
+        raise notice 'object_trigger_fun_after_insert custom object';
         name_label := split_part(record_new.remark, E'\n', 1);
         name_gen_rule := split_part(record_new.remark, E'\n', 2);
         if name_label = '' then
@@ -721,7 +728,7 @@ begin
 end;
 $$;
 comment on function hymn.object_trigger_fun_before_update() is '业务对象 before update 触发器函数, 阻止修改 api 和 source_table ，对象停用时阻止更新';
-drop trigger if exists object_after_insert_trigger on hymn.sys_core_b_object;
+drop trigger if exists object_before_update_trigger on hymn.sys_core_b_object;
 create trigger object_before_update_trigger
     before update
     on hymn.sys_core_b_object
@@ -741,6 +748,7 @@ begin
 end;
 $$;
 comment on function hymn.object_trigger_fun_before_delete() is '业务对象 before delete 触发器函数，阻止删除未停用的对象';
+drop trigger if exists object_before_delete_trigger on hymn.sys_core_b_object;
 create trigger object_before_delete_trigger
     before delete
     on hymn.sys_core_b_object
@@ -754,8 +762,8 @@ declare
     record_old hymn.sys_core_b_object := old;
     sql_str    text;
 begin
-    -- 删除视图
-    sql_str := format('drop view hymn_view.%I if exists', record_old.api);
+    --     删除视图
+    sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
     execute sql_str;
     -- 删除数据
     sql_str := format('truncate hymn.%I', record_old.source_table);
@@ -766,7 +774,8 @@ begin
     return record_old;
 end;
 $$;
-comment on function hymn.object_trigger_fun_after_insert() is '业务对象 after delete 触发器函数，删除数据、历史记录和视图';
+comment on function hymn.object_trigger_fun_after_delete() is '业务对象 after delete 触发器函数，删除数据、历史记录和视图';
+drop trigger if exists object_after_delete_trigger on hymn.sys_core_b_object;
 create trigger object_after_delete_trigger
     after delete
     on hymn.sys_core_b_object
@@ -779,13 +788,18 @@ create or replace function hymn.field_trigger_fun_before_insert() returns trigge
     language plpgsql as
 $$
 declare
-    record_new hymn.sys_core_b_object_field := new;
-    sql_type   text;
-    dict_id    uuid;
+    record_new    hymn.sys_core_b_object_field := new;
+    column_prefix text;
+    dict_id       text;
 begin
+    raise notice 'field_trigger_fun_before_insert';
+    raise notice 'field object_id is : %',record_new.object_id;
 
     --     检查字段类型约束
     perform hymn.check_field_properties(record_new);
+
+--     新建字段强制启用
+    record_new.active = true;
 
     if record_new.is_standard = false then
 --     自定义字段末尾加上 __cf
@@ -798,7 +812,7 @@ begin
         end if;
 
 --     申请列名
-        select hymn.field_type_2_sql_type(record_new.type) into sql_type;
+        select hymn.field_type_2_column_prefix(record_new.type) into column_prefix;
         update hymn.sys_core_column_field_mapping sccfm
         set field_api= record_new.api
         where (table_name, column_name) = (
@@ -806,7 +820,7 @@ begin
             from hymn.sys_core_column_field_mapping s
                      inner join hymn.sys_core_b_object scbo on scbo.source_table = s.table_name
             where s.field_api is null
-              and starts_with(s.column_name, sql_type)
+              and starts_with(s.column_name, column_prefix)
               and scbo.id = record_new.object_id
             limit 1 for update skip locked)
         returning column_name into record_new.source_column;
@@ -815,11 +829,14 @@ begin
         end if;
 
     end if;
+    raise notice 'field object_id is : %',record_new.object_id;
+
     return record_new;
 
-end ;
+end;
 $$;
 comment on function hymn.field_trigger_fun_before_insert() is '字段 before insert 触发器函数，新建字段时执行校验和相关操作';
+drop trigger if exists field_before_insert_trigger on hymn.sys_core_b_object_field;
 create trigger field_before_insert_trigger
     before insert
     on hymn.sys_core_b_object_field
@@ -834,7 +851,8 @@ declare
     record_old hymn.sys_core_b_object_field := old;
     record_new hymn.sys_core_b_object_field := new;
 begin
---     修改停用的字段是抛出异常
+    raise notice 'field_trigger_fun_before_update';
+    --     修改停用的字段是抛出异常
     if record_new.active = record_old.active and record_new.active = false then
         raise exception 'field is inactive, cannot insert/update';
     end if;
@@ -860,51 +878,58 @@ begin
 end ;
 $$;
 comment on function hymn.field_trigger_fun_before_update() is '字段 before update 触发器函数，检查字段属性';
+drop trigger if exists field_before_update_trigger on hymn.sys_core_b_object_field;
 create trigger field_before_update_trigger
     before update
     on hymn.sys_core_b_object_field
     for each row
 execute function hymn.field_trigger_fun_before_update();
 
-create or replace function hymn.field_trigger_fun_after_upsert() returns trigger
+create or replace function hymn.field_trigger_fun_after_insert() returns trigger
+    language plpgsql as
+$$
+declare
+    record_new hymn.sys_core_b_object_field := new;
+begin
+    raise notice 'field_trigger_fun_after_insert';
+    raise notice 'field object_id is : %',record_new.object_id;
+    raise notice 'field is : %',record_new;
+    --     构建视图
+    perform hymn.rebuild_object_view(record_new.object_id);
+--     如果是自动编号字段则重建触发器
+    if record_new.type = 'auto' then
+        perform hymn.replace_auto_numbering_trigger(record_new.object_id);
+    end if;
+end;
+$$;
+comment on function hymn.field_trigger_fun_after_insert() is '字段 after insert 触发器函数，重建视图，如果是自动编号字段则重建触发器';
+drop trigger if exists field_after_insert_trigger on hymn.sys_core_b_object_field;
+create trigger field_after_insert_trigger
+    after insert
+    on hymn.sys_core_b_object_field
+execute function hymn.field_trigger_fun_after_insert();
+
+create or replace function hymn.field_trigger_fun_after_update() returns trigger
     language plpgsql as
 $$
 declare
     record_old hymn.sys_core_b_object_field := old;
     record_new hymn.sys_core_b_object_field := new;
-    role       hymn.sys_core_role;
 begin
-    if tg_op = 'INSERT' then
-        --     创建角色字段权限，默认无任何权限
---         for role in select * from hymn.sys_core_role scr
---             loop
---                 insert into hymn.sys_core_b_object_field_perm (role_id, object_id, field_id,
---                                                                create_by_id, create_by,
---                                                                modify_by_id,
---                                                                modify_by,
---                                                                create_date,
---                                                                modify_date, perm)
---                 values (role.id, record_new.object_id, record_new.id,
---                         record_new.create_by_id, record_new.create_by,
---                         record_new.modify_by_id, record_new.modify_by,
---                         record_new.create_date, record_new.create_date, '');
---             end loop;
---     构建视图
+    raise notice 'field_trigger_fun_after_update';
+    --         启用字段时重新创建视图
+    if record_new.active != record_old.active then
         perform hymn.rebuild_object_view(record_new.object_id);
---     如果是自动编号字段则重建触发器
-        if record_new.type = 'auto' then
-            perform hymn.replace_auto_numbering_trigger(record_new.object_id);
-        end if;
-    elseif tg_op = 'UPDATE' then
-        if record_new.active != record_old.active then
---      构建视图
-            perform hymn.rebuild_object_view(record_new.object_id);
-        end if;
-        if record_new.type = 'auto' and record_old.gen_rule != record_new.gen_rule then
+    end if;
+    if record_new.type = 'auto' and record_old.gen_rule != record_new.gen_rule then
 --          如果是自动编号字段则重建触发器
-            perform hymn.replace_auto_numbering_trigger(record_new.object_id);
-        end if;
+        perform hymn.replace_auto_numbering_trigger(record_new.object_id);
     end if;
 end;
 $$;
-comment on function hymn.field_trigger_fun_after_upsert() is '字段 after upsert 触发器函数，1 创建所有角色对当前字段的权限数据，2 重建视图，3 如果是自动编号字段则重建触发器';
+comment on function hymn.field_trigger_fun_after_update() is '字段 after update 触发器函数，重建视图，如果是自动编号字段则重建触发器';
+drop trigger if exists field_after_update_trigger on hymn.sys_core_b_object_field;
+create trigger field_after_update_trigger
+    after update
+    on hymn.sys_core_b_object_field
+execute function hymn.field_trigger_fun_after_update();

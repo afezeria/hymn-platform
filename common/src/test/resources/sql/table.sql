@@ -1,6 +1,8 @@
 drop schema if exists hymn cascade;
 create schema hymn;
 
+drop schema if exists hymn_view cascade;
+create schema hymn_view;
 
 drop table if exists hymn.sys_core_account cascade;
 create table hymn.sys_core_account

@@ -270,6 +270,7 @@ create table hymn.sys_core_b_object_field_history
     api              text,
     type             text,
     active           bool,
+    history          bool,
     default_value    text,
     formula          text,
     max_length       int4,
