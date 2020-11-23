@@ -20,7 +20,7 @@ open class BaseDbTest {
             val path = System.getProperty("user.dir")
             val scripts = listOf(
                 "table.sql",
-                "data-table.sql",
+                "test-data-table.sql",
                 "init-data.sql",
                 "history-table-and-trigger.sql",
                 "function.sql"
