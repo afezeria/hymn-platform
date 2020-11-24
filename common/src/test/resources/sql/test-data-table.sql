@@ -1466,6 +1466,13 @@ create table hymn.sys_core_data_table_001(
     datetime019 timestamptz,
     datetime020 timestamptz
 );
+create table hymn.sys_core_data_table_001_history
+(
+    id        text,
+    operation text,
+    stamp     timestamp,
+    change    text
+);
 create index sys_core_data_table_001_owner_id_idx on hymn.sys_core_data_table_001 (owner_id);
 create index sys_core_data_table_001_create_by_id_idx on hymn.sys_core_data_table_001 (create_by_id);
 create index sys_core_data_table_001_modify_by_id_idx on hymn.sys_core_data_table_001 (modify_by_id);
@@ -1726,6 +1733,13 @@ create table hymn.sys_core_data_table_002(
     datetime018 timestamptz,
     datetime019 timestamptz,
     datetime020 timestamptz
+);
+create table hymn.sys_core_data_table_002_history
+(
+    id        text,
+    operation text,
+    stamp     timestamp,
+    change    text
 );
 create index sys_core_data_table_002_owner_id_idx on hymn.sys_core_data_table_002 (owner_id);
 create index sys_core_data_table_002_create_by_id_idx on hymn.sys_core_data_table_002 (create_by_id);
@@ -1988,6 +2002,13 @@ create table hymn.sys_core_data_table_003(
     datetime019 timestamptz,
     datetime020 timestamptz
 );
+create table hymn.sys_core_data_table_003_history
+(
+    id        text,
+    operation text,
+    stamp     timestamp,
+    change    text
+);
 create index sys_core_data_table_003_owner_id_idx on hymn.sys_core_data_table_003 (owner_id);
 create index sys_core_data_table_003_create_by_id_idx on hymn.sys_core_data_table_003 (create_by_id);
 create index sys_core_data_table_003_modify_by_id_idx on hymn.sys_core_data_table_003 (modify_by_id);
@@ -2249,6 +2270,13 @@ create table hymn.sys_core_data_table_004(
     datetime019 timestamptz,
     datetime020 timestamptz
 );
+create table hymn.sys_core_data_table_004_history
+(
+    id        text,
+    operation text,
+    stamp     timestamp,
+    change    text
+);
 create index sys_core_data_table_004_owner_id_idx on hymn.sys_core_data_table_004 (owner_id);
 create index sys_core_data_table_004_create_by_id_idx on hymn.sys_core_data_table_004 (create_by_id);
 create index sys_core_data_table_004_modify_by_id_idx on hymn.sys_core_data_table_004 (modify_by_id);
@@ -2509,6 +2537,13 @@ create table hymn.sys_core_data_table_005(
     datetime018 timestamptz,
     datetime019 timestamptz,
     datetime020 timestamptz
+);
+create table hymn.sys_core_data_table_005_history
+(
+    id        text,
+    operation text,
+    stamp     timestamp,
+    change    text
 );
 create index sys_core_data_table_005_owner_id_idx on hymn.sys_core_data_table_005 (owner_id);
 create index sys_core_data_table_005_create_by_id_idx on hymn.sys_core_data_table_005 (create_by_id);

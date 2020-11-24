@@ -41,6 +41,68 @@ create trigger a00_cannot_change_object_id
     for each row
 execute function hymn.cannot_change_object_id();
 
+create or replace function hymn.cannot_change_api() returns trigger
+    language plpgsql as
+$$
+begin
+    if old.api != new.api then
+        raise exception 'cannot change api';
+    end if;
+    return new;
+end;
+$$;
+create trigger a20_cannot_change_api
+    before update
+    on hymn.sys_core_b_object
+    for each row
+execute function hymn.cannot_change_api();
+create trigger a20_cannot_change_api
+    before update
+    on hymn.sys_core_b_object_field
+    for each row
+execute function hymn.cannot_change_api();
+create trigger a20_cannot_change_api
+    before update
+    on hymn.sys_core_b_object_trigger
+    for each row
+execute function hymn.cannot_change_api();
+create trigger a20_cannot_change_api
+    before update
+    on hymn.sys_core_custom_button
+    for each row
+execute function hymn.cannot_change_api();
+create trigger a20_cannot_change_api
+    before update
+    on hymn.sys_core_custom_component
+    for each row
+execute function hymn.cannot_change_api();
+create trigger a20_cannot_change_api
+    before update
+    on hymn.sys_core_custom_interface
+    for each row
+execute function hymn.cannot_change_api();
+create trigger a20_cannot_change_api
+    before update
+    on hymn.sys_core_custom_page
+    for each row
+execute function hymn.cannot_change_api();
+create trigger a20_cannot_change_api
+    before update
+    on hymn.sys_core_dict
+    for each row
+execute function hymn.cannot_change_api();
+create trigger a20_cannot_change_api
+    before update
+    on hymn.sys_core_module_function
+    for each row
+execute function hymn.cannot_change_api();
+create trigger a20_cannot_change_api
+    before update
+    on hymn.sys_core_shared_code
+    for each row
+execute function hymn.cannot_change_api();
+
+
 
 -- 对象停用时禁止插入/更新
 create or replace function hymn.cannot_upsert_when_object_is_inactive() returns trigger
@@ -60,32 +122,32 @@ begin
 end;
 $$;
 comment on function hymn.cannot_upsert_when_object_is_inactive() is '检查当前数据所属的对象是否已停用，对象处于停用状态时不能修改相关数据（insert，update触发器）';
-drop trigger if exists a11_check_object_active_status_upsert on hymn.sys_core_b_object_field;
-create trigger a11_check_object_active_status_upsert
+drop trigger if exists a10_check_object_active_status_upsert on hymn.sys_core_b_object_field;
+create trigger a10_check_object_active_status_upsert
     before insert or update
     on hymn.sys_core_b_object_field
     for each row
 execute function hymn.cannot_upsert_when_object_is_inactive();
-drop trigger if exists a11_check_object_active_status_upsert on hymn.sys_core_b_object_layout;
-create trigger a11_check_object_active_status_upsert
+drop trigger if exists a10_check_object_active_status_upsert on hymn.sys_core_b_object_layout;
+create trigger a10_check_object_active_status_upsert
     before insert or update
     on hymn.sys_core_b_object_layout
     for each row
 execute function hymn.cannot_upsert_when_object_is_inactive();
-drop trigger if exists a11_check_object_active_status_upsert on hymn.sys_core_b_object_type_layout;
-create trigger a11_check_object_active_status_upsert
+drop trigger if exists a10_check_object_active_status_upsert on hymn.sys_core_b_object_type_layout;
+create trigger a10_check_object_active_status_upsert
     before insert or update
     on hymn.sys_core_b_object_type_layout
     for each row
 execute function hymn.cannot_upsert_when_object_is_inactive();
-drop trigger if exists a11_check_object_active_status_upsert on hymn.sys_core_b_object_type;
-create trigger a11_check_object_active_status_upsert
+drop trigger if exists a10_check_object_active_status_upsert on hymn.sys_core_b_object_type;
+create trigger a10_check_object_active_status_upsert
     before insert or update
     on hymn.sys_core_b_object_type
     for each row
 execute function hymn.cannot_upsert_when_object_is_inactive();
-drop trigger if exists a11_check_object_active_status_upsert on hymn.sys_core_b_object_trigger;
-create trigger a11_check_object_active_status_upsert
+drop trigger if exists a10_check_object_active_status_upsert on hymn.sys_core_b_object_trigger;
+create trigger a10_check_object_active_status_upsert
     before insert or update
     on hymn.sys_core_b_object_trigger
     for each row
@@ -185,19 +247,18 @@ begin
     raise notice 'rebuild_object_view';
     raise notice 'obj_id is %',obj_id;
     select * into obj from hymn.sys_core_b_object where id = obj_id;
-    if not FOUND then
-        raise exception 'object [id:%] does not exist',obj_id;
+    if FOUND then
+        for field in select *
+                     from hymn.sys_core_b_object_field
+                     where active = true
+                       and object_id = obj_id
+            loop
+                columns := format(' %I as %I,', field.source_column, field.api) || columns;
+            end loop;
+        execute format('drop view if exists hymn_view.%I', obj.api);
+        execute format('create view hymn_view.%I as select %s from hymn.%I', obj.api, columns,
+                       obj.source_table);
     end if;
-    for field in select *
-                 from hymn.sys_core_b_object_field
-                 where active = true
-                   and object_id = obj_id
-        loop
-            columns := format(' %I as %I,', field.source_column, field.api) || columns;
-        end loop;
-    execute format('drop view if exists hymn_view.%I', obj.api);
-    execute format('create view hymn_view.%I as select %s from hymn_view.%I', obj.api, columns,
-                   obj.source_table);
 end;
 $$;
 comment on function hymn.rebuild_object_view(obj_id text) is '重建对象视图';
@@ -294,7 +355,7 @@ end;
 $$;
 comment on function hymn.create_dict_by_field(field hymn.sys_core_b_object_field) is '根据字段内容创建数据字典，在创建字段的触发器中调用';
 
-create or replace function hymn.replace_auto_numbering_trigger(obj_id text) returns void
+create or replace function hymn.rebuild_auto_numbering_trigger(obj_id text) returns void
     language plpgsql as
 $BODY$
 declare
@@ -306,6 +367,8 @@ declare
     fun_header                         text;
     fun_body                           text := E'begin\n';
     fun_tail                           text := E'    return new;\nend;\n$$;\n';
+    trigger_name                       text;
+    trigger_fun_name                   text;
 begin
     raise notice 'replace_auto_numbering_trigger';
     select * into obj from hymn.sys_core_b_object where id = obj_id;
@@ -316,8 +379,11 @@ begin
         raise exception 'object must be active';
     end if;
     data_table_name := obj.source_table;
+    trigger_fun_name := data_table_name || '_auto_numbering_trigger_fun';
+    trigger_name := data_table_name || '_auto_numbering';
+
     fun_header := format(
-            E'create or replace function hymn.%s_auto_numbering_trigger_fun() returns void\n'
+            E'create or replace function hymn.%s() returns trigger\n'
                 '   language plpgsql as\n'
                 '$$\n'
                 'declare\n'
@@ -329,7 +395,7 @@ begin
                 'day             text      := date_part(''day'', now);\n'
                 'hour            text      := date_part(''hour'', now);\n'
                 'minute          text      := date_part(''minute'', now);\n'
-                'tmp             text;\n', data_table_name, data_table_auto_numbering_seq_name);
+                'tmp             text;\n', trigger_fun_name, data_table_auto_numbering_seq_name);
 
     for field in select *
                  from hymn.sys_core_b_object_field
@@ -360,17 +426,128 @@ begin
                                template_name, field.source_column, template_name);
         end loop;
     execute fun_header || fun_body || fun_tail;
-    --     触发器函数和触发器在创建表的同时建好，后续增加字段只需要覆盖触发器函数
---     execute format(E'create trigger %s_auto_numbering_trigger\n'
---                        E'before insert\n'
---                        E'on hymn.%s\n'
---                        E'for each row\n'
---                        E'execute function hymn.%s_auto_numbering_trigger_fun();\n',
---                    data_table_name, data_table_name, data_table_name);
 
+--     如果触发器不存在则创建触发器，如果触发器已存在则跳过
+    perform *
+    from pg_trigger pt
+             left join pg_class pc on pt.tgrelid = pc.oid
+             left join pg_namespace pn on pn.oid = pc.relnamespace
+    where pc.relname = data_table_name
+      and pn.nspname = 'hymn'
+      and pt.tgname = trigger_name;
+    if not FOUND then
+        execute format(E'create trigger %s\n'
+                           E'before insert\n'
+                           E'on hymn.%s\n'
+                           E'for each row\n'
+                           E'execute function hymn.%s();\n',
+                       trigger_name, data_table_name, trigger_fun_name);
+    end if;
 end;
 $BODY$;
-comment on function hymn.replace_auto_numbering_trigger(obj_id text) is '覆盖自动编号触发器，创建或更新自动编号字段时更新触发器代码';
+comment on function hymn.rebuild_auto_numbering_trigger(obj_id text) is '重建数据表的自动编号触发器，生成触发器函数';
+
+
+create or replace function hymn.rebuild_data_table_history_trigger(obj_id text) returns void
+    language plpgsql as
+$BODY$
+declare
+    obj              hymn.sys_core_b_object;
+    field            hymn.sys_core_b_object_field;
+    data_table_name  text;
+    field_api        text;
+    field_column     text;
+    fun_header       text;
+    fun_body         text := '';
+    fun_tail         text ;
+    trigger_name     text;
+    trigger_fun_name text;
+begin
+    raise notice 'rebuild_data_table_history_trigger';
+    select * into obj from hymn.sys_core_b_object where id = obj_id;
+    if not FOUND then
+        raise exception 'object [%] does not exist',obj_id;
+    end if;
+    if obj.active = false then
+        raise exception 'object must be active';
+    end if;
+    data_table_name := obj.source_table;
+    trigger_fun_name := data_table_name || '_history_trigger_fun';
+    trigger_name := data_table_name || '_history';
+
+    fun_header := format(
+            E'create or replace function hymn.%s() returns trigger\n'
+                '    language plpgsql as\n'
+                '$$\n'
+                'declare\n'
+                '    js         jsonb                        := ''{}'';\n'
+                '    operation  text;\n'
+                '    id         text;\n'
+                '    o          text;\n'
+                '    n          text;\n'
+                'begin\n'
+                '    if tg_op = ''DELETE'' then\n'
+                '        js := to_jsonb(old);\n'
+                '        id := old.id;\n'
+                '        operation := ''d'';\n'
+                '    elseif tg_op = ''UPDATE'' then\n', trigger_fun_name);
+    fun_tail :=
+            format(E'        id := new.id;\n'
+                '        operation := ''u'';\n'
+                '    end if;\n'
+                '    insert into hymn.%s_history (id, operation, stamp, change)\n'
+                '    values (id, operation, now(), js::text);\n'
+                '    return null;\n'
+                'end;\n'
+                '$$;\n',data_table_name);
+    for field in select *
+                 from hymn.sys_core_b_object_field
+                 where object_id = obj_id
+                   and field.history = true
+        loop
+            field_api := field.api;
+            field_column := field.source_column;
+
+            fun_body := fun_body ||
+                        format(
+                                E'        if old.%s != new.%s then\n'
+                                    '            if old.%s is null then\n'
+                                    '                o := ''null'';\n'
+                                    '            else\n'
+                                    '                o := to_jsonb(old.%s);\n'
+                                    '            end if;\n'
+                                    '            if new.%s is null then\n'
+                                    '                n := ''null'';\n'
+                                    '            else\n'
+                                    '                n := to_jsonb(new.%s);\n'
+                                    '            end if;\n'
+                                    '            js := jsonb_insert(js, ''{%s}'',\n'
+                                    '                               to_jsonb(''{"o":'' || o || '',"n":'' || n || ''}''));\n'
+                                    '        end if;\n',
+                                field_column, field_column, field_column, field_column,
+                                field_column, field_column, field_api);
+        end loop;
+    execute fun_header || fun_body || fun_tail;
+
+--     如果触发器不存在则创建触发器，如果触发器已存在则跳过
+    perform *
+    from pg_trigger pt
+             left join pg_class pc on pt.tgrelid = pc.oid
+             left join pg_namespace pn on pn.oid = pc.relnamespace
+    where pc.relname = data_table_name
+      and pn.nspname = 'hymn'
+      and pt.tgname = trigger_name;
+    if not FOUND then
+        execute format(E'create trigger %s\n'
+                           E'after update or delete\n'
+                           E'on hymn.%s\n'
+                           E'for each row\n'
+                           E'execute function hymn.%s();\n',
+                       trigger_name, data_table_name, trigger_fun_name);
+    end if;
+end;
+$BODY$;
+comment on function hymn.rebuild_data_table_history_trigger(obj_id text) is '重建数据表的历史记录触发器，生成触发器函数';
 
 
 
@@ -594,8 +771,8 @@ begin
 end;
 $$;
 comment on function hymn.object_trigger_fun_before_insert() is '业务对象 before insert 触发器函数, 申请数据表';
-drop trigger if exists object_before_insert_trigger on hymn.sys_core_b_object;
-create trigger object_before_insert_trigger
+drop trigger if exists c00_object_before_insert on hymn.sys_core_b_object;
+create trigger c00_object_before_insert
     before insert
     on hymn.sys_core_b_object
     for each row
@@ -670,13 +847,13 @@ begin
                 record_new.name || ' 修改人', false, null, null, null, null, null, null,
                 null, null, 'modify_by_id', true, record_new.create_by_id, record_new.create_by,
                 record_new.modify_by_id, record_new.modify_by, now(), now()),
-               ('owner', obj_id, '所有人', 'owner', 'reference', true, null, null,
+               ('owner_id', obj_id, '所有人', 'owner_id', 'reference', true, null, null,
                 null,
                 null, null, null, null, null, 'bcf5f00c2e6c494ea2318912a639031a',
                 record_new.name || ' 所有人', false, null, null, null, null, null, null,
                 null, null, 'owner', true, record_new.create_by_id, record_new.create_by,
                 record_new.modify_by_id, record_new.modify_by, now(), now()),
-               ('type', obj_id, '业务类型', 'type', 'reference', true, null, null,
+               ('type_id', obj_id, '业务类型', 'type_id', 'reference', true, null, null,
                 null,
                 null, null, null, null, null, '09da56a7de514895aea5c596820d0ced',
                 record_new.name || ' 业务类型', false, null, null, null, null, null, null,
@@ -701,8 +878,8 @@ begin
 end;
 $$;
 comment on function hymn.object_trigger_fun_after_insert() is '业务对象 after insert 触发器函数, 重置自动编号字段的递增序列，向 sys_core_b_object_field 表中插入系统默认字段数据';
-drop trigger if exists object_after_insert_trigger on hymn.sys_core_b_object;
-create trigger object_after_insert_trigger
+drop trigger if exists c00_object_after_insert on hymn.sys_core_b_object;
+create trigger c00_object_after_insert
     after insert
     on hymn.sys_core_b_object
     for each row
@@ -715,21 +892,18 @@ declare
     record_new hymn.sys_core_b_object := new;
     record_old hymn.sys_core_b_object := old;
 begin
-    if record_old.active = false and record_new.active then
+    if record_old.active = false and record_new.active = false then
         raise exception 'object is inactive, cannot update';
     end if;
     if record_new.source_table <> record_old.source_table then
-        raise exception 'cannot modify source_table';
-    end if;
-    if record_new.api <> record_old.api then
         raise exception 'cannot modify source_table';
     end if;
     return record_new;
 end;
 $$;
 comment on function hymn.object_trigger_fun_before_update() is '业务对象 before update 触发器函数, 阻止修改 api 和 source_table ，对象停用时阻止更新';
-drop trigger if exists object_before_update_trigger on hymn.sys_core_b_object;
-create trigger object_before_update_trigger
+drop trigger if exists c00_object_before_update on hymn.sys_core_b_object;
+create trigger c00_object_before_update
     before update
     on hymn.sys_core_b_object
     for each row
@@ -748,8 +922,8 @@ begin
 end;
 $$;
 comment on function hymn.object_trigger_fun_before_delete() is '业务对象 before delete 触发器函数，阻止删除未停用的对象';
-drop trigger if exists object_before_delete_trigger on hymn.sys_core_b_object;
-create trigger object_before_delete_trigger
+drop trigger if exists c00_object_before_delete on hymn.sys_core_b_object;
+create trigger c00_object_before_delete
     before delete
     on hymn.sys_core_b_object
     for each row
@@ -775,8 +949,8 @@ begin
 end;
 $$;
 comment on function hymn.object_trigger_fun_after_delete() is '业务对象 after delete 触发器函数，删除数据、历史记录和视图';
-drop trigger if exists object_after_delete_trigger on hymn.sys_core_b_object;
-create trigger object_after_delete_trigger
+drop trigger if exists c00_object_after_delete on hymn.sys_core_b_object;
+create trigger c00_object_after_delete
     after delete
     on hymn.sys_core_b_object
     for each row
@@ -793,7 +967,6 @@ declare
     dict_id       text;
 begin
     raise notice 'field_trigger_fun_before_insert';
-    raise notice 'field object_id is : %',record_new.object_id;
 
     --     检查字段类型约束
     perform hymn.check_field_properties(record_new);
@@ -829,15 +1002,12 @@ begin
         end if;
 
     end if;
-    raise notice 'field object_id is : %',record_new.object_id;
-
     return record_new;
-
 end;
 $$;
 comment on function hymn.field_trigger_fun_before_insert() is '字段 before insert 触发器函数，新建字段时执行校验和相关操作';
-drop trigger if exists field_before_insert_trigger on hymn.sys_core_b_object_field;
-create trigger field_before_insert_trigger
+drop trigger if exists c00_field_before_insert on hymn.sys_core_b_object_field;
+create trigger c00_field_before_insert
     before insert
     on hymn.sys_core_b_object_field
     for each row
@@ -852,9 +1022,16 @@ declare
     record_new hymn.sys_core_b_object_field := new;
 begin
     raise notice 'field_trigger_fun_before_update';
-    --     修改停用的字段是抛出异常
+    --     修改停用的字段时抛出异常
     if record_new.active = record_old.active and record_new.active = false then
         raise exception 'field is inactive, cannot insert/update';
+    end if;
+    --     禁止修改api和type
+    if record_new.api <> record_old.api then
+        raise exception 'cannot change api';
+    end if;
+    if record_new.type <> record_old.type then
+        raise exception 'cannot change type';
     end if;
     -- 停用字段时不改变其他值
     if record_new.active <> record_old.active and record_new.active = false then
@@ -864,13 +1041,6 @@ begin
         record_old.modify_date = record_new.modify_date;
         return record_old;
     end if;
-    --     禁止修改api和type
-    if record_new.api <> record_old.api then
-        raise exception 'cannot change api';
-    end if;
-    if record_new.type <> record_old.type then
-        raise exception 'cannot change type';
-    end if;
 
     --     检查字段类型约束
     perform hymn.check_field_properties(record_new);
@@ -878,8 +1048,8 @@ begin
 end ;
 $$;
 comment on function hymn.field_trigger_fun_before_update() is '字段 before update 触发器函数，检查字段属性';
-drop trigger if exists field_before_update_trigger on hymn.sys_core_b_object_field;
-create trigger field_before_update_trigger
+drop trigger if exists c00_field_before_update on hymn.sys_core_b_object_field;
+create trigger c00_field_before_update
     before update
     on hymn.sys_core_b_object_field
     for each row
@@ -894,19 +1064,24 @@ begin
     raise notice 'field_trigger_fun_after_insert';
     raise notice 'field object_id is : %',record_new.object_id;
     raise notice 'field is : %',record_new;
+    raise notice 'new var is : %',new;
+    raise notice 'old var is : %',old;
+
     --     构建视图
     perform hymn.rebuild_object_view(record_new.object_id);
 --     如果是自动编号字段则重建触发器
     if record_new.type = 'auto' then
-        perform hymn.replace_auto_numbering_trigger(record_new.object_id);
+        perform hymn.rebuild_auto_numbering_trigger(record_new.object_id);
     end if;
+    return record_new;
 end;
 $$;
 comment on function hymn.field_trigger_fun_after_insert() is '字段 after insert 触发器函数，重建视图，如果是自动编号字段则重建触发器';
-drop trigger if exists field_after_insert_trigger on hymn.sys_core_b_object_field;
-create trigger field_after_insert_trigger
+drop trigger if exists c00_field_after_insert on hymn.sys_core_b_object_field;
+create trigger c00_field_after_insert
     after insert
     on hymn.sys_core_b_object_field
+    for each row
 execute function hymn.field_trigger_fun_after_insert();
 
 create or replace function hymn.field_trigger_fun_after_update() returns trigger
@@ -923,13 +1098,38 @@ begin
     end if;
     if record_new.type = 'auto' and record_old.gen_rule != record_new.gen_rule then
 --          如果是自动编号字段则重建触发器
-        perform hymn.replace_auto_numbering_trigger(record_new.object_id);
+        perform hymn.rebuild_auto_numbering_trigger(record_new.object_id);
     end if;
 end;
 $$;
 comment on function hymn.field_trigger_fun_after_update() is '字段 after update 触发器函数，重建视图，如果是自动编号字段则重建触发器';
-drop trigger if exists field_after_update_trigger on hymn.sys_core_b_object_field;
-create trigger field_after_update_trigger
+drop trigger if exists c00_field_after_update on hymn.sys_core_b_object_field;
+create trigger c00_field_after_update
     after update
     on hymn.sys_core_b_object_field
 execute function hymn.field_trigger_fun_after_update();
+
+create or replace function hymn.field_trigger_fun_before_delete() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.sys_core_b_object_field := old;
+    obj        hymn.sys_core_b_object;
+    sql_str    text;
+begin
+    if record_old.active = true then
+        raise exception 'cannot delete active field';
+    end if;
+    select * into obj from hymn.sys_core_b_object where id = record_old.object_id;
+    if FOUND then
+        sql_str :=
+                format('update hymn.%I set %I = null', obj.source_table, record_old.source_column);
+        execute sql_str;
+    end if;
+end;
+$$;
+drop trigger if exists c00_field_before_delete on hymn.sys_core_b_object_field;
+create trigger c00_field_before_delete
+    after update
+    on hymn.sys_core_b_object_field
+execute function hymn.field_trigger_fun_before_delete();

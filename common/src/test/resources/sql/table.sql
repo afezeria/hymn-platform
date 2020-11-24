@@ -486,7 +486,6 @@ create table hymn.sys_core_b_object_layout
     id                      text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     object_id               text      not null,
     name                    text      not null,
-    api                     text      not null,
     remark                  text,
     rel_field_json_arr      text      not null,
     pc_read_layout_json     text      not null,
@@ -503,7 +502,6 @@ create table hymn.sys_core_b_object_layout
 );
 comment on table hymn.sys_core_b_object_layout is '业务对象详情页面布局';
 comment on column hymn.sys_core_b_object_layout.name is '布局名称';
-comment on column hymn.sys_core_b_object_layout.api is '布局api名称';
 comment on column hymn.sys_core_b_object_layout.rel_field_json_arr is '引用字段的数据的列表，用于根据权限对字段进行过滤，布局json中不能直接使用字段数据，在需要字段数据的部分通过rel_field_json_arr中的json对象的_id引用，找不到的场合下忽略该字段';
 comment on column hymn.sys_core_b_object_layout.pc_read_layout_json is 'pc端查看页面页面布局';
 comment on column hymn.sys_core_b_object_layout.pc_edit_layout_json is 'pc端新建、编辑页面页面布局';
