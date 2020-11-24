@@ -25,6 +25,14 @@ class HistoryTriggerTest : BaseDbTest() {
                 id = query[0]["id"]!! as String
             }
         }
+
+        @AfterAll
+        @JvmStatic
+        fun afterAll() {
+            conn.use {
+                it.execute("delete from hymn.sys_core_org where id = ?", id)
+            }
+        }
     }
 
     @Test

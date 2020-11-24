@@ -19,6 +19,24 @@ import java.time.LocalDateTime
  * @author afezeria
  */
 class BusinessObjectInsertTriggerTest : BaseDbTest() {
+    companion object {
+        @AfterAll
+        @JvmStatic
+        fun clear() {
+            //                clear
+            conn.use {
+                it.execute("alter table hymn.sys_core_b_object disable trigger all")
+                it.execute("alter table hymn.sys_core_b_object_field disable trigger all")
+                it.execute(
+                    "delete from hymn.sys_core_b_object where api not in (?,?,?,?)",
+                    "account", "role", "org", "business_type",
+                )
+                it.execute("alter table hymn.sys_core_b_object enable trigger all")
+                it.execute("alter table hymn.sys_core_b_object_field enable trigger all")
+            }
+        }
+    }
+
     @Nested
     @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
     inner class CustomObject {
@@ -37,7 +55,7 @@ values ('测试对象','test_obj',true,'编号
 
                 it.execute("select * from hymn.sys_core_b_object_field where object_id = ?", id).apply {
                     size shouldBe 8
-                    map { it["api"] } shouldContainAll listOf("name", "create_by_id", "modify_by_id", "create_date", "modify_date", "owner", "lock_state", "type")
+                    map { it["api"] } shouldContainAll listOf("name", "create_by_id", "modify_by_id", "create_date", "modify_date", "owner_id", "lock_state", "type_id")
                     filter { it["api"] == "name" }.first().apply {
                         get("name") shouldBe "编号"
                         get("gen_rule") shouldBe "{yyyy}{mm}{dd}{000}"
