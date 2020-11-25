@@ -24,7 +24,37 @@ create table hymn.sys_core_account
     modify_by_id text      not null,
     modify_by    text      not null,
     create_date  timestamp not null,
-    modify_date  timestamp not null
+    modify_date  timestamp not null,
+    text001      text,
+    text002      text,
+    text003      text,
+    text004      text,
+    text005      text,
+    text006      text,
+    text007      text,
+    text008      text,
+    text009      text,
+    text010      text,
+    bigint001    bigint,
+    bigint002    bigint,
+    bigint003    bigint,
+    bigint004    bigint,
+    bigint005    bigint,
+    double001    double precision,
+    double002    double precision,
+    double003    double precision,
+    double004    double precision,
+    double005    double precision,
+    decimal001   decimal,
+    decimal002   decimal,
+    decimal003   decimal,
+    decimal004   decimal,
+    decimal005   decimal,
+    datetime001  timestamptz,
+    datetime002  timestamptz,
+    datetime003  timestamptz,
+    datetime004  timestamptz,
+    datetime005  timestamptz
 );
 comment on table hymn.sys_core_account is '用户';
 comment on column hymn.sys_core_account.lock_time is '锁定时间，当前时间小于等于lock_time表示帐号被锁定';
@@ -34,6 +64,36 @@ comment on column hymn.sys_core_account.admin is '是否是管理员';
 comment on column hymn.sys_core_account.leader_id is '直接上级id';
 comment on column hymn.sys_core_account.org_id is '所属组织id';
 comment on column hymn.sys_core_account.root is '是否是初始帐号';
+comment on column hymn.sys_core_account.text001 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.text002 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.text003 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.text004 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.text005 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.text006 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.text007 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.text008 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.text009 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.text010 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.bigint001 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.bigint002 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.bigint003 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.bigint004 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.bigint005 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.double001 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.double002 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.double003 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.double004 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.double005 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.decimal001 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.decimal002 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.decimal003 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.decimal004 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.decimal005 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.datetime001 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.datetime002 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.datetime003 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.datetime004 is '##ignore 预留字段';
+comment on column hymn.sys_core_account.datetime005 is '##ignore 预留字段';
 
 
 
@@ -50,13 +110,33 @@ create table hymn.sys_core_org
     modify_by_id       text      not null,
     modify_by          text      not null,
     create_date        timestamp not null,
-    modify_date        timestamp not null
+    modify_date        timestamp not null,
+    text001      text,
+    text002      text,
+    text003      text,
+    text004      text,
+    text005      text,
+    bigint001    bigint,
+    bigint002    bigint,
+    bigint003    bigint,
+    bigint004    bigint,
+    bigint005    bigint
 );
 comment on table hymn.sys_core_org is '组织';
 -- comment on column hymn.sys_core_org.code is '组织代码，数字加小写字母的字符串，父组织的代码为子组织前缀，每个组织最多36个子组织，eg： 总公司：1a 子公司1：1a0 子公司2：1a1';
 comment on column hymn.sys_core_org.parent_id is '上级组织id';
 comment on column hymn.sys_core_org.director_id is '部门领导id';
 comment on column hymn.sys_core_org.deputy_director_id is '部门副领导id';
+comment on column hymn.sys_core_org.text001 is '##ignore 预留字段';
+comment on column hymn.sys_core_org.text002 is '##ignore 预留字段';
+comment on column hymn.sys_core_org.text003 is '##ignore 预留字段';
+comment on column hymn.sys_core_org.text004 is '##ignore 预留字段';
+comment on column hymn.sys_core_org.text005 is '##ignore 预留字段';
+comment on column hymn.sys_core_org.bigint001 is '##ignore 预留字段';
+comment on column hymn.sys_core_org.bigint002 is '##ignore 预留字段';
+comment on column hymn.sys_core_org.bigint003 is '##ignore 预留字段';
+comment on column hymn.sys_core_org.bigint004 is '##ignore 预留字段';
+comment on column hymn.sys_core_org.bigint005 is '##ignore 预留字段';
 
 drop table if exists hymn.sys_core_role cascade;
 create table hymn.sys_core_role
@@ -476,7 +556,7 @@ comment on column hymn.sys_core_b_object_field.query_filter is '字段为汇总�
 comment on column hymn.sys_core_b_object_field.help is '说明，显示在页面上的帮助信息';
 comment on column hymn.sys_core_b_object_field.remark is '备注';
 comment on column hymn.sys_core_b_object_field.tmp is '辅助列，新建与字典相关的字段时存储字典项数据';
-comment on column hymn.sys_core_b_object_field.standard_type is '标准类型，可选值：create_by_id 创建人id, create_by 创建人, modify_by_id 修改人id, modify_by 修改人, create_date 创建时间, modify_date 修改时间, org_id 组织id, lock_state 锁定状态, name 名称, type 业务类型 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型';
+comment on column hymn.sys_core_b_object_field.standard_type is '标准类型，可选值：create_by_id 创建人id, create_by 创建人, modify_by_id 修改人id, modify_by 修改人, create_date 创建时间, modify_date 修改时间, org_id 组织id, lock_state 锁定状态, name 名称, type 业务类型, owner_id 所有人 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型';
 comment on column hymn.sys_core_b_object_field.is_standard is '是否是标准字段，区分模块对象中的自定义字段与默认字段，默认字段该值为true且source_column与api相等，标准字段不能删除和修改';
 
 

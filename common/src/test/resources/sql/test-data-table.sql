@@ -1,11 +1,11 @@
 
 insert into hymn.sys_core_table_obj_mapping (table_name, obj_api)
 values 
-('sys_core_date_table_001',null),
-('sys_core_date_table_002',null),
-('sys_core_date_table_003',null),
-('sys_core_date_table_004',null),
-('sys_core_date_table_005',null);
+('sys_core_data_table_001',null),
+('sys_core_data_table_002',null),
+('sys_core_data_table_003',null),
+('sys_core_data_table_004',null),
+('sys_core_data_table_005',null);
 
 insert into hymn.sys_core_column_field_mapping (table_name, column_name, field_api)
 values 

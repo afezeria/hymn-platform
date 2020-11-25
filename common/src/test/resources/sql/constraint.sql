@@ -8,8 +8,8 @@ alter table hymn.sys_core_custom_button
 alter table hymn.sys_core_b_object_field
     add check ( type in ('text', 'check_box', 'select',
                          'multiple_select', 'integer', 'float',
-                         'money', 'date', 'datetime', 'picture',
-                         'percentage', 'relation'));
+                         'money', 'date', 'datetime', 'master_slave', 'reference', 'summary',
+                         'auto', 'picture'));
 alter table hymn.sys_core_b_object_field
     add check (
             standard_type in (
@@ -19,7 +19,11 @@ alter table hymn.sys_core_b_object_field
                               'modify_by',
                               'create_date',
                               'modify_date',
-                              'org_id'
+                              'org_id',
+                              'lock_state',
+                              'name',
+                              'type',
+                             'owner_id'
             )
         );
 
