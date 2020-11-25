@@ -23,6 +23,7 @@ open class BaseDbTest {
                 "test-data-table.sql",
                 "init-data.sql",
                 "history-table-and-trigger.sql",
+                "constraint.sql",
                 "function.sql"
             )
             for (script in scripts) {

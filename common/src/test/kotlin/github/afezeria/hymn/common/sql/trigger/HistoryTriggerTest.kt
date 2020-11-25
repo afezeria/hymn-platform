@@ -1,4 +1,4 @@
-package github.afezeria.hymn.common.sql.history
+package github.afezeria.hymn.common.sql.trigger
 
 import github.afezeria.hymn.common.conn
 import github.afezeria.hymn.common.sql.BASE_ARRAY

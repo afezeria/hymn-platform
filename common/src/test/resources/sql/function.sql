@@ -223,6 +223,7 @@ declare
     seq_name text;
     obj      hymn.sys_core_b_object;
 begin
+    raise notice 'reset_increment_seq_of_data_table';
     select * into obj from hymn.sys_core_b_object scbo where id = obj_id;
     if not FOUND then
         raise exception 'sys_core_b_object [id:%] not found',obj_id;
@@ -231,6 +232,7 @@ begin
         raise exception 'only the increment sequence of business objects can be reset';
     end if;
     seq_name := 'hymn.' || obj.source_table || '_seq';
+    raise notice '%',seq_name;
     perform setval(seq_name, 1, false);
 end;
 $$;
@@ -381,39 +383,40 @@ begin
     data_table_name := obj.source_table;
     trigger_fun_name := data_table_name || '_auto_numbering_trigger_fun';
     trigger_name := data_table_name || '_auto_numbering';
+    data_table_auto_numbering_seq_name:=data_table_name||'_seq';
 
     fun_header := format(
             E'create or replace function hymn.%s() returns trigger\n'
                 '   language plpgsql as\n'
                 '$$\n'
                 'declare\n'
-                'seq             bigint    := nextval(''hymn.%s'');\n'
+                'seq             text      := nextval(''hymn.%s'');\n'
                 'now             timestamp := now();\n'
-                'year            text      := date_part(''year'', now);\n'
-                'yy              text      := substr(year, 3);\n'
-                'month           text      := date_part(''month'', now);\n'
-                'day             text      := date_part(''day'', now);\n'
-                'hour            text      := date_part(''hour'', now);\n'
-                'minute          text      := date_part(''minute'', now);\n'
+                'year_v            text      := date_part(''year'', now);\n'
+                'yy_v              text      := substr(year_v, 3);\n'
+                'month_v           text      := date_part(''month'', now);\n'
+                'day_v             text      := date_part(''day'', now);\n'
+                'hour_v            text      := date_part(''hour'', now);\n'
+                'minute_v          text      := date_part(''minute'', now);\n'
                 'tmp             text;\n', trigger_fun_name, data_table_auto_numbering_seq_name);
 
     for field in select *
                  from hymn.sys_core_b_object_field
                  where object_id = obj_id
-                   and field.type = 'auto'
+                   and type = 'auto'
         loop
             template_name := field.source_column || '_template';
             fun_header := fun_header ||
-                          format('%s text := %L;\n', template_name, field.gen_rule);
+                          format(E'%s text := %L;\n', template_name, field.gen_rule);
 
             fun_body := fun_body ||
-                        format(E'\n'
-                                   '%s := replace(%s, ''{yyyy}'', year);\n'
-                                   '%s := replace(%s, ''{yy}'', yy);\n'
-                                   '%s := replace(%s, ''{mm}'', month);\n'
-                                   '%s := replace(%s, ''{dd}'', day);\n'
-                                   '%s := replace(%s, ''{hh}'', hour);\n'
-                                   '%s := replace(%s, ''{mm}'', minute);\n'
+                        format(E'raise notice ''%%'',seq;\n'
+                                   '%s := replace(%s, ''{yyyy}'', year_v);\n'
+                                   '%s := replace(%s, ''{yy}'', yy_v);\n'
+                                   '%s := replace(%s, ''{mm}'', month_v);\n'
+                                   '%s := replace(%s, ''{dd}'', day_v);\n'
+                                   '%s := replace(%s, ''{hh}'', hour_v);\n'
+                                   '%s := replace(%s, ''{mm}'', minute_v);\n'
                                    'for tmp in select (regexp_matches(%s, ''\{(0+)\}'', ''g''))[1]\n'
                                    '    loop\n'
                                    '        %s := replace(%s, ''{'' || tmp || ''}'', seq);\n'
@@ -437,10 +440,10 @@ begin
       and pt.tgname = trigger_name;
     if not FOUND then
         execute format(E'create trigger %s\n'
-                           E'before insert\n'
-                           E'on hymn.%s\n'
-                           E'for each row\n'
-                           E'execute function hymn.%s();\n',
+                           'before insert\n'
+                           'on hymn.%s\n'
+                           'for each row\n'
+                           'execute function hymn.%s();\n',
                        trigger_name, data_table_name, trigger_fun_name);
     end if;
 end;
@@ -488,18 +491,14 @@ begin
                 'begin\n'
                 '    if tg_op = ''DELETE'' then\n'
                 '        js := to_jsonb(old);\n'
-                '        id := old.id;\n'
-                '        operation := ''d'';\n'
-                '    elseif tg_op = ''UPDATE'' then\n', trigger_fun_name);
+                '        insert into hymn.%s_history (id, operation, stamp, change)\n'
+                '        values (old.id, ''d'', now(), js::text);\n'
+                '    elseif tg_op = ''UPDATE'' then\n', trigger_fun_name, data_table_name);
     fun_tail :=
-            format(E'        id := new.id;\n'
-                '        operation := ''u'';\n'
-                '    end if;\n'
-                '    insert into hymn.%s_history (id, operation, stamp, change)\n'
-                '    values (id, operation, now(), js::text);\n'
+            format(E'    end if;\n'
                 '    return null;\n'
                 'end;\n'
-                '$$;\n',data_table_name);
+                '$$;\n');
     for field in select *
                  from hymn.sys_core_b_object_field
                  where object_id = obj_id
@@ -527,6 +526,10 @@ begin
                                 field_column, field_column, field_column, field_column,
                                 field_column, field_column, field_api);
         end loop;
+    if fun_body <> '' then
+        fun_body := fun_body || E'    insert into hymn.%s_history (id, operation, stamp, change)\n'
+            '    values (old.id, ''u'', now(), js::text);\n';
+    end if;
     execute fun_header || fun_body || fun_tail;
 
 --     如果触发器不存在则创建触发器，如果触发器已存在则跳过
@@ -539,13 +542,13 @@ begin
       and pt.tgname = trigger_name;
     if not FOUND then
         execute format(E'create trigger %s\n'
-                           E'after update or delete\n'
-                           E'on hymn.%s\n'
-                           E'for each row\n'
-                           E'execute function hymn.%s();\n',
+                           'after update or delete\n'
+                           'on hymn.%s\n'
+                           'for each row\n'
+                           'execute function hymn.%s();\n',
                        trigger_name, data_table_name, trigger_fun_name);
     end if;
-end;
+end ;
 $BODY$;
 comment on function hymn.rebuild_data_table_history_trigger(obj_id text) is '重建数据表的历史记录触发器，生成触发器函数';
 
@@ -851,7 +854,7 @@ begin
                 null,
                 null, null, null, null, null, 'bcf5f00c2e6c494ea2318912a639031a',
                 record_new.name || ' 所有人', false, null, null, null, null, null, null,
-                null, null, 'owner', true, record_new.create_by_id, record_new.create_by,
+                null, null, 'owner_id', true, record_new.create_by_id, record_new.create_by,
                 record_new.modify_by_id, record_new.modify_by, now(), now()),
                ('type_id', obj_id, '业务类型', 'type_id', 'reference', true, null, null,
                 null,
@@ -862,7 +865,7 @@ begin
                ('lock_state', obj_id, '锁定状态', 'lock_state', 'check_box', true, '0', null,
                 null,
                 null, null, '4a6010cceea948d6856aac09e8aa19c0', null, 1, null,
-                record_new.name || ' 所有人', false, null, null, null, null, null, null,
+                null, false, null, null, null, null, null, null,
                 null, null, 'lock_state', true, record_new.create_by_id, record_new.create_by,
                 record_new.modify_by_id, record_new.modify_by, now(), now());
 --         生成标准类型
@@ -874,6 +877,8 @@ begin
 
         perform hymn.reset_increment_seq_of_data_table(record_new.id);
     end if;
+--     创建历史记录触发器
+    perform hymn.rebuild_data_table_history_trigger(record_new.id);
     return null;
 end;
 $$;
@@ -891,12 +896,20 @@ $$
 declare
     record_new hymn.sys_core_b_object := new;
     record_old hymn.sys_core_b_object := old;
+    sql_str    text;
 begin
     if record_old.active = false and record_new.active = false then
         raise exception 'object is inactive, cannot update';
     end if;
     if record_new.source_table <> record_old.source_table then
         raise exception 'cannot modify source_table';
+    end if;
+    if record_old.active = true and record_new.active = false then
+        sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
+        execute sql_str;
+    end if;
+    if record_old.active = false and record_new.active = true then
+        perform hymn.rebuild_object_view(record_old.id);
     end if;
     return record_new;
 end;
@@ -933,8 +946,10 @@ create or replace function hymn.object_trigger_fun_after_delete() returns trigge
     language plpgsql as
 $$
 declare
-    record_old hymn.sys_core_b_object := old;
-    sql_str    text;
+    record_old       hymn.sys_core_b_object := old;
+    sql_str          text;
+    trigger_name     text;
+    trigger_fun_name text;
 begin
     --     删除视图
     sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
@@ -945,6 +960,28 @@ begin
     -- 删除历史记录
     sql_str := format('truncate hymn.%I_history', record_old.source_table);
     execute sql_str;
+--     删除触发器及触发器函数
+    for trigger_fun_name,trigger_name in select pp.proname, pt.tgname
+                                         from pg_trigger pt
+                                                  left join pg_class pc on pt.tgrelid = pc.oid
+                                                  left join pg_namespace pn on pn.oid = pc.relnamespace
+                                                  left join pg_proc pp on pt.tgfoid = pp.oid
+                                         where pc.relname = 'sys_core_data_table_001'
+                                           and pn.nspname = 'hymn'
+        loop
+            sql_str := format('drop trigger if exists %I on hymn.%I cascade;', trigger_name,
+                              old.source_table);
+            execute sql_str;
+            sql_str := format('drop function if exists %I;', trigger_fun_name);
+            execute sql_str;
+        end loop;
+--     归还字段和表资源
+    update hymn.sys_core_table_obj_mapping
+    set obj_api=null
+    where table_name = record_old.source_table;
+    update hymn.sys_core_column_field_mapping
+    set field_api=null
+    where table_name = record_old.source_table;
     return record_old;
 end;
 $$;
@@ -1096,10 +1133,14 @@ begin
     if record_new.active != record_old.active then
         perform hymn.rebuild_object_view(record_new.object_id);
     end if;
+    if record_new.history != record_old.history then
+        perform hymn.rebuild_data_table_history_trigger(record_new.object_id);
+    end if;
     if record_new.type = 'auto' and record_old.gen_rule != record_new.gen_rule then
 --          如果是自动编号字段则重建触发器
         perform hymn.rebuild_auto_numbering_trigger(record_new.object_id);
     end if;
+    return null;
 end;
 $$;
 comment on function hymn.field_trigger_fun_after_update() is '字段 after update 触发器函数，重建视图，如果是自动编号字段则重建触发器';
@@ -1121,15 +1162,22 @@ begin
         raise exception 'cannot delete active field';
     end if;
     select * into obj from hymn.sys_core_b_object where id = record_old.object_id;
+    --     如果found为true说明只删除了字段，需要执行数据清理和归还字段资源
+--     如果为false说明执行的是删除对象的流程，相关的操作由对象触发器处理
     if FOUND then
         sql_str :=
                 format('update hymn.%I set %I = null', obj.source_table, record_old.source_column);
         execute sql_str;
+        update hymn.sys_core_column_field_mapping
+        set column_name = null
+        where table_name = obj.source_table
+          and column_name = record_old.source_column;
     end if;
+    return old;
 end;
 $$;
 drop trigger if exists c00_field_before_delete on hymn.sys_core_b_object_field;
 create trigger c00_field_before_delete
-    after update
+    before delete
     on hymn.sys_core_b_object_field
 execute function hymn.field_trigger_fun_before_delete();
