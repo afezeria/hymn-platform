@@ -24,7 +24,7 @@ class DataTableGen {
     """
 insert into hymn.sys_core_table_obj_mapping (table_name, obj_api)
 values 
-${(1..tableCount).collect { "('sys_core_date_table_${String.format('%03d', it)}',null)" }.join(",\n")};
+${(1..tableCount).collect { "('sys_core_data_table_${String.format('%03d', it)}',null)" }.join(",\n")};
 """
   }
 
