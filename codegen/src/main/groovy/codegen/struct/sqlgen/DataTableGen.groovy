@@ -37,7 +37,7 @@ values
 
       """
 ${(1..100).collect { "('$table','text${String.format('%03d', it)}',null)," }.join("\n")}
-${(1..50).collect { "('$table','bigint${String.format('%02d', it)}',null)," }.join("\n")}
+${(1..50).collect { "('$table','bigint${String.format('%03d', it)}',null)," }.join("\n")}
 ${(1..50).collect { "('$table','double${String.format('%03d', it)}',null)," }.join("\n")}
 ${(1..20).collect { "('$table','decimal${String.format('%03d', it)}',null)," }.join("\n")}
 ${(1..20).collect { "('$table','datetime${String.format('%03d', it)}',null)${tn == tableCount && it == 20 ? '' : ','}" }.join("\n")}
