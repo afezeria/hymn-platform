@@ -6,10 +6,9 @@ alter table hymn.sys_core_custom_button
     add check ( client_type in ('browser', 'android') );
 
 alter table hymn.sys_core_b_object_field
-    add check ( type in ('text', 'check_box', 'select',
-                         'multiple_select', 'integer', 'float',
-                         'money', 'date', 'datetime', 'master_slave', 'reference', 'summary',
-                         'auto', 'picture'));
+    add check ( type in ('text', 'check_box', 'check_box_group', 'select',
+                         'integer', 'float', 'money', 'date', 'datetime', 'master_slave',
+                         'reference', 'summary', 'auto', 'picture'));
 alter table hymn.sys_core_b_object_field
     add check (
             standard_type in (
@@ -23,7 +22,7 @@ alter table hymn.sys_core_b_object_field
                               'lock_state',
                               'name',
                               'type',
-                             'owner_id'
+                              'owner_id'
             )
         );
 

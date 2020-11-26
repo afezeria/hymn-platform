@@ -273,10 +273,10 @@ declare
 begin
     raise notice 'field_type_2_sql_type';
     case field_type
-        when 'text', 'check_box', 'select', 'multiple_select', 'master_slave', 'reference', 'auto', 'picture'
+        when 'text', 'check_box', 'check_box_group', 'select', 'master_slave', 'reference', 'auto', 'picture'
             then sql_type := 'text';
         when 'integer' then sql_type := 'bigint';
-        when 'double' then sql_type := 'double';
+        when 'float' then sql_type := 'double';
         when 'money' then sql_type := 'decimal';
         when 'datetime','date' then sql_type := 'datetime' ;
         else raise exception 'unknown field type: %',field_type;
@@ -383,7 +383,7 @@ begin
     data_table_name := obj.source_table;
     trigger_fun_name := data_table_name || '_auto_numbering_trigger_fun';
     trigger_name := data_table_name || '_auto_numbering';
-    data_table_auto_numbering_seq_name:=data_table_name||'_seq';
+    data_table_auto_numbering_seq_name := data_table_name || '_seq';
 
     fun_header := format(
             E'create or replace function hymn.%s() returns trigger\n'
@@ -562,9 +562,12 @@ declare
     ref_field hymn.sys_core_b_object_field;
 begin
     raise notice 'check_field_properties';
+    if record_new.is_predefined = true and record_new.source_column is null then
+        raise exception 'source_column cannot be null';
+    end if;
     if record_new.type = 'text' then
 --         文本类型：最小值 最大值 显示行数
-        if record_new.min_length IS NULL or record_new.max_length is null or
+        if record_new.min_length IS null or record_new.max_length is null or
            record_new.visible_row is null then
             raise exception 'min_length,max_length,row cannot be null';
         end if;
@@ -589,7 +592,12 @@ begin
             record_new.formula := null;
         end if;
     elseif record_new.type = 'check_box' then
---         单选框： 选项个数 字典id/字典项文本（字典项文本存储在tmp中，这连个字段只要取一个就行）
+--         复选框字段必须为预定义字段
+        if record_new.is_predefined = false then
+            raise exception 'is_predefined must be true';
+        end if;
+    elseif record_new.type = 'check_box_group' then
+--         复选框组： 选项个数 字典id/字典项文本（字典项文本存储在tmp中，这连个字段只要取一个就行）
         if record_new.optional_number is null then
             raise exception 'optional_number cannot be null';
         end if;
@@ -598,14 +606,6 @@ begin
         end if;
     elseif record_new.type = 'select' then
 --         选项列表： 选项个数 字典id/字典项文本（字典项文本存储在tmp中，这连个字段只要取一个就行）
-        if record_new.optional_number is null then
-            raise exception 'optional_number cannot be null';
-        end if;
-        if record_new.optional_number < 1 then
-            raise exception 'optional_number must greater than 0';
-        end if;
-    elseif record_new.type = 'multiple_select' then
---         多选列表： 选项个数 字典id/字典项文本（字典项文本存储在tmp中，这连个字段只要取一个就行）
         if record_new.optional_number is null then
             raise exception 'optional_number cannot be null';
         end if;
@@ -628,7 +628,7 @@ begin
         if record_new.max_length < 1 then
             raise exception 'max_length must greater than or equal to 1';
         end if;
-        if (record_new.min_length + record_new.max_length) <= 18 then
+        if (record_new.min_length + record_new.max_length) > 18 then
             raise exception 'min_length plus max_length must be less than or equal to 18';
         end if;
     elseif record_new.type = 'money' then
@@ -651,17 +651,17 @@ begin
         if record_new.min_length is null or record_new.max_length is null then
             raise exception 'min_length, max_length cannot be null';
         end if;
-        if record_new.min_length >= 1 then
+        if record_new.min_length < 1 then
             raise exception 'min_length must greater than or equal to 1';
         end if;
-        if record_new.max_length > 0 then
+        if record_new.max_length <= 0 then
             raise exception 'max_length must greater than 1';
         end if;
     elseif record_new.type = 'reference' then
 --         关联关系
         if record_new.ref_id is null or record_new.ref_list_label is null or
-           record_new.ref_allow_delete then
-            raise exception 'ref_id, ref_list_label, ref_allow_delete cannot be null';
+           record_new.ref_delete_policy is null then
+            raise exception 'ref_id, ref_list_label, ref_delete_policy cannot be null';
         end if;
         select * into own_obj from hymn.sys_core_b_object where id = record_new.ref_id;
         if not FOUND then
@@ -820,11 +820,11 @@ begin
                                                   default_value, formula, max_length, min_length,
                                                   visible_row, dict_id, master_field_id,
                                                   optional_number,
-                                                  ref_id, ref_list_label, ref_allow_delete,
+                                                  ref_id, ref_list_label, ref_delete_policy,
                                                   query_filter,
                                                   s_id, s_field_id, s_type, gen_rule, remark, help,
                                                   tmp,
-                                                  standard_type, is_standard, create_by_id,
+                                                  standard_type, is_predefined, create_by_id,
                                                   create_by,
                                                   modify_by_id, modify_by, create_date, modify_date)
         values ('name', obj_id, name_label, 'name', name_type, true, null, null, 255, 1, null, null,
@@ -841,25 +841,25 @@ begin
                 record_new.modify_by_id, record_new.modify_by, now(), now()),
                ('create_by_id', obj_id, '创建人', 'create_by_id', 'reference', true, null, null, null,
                 null, null, null, null, null, 'bcf5f00c2e6c494ea2318912a639031a',
-                record_new.name || ' 创建人', false, null, null, null, null, null, null,
+                record_new.name || ' 创建人', 'null', null, null, null, null, null, null,
                 null, null, 'create_by_id', true, record_new.create_by_id, record_new.create_by,
                 record_new.modify_by_id, record_new.modify_by, now(), now()),
                ('modify_by_id', obj_id, '修改人', 'modify_by_id', 'reference', true, null, null,
                 null,
                 null, null, null, null, null, 'bcf5f00c2e6c494ea2318912a639031a',
-                record_new.name || ' 修改人', false, null, null, null, null, null, null,
+                record_new.name || ' 修改人', 'null', null, null, null, null, null, null,
                 null, null, 'modify_by_id', true, record_new.create_by_id, record_new.create_by,
                 record_new.modify_by_id, record_new.modify_by, now(), now()),
                ('owner_id', obj_id, '所有人', 'owner_id', 'reference', true, null, null,
                 null,
                 null, null, null, null, null, 'bcf5f00c2e6c494ea2318912a639031a',
-                record_new.name || ' 所有人', false, null, null, null, null, null, null,
+                record_new.name || ' 所有人', 'null', null, null, null, null, null, null,
                 null, null, 'owner_id', true, record_new.create_by_id, record_new.create_by,
                 record_new.modify_by_id, record_new.modify_by, now(), now()),
                ('type_id', obj_id, '业务类型', 'type_id', 'reference', true, null, null,
                 null,
                 null, null, null, null, null, '09da56a7de514895aea5c596820d0ced',
-                record_new.name || ' 业务类型', false, null, null, null, null, null, null,
+                record_new.name || ' 业务类型', 'restrict', null, null, null, null, null, null,
                 null, null, 'type', true, record_new.create_by_id, record_new.create_by,
                 record_new.modify_by_id, record_new.modify_by, now(), now()),
                ('lock_state', obj_id, '锁定状态', 'lock_state', 'check_box', true, '0', null,
@@ -894,9 +894,10 @@ create or replace function hymn.object_trigger_fun_before_update() returns trigg
     language plpgsql as
 $$
 declare
-    record_new hymn.sys_core_b_object := new;
-    record_old hymn.sys_core_b_object := old;
-    sql_str    text;
+    record_new    hymn.sys_core_b_object := new;
+    record_old    hymn.sys_core_b_object := old;
+    sql_str       text;
+    ref_field_arr text;
 begin
     if record_old.active = false and record_new.active = false then
         raise exception 'object is inactive, cannot update';
@@ -905,6 +906,18 @@ begin
         raise exception 'cannot modify source_table';
     end if;
     if record_old.active = true and record_new.active = false then
+--         停用对象时不能有其他对象引用当前对象
+        select array_agg(scbo.api || '.' || scbof.api)::text
+        into ref_field_arr
+        from hymn.sys_core_b_object scbo
+                 inner join sys_core_b_object_field scbof on scbof.object_id = scbo.id
+        where scbof.type in ('reference', 'master_slave')
+          and scbof.active = true
+          and scbo.active = true
+          and scbof.ref_id = record_new.id;
+        if ref_field_arr is not null then
+            raise exception 'the following objects refer to the current object and cannot be deactivated:%',ref_field_arr;
+        end if;
         sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
         execute sql_str;
     end if;
@@ -1011,7 +1024,7 @@ begin
 --     新建字段强制启用
     record_new.active = true;
 
-    if record_new.is_standard = false then
+    if record_new.is_predefined = false then
 --     自定义字段末尾加上 __cf
         record_new.api := record_new.api || '__cf';
 

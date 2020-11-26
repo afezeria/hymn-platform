@@ -111,16 +111,16 @@ create table hymn.sys_core_org
     modify_by          text      not null,
     create_date        timestamp not null,
     modify_date        timestamp not null,
-    text001      text,
-    text002      text,
-    text003      text,
-    text004      text,
-    text005      text,
-    bigint001    bigint,
-    bigint002    bigint,
-    bigint003    bigint,
-    bigint004    bigint,
-    bigint005    bigint
+    text001            text,
+    text002            text,
+    text003            text,
+    text004            text,
+    text005            text,
+    bigint001          bigint,
+    bigint002          bigint,
+    bigint003          bigint,
+    bigint004          bigint,
+    bigint005          bigint
 );
 comment on table hymn.sys_core_org is '组织';
 -- comment on column hymn.sys_core_org.code is '组织代码，数字加小写字母的字符串，父组织的代码为子组织前缀，每个组织最多36个子组织，eg： 总公司：1a 子公司1：1a0 子公司2：1a1';
@@ -404,6 +404,8 @@ create table hymn.sys_core_b_object
     active       bool               default true not null,
     module_api   text               default null,
     remark       text      not null default '',
+    can_insert   bool,
+    can_update   bool,
     create_by_id text      not null,
     create_by    text      not null,
     modify_by_id text      not null,
@@ -417,50 +419,56 @@ comment on column hymn.sys_core_b_object.api is '业务对象api，用于触发�
 comment on column hymn.sys_core_b_object.active is '是否启用，停用后无法进行增删改查等操作';
 comment on column hymn.sys_core_b_object.source_table is '实际表名，例： sys_core_data_table_500';
 comment on column hymn.sys_core_b_object.module_api is '模块api名称，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 sys_core_b_object 和 sys_core_b_object_field 数据来支持在触发器中使用DataService提供的通用操作';
+comment on column hymn.sys_core_b_object.can_insert is '模块对象是否可以通过视图插入';
+comment on column hymn.sys_core_b_object.can_update is '模块对象是否可以通过视图更新';
+
 
 
 drop table if exists hymn.sys_core_b_object_field cascade;
 create table hymn.sys_core_b_object_field
 (
-    id               text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    source_column    text      not null,
-    object_id        text      not null,
-    name             text      not null,
-    api              text      not null,
-    type             text      not null,
-    active           bool             default true,
-    history          bool             default false,
-    default_value    text,
-    formula          text,
-    max_length       integer,
-    min_length       integer,
-    visible_row      integer,
-    dict_id          text,
-    master_field_id  text,
-    optional_number  integer,
-    ref_id           text,
-    ref_list_label   text,
-    ref_allow_delete bool,
-    query_filter     text,
-    s_id             text,
-    s_field_id       text,
-    s_type           text,
-    gen_rule         text,
-    remark           text,
-    help             text,
-    tmp              text,
-    standard_type    text,
-    is_standard      bool,
-    create_by_id     text      not null,
-    create_by        text      not null,
-    modify_by_id     text      not null,
-    modify_by        text      not null,
-    create_date      timestamp not null,
-    modify_date      timestamp not null
+    id                text primary key   default replace(public.uuid_generate_v4()::text, '-', ''),
+    source_column     text      not null,
+    object_id         text      not null,
+    name              text      not null,
+    api               text      not null,
+    type              text      not null,
+    active            bool               default true,
+    history           bool               default false,
+    default_value     text,
+    formula           text,
+    max_length        integer,
+    min_length        integer,
+    visible_row       integer,
+    dict_id           text,
+    master_field_id   text,
+    optional_number   integer,
+    ref_id            text,
+    ref_list_label    text,
+    ref_delete_policy text,
+    query_filter      text,
+    s_id              text,
+    s_field_id        text,
+    s_type            text,
+    gen_rule          text,
+    remark            text,
+    help              text,
+    tmp               text,
+    standard_type     text,
+    is_predefined     bool      not null default false,
+    create_by_id      text      not null,
+    create_by         text      not null,
+    modify_by_id      text      not null,
+    modify_by         text      not null,
+    create_date       timestamp not null,
+    modify_date       timestamp not null
 );
 comment on table hymn.sys_core_b_object_field is '业务对象字段
 
-字段类型：文本、单选框、选择框、下拉菜单、下拉多选、整型、浮点型、货币、日期、日期时间、主详、关联关系、汇总、自动编号;
+字段类型：文本(text),复选框(check_box),复选框组(check_box_group),下拉菜单(select),整型(integer),
+浮点型(float),货币(money),日期(date),日期时间(datetime),主详(master_slave),关联关系(reference),
+汇总(summary),自动编号(auto),图片(picture);
+说明: 复选框 check_box 类型仅用于模块对象的特殊字段，底层字段类型为bool，自定义字段不能为check_box类型
 公共可选字段：remark（备注，只显示在管理员界面），help（帮助文本，显示在对象详情界面）
 通用字段：default_value（默认值，后端处理，字段间不能联动），formula（前端处理）
 
@@ -469,17 +477,16 @@ required: min_length（最小长度）, max_length（最大长度）, visible_ro
 optional: default_value, formula
 rule: min_length >= 0, max_length <= 50000 , visible_row > 0, min_length <= max_length, (if api = ''name'' than max_length <=255)
 
-type: 选择框 check_box
+type: 复选框 check_box
+required:
+optional: default_value
+
+type: 复选框组 check_box_group
 required: optional_number（可选个数）, dict_id（引用字典id）/tmp（字典项，json数组，属性：name 名称，code 代码，parent_code 依赖项代码）
 optional: default_value, formula
 rule: optional_number > 0, (dict_id is not null) or (tmp is not null)
 
 type: 下拉菜单 select
-required: dict_id（引用字典id）/tmp（字典项，json数组，属性：name 名称，code 代码，parent_code 依赖项代码）
-optional: default_value, formula, master_field_id（依赖字段id，必须是当前对象的字段，且类型为check_box/select/multiple_select）
-rule: (dict_id is not null) or (tmp is not null)
-
-type: 下拉多选 multiple_select
 required: optional_number（可选个数）, dict_id（引用字典id）/tmp（字典项，json数组，属性：name 名称，code 代码，parent_code 依赖项代码）
 optional: default_value, formula, master_field_id（依赖字段id，必须是当前对象的字段，且类型为check_box/select/multiple_select）
 rule: optional_number > 0, (dict_id is not null) or (tmp is not null)
@@ -547,7 +554,7 @@ comment on column hymn.sys_core_b_object_field.master_field_id is '下拉字段�
 comment on column hymn.sys_core_b_object_field.optional_number is '副选框和下拉多选的可选个数';
 comment on column hymn.sys_core_b_object_field.ref_id is '关联的自定义对象id';
 comment on column hymn.sys_core_b_object_field.ref_list_label is '相关列表标签，当前对象在被关联对象的相关列表中显示的标签';
-comment on column hymn.sys_core_b_object_field.ref_allow_delete is '当字段为关联字段时，引用数据被删除时是否阻止删除';
+comment on column hymn.sys_core_b_object_field.ref_delete_policy is '当字段为关联字段时，引用数据被删除时的动作。 cascade 级联删除当前对象数据, restrict 阻止删除被引用对象, null 无动作';
 comment on column hymn.sys_core_b_object_field.gen_rule is '编号规则，{000} 递增序列，必填，实际序号大小小于0的个数时将会在前面补0 ; {yyyy}/{yy} 年; {mm} 月; {dd} 日';
 comment on column hymn.sys_core_b_object_field.s_id is '汇总对象id';
 comment on column hymn.sys_core_b_object_field.s_field_id is '汇总字段id';
@@ -557,7 +564,7 @@ comment on column hymn.sys_core_b_object_field.help is '说明，显示在页面
 comment on column hymn.sys_core_b_object_field.remark is '备注';
 comment on column hymn.sys_core_b_object_field.tmp is '辅助列，新建与字典相关的字段时存储字典项数据';
 comment on column hymn.sys_core_b_object_field.standard_type is '标准类型，可选值：create_by_id 创建人id, create_by 创建人, modify_by_id 修改人id, modify_by 修改人, create_date 创建时间, modify_date 修改时间, org_id 组织id, lock_state 锁定状态, name 名称, type 业务类型, owner_id 所有人 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型';
-comment on column hymn.sys_core_b_object_field.is_standard is '是否是标准字段，区分模块对象中的自定义字段与默认字段，默认字段该值为true且source_column与api相等，标准字段不能删除和修改';
+comment on column hymn.sys_core_b_object_field.is_predefined is '是否是预定义字段，区分对象中的自定义字段与预定义字段，预定义字段该值为true且source_column与api相等，后台对象管理界面中不能删除和修改';
 
 
 drop table if exists hymn.sys_core_b_object_layout cascade;

@@ -3,30 +3,60 @@ create table hymn.sys_core_account_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    lock_time    timestamp,
-    name         text,
-    username     text,
-    password     text,
-    online_rule  text,
-    active       bool,
-    admin        bool,
-    root         bool,
-    leader_id    text,
-    org_id       text,
-    role_id      text,
+    id text,
+    lock_time timestamp,
+    name text,
+    username text,
+    password text,
+    online_rule text,
+    active bool,
+    admin bool,
+    root bool,
+    leader_id text,
+    org_id text,
+    role_id text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp,
+    text001 text,
+    text002 text,
+    text003 text,
+    text004 text,
+    text005 text,
+    text006 text,
+    text007 text,
+    text008 text,
+    text009 text,
+    text010 text,
+    bigint001 int8,
+    bigint002 int8,
+    bigint003 int8,
+    bigint004 int8,
+    bigint005 int8,
+    double001 float8,
+    double002 float8,
+    double003 float8,
+    double004 float8,
+    double005 float8,
+    decimal001 numeric,
+    decimal002 numeric,
+    decimal003 numeric,
+    decimal004 numeric,
+    decimal005 numeric,
+    datetime001 timestamptz,
+    datetime002 timestamptz,
+    datetime003 timestamptz,
+    datetime004 timestamptz,
+    datetime005 timestamptz
 );
 create or replace function hymn.sys_core_account_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_account_history select 'i', now(), new.*;
+    insert into hymn.sys_core_account_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -34,7 +64,7 @@ create or replace function hymn.sys_core_account_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_account_history select 'u', now(), new.*;
+    insert into hymn.sys_core_account_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -42,7 +72,7 @@ create or replace function hymn.sys_core_account_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_account_history select 'd', now(), old.*;
+    insert into hymn.sys_core_account_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -72,22 +102,22 @@ create table hymn.sys_core_account_menu_layout_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    account_id   text,
-    client_type  text,
-    layout_json  text,
+    id text,
+    account_id text,
+    client_type text,
+    layout_json text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_account_menu_layout_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_account_menu_layout_history select 'i', now(), new.*;
+    insert into hymn.sys_core_account_menu_layout_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -95,7 +125,7 @@ create or replace function hymn.sys_core_account_menu_layout_history_upd() retur
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_account_menu_layout_history select 'u', now(), new.*;
+    insert into hymn.sys_core_account_menu_layout_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -103,7 +133,7 @@ create or replace function hymn.sys_core_account_menu_layout_history_del() retur
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_account_menu_layout_history select 'd', now(), old.*;
+    insert into hymn.sys_core_account_menu_layout_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -133,27 +163,27 @@ create table hymn.sys_core_account_object_view_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    copy_id      text,
-    remark       text,
-    global_view  bool,
+    id text,
+    copy_id text,
+    remark text,
+    global_view bool,
     default_view bool,
-    account_id   text,
-    object_id    text,
-    name         text,
-    view_json    text,
+    account_id text,
+    object_id text,
+    name text,
+    view_json text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_account_object_view_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_account_object_view_history select 'i', now(), new.*;
+    insert into hymn.sys_core_account_object_view_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -161,7 +191,7 @@ create or replace function hymn.sys_core_account_object_view_history_upd() retur
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_account_object_view_history select 'u', now(), new.*;
+    insert into hymn.sys_core_account_object_view_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -169,7 +199,7 @@ create or replace function hymn.sys_core_account_object_view_history_del() retur
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_account_object_view_history select 'd', now(), old.*;
+    insert into hymn.sys_core_account_object_view_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -199,25 +229,27 @@ create table hymn.sys_core_b_object_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    name         text,
-    api          text,
+    id text,
+    name text,
+    api text,
     source_table text,
-    active       bool,
-    module_api   text,
-    remark       text,
+    active bool,
+    module_api text,
+    remark text,
+    can_insert bool,
+    can_update bool,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -225,7 +257,7 @@ create or replace function hymn.sys_core_b_object_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -233,7 +265,7 @@ create or replace function hymn.sys_core_b_object_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -261,49 +293,49 @@ execute function hymn.sys_core_b_object_history_del();
 drop table if exists hymn.sys_core_b_object_field_history cascade;
 create table hymn.sys_core_b_object_field_history
 (
-    operation        text,
-    stamp            timestamp,
-    id               text,
-    source_column    text,
-    object_id        text,
-    name             text,
-    api              text,
-    type             text,
-    active           bool,
-    history          bool,
-    default_value    text,
-    formula          text,
-    max_length       int4,
-    min_length       int4,
-    visible_row      int4,
-    dict_id          text,
-    master_field_id  text,
-    optional_number  int4,
-    ref_id           text,
-    ref_list_label   text,
-    ref_allow_delete bool,
-    query_filter     text,
-    s_id             text,
-    s_field_id       text,
-    s_type           text,
-    gen_rule         text,
-    remark           text,
-    help             text,
-    tmp              text,
-    standard_type    text,
-    is_standard      bool,
-    create_by_id     text,
-    create_by        text,
-    modify_by_id     text,
-    modify_by        text,
-    create_date      timestamp,
-    modify_date      timestamp
+    operation    text,
+    stamp        timestamp,
+    id text,
+    source_column text,
+    object_id text,
+    name text,
+    api text,
+    type text,
+    active bool,
+    history bool,
+    default_value text,
+    formula text,
+    max_length int4,
+    min_length int4,
+    visible_row int4,
+    dict_id text,
+    master_field_id text,
+    optional_number int4,
+    ref_id text,
+    ref_list_label text,
+    ref_delete_policy text,
+    query_filter text,
+    s_id text,
+    s_field_id text,
+    s_type text,
+    gen_rule text,
+    remark text,
+    help text,
+    tmp text,
+    standard_type text,
+    is_predefined bool,
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_field_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_field_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_field_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -311,7 +343,7 @@ create or replace function hymn.sys_core_b_object_field_history_upd() returns tr
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_field_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_field_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -319,7 +351,7 @@ create or replace function hymn.sys_core_b_object_field_history_del() returns tr
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_field_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_field_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -349,24 +381,24 @@ create table hymn.sys_core_b_object_field_perm_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    role_id      text,
-    object_id    text,
-    field_id     text,
-    p_read       bool,
-    p_edit       bool,
+    id text,
+    role_id text,
+    object_id text,
+    field_id text,
+    p_read bool,
+    p_edit bool,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_field_perm_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_field_perm_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_field_perm_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -374,7 +406,7 @@ create or replace function hymn.sys_core_b_object_field_perm_history_upd() retur
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_field_perm_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_field_perm_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -382,7 +414,7 @@ create or replace function hymn.sys_core_b_object_field_perm_history_del() retur
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_field_perm_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_field_perm_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -410,31 +442,30 @@ execute function hymn.sys_core_b_object_field_perm_history_del();
 drop table if exists hymn.sys_core_b_object_layout_history cascade;
 create table hymn.sys_core_b_object_layout_history
 (
-    operation               text,
-    stamp                   timestamp,
-    id                      text,
-    object_id               text,
-    name                    text,
-    api                     text,
-    remark                  text,
-    rel_field_json_arr      text,
-    pc_read_layout_json     text,
-    pc_edit_layout_json     text,
+    operation    text,
+    stamp        timestamp,
+    id text,
+    object_id text,
+    name text,
+    remark text,
+    rel_field_json_arr text,
+    pc_read_layout_json text,
+    pc_edit_layout_json text,
     mobile_read_layout_json text,
     mobile_edit_layout_json text,
-    preview_layout_json     text,
-    create_by_id            text,
-    create_by               text,
-    modify_by_id            text,
-    modify_by               text,
-    create_date             timestamp,
-    modify_date             timestamp
+    preview_layout_json text,
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_layout_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_layout_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_layout_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -442,7 +473,7 @@ create or replace function hymn.sys_core_b_object_layout_history_upd() returns t
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_layout_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_layout_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -450,7 +481,7 @@ create or replace function hymn.sys_core_b_object_layout_history_del() returns t
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_layout_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_layout_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -478,25 +509,25 @@ execute function hymn.sys_core_b_object_layout_history_del();
 drop table if exists hymn.sys_core_b_object_mapping_history cascade;
 create table hymn.sys_core_b_object_mapping_history
 (
-    operation        text,
-    stamp            timestamp,
-    id               text,
+    operation    text,
+    stamp        timestamp,
+    id text,
     source_object_id text,
     target_object_id text,
-    source_type_id   text,
-    target_type_id   text,
-    create_by_id     text,
-    create_by        text,
-    modify_by_id     text,
-    modify_by        text,
-    create_date      timestamp,
-    modify_date      timestamp
+    source_type_id text,
+    target_type_id text,
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_mapping_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_mapping_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_mapping_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -504,7 +535,7 @@ create or replace function hymn.sys_core_b_object_mapping_history_upd() returns 
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_mapping_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_mapping_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -512,7 +543,7 @@ create or replace function hymn.sys_core_b_object_mapping_history_del() returns 
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_mapping_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_mapping_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -540,34 +571,34 @@ execute function hymn.sys_core_b_object_mapping_history_del();
 drop table if exists hymn.sys_core_b_object_mapping_item_history cascade;
 create table hymn.sys_core_b_object_mapping_item_history
 (
-    operation             text,
-    stamp                 timestamp,
-    id                    text,
-    mapping_id            text,
-    source_object_api     text,
-    target_object_api     text,
-    source_field_api      text,
-    target_field_api      text,
-    ref_field1_api        text,
+    operation    text,
+    stamp        timestamp,
+    id text,
+    mapping_id text,
+    source_object_api text,
+    target_object_api text,
+    source_field_api text,
+    target_field_api text,
+    ref_field1_api text,
     ref_field1_object_api text,
-    ref_field2_api        text,
+    ref_field2_api text,
     ref_field2_object_api text,
-    ref_field3_api        text,
+    ref_field3_api text,
     ref_field3_object_api text,
-    ref_field4_api        text,
+    ref_field4_api text,
     ref_field4_object_api text,
-    create_by_id          text,
-    create_by             text,
-    modify_by_id          text,
-    modify_by             text,
-    create_date           timestamp,
-    modify_date           timestamp
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_mapping_item_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_mapping_item_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_mapping_item_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -575,7 +606,7 @@ create or replace function hymn.sys_core_b_object_mapping_item_history_upd() ret
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_mapping_item_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_mapping_item_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -583,7 +614,7 @@ create or replace function hymn.sys_core_b_object_mapping_item_history_del() ret
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_mapping_item_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_mapping_item_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -611,33 +642,33 @@ execute function hymn.sys_core_b_object_mapping_item_history_del();
 drop table if exists hymn.sys_core_b_object_perm_history cascade;
 create table hymn.sys_core_b_object_perm_history
 (
-    operation               text,
-    stamp                   timestamp,
-    id                      text,
-    role_id                 text,
-    object_id               text,
-    object_api_name         text,
-    ins                     bool,
-    upd                     bool,
-    del                     bool,
-    que                     bool,
+    operation    text,
+    stamp        timestamp,
+    id text,
+    role_id text,
+    object_id text,
+    object_api_name text,
+    ins bool,
+    upd bool,
+    del bool,
+    que bool,
     query_with_account_tree bool,
-    query_with_dept         bool,
-    query_with_dept_tree    bool,
-    query_all               bool,
-    edit_all                bool,
-    create_by_id            text,
-    create_by               text,
-    modify_by_id            text,
-    modify_by               text,
-    create_date             timestamp,
-    modify_date             timestamp
+    query_with_dept bool,
+    query_with_dept_tree bool,
+    query_all bool,
+    edit_all bool,
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_perm_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_perm_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_perm_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -645,7 +676,7 @@ create or replace function hymn.sys_core_b_object_perm_history_upd() returns tri
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_perm_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_perm_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -653,7 +684,7 @@ create or replace function hymn.sys_core_b_object_perm_history_del() returns tri
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_perm_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_perm_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -683,29 +714,29 @@ create table hymn.sys_core_b_object_trigger_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    active       bool,
-    remark       text,
-    object_id    text,
-    name         text,
-    api          text,
-    lang         text,
-    option_text  text,
-    ord          int4,
-    event        text,
-    code         text,
+    id text,
+    active bool,
+    remark text,
+    object_id text,
+    name text,
+    api text,
+    lang text,
+    option_text text,
+    ord int4,
+    event text,
+    code text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_trigger_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_trigger_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_trigger_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -713,7 +744,7 @@ create or replace function hymn.sys_core_b_object_trigger_history_upd() returns 
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_trigger_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_trigger_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -721,7 +752,7 @@ create or replace function hymn.sys_core_b_object_trigger_history_del() returns 
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_trigger_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_trigger_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -751,23 +782,23 @@ create table hymn.sys_core_b_object_type_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    object_id    text,
-    name         text,
-    active       bool,
-    remark       text,
+    id text,
+    object_id text,
+    name text,
+    active bool,
+    remark text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_type_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_type_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -775,7 +806,7 @@ create or replace function hymn.sys_core_b_object_type_history_upd() returns tri
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_type_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -783,7 +814,7 @@ create or replace function hymn.sys_core_b_object_type_history_del() returns tri
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_type_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -813,22 +844,22 @@ create table hymn.sys_core_b_object_type_available_options_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    type_id      text,
-    field_id     text,
+    id text,
+    type_id text,
+    field_id text,
     dict_item_id text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_type_available_options_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_available_options_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_type_available_options_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -836,7 +867,7 @@ create or replace function hymn.sys_core_b_object_type_available_options_history
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_available_options_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_type_available_options_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -844,7 +875,7 @@ create or replace function hymn.sys_core_b_object_type_available_options_history
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_available_options_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_type_available_options_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -874,23 +905,23 @@ create table hymn.sys_core_b_object_type_layout_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    role_id      text,
-    object_id    text,
-    type_id      text,
-    layout_id    text,
+    id text,
+    role_id text,
+    object_id text,
+    type_id text,
+    layout_id text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_type_layout_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_layout_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_type_layout_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -898,7 +929,7 @@ create or replace function hymn.sys_core_b_object_type_layout_history_upd() retu
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_layout_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_type_layout_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -906,7 +937,7 @@ create or replace function hymn.sys_core_b_object_type_layout_history_del() retu
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_layout_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_type_layout_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -936,23 +967,23 @@ create table hymn.sys_core_b_object_type_perm_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    role_id      text,
-    object_id    text,
-    type_id      text,
-    visible      bool,
+    id text,
+    role_id text,
+    object_id text,
+    type_id text,
+    visible bool,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_b_object_type_perm_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_perm_history select 'i', now(), new.*;
+    insert into hymn.sys_core_b_object_type_perm_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -960,7 +991,7 @@ create or replace function hymn.sys_core_b_object_type_perm_history_upd() return
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_perm_history select 'u', now(), new.*;
+    insert into hymn.sys_core_b_object_type_perm_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -968,7 +999,7 @@ create or replace function hymn.sys_core_b_object_type_perm_history_del() return
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_b_object_type_perm_history select 'd', now(), old.*;
+    insert into hymn.sys_core_b_object_type_perm_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -996,28 +1027,28 @@ execute function hymn.sys_core_b_object_type_perm_history_del();
 drop table if exists hymn.sys_core_business_code_ref_history cascade;
 create table hymn.sys_core_business_code_ref_history
 (
-    operation      text,
-    stamp          timestamp,
-    id             text,
-    trigger_id     text,
-    interface_id   text,
+    operation    text,
+    stamp        timestamp,
+    id text,
+    trigger_id text,
+    interface_id text,
     shared_code_id text,
-    object_id      text,
-    field_id       text,
-    org_id         text,
-    role_id        text,
-    create_by_id   text,
-    create_by      text,
-    modify_by_id   text,
-    modify_by      text,
-    create_date    timestamp,
-    modify_date    timestamp
+    object_id text,
+    field_id text,
+    org_id text,
+    role_id text,
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_business_code_ref_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_business_code_ref_history select 'i', now(), new.*;
+    insert into hymn.sys_core_business_code_ref_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1025,7 +1056,7 @@ create or replace function hymn.sys_core_business_code_ref_history_upd() returns
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_business_code_ref_history select 'u', now(), new.*;
+    insert into hymn.sys_core_business_code_ref_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1033,7 +1064,7 @@ create or replace function hymn.sys_core_business_code_ref_history_del() returns
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_business_code_ref_history select 'd', now(), old.*;
+    insert into hymn.sys_core_business_code_ref_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1063,22 +1094,22 @@ create table hymn.sys_core_button_perm_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    role_id      text,
-    button_id    text,
-    visible      bool,
+    id text,
+    role_id text,
+    button_id text,
+    visible bool,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_button_perm_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_button_perm_history select 'i', now(), new.*;
+    insert into hymn.sys_core_button_perm_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1086,7 +1117,7 @@ create or replace function hymn.sys_core_button_perm_history_upd() returns trigg
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_button_perm_history select 'u', now(), new.*;
+    insert into hymn.sys_core_button_perm_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1094,7 +1125,7 @@ create or replace function hymn.sys_core_button_perm_history_del() returns trigg
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_button_perm_history select 'd', now(), old.*;
+    insert into hymn.sys_core_button_perm_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1124,21 +1155,21 @@ create table hymn.sys_core_config_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    key          text,
-    value        text,
+    id text,
+    key text,
+    value text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_config_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_config_history select 'i', now(), new.*;
+    insert into hymn.sys_core_config_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1146,7 +1177,7 @@ create or replace function hymn.sys_core_config_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_config_history select 'u', now(), new.*;
+    insert into hymn.sys_core_config_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1154,7 +1185,7 @@ create or replace function hymn.sys_core_config_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_config_history select 'd', now(), old.*;
+    insert into hymn.sys_core_config_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1182,26 +1213,26 @@ execute function hymn.sys_core_config_history_del();
 drop table if exists hymn.sys_core_cron_job_history cascade;
 create table hymn.sys_core_cron_job_history
 (
-    operation       text,
-    stamp           timestamp,
-    id              text,
-    active          bool,
-    shared_code_id  text,
-    cron            text,
+    operation    text,
+    stamp        timestamp,
+    id text,
+    active bool,
+    shared_code_id text,
+    cron text,
     start_date_time timestamp,
-    end_date_time   timestamp,
-    create_by_id    text,
-    create_by       text,
-    modify_by_id    text,
-    modify_by       text,
-    create_date     timestamp,
-    modify_date     timestamp
+    end_date_time timestamp,
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_cron_job_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_cron_job_history select 'i', now(), new.*;
+    insert into hymn.sys_core_cron_job_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1209,7 +1240,7 @@ create or replace function hymn.sys_core_cron_job_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_cron_job_history select 'u', now(), new.*;
+    insert into hymn.sys_core_cron_job_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1217,7 +1248,7 @@ create or replace function hymn.sys_core_cron_job_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_cron_job_history select 'd', now(), old.*;
+    insert into hymn.sys_core_cron_job_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1247,26 +1278,26 @@ create table hymn.sys_core_custom_button_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    remark       text,
-    object_id    text,
-    name         text,
-    api          text,
-    client_type  text,
-    action       text,
-    content      text,
+    id text,
+    remark text,
+    object_id text,
+    name text,
+    api text,
+    client_type text,
+    action text,
+    content text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_custom_button_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_button_history select 'i', now(), new.*;
+    insert into hymn.sys_core_custom_button_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1274,7 +1305,7 @@ create or replace function hymn.sys_core_custom_button_history_upd() returns tri
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_button_history select 'u', now(), new.*;
+    insert into hymn.sys_core_custom_button_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1282,7 +1313,7 @@ create or replace function hymn.sys_core_custom_button_history_del() returns tri
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_button_history select 'd', now(), old.*;
+    insert into hymn.sys_core_custom_button_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1312,22 +1343,22 @@ create table hymn.sys_core_custom_component_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    api          text,
-    name         text,
-    code         text,
+    id text,
+    api text,
+    name text,
+    code text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_custom_component_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_component_history select 'i', now(), new.*;
+    insert into hymn.sys_core_custom_component_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1335,7 +1366,7 @@ create or replace function hymn.sys_core_custom_component_history_upd() returns 
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_component_history select 'u', now(), new.*;
+    insert into hymn.sys_core_custom_component_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1343,7 +1374,7 @@ create or replace function hymn.sys_core_custom_component_history_del() returns 
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_component_history select 'd', now(), old.*;
+    insert into hymn.sys_core_custom_component_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1373,26 +1404,26 @@ create table hymn.sys_core_custom_interface_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    api          text,
-    name         text,
-    code         text,
-    active       bool,
-    lang         text,
-    option_text  text,
-    remark       text,
+    id text,
+    api text,
+    name text,
+    code text,
+    active bool,
+    lang text,
+    option_text text,
+    remark text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_custom_interface_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_interface_history select 'i', now(), new.*;
+    insert into hymn.sys_core_custom_interface_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1400,7 +1431,7 @@ create or replace function hymn.sys_core_custom_interface_history_upd() returns 
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_interface_history select 'u', now(), new.*;
+    insert into hymn.sys_core_custom_interface_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1408,7 +1439,7 @@ create or replace function hymn.sys_core_custom_interface_history_del() returns 
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_interface_history select 'd', now(), old.*;
+    insert into hymn.sys_core_custom_interface_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1438,25 +1469,25 @@ create table hymn.sys_core_custom_menu_item_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    name         text,
-    path         text,
-    path_type    text,
-    action       text,
-    client_type  text,
-    icon         text,
+    id text,
+    name text,
+    path text,
+    path_type text,
+    action text,
+    client_type text,
+    icon text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_custom_menu_item_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_menu_item_history select 'i', now(), new.*;
+    insert into hymn.sys_core_custom_menu_item_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1464,7 +1495,7 @@ create or replace function hymn.sys_core_custom_menu_item_history_upd() returns 
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_menu_item_history select 'u', now(), new.*;
+    insert into hymn.sys_core_custom_menu_item_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1472,7 +1503,7 @@ create or replace function hymn.sys_core_custom_menu_item_history_del() returns 
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_menu_item_history select 'd', now(), old.*;
+    insert into hymn.sys_core_custom_menu_item_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1502,24 +1533,24 @@ create table hymn.sys_core_custom_page_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    api          text,
-    name         text,
-    template     text,
-    static       bool,
-    remark       text,
+    id text,
+    api text,
+    name text,
+    template text,
+    static bool,
+    remark text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_custom_page_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_page_history select 'i', now(), new.*;
+    insert into hymn.sys_core_custom_page_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1527,7 +1558,7 @@ create or replace function hymn.sys_core_custom_page_history_upd() returns trigg
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_page_history select 'u', now(), new.*;
+    insert into hymn.sys_core_custom_page_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1535,7 +1566,7 @@ create or replace function hymn.sys_core_custom_page_history_del() returns trigg
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_custom_page_history select 'd', now(), old.*;
+    insert into hymn.sys_core_custom_page_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1563,26 +1594,26 @@ execute function hymn.sys_core_custom_page_history_del();
 drop table if exists hymn.sys_core_dict_history cascade;
 create table hymn.sys_core_dict_history
 (
-    operation      text,
-    stamp          timestamp,
-    id             text,
-    field_id       text,
+    operation    text,
+    stamp        timestamp,
+    id text,
+    field_id text,
     parent_dict_id text,
-    name           text,
-    api            text,
-    remark         text,
-    create_by_id   text,
-    create_by      text,
-    modify_by_id   text,
-    modify_by      text,
-    create_date    timestamp,
-    modify_date    timestamp
+    name text,
+    api text,
+    remark text,
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_dict_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_dict_history select 'i', now(), new.*;
+    insert into hymn.sys_core_dict_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1590,7 +1621,7 @@ create or replace function hymn.sys_core_dict_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_dict_history select 'u', now(), new.*;
+    insert into hymn.sys_core_dict_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1598,7 +1629,7 @@ create or replace function hymn.sys_core_dict_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_dict_history select 'd', now(), old.*;
+    insert into hymn.sys_core_dict_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1628,23 +1659,23 @@ create table hymn.sys_core_dict_item_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    dict_id      text,
-    name         text,
-    code         text,
-    parent_code  text,
+    id text,
+    dict_id text,
+    name text,
+    code text,
+    parent_code text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_dict_item_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_dict_item_history select 'i', now(), new.*;
+    insert into hymn.sys_core_dict_item_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1652,7 +1683,7 @@ create or replace function hymn.sys_core_dict_item_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_dict_item_history select 'u', now(), new.*;
+    insert into hymn.sys_core_dict_item_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1660,7 +1691,7 @@ create or replace function hymn.sys_core_dict_item_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_dict_item_history select 'd', now(), old.*;
+    insert into hymn.sys_core_dict_item_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1690,22 +1721,22 @@ create table hymn.sys_core_menu_item_perm_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    role_id      text,
+    id text,
+    role_id text,
     menu_item_id text,
-    visible      bool,
+    visible bool,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_menu_item_perm_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_menu_item_perm_history select 'i', now(), new.*;
+    insert into hymn.sys_core_menu_item_perm_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1713,7 +1744,7 @@ create or replace function hymn.sys_core_menu_item_perm_history_upd() returns tr
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_menu_item_perm_history select 'u', now(), new.*;
+    insert into hymn.sys_core_menu_item_perm_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1721,7 +1752,7 @@ create or replace function hymn.sys_core_menu_item_perm_history_del() returns tr
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_menu_item_perm_history select 'd', now(), old.*;
+    insert into hymn.sys_core_menu_item_perm_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1749,24 +1780,24 @@ execute function hymn.sys_core_menu_item_perm_history_del();
 drop table if exists hymn.sys_core_module_function_perm_history cascade;
 create table hymn.sys_core_module_function_perm_history
 (
-    operation          text,
-    stamp              timestamp,
-    id                 text,
-    role_id            text,
+    operation    text,
+    stamp        timestamp,
+    id text,
+    role_id text,
     module_function_id text,
-    perm               bool,
-    create_by_id       text,
-    create_by          text,
-    modify_by_id       text,
-    modify_by          text,
-    create_date        timestamp,
-    modify_date        timestamp
+    perm bool,
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_module_function_perm_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_module_function_perm_history select 'i', now(), new.*;
+    insert into hymn.sys_core_module_function_perm_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1774,7 +1805,7 @@ create or replace function hymn.sys_core_module_function_perm_history_upd() retu
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_module_function_perm_history select 'u', now(), new.*;
+    insert into hymn.sys_core_module_function_perm_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1782,7 +1813,7 @@ create or replace function hymn.sys_core_module_function_perm_history_del() retu
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_module_function_perm_history select 'd', now(), old.*;
+    insert into hymn.sys_core_module_function_perm_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1810,25 +1841,35 @@ execute function hymn.sys_core_module_function_perm_history_del();
 drop table if exists hymn.sys_core_org_history cascade;
 create table hymn.sys_core_org_history
 (
-    operation          text,
-    stamp              timestamp,
-    id                 text,
-    name               text,
-    director_id        text,
+    operation    text,
+    stamp        timestamp,
+    id text,
+    name text,
+    director_id text,
     deputy_director_id text,
-    parent_id          text,
-    create_by_id       text,
-    create_by          text,
-    modify_by_id       text,
-    modify_by          text,
-    create_date        timestamp,
-    modify_date        timestamp
+    parent_id text,
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp,
+    text001 text,
+    text002 text,
+    text003 text,
+    text004 text,
+    text005 text,
+    bigint001 int8,
+    bigint002 int8,
+    bigint003 int8,
+    bigint004 int8,
+    bigint005 int8
 );
 create or replace function hymn.sys_core_org_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_org_history select 'i', now(), new.*;
+    insert into hymn.sys_core_org_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1836,7 +1877,7 @@ create or replace function hymn.sys_core_org_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_org_history select 'u', now(), new.*;
+    insert into hymn.sys_core_org_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1844,7 +1885,7 @@ create or replace function hymn.sys_core_org_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_org_history select 'd', now(), old.*;
+    insert into hymn.sys_core_org_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1874,21 +1915,21 @@ create table hymn.sys_core_role_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    name         text,
-    remark       text,
+    id text,
+    name text,
+    remark text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_role_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_role_history select 'i', now(), new.*;
+    insert into hymn.sys_core_role_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1896,7 +1937,7 @@ create or replace function hymn.sys_core_role_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_role_history select 'u', now(), new.*;
+    insert into hymn.sys_core_role_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1904,7 +1945,7 @@ create or replace function hymn.sys_core_role_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_role_history select 'd', now(), old.*;
+    insert into hymn.sys_core_role_history select 'd',now(),old.*;
     return null;
 end
 $$;
@@ -1934,24 +1975,24 @@ create table hymn.sys_core_shared_code_history
 (
     operation    text,
     stamp        timestamp,
-    id           text,
-    api          text,
-    type         text,
-    code         text,
-    lang         text,
-    option_text  text,
+    id text,
+    api text,
+    type text,
+    code text,
+    lang text,
+    option_text text,
     create_by_id text,
-    create_by    text,
+    create_by text,
     modify_by_id text,
-    modify_by    text,
-    create_date  timestamp,
-    modify_date  timestamp
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.sys_core_shared_code_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_shared_code_history select 'i', now(), new.*;
+    insert into hymn.sys_core_shared_code_history select 'i',now(),new.*;
     return null;
 end
 $$;
@@ -1959,7 +2000,7 @@ create or replace function hymn.sys_core_shared_code_history_upd() returns trigg
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_shared_code_history select 'u', now(), new.*;
+    insert into hymn.sys_core_shared_code_history select 'u',now(),new.*;
     return null;
 end
 $$;
@@ -1967,7 +2008,7 @@ create or replace function hymn.sys_core_shared_code_history_del() returns trigg
     language plpgsql as
 $$
 begin
-    insert into hymn.sys_core_shared_code_history select 'd', now(), old.*;
+    insert into hymn.sys_core_shared_code_history select 'd',now(),old.*;
     return null;
 end
 $$;
