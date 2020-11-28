@@ -398,6 +398,7 @@ begin
                 'day_v             text      := date_part(''day'', now);\n'
                 'hour_v            text      := date_part(''hour'', now);\n'
                 'minute_v          text      := date_part(''minute'', now);\n'
+                'size              int;\n'
                 'tmp             text;\n', trigger_fun_name, data_table_auto_numbering_seq_name);
 
     for field in select *
@@ -419,7 +420,8 @@ begin
                                    '%s := replace(%s, ''{mm}'', minute_v);\n'
                                    'for tmp in select (regexp_matches(%s, ''\{(0+)\}'', ''g''))[1]\n'
                                    '    loop\n'
-                                   '        %s := replace(%s, ''{'' || tmp || ''}'', seq);\n'
+                                   '        size := length(tmp);'
+                                   '        %s := replace(%s, ''{'' || tmp || ''}'', lpad(seq,size,''0''));\n'
                                    '    end loop;\n'
                                    'new.%s := %s;\n', template_name, template_name,
                                template_name, template_name, template_name,
@@ -446,7 +448,7 @@ begin
                            'execute function hymn.%s();\n',
                        trigger_name, data_table_name, trigger_fun_name);
     end if;
-end;
+end ;
 $BODY$;
 comment on function hymn.rebuild_auto_numbering_trigger(obj_id text) is '重建数据表的自动编号触发器，生成触发器函数';
 
