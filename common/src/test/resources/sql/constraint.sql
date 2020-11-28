@@ -1,4 +1,6 @@
 -- check
+alter table hymn.sys_core_b_object
+    add check ( type in ('custom', 'module', 'remote') );
 alter table hymn.sys_core_custom_button
     add check ( action in
                 ('eval', 'open_in_current_tab', 'open_in_new_tab', 'open_in_new_window') );

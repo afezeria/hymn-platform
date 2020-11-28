@@ -400,12 +400,16 @@ create table hymn.sys_core_b_object
     id           text primary key   default replace(public.uuid_generate_v4()::text, '-', ''),
     name         text      not null,
     api          text      not null,
-    source_table text      not null,
+    source_table text,
     active       bool               default true not null,
-    module_api   text               default null,
+    type         text      not null default 'custom',
+    remote_url   text,
+    remote_token text,
+    module_api   text,
     remark       text      not null default '',
     can_insert   bool,
     can_update   bool,
+    can_delete   bool,
     create_by_id text      not null,
     create_by    text      not null,
     modify_by_id text      not null,
@@ -419,8 +423,13 @@ comment on column hymn.sys_core_b_object.api is '业务对象api，用于触发�
 comment on column hymn.sys_core_b_object.active is '是否启用，停用后无法进行增删改查等操作';
 comment on column hymn.sys_core_b_object.source_table is '实际表名，例： sys_core_data_table_500';
 comment on column hymn.sys_core_b_object.module_api is '模块api名称，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 sys_core_b_object 和 sys_core_b_object_field 数据来支持在触发器中使用DataService提供的通用操作';
-comment on column hymn.sys_core_b_object.can_insert is '模块对象是否可以通过视图插入';
-comment on column hymn.sys_core_b_object.can_update is '模块对象是否可以通过视图更新';
+comment on column hymn.sys_core_b_object.can_insert is '模块对象及远程对象是否可以新增数据';
+comment on column hymn.sys_core_b_object.can_update is '模块对象是及远程对象否可以更新数据';
+comment on column hymn.sys_core_b_object.can_update is '模块对象是及远程对象否可以删除数据';
+comment on column hymn.sys_core_b_object.type is '对象类型, 可选值： custom (自定义对象), module (模块对象), remote (外部对象)，说明：模块对象不能在系统后台进行新增删除，底层表单和相关数据需要手动创建，外部对象没有底层表，通过url调用外部接口，只能在应用层脚本中使用';
+comment on column hymn.sys_core_b_object.module_api is '模块api名称，通过添加模块对象的 sys_core_b_object 和 sys_core_b_object_field 数据来支持在触发器中使用DataService提供的通用操作';
+comment on column hymn.sys_core_b_object.remote_url is '远程rest接口地址，系统通过该地址调用远程数据';
+comment on column hymn.sys_core_b_object.remote_token is '远程rest验证信息';
 
 
 
@@ -538,7 +547,7 @@ required: min_length（图片数量）, max_length（图片大小，单位：kb�
 optional:
 rule: min_length >= 1, max_length > 0
 ';
-comment on column hymn.sys_core_b_object_field.source_column is '字段对应的实际表中的列名';
+comment on column hymn.sys_core_b_object_field.source_column is '字段对应的实际表中的列名,对象为远程对象时该字段填充空字符串';
 comment on column hymn.sys_core_b_object_field.object_id is '所属业务对象id';
 comment on column hymn.sys_core_b_object_field.api is 'api名称，用于触发器和自定义接口';
 comment on column hymn.sys_core_b_object_field.name is '名称，用于页面显示';
