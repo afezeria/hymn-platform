@@ -19,12 +19,12 @@ open class BaseDbTest {
             )
             val path = System.getProperty("user.dir")
             val scripts = listOf(
-                "table.sql",
-                "test-data-table.sql",
-                "init-data.sql",
-                "history-table-and-trigger.sql",
-                "constraint.sql",
-                "function.sql"
+                "1.table.sql",
+                "2.history-table-and-trigger.sql",
+                "3.init-data.sql",
+                "4.function.sql",
+                "5.constraint.sql",
+                "6.test-data-table.sql",
             )
             for (script in scripts) {
                 runSqlScript("$path/src/test/resources/sql/$script")

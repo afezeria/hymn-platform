@@ -24,14 +24,14 @@ class ModuleObjectTest {
         @JvmStatic
         fun clear() {
             conn.use {
-                it.execute("alter table hymn.sys_core_b_object disable trigger all")
-                it.execute("alter table hymn.sys_core_b_object_field disable trigger all")
+                it.execute("alter table hymn.core_b_object disable trigger all")
+                it.execute("alter table hymn.core_b_object_field disable trigger all")
                 it.execute(
-                    "delete from hymn.sys_core_b_object where api not in (?,?,?,?)",
+                    "delete from hymn.core_b_object where api not in (?,?,?,?)",
                     "account", "role", "org", "business_type",
                 )
-                it.execute("alter table hymn.sys_core_b_object enable trigger all")
-                it.execute("alter table hymn.sys_core_b_object_field enable trigger all")
+                it.execute("alter table hymn.core_b_object enable trigger all")
+                it.execute("alter table hymn.core_b_object_field enable trigger all")
             }
         }
 
@@ -43,7 +43,7 @@ class ModuleObjectTest {
         conn.use {
             val e = shouldThrow<PSQLException> {
                 it.execute("""
-insert into hymn.sys_core_b_object(name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+insert into hymn.core_b_object(name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
 values ('模块对象','module_obj',true,'core','模块对象',?,?,?,?,?,?) returning *;""",
                     DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME,
                     LocalDateTime.now(), LocalDateTime.now()
@@ -60,7 +60,7 @@ values ('模块对象','module_obj',true,'core','模块对象',?,?,?,?,?,?) retu
         conn.use {
             val e = shouldThrow<PSQLException> {
                 it.execute("""
-insert into hymn.sys_core_b_object(source_table,name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+insert into hymn.core_b_object(source_table,name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
 values ('sys_test_obj','模块对象','module_obj',true,'core','模块对象',?,?,?,?,?,?) returning *;""",
                     DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME,
                     LocalDateTime.now(), LocalDateTime.now()
@@ -82,7 +82,7 @@ values ('sys_test_obj','模块对象','module_obj',true,'core','模块对象',?,
                     )
                 """)
             val insert = it.execute("""
-insert into hymn.sys_core_b_object(source_table,name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+insert into hymn.core_b_object(source_table,name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
 values ('sys_test_obj','模块对象','module_obj',true,'core','模块对象',?,?,?,?,?,?) returning *;""",
                 DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME,
                 LocalDateTime.now(), LocalDateTime.now()
@@ -90,7 +90,7 @@ values ('sys_test_obj','模块对象','module_obj',true,'core','模块对象',?,
             insert["id"] shouldNotBe null
             id = insert["id"] as String
 
-            it.execute("select * from hymn.sys_core_b_object_field where object_id = ?", id).apply {
+            it.execute("select * from hymn.core_b_object_field where object_id = ?", id).apply {
                 size shouldBe 0
             }
         }

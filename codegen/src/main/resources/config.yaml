@@ -6,13 +6,13 @@ db:
 schema: hymn
 packageName: github.afezeria.hymn.admin
 moduleName: admin
-tableRegex: ^sys_core.*(?<!history)$
+tableRegex: ^core(?!_data_table).*(?<!history)$
 templates: [
-#    Controller,
-#    Dto,
+    Controller,
+    Dto,
     Entity,
-#    Service,
-#    ServiceImpl,
+    Dao,
+    DaoImpl,
     Table
 ]
 systemOutput: false

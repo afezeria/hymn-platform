@@ -1,52 +1,52 @@
-insert into hymn.sys_core_account (id, name, username, password, online_rule, active, admin, root,
-                                   leader_id, org_id, role_id, create_by_id, create_by,
-                                   modify_by_id, modify_by, create_date, modify_date)
+insert into hymn.core_account (id, name, username, password, online_rule, active, admin, root,
+                               leader_id, org_id, role_id, create_by_id, create_by,
+                               modify_by_id, modify_by, create_date, modify_date)
 values ('911c60ea5d62420794d86eeecfddce7c', 'system admin', 'system admin', '', '', true, true,
         true, null, 'b18245e9d690461190172b6cb90c46ac', '301c35c23be449abb5bdf6c80b6878af',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00');
-insert into hymn.sys_core_org (id, name, director_id, deputy_director_id, parent_id,
-                               create_by_id, create_by, modify_by_id, modify_by, create_date,
-                               modify_date)
+insert into hymn.core_org (id, name, director_id, deputy_director_id, parent_id,
+                           create_by_id, create_by, modify_by_id, modify_by, create_date,
+                           modify_date)
 values ('b18245e9d690461190172b6cb90c46ac', '根组织', null, null, null,
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00');
-insert into hymn.sys_core_role (id, name, remark, create_by_id, create_by, modify_by_id,
-                                modify_by, create_date, modify_date)
+insert into hymn.core_role (id, name, remark, create_by_id, create_by, modify_by_id,
+                            modify_by, create_date, modify_date)
 values ('301c35c23be449abb5bdf6c80b6878af', '管理员权限', '', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '911c60ea5d62420794d86eeecfddce7c', 'system admin', '2020-01-01 00:00:00',
         '2020-01-01 00:00:00');
 
-insert into hymn.sys_core_b_object (id, name, api, source_table, active, module_api, can_insert,
-                                    can_update, remark,
-                                    create_by_id, create_by, modify_by_id, modify_by, create_date,
-                                    modify_date)
-values ('bcf5f00c2e6c494ea2318912a639031a', '用户', 'account', 'sys_core_account', true, 'core',
+insert into hymn.core_b_object (id, name, api, source_table, active, type, module_api, can_insert,
+                                can_update, remark,
+                                create_by_id, create_by, modify_by_id, modify_by, create_date,
+                                modify_date)
+values ('bcf5f00c2e6c494ea2318912a639031a', '用户', 'account', 'core_account', true, 'module', 'core',
         false, true, '用户表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
-       ('53e9c36723dc4e3db1faf396fdb3f1d2', '角色', 'role', 'sys_core_role', true, 'core',
+       ('53e9c36723dc4e3db1faf396fdb3f1d2', '角色', 'role', 'core_role', true, 'module', 'core',
         false, false, '角色表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
-       ('c9c6cc327c614c96b8d6f5af1fee6442', '组织', 'org', 'sys_core_org', true, 'core',
+       ('c9c6cc327c614c96b8d6f5af1fee6442', '组织', 'org', 'core_org', true, 'module', 'core',
         false, false, '组织表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
-       ('09da56a7de514895aea5c596820d0ced', '业务类型', 'business_type', 'sys_core_b_object_type',
-        true, 'core', false, false, '自定义对象业务类型表',
+       ('09da56a7de514895aea5c596820d0ced', '业务类型', 'object_type', 'core_b_object_type',
+        true, 'module', 'core', false, false, '自定义对象业务类型表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00')
 ;
 
-insert into hymn.sys_core_dict (id, field_id, parent_dict_id, name, api, remark, create_by_id,
-                                create_by, modify_by_id, modify_by, create_date, modify_date)
+insert into hymn.core_dict (id, field_id, parent_dict_id, name, api, remark, create_by_id,
+                            create_by, modify_by_id, modify_by, create_date, modify_date)
 values ('4a6010cceea948d6856aac09e8aa19c0', null, null, '锁定状态', 'lock_state_dict', '系统标准字段锁定状态',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00');
 
-insert into hymn.sys_core_dict_item (id, dict_id, name, code, parent_code, create_by_id, create_by,
-                                     modify_by_id, modify_by, create_date, modify_date)
+insert into hymn.core_dict_item (id, dict_id, name, code, parent_code, create_by_id, create_by,
+                                 modify_by_id, modify_by, create_date, modify_date)
 values ('c31ec080066a432e9d1399b912c417c7', '4a6010cceea948d6856aac09e8aa19c0', '未锁定', '0', null,
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
@@ -54,13 +54,13 @@ values ('c31ec080066a432e9d1399b912c417c7', '4a6010cceea948d6856aac09e8aa19c0', 
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00');
 
-insert into hymn.sys_core_b_object_field (id, source_column, object_id, name, api, type, active,
-                                          history, default_value, formula, max_length, min_length,
-                                          visible_row, dict_id, master_field_id, optional_number,
-                                          ref_id, ref_list_label, ref_delete_policy, query_filter,
-                                          s_id, s_field_id, s_type, gen_rule, remark, help, tmp,
-                                          standard_type, is_predefined, create_by_id, create_by,
-                                          modify_by_id, modify_by, create_date, modify_date)
+insert into hymn.core_b_object_field (id, source_column, object_id, name, api, type, active,
+                                      history, default_value, formula, max_length, min_length,
+                                      visible_row, dict_id, master_field_id, optional_number,
+                                      ref_id, ref_list_label, ref_delete_policy, query_filter,
+                                      s_id, s_field_id, s_type, gen_rule, remark, help, tmp,
+                                      standard_type, is_predefined, create_by_id, create_by,
+                                      modify_by_id, modify_by, create_date, modify_date)
 values ('1bad12b79d114b18a9f1b3276992886e', 'name', 'bcf5f00c2e6c494ea2318912a639031a', '姓名',
         'name', 'text', true, false, null, null, 255, 1, 1, null, null, null, null, null, null,
         null, null, null, null, null, null, null, null, 'name', true,
@@ -68,7 +68,7 @@ values ('1bad12b79d114b18a9f1b3276992886e', 'name', 'bcf5f00c2e6c494ea2318912a63
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
        ('c74acaab671e4045968f0249de2dde56', 'username', 'bcf5f00c2e6c494ea2318912a639031a', '用户名',
         'username', 'text', true, false, null, null, 50, 1, 1, null, null, null, null, null, null,
-        null, null, null, null, null, null, null, null, null, false,
+        null, null, null, null, null, null, null, null, null, true,
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
        ('9348a88e57164388b0d623da8e626191', 'active', 'bcf5f00c2e6c494ea2318912a639031a', '启用',
@@ -124,52 +124,52 @@ values ('1bad12b79d114b18a9f1b3276992886e', 'name', 'bcf5f00c2e6c494ea2318912a63
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00')
 ;
 
-insert into hymn.sys_core_table_obj_mapping (table_name, obj_api)
-values ('sys_core_account', 'account'),
-       ('sys_core_org', 'org'),
-       ('sys_core_role', 'role');
+insert into hymn.core_table_obj_mapping (table_name, obj_api)
+values ('core_account', 'account'),
+       ('core_org', 'org'),
+       ('core_role', 'role');
 
-insert into hymn.sys_core_column_field_mapping (table_name, column_name, field_api)
-values ('sys_core_account', 'text001', null),
-       ('sys_core_account', 'text002', null),
-       ('sys_core_account', 'text003', null),
-       ('sys_core_account', 'text004', null),
-       ('sys_core_account', 'text005', null),
-       ('sys_core_account', 'text006', null),
-       ('sys_core_account', 'text007', null),
-       ('sys_core_account', 'text008', null),
-       ('sys_core_account', 'text009', null),
-       ('sys_core_account', 'text010', null),
-       ('sys_core_account', 'bigint001', null),
-       ('sys_core_account', 'bigint002', null),
-       ('sys_core_account', 'bigint003', null),
-       ('sys_core_account', 'bigint004', null),
-       ('sys_core_account', 'bigint005', null),
-       ('sys_core_account', 'double001', null),
-       ('sys_core_account', 'double002', null),
-       ('sys_core_account', 'double003', null),
-       ('sys_core_account', 'double004', null),
-       ('sys_core_account', 'double005', null),
-       ('sys_core_account', 'decimal001', null),
-       ('sys_core_account', 'decimal002', null),
-       ('sys_core_account', 'decimal003', null),
-       ('sys_core_account', 'decimal004', null),
-       ('sys_core_account', 'decimal005', null),
-       ('sys_core_account', 'datetime001', null),
-       ('sys_core_account', 'datetime002', null),
-       ('sys_core_account', 'datetime003', null),
-       ('sys_core_account', 'datetime004', null),
-       ('sys_core_account', 'datetime005', null),
-       ('sys_core_org', 'text001', null),
-       ('sys_core_org', 'text002', null),
-       ('sys_core_org', 'text003', null),
-       ('sys_core_org', 'text004', null),
-       ('sys_core_org', 'text005', null),
-       ('sys_core_org', 'bigint001', null),
-       ('sys_core_org', 'bigint002', null),
-       ('sys_core_org', 'bigint003', null),
-       ('sys_core_org', 'bigint004', null),
-       ('sys_core_org', 'bigint005', null);
+insert into hymn.core_column_field_mapping (table_name, column_name, field_api)
+values ('core_account', 'text001', null),
+       ('core_account', 'text002', null),
+       ('core_account', 'text003', null),
+       ('core_account', 'text004', null),
+       ('core_account', 'text005', null),
+       ('core_account', 'text006', null),
+       ('core_account', 'text007', null),
+       ('core_account', 'text008', null),
+       ('core_account', 'text009', null),
+       ('core_account', 'text010', null),
+       ('core_account', 'bigint001', null),
+       ('core_account', 'bigint002', null),
+       ('core_account', 'bigint003', null),
+       ('core_account', 'bigint004', null),
+       ('core_account', 'bigint005', null),
+       ('core_account', 'double001', null),
+       ('core_account', 'double002', null),
+       ('core_account', 'double003', null),
+       ('core_account', 'double004', null),
+       ('core_account', 'double005', null),
+       ('core_account', 'decimal001', null),
+       ('core_account', 'decimal002', null),
+       ('core_account', 'decimal003', null),
+       ('core_account', 'decimal004', null),
+       ('core_account', 'decimal005', null),
+       ('core_account', 'datetime001', null),
+       ('core_account', 'datetime002', null),
+       ('core_account', 'datetime003', null),
+       ('core_account', 'datetime004', null),
+       ('core_account', 'datetime005', null),
+       ('core_org', 'text001', null),
+       ('core_org', 'text002', null),
+       ('core_org', 'text003', null),
+       ('core_org', 'text004', null),
+       ('core_org', 'text005', null),
+       ('core_org', 'bigint001', null),
+       ('core_org', 'bigint002', null),
+       ('core_org', 'bigint003', null),
+       ('core_org', 'bigint004', null),
+       ('core_org', 'bigint005', null);
 
 insert into hymn.sql_keyword (keyword)
 values ('a'),
