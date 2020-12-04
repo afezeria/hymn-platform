@@ -593,8 +593,9 @@ create or replace function hymn.check_field_properties(record_new hymn.core_b_ob
     language plpgsql as
 $$
 declare
-    own_obj   hymn.core_b_object;
-    ref_field hymn.core_b_object_field;
+    own_obj           hymn.core_b_object;
+    ref_field         hymn.core_b_object_field;
+    placeholder_count int;
 begin
     if record_new.is_predefined = true and record_new.source_column is null then
         raise exception 'source_column cannot be null';
@@ -603,78 +604,96 @@ begin
 --         文本类型：最小值 最大值 显示行数
         if record_new.min_length IS null or record_new.max_length is null or
            record_new.visible_row is null then
-            raise exception 'min_length,max_length,row cannot be null';
+            raise exception '最小长度、最大长度和显示行数都不能为空';
         end if;
         if record_new.min_length < 0 then
-            raise exception 'min_length must greater than 0';
+            raise exception '最小长度必须大于等于0';
         end if;
         if record_new.max_length > 50000 then
-            raise exception 'max_length must less than 50000';
+            raise exception '最大长度必须小于等于50000';
         end if;
         if record_new.max_length < record_new.min_length then
-            raise exception 'max_length must greater than or equal to min_length';
+            raise exception '最小长度必须小于等于最大长度';
         end if;
         if record_new.visible_row < 0 then
-            raise exception 'row must greater than 0';
+            raise exception '可见行数必须大于等于0';
         end if;
---         如果字段是主属性则长度不能超过255
         if record_new.api = 'name' then
-            if record_new.max_length > 255 then
-                raise exception 'max_length must less than or equal to 255';
-            end if;
+            record_new.max_length := 255;
+            record_new.min_length := 1;
+            record_new.visible_row := 1;
             record_new.default_value := null;
             record_new.formula := null;
         end if;
     elseif record_new.type = 'check_box' then
---         复选框字段必须为预定义字段
-        if record_new.is_predefined = false then
-            raise exception 'is_predefined must be true';
-        end if;
     elseif record_new.type = 'check_box_group' then
 --         复选框组： 选项个数 字典id/字典项文本（字典项文本存储在tmp中，这连个字段只要取一个就行）
         if record_new.optional_number is null then
-            raise exception 'optional_number cannot be null';
+            raise exception '可选个数不能为空';
         end if;
         if record_new.optional_number < 1 then
-            raise exception 'optional_number must greater than 0';
+            raise exception '可选个数必须大于0';
+        end if;
+        if record_new.dict_id is null then
+            raise exception '字典项不能为空';
+        end if;
+        perform * from hymn.core_dict where id = record_new.dict_id;
+        if not FOUND then
+            raise exception '字典 [id:%] 不存在',record_new.dict_id;
         end if;
     elseif record_new.type = 'select' then
 --         选项列表： 选项个数 字典id/字典项文本（字典项文本存储在tmp中，这连个字段只要取一个就行）
         if record_new.optional_number is null then
-            raise exception 'optional_number cannot be null';
+            raise exception '可选个数不能为空';
         end if;
         if record_new.optional_number < 1 then
-            raise exception 'optional_number must greater than 0';
+            raise exception '可选个数必须大于0';
+        end if;
+        if record_new.visible_row is null then
+            raise exception '可见行数不能为空';
+        end if;
+        if record_new.visible_row < 1 then
+            raise exception '可见行数必须大于0';
+        end if;
+        if record_new.dict_id is null then
+            raise exception '字典项不能为空';
+        end if;
+        perform * from hymn.core_dict where id = record_new.dict_id;
+        if not FOUND then
+            raise exception '字典 [id:%] 不存在',record_new.dict_id;
         end if;
     elseif record_new.type = 'integer' then
+        if record_new.min_length is null or record_new.max_length is null then
+            raise exception '最小值和最大值不能为空';
+        end if;
 --         整型
         if record_new.min_length > record_new.max_length then
-            raise exception 'min_length must less than max_length';
+            raise exception '最小值必须小于最大值';
         end if;
     elseif record_new.type = 'float' then
 --         浮点: 整数位长度 小数位长度
         if record_new.min_length is null or record_new.max_length is null then
-            raise exception 'min_length,max_length cannot be null';
+            raise exception '小数位数和整数位数不能为空';
         end if;
         if record_new.min_length < 0 then
-            raise exception 'min_length must greater than 0';
+            raise exception '小数位数必须大于等于0';
         end if;
         if record_new.max_length < 1 then
-            raise exception 'max_length must greater than or equal to 1';
+            raise exception '整数位数必须大于等于1';
         end if;
         if (record_new.min_length + record_new.max_length) > 18 then
-            raise exception 'min_length plus max_length must be less than or equal to 18';
+            raise exception '总位数必须小于等于18';
         end if;
     elseif record_new.type = 'money' then
 --          货币: 整数位长度 小数位长度
         if record_new.min_length is null or record_new.max_length is null then
-            raise exception 'min_length,max_length cannot be null';
+            raise exception '小数位数和整数位数不能为空';
         end if;
         if record_new.min_length < 0 then
-            raise exception 'min_length must greater than or equal to 0';
+            raise exception '小数位数必须大于等于0';
         end if;
         if record_new.max_length < 1 then
-            raise exception 'max_length must greater than or equal to 1';
+            raise exception '整数位数必须大于等于1';
         end if;
     elseif record_new.type = 'date' then
 --         日期 没有字段限制
@@ -683,62 +702,73 @@ begin
     elseif record_new.type = 'picture' then
 --         图片
         if record_new.min_length is null or record_new.max_length is null then
-            raise exception 'min_length, max_length cannot be null';
+            raise exception '图片数量和图片大小不能为空';
         end if;
         if record_new.min_length < 1 then
-            raise exception 'min_length must greater than or equal to 1';
+            raise exception '图片数量必须大于等于1';
         end if;
-        if record_new.max_length <= 0 then
-            raise exception 'max_length must greater than 1';
+        if record_new.max_length < 1 then
+            raise exception '图片大小必须大于1';
         end if;
-    elseif record_new.type = 'reference' then
+    elseif record_new.type in ('reference', 'mreference') then
 --         关联关系
-        if record_new.ref_id is null or record_new.ref_list_label is null or
-           record_new.ref_delete_policy is null then
-            raise exception 'ref_id, ref_list_label, ref_delete_policy cannot be null';
+        if record_new.ref_id is null or record_new.ref_delete_policy is null then
+            raise exception '关联对象、关联对象删除策略不能为空';
         end if;
         select * into own_obj from hymn.core_b_object where id = record_new.ref_id;
         if not FOUND then
-            raise exception 'reference object does not exist';
+            raise exception '引用对象不存在';
         end if;
         if own_obj.active = false then
-            raise exception 'reference object is not active';
+            raise exception '引用对象未启用';
         end if;
     elseif record_new.type = 'master_slave' then
 --         主详关系
-        if record_new.ref_id is null or record_new.ref_list_label is null then
-            raise exception 'ref_id, ref_list_label cannot be null';
+        if record_new.ref_id is null or record_new.ref_list_label is null or
+           record_new.ref_delete_policy is null then
+            raise exception '关联对象、关联对象相关列表标签和关联对象删除策略不能为空';
         end if;
         select * into own_obj from hymn.core_b_object where id = record_new.ref_id;
         if not FOUND then
-            raise exception 'reference object does not exist';
+            raise exception '引用对象不存在';
         end if;
         if own_obj.active = false then
-            raise exception 'reference object is not active';
+            raise exception '引用对象未启用';
         end if;
     elseif record_new.type = 'auto' then
 --         自动编号
         if record_new.gen_rule is null then
-            raise exception 'gen_rule cannot be null';
+            raise exception '编号规则不能为空';
         end if;
-        if record_new.gen_rule not similar to '%\{0+\}%' then
-            raise exception 'gen_rule must include {0}';
+        select count(*)
+        into placeholder_count
+        from (select regexp_matches(record_new.gen_rule, '\{0+\}', 'g')) a;
+        if placeholder_count != 1 then
+            raise exception '编号规则中有且只能有一个{0}占位符';
         end if;
     elseif record_new.type = 'summary' then
 --         汇总字段
         if record_new.s_id is null or record_new.s_type is null or record_new.s_field_id is null or
            record_new.min_length then
-            raise exception 's_id, s_type, s_field_id, min_length cannot be null';
+            raise exception '汇总对象、汇总类型、汇总字段和小数位长度不能为空';
         end if;
         if record_new.min_length < 0 then
-            raise exception 'min_length must greater than or equal to 0';
+            raise exception '小数位长度必须大于等于0j';
         end if;
         select * into own_obj from hymn.core_b_object where id = record_new.ref_id;
         if not FOUND then
-            raise exception 'summary object does not exist';
+            raise exception '汇总对象不存在';
         end if;
         if own_obj.active = false then
-            raise exception 'summary object is not active';
+            raise exception '汇总对象未启用';
+        end if;
+        perform *
+        from hymn.core_b_object_field
+        where object_id = record_new.ref_id
+          and active = true
+          and type = 'maste_slave';
+        if not FOUND then
+            raise exception '汇总对象必须是当前对象的子对象';
         end if;
         if record_new.s_type in ('max', 'min', 'sum') then
             select *
@@ -747,17 +777,17 @@ begin
             where id = record_new.s_field_id
               and object_id = record_new.s_id;
             if not FOUND then
-                raise exception 'summary field does not exist';
+                raise exception '汇总字段不存在';
             end if;
             if ref_field.type not in ('integer', 'float', 'money') then
-                raise exception 'the type of summary field must in (''integer'',''float'',''money'')';
+                raise exception '最大值、最小值、总和的汇总字段类型必须为：整型/浮点型/金额';
             end if;
         elseif record_new.s_type = 'count' then
         else
-            raise exception 's_type must in (''count'',''max'',''min'',''sum'')';
+            raise exception '汇总类型必须为：总数/最大值/最小值/总和';
         end if;
     else
-        RAISE EXCEPTION 'object field type cannot be %',record_new.type;
+        RAISE EXCEPTION '业务对象字段类型不能为： %',record_new.type;
     end if;
 end;
 $$;
@@ -820,7 +850,7 @@ create or replace function hymn.object_trigger_fun_after_insert() returns trigge
 $$
 declare
     record_new hymn.core_b_object := new;
-    obj_id     text               := record_new.id;
+--     obj_id     text               := record_new.id;
 --     name_label    text;
 --     name_gen_rule text ;
 --     name_type     text ;
