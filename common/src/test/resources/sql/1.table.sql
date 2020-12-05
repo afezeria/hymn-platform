@@ -528,11 +528,11 @@ required: ref_id （引用对象id）, ref_list_label （引用对象相关列�
 optional: default_value, formula, query_filter
 rule:
 
-type: 关联关系 reference
+type: 关联 reference
 required: ref_id （引用对象id）, ref_delete_policy （引用对象数据被删除时是否阻止）
 optional: default_value, formula, query_filter, ref_list_label （引用对象相关列表显示的标签）
 
-type: 多选关联关系 mreference
+type: 多选关联 mreference
 required: ref_id （引用对象id）, ref_delete_policy （引用对象数据被删除时是否阻止）
 optional: default_value, formula, query_filter, ref_list_label （引用对象相关列表显示的标签）
 
@@ -556,6 +556,7 @@ comment on column hymn.core_b_object_field.object_id is '所属业务对象id';
 comment on column hymn.core_b_object_field.api is 'api名称，用于触发器和自定义接口';
 comment on column hymn.core_b_object_field.name is '名称，用于页面显示';
 comment on column hymn.core_b_object_field.type is '字段类型';
+comment on column hymn.core_b_object_field.history is '是否启用历史记录';
 comment on column hymn.core_b_object_field.active is '字段启用状态，false表示停用，字段停用时从视图中移除，删除时清空没一行中对应字段数据';
 comment on column hymn.core_b_object_field.default_value is '默认值，可选择其他表中的字段，由后端处理，新建时与页面布局一起返回给前端';
 comment on column hymn.core_b_object_field.formula is '公式，js代码，由前端处理，新建和编辑时拼接成监听函数与页面布局一起返回给前端';
@@ -1047,13 +1048,3 @@ create table hymn.sql_keyword
 (
     keyword text primary key
 );
-
-drop table if exists hymn.business_data_many_to_many;
-create table hymn.business_data_many_to_many
-(
-    source_api       text,
-    source_field_api text,
-    target_api       text,
-    source_id        text,
-    target_id        text
-)

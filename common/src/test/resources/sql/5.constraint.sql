@@ -10,7 +10,7 @@ alter table hymn.core_custom_button
 alter table hymn.core_b_object_field
     add check ( type in ('text', 'check_box', 'check_box_group', 'select',
                          'integer', 'float', 'money', 'date', 'datetime', 'master_slave',
-                         'reference', 'summary', 'auto', 'picture'));
+                         'reference', 'mreference', 'summary', 'auto', 'picture'));
 alter table hymn.core_b_object_field
     add check (
             standard_type in (
