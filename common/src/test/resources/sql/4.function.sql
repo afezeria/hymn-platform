@@ -830,14 +830,24 @@ begin
         end if;
     elseif record_new.type = 'summary' then
 --         汇总字段
-        if record_new.s_id is null or record_new.s_type is null or record_new.s_field_id is null or
-           record_new.min_length then
-            raise exception '汇总对象、汇总类型、汇总字段和小数位长度不能为空';
+        if record_new.s_id is null then
+            raise exception '汇总对象不能为空';
+        end if;
+        if record_new.s_type is null then
+            raise exception '汇总类型不能为空';
+        end if;
+        if record_new.s_type in ('max', 'min', 'sum') then
+            if record_new.s_field_id is null then
+                raise exception '汇总字段不能为空';
+            end if;
+            if record_new.min_length is null then
+                raise exception '小数位长度不能为空';
+            end if;
         end if;
         if record_new.min_length < 0 then
             raise exception '小数位长度必须大于等于0j';
         end if;
-        select * into own_obj from hymn.core_b_object where id = record_new.ref_id;
+        select * into own_obj from hymn.core_b_object where id = record_new.s_id;
         if not FOUND then
             raise exception '汇总对象不存在';
         end if;
@@ -846,9 +856,9 @@ begin
         end if;
         perform *
         from hymn.core_b_object_field
-        where object_id = record_new.ref_id
+        where object_id = record_new.s_id
           and active = true
-          and type = 'maste_slave';
+          and type = 'master_slave';
         if not FOUND then
             raise exception '汇总对象必须是当前对象的子对象';
         end if;
