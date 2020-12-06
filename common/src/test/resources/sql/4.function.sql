@@ -675,7 +675,7 @@ begin
     end if;
     if record_new.type = 'text' then
 --         文本类型：最小值 最大值 显示行数
-        if record_new.min_length IS null or record_new.max_length is null or
+        if record_new.min_length is null or record_new.max_length is null or
            record_new.visible_row is null then
             raise exception '最小长度、最大长度和显示行数都不能为空';
         end if;
@@ -701,14 +701,11 @@ begin
     elseif record_new.type = 'check_box' then
     elseif record_new.type = 'check_box_group' then
 --         复选框组： 选项个数 字典id/字典项文本（字典项文本存储在tmp中，这连个字段只要取一个就行）
-        if record_new.optional_number is null then
-            raise exception '可选个数不能为空';
+        if record_new.optional_number is null or record_new.dict_id is null then
+            raise exception '可选个数/字典项不能为空';
         end if;
         if record_new.optional_number < 1 then
             raise exception '可选个数必须大于0';
-        end if;
-        if record_new.dict_id is null then
-            raise exception '字典项不能为空';
         end if;
         perform * from hymn.core_dict where id = record_new.dict_id;
         if not FOUND then
@@ -716,20 +713,15 @@ begin
         end if;
     elseif record_new.type = 'select' then
 --         选项列表： 选项个数 字典id/字典项文本（字典项文本存储在tmp中，这连个字段只要取一个就行）
-        if record_new.optional_number is null then
-            raise exception '可选个数不能为空';
+        if record_new.optional_number is null or record_new.visible_row is null or
+           record_new.dict_id is null then
+            raise exception '可选个数/可见行数/字典项不能为空';
         end if;
         if record_new.optional_number < 1 then
             raise exception '可选个数必须大于0';
         end if;
-        if record_new.visible_row is null then
-            raise exception '可见行数不能为空';
-        end if;
         if record_new.visible_row < 1 then
             raise exception '可见行数必须大于0';
-        end if;
-        if record_new.dict_id is null then
-            raise exception '字典项不能为空';
         end if;
         perform * from hymn.core_dict where id = record_new.dict_id;
         if not FOUND then
@@ -737,7 +729,7 @@ begin
         end if;
     elseif record_new.type = 'integer' then
         if record_new.min_length is null or record_new.max_length is null then
-            raise exception '最小值和最大值不能为空';
+            raise exception '最小值/最大值不能为空';
         end if;
 --         整型
         if record_new.min_length > record_new.max_length then
@@ -746,7 +738,7 @@ begin
     elseif record_new.type = 'float' then
 --         浮点: 整数位长度 小数位长度
         if record_new.min_length is null or record_new.max_length is null then
-            raise exception '小数位数和整数位数不能为空';
+            raise exception '小数位数/整数位数不能为空';
         end if;
         if record_new.min_length < 0 then
             raise exception '小数位数必须大于等于0';
@@ -760,7 +752,7 @@ begin
     elseif record_new.type = 'money' then
 --          货币: 整数位长度 小数位长度
         if record_new.min_length is null or record_new.max_length is null then
-            raise exception '小数位数和整数位数不能为空';
+            raise exception '小数位数/整数位数不能为空';
         end if;
         if record_new.min_length < 0 then
             raise exception '小数位数必须大于等于0';
@@ -775,7 +767,7 @@ begin
     elseif record_new.type = 'picture' then
 --         图片
         if record_new.min_length is null or record_new.max_length is null then
-            raise exception '图片数量和图片大小不能为空';
+            raise exception '图片数量/图片大小不能为空';
         end if;
         if record_new.min_length < 1 then
             raise exception '图片数量必须大于等于1';
@@ -786,7 +778,7 @@ begin
     elseif record_new.type = 'mreference' then
 --         多选关联关系
         if record_new.ref_id is null or record_new.ref_delete_policy is null then
-            raise exception '关联对象、关联对象删除策略不能为空';
+            raise exception '关联对象/关联对象删除策略不能为空';
         end if;
         select * into own_obj from hymn.core_b_object where id = record_new.ref_id;
         if not FOUND then
@@ -798,7 +790,7 @@ begin
     elseif record_new.type = 'reference' then
 --         关联关系
         if record_new.ref_id is null or record_new.ref_delete_policy is null then
-            raise exception '关联对象、关联对象删除策略不能为空';
+            raise exception '关联对象/关联对象删除策略不能为空';
         end if;
         select * into own_obj from hymn.core_b_object where id = record_new.ref_id;
         if not FOUND then
@@ -810,7 +802,7 @@ begin
     elseif record_new.type = 'master_slave' then
 --         主详关系
         if record_new.ref_id is null or record_new.ref_list_label is null then
-            raise exception '关联对象、关联对象相关列表标签和关联对象删除策略不能为空';
+            raise exception '关联对象/关联对象相关列表标签不能为空';
         end if;
         select * into own_obj from hymn.core_b_object where id = record_new.ref_id;
         if not FOUND then
@@ -832,11 +824,8 @@ begin
         end if;
     elseif record_new.type = 'summary' then
 --         汇总字段
-        if record_new.s_id is null then
-            raise exception '汇总对象不能为空';
-        end if;
-        if record_new.s_type is null then
-            raise exception '汇总类型不能为空';
+        if record_new.s_id is null or record_new.s_type is null then
+            raise exception '汇总对象/汇总类型不能为空';
         end if;
         if record_new.s_type in ('max', 'min', 'sum') then
             if record_new.s_field_id is null then

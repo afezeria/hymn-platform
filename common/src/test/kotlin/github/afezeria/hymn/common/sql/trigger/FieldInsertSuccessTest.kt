@@ -4,6 +4,7 @@ import github.afezeria.hymn.common.conn
 import github.afezeria.hymn.common.sql.*
 import github.afezeria.hymn.common.util.execute
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
 import org.junit.jupiter.api.AfterAll
@@ -119,18 +120,18 @@ class FieldInsertSuccessTest : BaseDbTest() {
         conn.use {
             val dict = it.execute(
                 """
-                        insert into hymn.core_dict  ( name, api,  create_by_id, create_by, modify_by_id, 
-                            modify_by, create_date, modify_date) 
-                        values ('测试字典','test_dict',?,?,?,?,now(),now()) returning *;
-                        """,
+                insert into hymn.core_dict  ( name, api,  create_by_id, create_by, modify_by_id, 
+                    modify_by, create_date, modify_date) 
+                values ('测试字典','test_dict',?,?,?,?,now(),now()) returning *;
+                """,
                 *COMMON_INFO
             )[0]
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, optional_number,  
-                        dict_id,create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
-                    values (?,'复选框组','cbgfield','check_box_group','0',1,?,?,?,?,?,now(),now()) returning *;
-                    """,
+                insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, optional_number,  
+                    dict_id,create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                values (?,'复选框组','cbgfield','check_box_group','0',1,?,?,?,?,?,now(),now()) returning *;
+                """,
                 objId,
                 dict["id"],
                 *COMMON_INFO
@@ -165,7 +166,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
                     insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, 
                         visible_row,optional_number, dict_id, create_by_id, create_by, modify_by_id, 
                         modify_by, create_date, modify_date) 
-                    values (?,'复选框组','selectfield','select','0',1,1,?,?,?,?,?,now(),now()) returning *;
+                    values (?,'下拉','selectfield','select','0',1,1,?,?,?,?,?,now(),now()) returning *;
                     """,
                 objId,
                 dict["id"],
@@ -383,7 +384,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
                 """
                     insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'主对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,'多选关联对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
                 objId, masterObj["id"], *COMMON_INFO
             )[0]
@@ -412,6 +413,45 @@ class FieldInsertSuccessTest : BaseDbTest() {
                 """
                     insert into hymn_view.dt_join_${objApi}_${field["api"]} (s_id,t_id) values (?,?) returning *;
                 """, UUID.randomUUID(), UUID.randomUUID()
+            ).size shouldBe 1
+        }
+    }
+
+    @Test
+    fun reference() {
+        conn.use {
+            val refObj = it.execute(
+                """
+                    insert into hymn.core_b_object(name,api,active,create_by_id,create_by,modify_by_id,
+                        modify_by,create_date,modify_date)
+                    values ('测试对象4','test_obj2',true,?,?,?,?,?,?) returning *;
+                    """,
+                DEFAULT_ACCOUNT_ID,
+                DEFAULT_ACCOUNT_NAME,
+                DEFAULT_ACCOUNT_ID,
+                DEFAULT_ACCOUNT_NAME,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+            )[0]
+
+            val field = it.execute(
+                """
+                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                        create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
+                    values (?,'关联','reffield','reference',?,'null',?,?,?,?,now(),now()) returning *;
+                    """,
+                objId, refObj["id"], *COMMON_INFO
+            )[0]
+            (field["source_column"] as String) shouldContain "text"
+            it.fieldShouldExists("reffield")
+            masterObjId = refObj["id"] as String
+            masterFieldId = field["id"] as String
+            it.execute(
+                """
+                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                            modify_by_id,type_id,${field["api"]}) 
+                        values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
+                *STANDARD_FIELD, UUID.randomUUID()
             ).size shouldBe 1
 
         }
@@ -466,7 +506,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
                 """
                     insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'主对象','summaryfield','summary',?,?,'count',0,?,?,?,?,now(),now()) returning *;
+                    values (?,'汇总','summaryfield','summary',?,?,'count',0,?,?,?,?,now(),now()) returning *;
                     """,
                 masterObjId, objId, masterFieldId, *COMMON_INFO
             )[0]
