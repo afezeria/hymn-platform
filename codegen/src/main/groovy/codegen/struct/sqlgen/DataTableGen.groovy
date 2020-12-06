@@ -22,20 +22,24 @@ class DataTableGen {
 
   def tableMappingData() {
     """
-insert into hymn.sys_core_table_obj_mapping (table_name, obj_api)
+insert into hymn.core_table_obj_mapping (table_name, obj_api)
 values 
-${(1..tableCount).collect { "('sys_core_data_table_${String.format('%03d', it)}',null)" }.join(",\n")};
+${(1..tableCount).collect { "('core_data_table_${String.format('%03d', it)}',null)" }.join(",\n")};
 """
   }
 
   def columnMappingData() {
     """
-insert into hymn.sys_core_column_field_mapping (table_name, column_name, field_api)
+insert into hymn.core_column_field_mapping (table_name, column_name, field_api)
 values 
 """ + (1..tableCount).collect { tn ->
       def table = getTableName(tn)
 
       """
+('$table','master001',null),
+${(1..5).collect { "('$table','bool${String.format('%03d', it)}',null)," }.join("\n")}
+${(1..5).collect { "('$table','pl_mref${String.format('%03d', it)}',null)," }.join("\n")}
+${(1..5).collect { "('$table','pl_summary${String.format('%03d', it)}',null)," }.join("\n")}
 ${(1..100).collect { "('$table','text${String.format('%03d', it)}',null)," }.join("\n")}
 ${(1..50).collect { "('$table','bigint${String.format('%03d', it)}',null)," }.join("\n")}
 ${(1..50).collect { "('$table','double${String.format('%03d', it)}',null)," }.join("\n")}
@@ -45,7 +49,7 @@ ${(1..20).collect { "('$table','datetime${String.format('%03d', it)}',null)${tn 
     }.join() + ";"
   }
   def getTableName(int i){
-    "sys_core_data_table_${String.format('%03d', i)}"
+    "core_data_table_${String.format('%03d', i)}"
   }
 
   def seqSql() {
@@ -69,8 +73,10 @@ create table hymn.${table}(
     create_date       timestamptz not null,
     modify_date       timestamptz not null,
     type_id           text not null,
-    lock_state        int not null,
+    lock_state        bool not null default false,
     name              text not null,
+    master001            text,
+${(1..5).collect { "    bool${String.format('%03d', it)} bool," }.join("\n")}
 ${(1..100).collect { "    text${String.format('%03d', it)} text," }.join("\n")}
 ${(1..50).collect { "    bigint${String.format('%03d', it)} bigint," }.join("\n")}
 ${(1..50).collect { "    double${String.format('%03d', it)} double precision," }.join("\n")}
@@ -96,7 +102,7 @@ create index ${table}_name_idx on hymn.${table} (name);
 
   static void main(String[] args) {
 //    new DataTableGen(300,'data-table.sql').run()
-    new DataTableGen(5, 'test-data-table.sql').run()
+    new DataTableGen(5, '6.test-data-table.sql').run()
 
 
   }
