@@ -279,8 +279,9 @@ create or replace function hymn.field_type_2_column_prefix(field_type text) retu
 $$
 begin
     case field_type
-        when 'text', 'check_box_group', 'select', 'master_slave', 'reference', 'auto', 'picture'
+        when 'text', 'check_box_group', 'select', 'reference', 'auto', 'picture'
             then return 'text';
+        when 'master_slave' then return 'master';
         when 'check_box' then return 'bool';
         when 'integer' then return 'bigint';
         when 'float' then return 'double';
@@ -290,7 +291,7 @@ begin
         when 'mreference' then return 'pl_mref';
         else raise exception '未知的字段类型: %',field_type;
     end case;
-end;
+end ;
 $$;
 comment on function hymn.field_type_2_column_prefix(field_type text) is '根据字段类型获取对应的sql列名前缀';
 
@@ -300,12 +301,13 @@ create or replace function hymn.column_prefix_2_field_type_description(prefix te
 $$
 begin
     case prefix
-        when 'text' then return '文本/复选框组/下拉/主从/关联/自动编号/图片';
+        when 'text' then return '文本/复选框组/下拉/关联/自动编号/图片';
         when 'bool' then return '复选框';
         when 'bigint' then return '整型';
         when 'double' then return '浮点型';
         when 'decimal' then return '金额';
         when 'datetime' then return '日期/日期时间';
+        when 'master' then return '主从';
         when 'pl_mref' then return '多选关联';
         when 'pl_summary' then return '汇总';
         else raise exception '未知的列名前缀: %',prefix;
@@ -669,7 +671,7 @@ declare
     ref_field hymn.core_b_object_field;
 begin
     if record_new.is_predefined = true and record_new.source_column is null then
-        raise exception 'source_column cannot be null';
+        raise exception '预定义字段必须指定 source_column';
     end if;
     if record_new.type = 'text' then
 --         文本类型：最小值 最大值 显示行数

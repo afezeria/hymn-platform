@@ -8,25 +8,20 @@ alter table hymn.core_custom_button
     add check ( client_type in ('browser', 'android') );
 
 alter table hymn.core_b_object_field
+    add check ( ref_delete_policy in ('cascade', 'restrict', 'null'));
+alter table hymn.core_b_object_field
     add check ( type in ('text', 'check_box', 'check_box_group', 'select',
                          'integer', 'float', 'money', 'date', 'datetime', 'master_slave',
                          'reference', 'mreference', 'summary', 'auto', 'picture'));
 alter table hymn.core_b_object_field
     add check (
             standard_type in (
-                              'create_by_id',
-                              'create_by',
-                              'modify_by_id',
-                              'modify_by',
+                              'create_by_id', 'create_by', 'modify_by_id', 'modify_by',
                               'create_date',
-                              'modify_date',
-                              'org_id',
-                              'lock_state',
-                              'name',
-                              'type',
-                              'owner_id'
-            )
-        );
+                              'modify_date', 'org_id', 'lock_state', 'name', 'type_id', 'owner_id'
+            ));
+alter table hymn.core_b_object_field
+    add check ( s_type in ('sum', 'count', 'min', 'max'));
 
 alter table hymn.core_b_object_trigger
     add check ( event in

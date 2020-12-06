@@ -10,6 +10,7 @@ values
 insert into hymn.core_column_field_mapping (table_name, column_name, field_api)
 values 
 
+('core_data_table_001','master001',null),
 ('core_data_table_001','bool001',null),
 ('core_data_table_001','bool002',null),
 ('core_data_table_001','bool003',null),
@@ -266,6 +267,7 @@ values
 ('core_data_table_001','datetime019',null),
 ('core_data_table_001','datetime020',null),
 
+('core_data_table_002','master001',null),
 ('core_data_table_002','bool001',null),
 ('core_data_table_002','bool002',null),
 ('core_data_table_002','bool003',null),
@@ -522,6 +524,7 @@ values
 ('core_data_table_002','datetime019',null),
 ('core_data_table_002','datetime020',null),
 
+('core_data_table_003','master001',null),
 ('core_data_table_003','bool001',null),
 ('core_data_table_003','bool002',null),
 ('core_data_table_003','bool003',null),
@@ -778,6 +781,7 @@ values
 ('core_data_table_003','datetime019',null),
 ('core_data_table_003','datetime020',null),
 
+('core_data_table_004','master001',null),
 ('core_data_table_004','bool001',null),
 ('core_data_table_004','bool002',null),
 ('core_data_table_004','bool003',null),
@@ -1034,6 +1038,7 @@ values
 ('core_data_table_004','datetime019',null),
 ('core_data_table_004','datetime020',null),
 
+('core_data_table_005','master001',null),
 ('core_data_table_005','bool001',null),
 ('core_data_table_005','bool002',null),
 ('core_data_table_005','bool003',null),
@@ -1300,6 +1305,7 @@ create table hymn.core_data_table_001(
     type_id           text not null,
     lock_state        bool not null default false,
     name              text not null,
+    master001            text,
     bool001 bool,
     bool002 bool,
     bool003 bool,
@@ -1573,6 +1579,7 @@ create table hymn.core_data_table_002(
     type_id           text not null,
     lock_state        bool not null default false,
     name              text not null,
+    master001            text,
     bool001 bool,
     bool002 bool,
     bool003 bool,
@@ -1846,6 +1853,7 @@ create table hymn.core_data_table_003(
     type_id           text not null,
     lock_state        bool not null default false,
     name              text not null,
+    master001            text,
     bool001 bool,
     bool002 bool,
     bool003 bool,
@@ -2119,6 +2127,7 @@ create table hymn.core_data_table_004(
     type_id           text not null,
     lock_state        bool not null default false,
     name              text not null,
+    master001            text,
     bool001 bool,
     bool002 bool,
     bool003 bool,
@@ -2392,6 +2401,7 @@ create table hymn.core_data_table_005(
     type_id           text not null,
     lock_state        bool not null default false,
     name              text not null,
+    master001            text,
     bool001 bool,
     bool002 bool,
     bool003 bool,

@@ -619,7 +619,7 @@ create table hymn.core_b_object_type
     object_id    text                           not null,
     name         text                           not null,
     active       bool             default false not null,
-    remark       text                           not null,
+    remark       text,
     create_by_id text                           not null,
     create_by    text                           not null,
     modify_by_id text                           not null,
