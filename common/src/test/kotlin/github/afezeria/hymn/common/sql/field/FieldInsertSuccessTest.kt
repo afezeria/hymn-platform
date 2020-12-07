@@ -1,4 +1,4 @@
-package github.afezeria.hymn.common.sql.trigger
+package github.afezeria.hymn.common.sql.field
 
 import github.afezeria.hymn.common.conn
 import github.afezeria.hymn.common.sql.*
@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
 
 /**
  * @author afezeria
@@ -48,7 +47,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         @JvmStatic
         @AfterAll
         fun clear() {
-            deleteBObject(objId)
+            clearBObject()
         }
 
         fun Connection.fieldShouldExists(fieldName: String) {
@@ -84,7 +83,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("tfield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, "abc"
@@ -107,7 +106,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("cbfield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, false
@@ -141,7 +140,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("cbgfield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, "0"
@@ -176,7 +175,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("selectfield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, "0"
@@ -201,7 +200,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("intfield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, 1
@@ -226,7 +225,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("floatfield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, 1.1
@@ -250,7 +249,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("moneyfield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, 1.1
@@ -275,7 +274,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("datefield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, LocalDate.now()
@@ -299,7 +298,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("datetimefield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, LocalDateTime.now()
@@ -324,7 +323,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("autofield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, ""
@@ -352,7 +351,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("picturefield")
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                 *STANDARD_FIELD, ""
@@ -412,7 +411,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.execute(
                 """
                     insert into hymn_view.dt_join_${objApi}_${field["api"]} (s_id,t_id) values (?,?) returning *;
-                """, UUID.randomUUID(), UUID.randomUUID()
+                """, randomUUIDStr(), randomUUIDStr()
             ).size shouldBe 1
         }
     }
@@ -448,10 +447,10 @@ class FieldInsertSuccessTest : BaseDbTest() {
             masterFieldId = field["id"] as String
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
-                *STANDARD_FIELD, UUID.randomUUID()
+                *STANDARD_FIELD, randomUUIDStr()
             ).size shouldBe 1
 
         }
@@ -489,10 +488,10 @@ class FieldInsertSuccessTest : BaseDbTest() {
             masterFieldId = field["id"] as String
             it.execute(
                 """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
-                *STANDARD_FIELD, UUID.randomUUID()
+                *STANDARD_FIELD, randomUUIDStr()
             ).size shouldBe 1
 
         }

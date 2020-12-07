@@ -127,7 +127,7 @@ begin
         raise exception '业务对象[id:%]不存在',new.object_id;
     end if;
     if not obj.active then
-        raise exception '对象已停用，不能新增/更新相关数据';
+        raise exception '对象 [id:%] 已停用，不能新增/更新相关数据',new.object_id;
     end if;
     return new;
 end;
@@ -173,6 +173,7 @@ declare
 begin
     select * into obj from hymn.core_b_object where id = old.object_id;
     if not obj.active then
+        raise exception '对象 [id:%] 已停用，不能删除相关数据',new.object_id;
         raise exception '对象已停用，不能删除相关数据';
     end if;
     return old;
@@ -666,7 +667,7 @@ create or replace function hymn.check_field_properties(record_new hymn.core_b_ob
     language plpgsql as
 $$
 declare
-    own_obj   hymn.core_b_object;
+    ref_obj   hymn.core_b_object;
     count     int;
     ref_field hymn.core_b_object_field;
 begin
@@ -688,15 +689,8 @@ begin
         if record_new.max_length < record_new.min_length then
             raise exception '最小长度必须小于等于最大长度';
         end if;
-        if record_new.visible_row < 0 then
-            raise exception '可见行数必须大于等于0';
-        end if;
-        if record_new.api = 'name' then
-            record_new.max_length := 255;
-            record_new.min_length := 1;
-            record_new.visible_row := 1;
-            record_new.default_value := null;
-            record_new.formula := null;
+        if record_new.visible_row < 1 then
+            raise exception '可见行数必须大于等于1';
         end if;
     elseif record_new.type = 'check_box' then
     elseif record_new.type = 'check_box_group' then
@@ -740,8 +734,8 @@ begin
         if record_new.min_length is null or record_new.max_length is null then
             raise exception '小数位数/整数位数不能为空';
         end if;
-        if record_new.min_length < 0 then
-            raise exception '小数位数必须大于等于0';
+        if record_new.min_length < 1 then
+            raise exception '小数位数必须大于等于1';
         end if;
         if record_new.max_length < 1 then
             raise exception '整数位数必须大于等于1';
@@ -754,8 +748,8 @@ begin
         if record_new.min_length is null or record_new.max_length is null then
             raise exception '小数位数/整数位数不能为空';
         end if;
-        if record_new.min_length < 0 then
-            raise exception '小数位数必须大于等于0';
+        if record_new.min_length < 1 then
+            raise exception '小数位数必须大于等于1';
         end if;
         if record_new.max_length < 1 then
             raise exception '整数位数必须大于等于1';
@@ -780,11 +774,11 @@ begin
         if record_new.ref_id is null or record_new.ref_delete_policy is null then
             raise exception '关联对象/关联对象删除策略不能为空';
         end if;
-        select * into own_obj from hymn.core_b_object where id = record_new.ref_id;
+        select * into ref_obj from hymn.core_b_object where id = record_new.ref_id;
         if not FOUND then
-            raise exception '引用对象不存在';
+            raise exception '引用对象 [id:%] 不存在',record_new.ref_id;
         end if;
-        if own_obj.active = false then
+        if ref_obj.active = false then
             raise exception '引用对象未启用';
         end if;
     elseif record_new.type = 'reference' then
@@ -792,11 +786,11 @@ begin
         if record_new.ref_id is null or record_new.ref_delete_policy is null then
             raise exception '关联对象/关联对象删除策略不能为空';
         end if;
-        select * into own_obj from hymn.core_b_object where id = record_new.ref_id;
+        select * into ref_obj from hymn.core_b_object where id = record_new.ref_id;
         if not FOUND then
-            raise exception '引用对象不存在';
+            raise exception '引用对象 [id:%] 不存在',record_new.ref_id;
         end if;
-        if own_obj.active = false then
+        if ref_obj.active = false then
             raise exception '引用对象未启用';
         end if;
     elseif record_new.type = 'master_slave' then
@@ -804,11 +798,11 @@ begin
         if record_new.ref_id is null or record_new.ref_list_label is null then
             raise exception '关联对象/关联对象相关列表标签不能为空';
         end if;
-        select * into own_obj from hymn.core_b_object where id = record_new.ref_id;
+        select * into ref_obj from hymn.core_b_object where id = record_new.ref_id;
         if not FOUND then
-            raise exception '引用对象不存在';
+            raise exception '引用对象 [id:%] 不存在',record_new.ref_id;
         end if;
-        if own_obj.active = false then
+        if ref_obj.active = false then
             raise exception '引用对象未启用';
         end if;
     elseif record_new.type = 'auto' then
@@ -824,25 +818,21 @@ begin
         end if;
     elseif record_new.type = 'summary' then
 --         汇总字段
-        if record_new.s_id is null or record_new.s_type is null then
-            raise exception '汇总对象/汇总类型不能为空';
+        if record_new.s_id is null or record_new.s_type is null or
+           record_new.min_length is null then
+            raise exception '汇总对象/汇总类型/小数位长度不能为空';
         end if;
-        if record_new.s_type in ('max', 'min', 'sum') then
-            if record_new.s_field_id is null then
-                raise exception '汇总字段不能为空';
-            end if;
-            if record_new.min_length is null then
-                raise exception '小数位长度不能为空';
-            end if;
+        if record_new.s_type in ('max', 'min', 'sum') and record_new.s_field_id is null then
+            raise exception '汇总字段不能为空';
         end if;
         if record_new.min_length < 0 then
-            raise exception '小数位长度必须大于等于0j';
+            raise exception '小数位长度必须大于等于0';
         end if;
-        select * into own_obj from hymn.core_b_object where id = record_new.s_id;
+        select * into ref_obj from hymn.core_b_object where id = record_new.s_id;
         if not FOUND then
-            raise exception '汇总对象不存在';
+            raise exception '汇总对象 [id:%] 不存在',record_new.s_id;
         end if;
-        if own_obj.active = false then
+        if ref_obj.active = false then
             raise exception '汇总对象未启用';
         end if;
         perform *
@@ -860,17 +850,14 @@ begin
             where id = record_new.s_field_id
               and object_id = record_new.s_id;
             if not FOUND then
-                raise exception '汇总字段不存在';
+                raise exception '汇总字段 [id:%] 不存在',record_new.s_field_id;
             end if;
             if ref_field.type not in ('integer', 'float', 'money') then
                 raise exception '最大值、最小值、总和的汇总字段类型必须为：整型/浮点型/金额';
             end if;
-        elseif record_new.s_type = 'count' then
-        else
-            raise exception '汇总类型必须为：总数/最大值/最小值/总和';
         end if;
     else
-        RAISE EXCEPTION '业务对象字段类型不能为： %',record_new.type;
+        RAISE EXCEPTION '无效的字段类型： %',record_new.type;
     end if;
 end;
 $$;
@@ -962,7 +949,7 @@ declare
     ref_field_arr text;
 begin
     if record_old.active = false and record_new.active = false then
-        raise exception '不能更新未启用的对象';
+        return null;
     end if;
     if record_new.source_table <> record_old.source_table then
         raise exception '不能更新source_table';
@@ -1104,6 +1091,15 @@ begin
             raise exception '%类型字段的数量已达到上限',hymn.field_type_description(record_new.type);
         end if;
     end if;
+    if record_new.is_predefined = true and record_new.standard_type = 'name' and
+       record_new.type = 'text' and
+       record_new.api = 'name' then
+        record_new.max_length := 255;
+        record_new.min_length := 1;
+        record_new.visible_row := 1;
+        record_new.default_value := null;
+        record_new.formula := null;
+    end if;
     return record_new;
 end;
 $$;
@@ -1197,6 +1193,15 @@ begin
 
     --     检查字段类型约束
     perform hymn.check_field_properties(record_new);
+
+    if record_new.is_predefined = true and record_new.standard_type = 'name' and
+       record_new.type = 'text' and record_new.api = 'name' then
+        record_new.max_length := 255;
+        record_new.min_length := 1;
+        record_new.visible_row := 1;
+        record_new.default_value := null;
+        record_new.formula := null;
+    end if;
     return record_new;
 end ;
 $$;
@@ -1215,7 +1220,7 @@ $$
 declare
     record_old      hymn.core_b_object_field := old;
     record_new      hymn.core_b_object_field := new;
-    obj_type        bool;
+    obj_type        text;
     sql_str         text;
     join_table_name text;
     join_view_name  text;

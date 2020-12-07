@@ -3,6 +3,7 @@ package github.afezeria.hymn.common.sql
 import github.afezeria.hymn.common.conn
 import github.afezeria.hymn.common.util.execute
 import java.time.LocalDateTime
+import java.util.*
 
 /**
  * @author afezeria
@@ -30,6 +31,26 @@ fun deleteBObject(id: String) {
     }
 }
 
+fun clearBObject() {
+    conn.use {
+        it.execute("update hymn.core_b_object set active =true where type='custom'")
+        it.execute(
+            """
+            update hymn.core_b_object_field set active = false 
+            where object_id in 
+                (select id from hymn.core_b_object where core_b_object.type='custom')
+        """
+        )
+        it.execute("update hymn.core_b_object set active =false where type='custom'")
+        it.execute("delete from hymn.core_b_object where active = false")
+    }
+    objSeq = (1..100000).iterator()
+}
+
+private var objSeq = (1..100000).iterator()
+
+fun randomUUIDStr(): String = UUID.randomUUID().toString().replace("-", "")
+
 //        id                text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
 //        owner_id          text not null,
 //        create_by_id      text not null,
@@ -44,7 +65,7 @@ fun createBObject(): Map<String, Any?> {
         val obj = it.execute(
             """
             insert into hymn.core_b_object(name,api,active,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
-            values ('测试对象','test_obj',true,?,?,?,?,?,?) returning *;
+            values ('测试对象','test_obj${objSeq.nextInt()}',true,?,?,?,?,?,?) returning *;
             """,
             DEFAULT_ACCOUNT_ID,
             DEFAULT_ACCOUNT_NAME,
