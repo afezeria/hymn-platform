@@ -1,6 +1,6 @@
 package github.afezeria.hymn.common.sql.field
 
-import github.afezeria.hymn.common.conn
+import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.sql.*
 import github.afezeria.hymn.common.util.execute
 import io.kotest.matchers.shouldBe
@@ -33,7 +33,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
-            conn.use {
+            adminConn.use {
                 val obj = createBObject()
                 objId = obj["id"] as String
                 objSourceTable = obj["source_table"] as String
@@ -69,7 +69,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun text() {
-        conn.use {
+        adminConn.use {
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
@@ -93,7 +93,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun `check_box`() {
-        conn.use {
+        adminConn.use {
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field  ( object_id, name, api, type, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
@@ -116,7 +116,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun check_box_group() {
-        conn.use {
+        adminConn.use {
             val dict = it.execute(
                 """
                 insert into hymn.core_dict  ( name, api,  create_by_id, create_by, modify_by_id, 
@@ -151,7 +151,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun select() {
-        conn.use {
+        adminConn.use {
             val dict = it.execute(
                 """
                     insert into hymn.core_dict  ( name, api,  create_by_id, create_by, modify_by_id, 
@@ -186,7 +186,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun integer() {
-        conn.use {
+        adminConn.use {
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, 
@@ -211,7 +211,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun float() {
-        conn.use {
+        adminConn.use {
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, min_length,  
@@ -236,7 +236,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun money() {
-        conn.use {
+        adminConn.use {
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field ( object_id, name, api, type, max_length, min_length, 
@@ -260,7 +260,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun date() {
-        conn.use {
+        adminConn.use {
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field  ( object_id, name, api, type,  create_by_id, 
@@ -285,7 +285,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun datetime() {
-        conn.use {
+        adminConn.use {
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field  ( object_id, name, api, type,  create_by_id, 
@@ -309,7 +309,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun auto() {
-        conn.use {
+        adminConn.use {
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field (object_id, name, api, type,gen_rule, create_by_id, 
@@ -337,7 +337,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun picture() {
-        conn.use {
+        adminConn.use {
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field  ( object_id, name, api, type, max_length, 
@@ -364,7 +364,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
     @Test
     fun multipleReference() {
 
-        conn.use {
+        adminConn.use {
             val masterObj = it.execute(
                 """
                     insert into hymn.core_b_object(name,api,active,create_by_id,create_by,modify_by_id,
@@ -418,7 +418,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
     @Test
     fun reference() {
-        conn.use {
+        adminConn.use {
             val refObj = it.execute(
                 """
                     insert into hymn.core_b_object(name,api,active,create_by_id,create_by,modify_by_id,
@@ -459,7 +459,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
     @Test
     @Order(10)
     fun masteslave() {
-        conn.use {
+        adminConn.use {
             val masterObj = it.execute(
                 """
                     insert into hymn.core_b_object(name,api,active,create_by_id,create_by,modify_by_id,
@@ -500,7 +500,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
     @Test
     @Order(20)
     fun summary() {
-        conn.use {
+        adminConn.use {
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 

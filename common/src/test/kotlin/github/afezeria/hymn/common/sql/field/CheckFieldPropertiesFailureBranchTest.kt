@@ -1,6 +1,6 @@
 package github.afezeria.hymn.common.sql.field
 
-import github.afezeria.hymn.common.conn
+import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.sql.*
 import github.afezeria.hymn.common.util.execute
 import io.kotest.assertions.assertSoftly
@@ -41,12 +41,12 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 arrayOf(DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, typeId)
             val ref = createBObject()
             refId = ref["id"] as String
-            conn.use {
+            adminConn.use {
                 it.execute("update hymn.core_b_object set active=false where id=?", refId)
             }
             val childObj = createBObject()
             childId = childObj["id"] as String
-            conn.use {
+            adminConn.use {
                 val childField = it.execute(
                     """
                     insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
@@ -69,7 +69,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
     @Test
     fun `predefined field don't set source_column`() {
-        conn.use {
+        adminConn.use {
             val e = shouldThrow<PSQLException> {
                 it.execute(
                     """
@@ -86,7 +86,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     }
     @Test
     fun `wrong field type`(){
-        conn.use {
+        adminConn.use {
             val e = shouldThrow<PSQLException> {
                 it.execute(
                     """
@@ -103,7 +103,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
     @Test
     fun `required field is null`() {
-        conn.use {
+        adminConn.use {
             assertSoftly {
 //                text
                 shouldThrow<PSQLException> {
@@ -434,7 +434,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class TextField {
         @Test
         fun `min_length must be greater than or equal to 0`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -450,7 +450,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `max_length must be less than or equal to 50000`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -466,7 +466,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `max_length must be greater than or equal to min_length`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -482,7 +482,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `visible_row must be greater than or equal to 0`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -501,7 +501,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class CheckBoxGroup {
         @Test
         fun `option_number must be greater than or equal to 0`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -517,7 +517,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `dict not exists`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -536,7 +536,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class Select {
         @Test
         fun `option_number must be greater than or equal to 0`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -554,7 +554,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `visible_row must be greater than or equal to 0`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -571,7 +571,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `dict not exists`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -591,7 +591,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class Integer {
         @Test
         fun `min_length must be less than max_length`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -610,7 +610,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class Float {
         @Test
         fun `min_length must be greater than or equal to 1`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -626,7 +626,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `max_length must be greater than or equal to 1`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -642,7 +642,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `the sum of max_length and min_length must be less than or equal to 18`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -661,7 +661,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class Money {
         @Test
         fun `min_length must be greater than or equal to 1`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -676,7 +676,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `max_length must be greater than or equal to 1`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -694,7 +694,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class Picture {
         @Test
         fun `min_length must be greater than or equal to 1`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -710,7 +710,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `max_length must be greater than or equal to 1`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -729,7 +729,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class MultipleReference {
         @Test
         fun `reference object does not exists`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -745,7 +745,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `reference object is inactive`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -764,7 +764,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class Reference {
         @Test
         fun `reference object does not exists`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -780,7 +780,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `reference object is inactive`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -799,7 +799,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class MasterSlave {
         @Test
         fun `reference object does not exists`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -815,7 +815,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `reference object is inactive`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -834,7 +834,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class Auto {
         @Test
         fun `there can only be one placeholder in gen_rul`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -853,7 +853,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
     inner class Summary {
         @Test
         fun `min_length must be greater than or equal to 0`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -871,7 +871,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `summary object does not exists`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -889,7 +889,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `summary object is inactive`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -907,7 +907,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `the summary object is not a child object`() {
-            conn.use {
+            adminConn.use {
                 val e = shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -924,7 +924,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `summary field does not exists`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -942,7 +942,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
 
         @Test
         fun `wrong summary field type`() {
-            conn.use {
+            adminConn.use {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
