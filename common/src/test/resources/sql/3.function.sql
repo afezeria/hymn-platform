@@ -281,7 +281,7 @@ begin
     end if;
     perform keyword from hymn.sql_keyword where keyword = lower(api_value);
     if FOUND then
-        raise exception '无效的api: %, % 是数据库关键字',api_name,api_value;
+        raise exception '无效的%, % 是数据库关键字',api_name,api_value;
     end if;
 end;
 $$;
@@ -931,6 +931,9 @@ declare
     record_new hymn.core_b_object := new;
 begin
     perform hymn.throw_if_api_is_illegal('api', record_new.api);
+
+    record_new.active = true;
+
     --     如果当前新增对象是业务对象则申请可用的数据表
     if record_new.type = 'custom' then
 --         业务对象自动在api后面添加 __co 的后缀
@@ -949,7 +952,7 @@ begin
         end if;
     elseif record_new.type = 'module' then
         if record_new.source_table is null then
-            raise exception '创建模块对象必须指定源表';
+            raise exception '创建模块对象必须指定数据表';
         end if;
         perform pn.nspname, pc.relname
         from pg_class pc
@@ -960,6 +963,8 @@ begin
         if not FOUND then
             raise exception '表 %.% 不存在','hymn',record_new.source_table;
         end if;
+    elseif record_new.type = 'remote' then
+        record_new.api = record_new.api || '__cr';
     end if;
     return record_new;
 end;
@@ -1018,12 +1023,12 @@ begin
         into ref_field_arr
         from hymn.core_b_object scbo
                  inner join hymn.core_b_object_field scbof on scbof.object_id = scbo.id
-        where scbof.type in ('reference', 'master_slave')
+        where scbof.type in ('mreference', 'reference', 'master_slave')
           and scbof.active = true
           and scbo.active = true
           and scbof.ref_id = record_new.id;
         if ref_field_arr is not null then
-            raise exception '不能停用当前对象，以下对象/字段引用了当前对象：%',ref_field_arr;
+            raise exception '不能停用当前对象，以下字段引用了当前对象：%',ref_field_arr;
         end if;
         sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
         execute sql_str;
@@ -1071,37 +1076,41 @@ declare
     trigger_name     text;
     trigger_fun_name text;
 begin
-    --     删除视图
-    sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
-    execute sql_str;
-    -- 删除数据
-    sql_str := format('truncate hymn.%I', record_old.source_table);
-    execute sql_str;
-    -- 删除历史记录
-    sql_str := format('truncate hymn.%I_history', record_old.source_table);
-    execute sql_str;
---     删除触发器及触发器函数
-    for trigger_fun_name,trigger_name in select pp.proname, pt.tgname
-                                         from pg_trigger pt
-                                                  left join pg_class pc on pt.tgrelid = pc.oid
-                                                  left join pg_namespace pn on pn.oid = pc.relnamespace
-                                                  left join pg_proc pp on pt.tgfoid = pp.oid
-                                         where pc.relname = 'core_data_table_001'
-                                           and pn.nspname = 'hymn'
-        loop
-            sql_str := format('drop trigger if exists %I on hymn.%I cascade;', trigger_name,
-                              old.source_table);
+    if record_old.type <> 'remote' then
+        --     删除视图
+        sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
+        execute sql_str;
+        if record_old.type = 'custom' then
+            -- 删除数据
+            sql_str := format('truncate hymn.%I', record_old.source_table);
             execute sql_str;
-            sql_str := format('drop function if exists %I;', trigger_fun_name);
+            -- 删除历史记录
+            sql_str := format('truncate hymn.%I_history', record_old.source_table);
             execute sql_str;
-        end loop;
---     归还字段和表资源
-    update hymn.core_table_obj_mapping
-    set obj_api=null
-    where table_name = record_old.source_table;
-    update hymn.core_column_field_mapping
-    set field_api=null
-    where table_name = record_old.source_table;
+            --     删除触发器及触发器函数
+            for trigger_fun_name,trigger_name in select pp.proname, pt.tgname
+                                                 from pg_trigger pt
+                                                          left join pg_class pc on pt.tgrelid = pc.oid
+                                                          left join pg_namespace pn on pn.oid = pc.relnamespace
+                                                          left join pg_proc pp on pt.tgfoid = pp.oid
+                                                 where pc.relname = 'core_data_table_001'
+                                                   and pn.nspname = 'hymn'
+                loop
+                    sql_str := format('drop trigger if exists %I on hymn.%I cascade;', trigger_name,
+                                      old.source_table);
+                    execute sql_str;
+                    sql_str := format('drop function if exists %I;', trigger_fun_name);
+                    execute sql_str;
+                end loop;
+            --     归还字段和表资源
+            update hymn.core_table_obj_mapping
+            set obj_api=null
+            where table_name = record_old.source_table;
+            update hymn.core_column_field_mapping
+            set field_api=null
+            where table_name = record_old.source_table;
+        end if;
+    end if;
     return record_old;
 end;
 $$;
@@ -1132,6 +1141,9 @@ begin
     record_new.active = true;
     select * into obj from hymn.core_b_object where id = record_new.object_id;
     --     只有模块对象和自定义对象能创建自定义字段
+    if obj.type = 'remote' then
+        record_new.source_column = '';
+    end if;
 --     预定义字段不需要申请列
     if record_new.is_predefined = false and obj.type <> 'remote' then
 --     自定义字段末尾加上 __cf
@@ -1202,7 +1214,6 @@ begin
             if record_new.type = 'auto' then
                 perform hymn.rebuild_auto_numbering_trigger(record_new.object_id);
             end if;
-
         end if;
     end if;
     return record_new;
@@ -1221,8 +1232,10 @@ create or replace function hymn.field_trigger_fun_before_update() returns trigge
     language plpgsql as
 $$
 declare
-    record_old hymn.core_b_object_field := old;
-    record_new hymn.core_b_object_field := new;
+    record_old        hymn.core_b_object_field := old;
+    record_new        hymn.core_b_object_field := new;
+    ref_obj           hymn.core_b_object;
+    summary_field_api text;
 begin
     --     状态为停用的字段不允许修改数据
     if record_new.active = record_old.active and record_new.active = false then
@@ -1244,6 +1257,32 @@ begin
         return record_old;
     end if;
 
+--     关联/汇总字段关联的对象删除后不能启用字段，只能手动删除
+    if record_old.active = false and record_new.active = true then
+        if record_old.type in ('reference', 'master_slave', 'mreference') then
+            select * into ref_obj from hymn.core_b_object where id = record_old.ref_id;
+            if not found then
+                raise exception '引用对象已删除，不能启用字段';
+            end if;
+        end if;
+    end if;
+
+    --     字段被汇总字段引用时不能停用
+    if record_old.active = true and record_new.active = false and
+       record_old.type in ('integer', 'float', 'money') then
+        select cbo.api || '.' || cbof.api
+        into summary_field_api
+        from core_b_object_field cbof
+                 left join core_b_object cbo on cbof.object_id = cbo.id
+        where cbof.type = 'summary'
+          and cbof.active = true
+          and cbo.active = true
+          and cbof.s_field_id = record_old.id;
+        if FOUND then
+            raise exception '当前字段被汇总字段： % 引用，不能停用',summary_field_api;
+        end if;
+    end if;
+
     --     检查字段类型约束
     perform hymn.check_field_properties(record_new);
 
@@ -1263,7 +1302,7 @@ begin
         record_old.visible_row = record_new.visible_row;
         record_old.optional_number = record_new.optional_number;
         record_old.dict_id = record_new.dict_id;
-        record_old.master_field_id=record_new.master_field_id;
+        record_old.master_field_id = record_new.master_field_id;
     elseif record_old.type = 'integer' then
         record_old.min_length = record_new.min_length;
         record_old.max_length = record_new.max_length;

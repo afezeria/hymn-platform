@@ -149,6 +149,8 @@ alter table hymn.core_b_object_type_available_options
     add foreign key (field_id) references hymn.core_b_object_field on delete cascade;
 alter table hymn.core_b_object_type_available_options
     add foreign key (dict_item_id) references hymn.core_dict_item on delete cascade;
+alter table hymn.core_b_object_type_available_options
+    add foreign key (object_id) references hymn.core_b_object on delete cascade;
 
 alter table hymn.core_module_function_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;

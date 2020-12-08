@@ -1,8 +1,8 @@
 package github.afezeria.hymn.common.sql.trigger
 
 import github.afezeria.hymn.common.adminConn
-import github.afezeria.hymn.common.sql.DEFAULT_ACCOUNT_ID
-import github.afezeria.hymn.common.sql.DEFAULT_ACCOUNT_NAME
+import github.afezeria.hymn.common.sql.BaseDbTest
+import github.afezeria.hymn.common.sql.COMMON_INFO
 import github.afezeria.hymn.common.util.execute
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -10,13 +10,12 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.*
 import org.postgresql.util.PSQLException
-import java.time.LocalDateTime
 
 /**
  * @author afezeria
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-class ModuleObjectTest {
+class ModuleObjectTest : BaseDbTest() {
     companion object {
         lateinit var id: String
 
@@ -24,14 +23,14 @@ class ModuleObjectTest {
         @JvmStatic
         fun clear() {
             adminConn.use {
-                it.execute("alter table hymn.core_b_object disable trigger all")
-                it.execute("alter table hymn.core_b_object_field disable trigger all")
+                it.execute(
+                    "update hymn.core_b_object set active=false where active=true and api not in (?,?,?,?)",
+                    "account", "role", "org", "object_type",
+                )
                 it.execute(
                     "delete from hymn.core_b_object where api not in (?,?,?,?)",
-                    "account", "role", "org", "business_type",
+                    "account", "role", "org", "object_type",
                 )
-                it.execute("alter table hymn.core_b_object enable trigger all")
-                it.execute("alter table hymn.core_b_object_field enable trigger all")
             }
         }
 
@@ -42,15 +41,15 @@ class ModuleObjectTest {
     fun `throw when not specify source_table`() {
         adminConn.use {
             val e = shouldThrow<PSQLException> {
-                it.execute("""
-insert into hymn.core_b_object(name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
-values ('模块对象','module_obj',true,'core','模块对象',?,?,?,?,?,?) returning *;""",
-                    DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME,
-                    LocalDateTime.now(), LocalDateTime.now()
+                it.execute(
+                    """
+insert into hymn.core_b_object(name,api,type,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+values ('模块对象','module_obj','module','core','模块对象',?,?,?,?,now(),now()) returning *;""",
+                    *COMMON_INFO
                 )
             }
             e.sqlState shouldBe "P0001"
-            e.message shouldContain "create a module object must specify source_table"
+            e.message shouldContain "创建模块对象必须指定数据表"
         }
     }
 
@@ -59,15 +58,15 @@ values ('模块对象','module_obj',true,'core','模块对象',?,?,?,?,?,?) retu
     fun `throw when source_table does not exists`() {
         adminConn.use {
             val e = shouldThrow<PSQLException> {
-                it.execute("""
-insert into hymn.core_b_object(source_table,name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
-values ('sys_test_obj','模块对象','module_obj',true,'core','模块对象',?,?,?,?,?,?) returning *;""",
-                    DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME,
-                    LocalDateTime.now(), LocalDateTime.now()
+                it.execute(
+                    """
+insert into hymn.core_b_object(source_table,name,api,type,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+values ('sys_test_obj','模块对象','module_obj','module','core','模块对象',?,?,?,?,now(),now()) returning *;""",
+                    *COMMON_INFO
                 )
             }
             e.sqlState shouldBe "P0001"
-            e.message shouldContain "table hymn.sys_test_obj does not exists"
+            e.message shouldContain "表 .*? 不存在".toRegex()
         }
     }
 
@@ -75,23 +74,29 @@ values ('sys_test_obj','模块对象','module_obj',true,'core','模块对象',?,
     @Order(3)
     fun insert() {
         adminConn.use {
-            it.execute("""
+            it.execute(
+                """
                     create table hymn.sys_test_obj(
                     id text primary key ,
                     aint int
                     )
-                """)
-            val insert = it.execute("""
-insert into hymn.core_b_object(source_table,name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
-values ('sys_test_obj','模块对象','module_obj',true,'core','模块对象',?,?,?,?,?,?) returning *;""",
-                DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME,
-                LocalDateTime.now(), LocalDateTime.now()
-            )[0]
-            insert["id"] shouldNotBe null
-            id = insert["id"] as String
+                """
+            )
+            try {
+                val insert = it.execute(
+                    """
+insert into hymn.core_b_object(source_table,name,api,type,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+values ('sys_test_obj','模块对象','module_obj','module','core','模块对象',?,?,?,?,now(),now()) returning *;""",
+                    *COMMON_INFO
+                )[0]
+                insert["id"] shouldNotBe null
+                id = insert["id"] as String
 
-            it.execute("select * from hymn.core_b_object_field where object_id = ?", id).apply {
-                size shouldBe 0
+                it.execute("select * from hymn.core_b_object_field where object_id = ?", id).apply {
+                    size shouldBe 0
+                }
+            } finally {
+                it.execute("drop table if exists hymn.sys_test_obj cascade")
             }
         }
     }

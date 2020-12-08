@@ -640,6 +640,7 @@ drop table if exists hymn.core_b_object_type_available_options cascade;
 create table hymn.core_b_object_type_available_options
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    object_id    text      not null,
     type_id      text      not null,
     field_id     text      not null,
     dict_item_id text      not null,

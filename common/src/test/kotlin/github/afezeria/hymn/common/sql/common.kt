@@ -26,6 +26,10 @@ val COMMON_INFO =
 
 fun deleteBObject(id: String) {
     adminConn.use {
+        it.execute(
+            "update hymn.core_b_object_field set active=false where ref_id=? and active=true",
+            id
+        )
         it.execute("update hymn.core_b_object set active=false where id=?", id)
         it.execute("delete from hymn.core_b_object where id=?", id)
     }
