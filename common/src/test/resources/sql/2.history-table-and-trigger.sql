@@ -326,6 +326,7 @@ create table hymn.core_b_object_field_history
     remark text,
     help text,
     tmp text,
+    join_view_name text,
     standard_type text,
     is_predefined bool,
     create_by_id text,

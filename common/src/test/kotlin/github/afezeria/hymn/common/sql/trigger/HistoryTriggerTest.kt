@@ -1,6 +1,6 @@
 package github.afezeria.hymn.common.sql.trigger
 
-import github.afezeria.hymn.common.conn
+import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.sql.BASE_ARRAY
 import github.afezeria.hymn.common.sql.BaseDbTest
 import github.afezeria.hymn.common.sql.DEFAULT_ORG_ID
@@ -20,7 +20,7 @@ class HistoryTriggerTest : BaseDbTest() {
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            conn.use {
+            adminConn.use {
                 val query = it.execute("insert into hymn.core_org  (name, director_id, deputy_director_id, parent_id, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) values (?,?,?,?,?,?,?,?,?,?) returning id;", "测试组织", null, null, DEFAULT_ORG_ID, *BASE_ARRAY)
                 id = query[0]["id"]!! as String
             }
@@ -29,7 +29,7 @@ class HistoryTriggerTest : BaseDbTest() {
         @AfterAll
         @JvmStatic
         fun afterAll() {
-            conn.use {
+            adminConn.use {
                 it.execute("delete from hymn.core_org where id = ?", id)
             }
         }
@@ -38,7 +38,7 @@ class HistoryTriggerTest : BaseDbTest() {
     @Test
     @Order(1)
     fun insertHistoryTest() {
-        conn.use {
+        adminConn.use {
             val org = it.execute("select * from hymn.core_org where id= ? ", id).run {
                 size shouldBe 1
                 get(0)
@@ -55,7 +55,7 @@ class HistoryTriggerTest : BaseDbTest() {
     @Test
     @Order(2)
     fun updateHistoryTest() {
-        conn.use {
+        adminConn.use {
             it.execute("update hymn.core_org set name= ? where id = ?", "测试组织2", id)
             it.execute("select * from hymn.core_org_history where id = ? and operation = 'u'", id).run {
                 size shouldBe 1
@@ -66,7 +66,7 @@ class HistoryTriggerTest : BaseDbTest() {
     @Test
     @Order(3)
     fun deleteHistoryTest() {
-        conn.use {
+        adminConn.use {
             it.execute("delete from hymn.core_org where id=?", id)
             it.execute("select * from hymn.core_org_history where id = ? and operation = 'd'", id).run {
                 size shouldBe 1

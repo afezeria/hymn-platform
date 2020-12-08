@@ -15,7 +15,7 @@ open class BaseDbTest {
         init {
             println("========== db init start ==========")
             prop.load(
-                this::class.java.classLoader.getResourceAsStream("database.properties")
+                this::class.java.classLoader.getResourceAsStream("admin-database.properties")
             )
             val path = System.getProperty("user.dir")
             val scripts = listOf(
@@ -25,7 +25,6 @@ open class BaseDbTest {
                 "4.init-data.sql",
                 "5.constraint.sql",
                 "6.test-data-table.sql",
-                "7.test-role.sql",
             )
             for (script in scripts) {
                 runSqlScript("$path/src/test/resources/sql/$script")

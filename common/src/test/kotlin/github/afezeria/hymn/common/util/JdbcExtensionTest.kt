@@ -1,6 +1,6 @@
 package github.afezeria.hymn.common.util
 
-import github.afezeria.hymn.common.conn
+import github.afezeria.hymn.common.adminConn
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -19,7 +19,7 @@ internal class JdbcExtensionTest {
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            conn.use {
+            adminConn.use {
                 it.createStatement().execute("""
                     drop table if exists test_table;
                     create table test_table(
@@ -36,7 +36,7 @@ internal class JdbcExtensionTest {
         @AfterAll
         @JvmStatic
         fun afterAll() {
-            conn.use {
+            adminConn.use {
                 it.createStatement().execute("""
                     drop table test_table
                 """)
@@ -46,7 +46,7 @@ internal class JdbcExtensionTest {
 
     @BeforeEach
     fun beforeEach() {
-        conn.use {
+        adminConn.use {
             it.createStatement().execute("delete from test_table")
         }
     }
@@ -107,7 +107,7 @@ internal class JdbcExtensionTest {
 
     @Test
     fun `execute with params`() {
-        val ins = conn.execute("insert into test_table (atext,aint) values (?,?) returning id,atext,aint,adate;", "abc", 123)
+        val ins = adminConn.execute("insert into test_table (atext,aint) values (?,?) returning id,atext,aint,adate;", "abc", 123)
         ins.size shouldBe 1
         ins[0].apply {
             size shouldBe 4
@@ -119,7 +119,7 @@ internal class JdbcExtensionTest {
 
     @Test
     fun `execute with list`() {
-        val ins = conn.execute("insert into test_table (atext,aint) values (?,?) returning id,atext,aint,adate;", listOf("abc", 123))
+        val ins = adminConn.execute("insert into test_table (atext,aint) values (?,?) returning id,atext,aint,adate;", listOf("abc", 123))
         ins.size shouldBe 1
         ins[0].apply {
             size shouldBe 4
@@ -136,7 +136,7 @@ internal class JdbcExtensionTest {
 
         @Test
         fun `execute`() {
-            val ins = conn.execute(sql, mapOf("atext" to "abc", "aint" to 123))
+            val ins = adminConn.execute(sql, mapOf("atext" to "abc", "aint" to 123))
             ins.size shouldBe 1
             ins[0].apply {
                 size shouldBe 4
@@ -148,7 +148,7 @@ internal class JdbcExtensionTest {
 
         @Test
         fun `ignore redundant parameters`() {
-            val ins = conn.execute(sql, mapOf("atext" to "abc", "aint" to 123, "bb" to "bb"))
+            val ins = adminConn.execute(sql, mapOf("atext" to "abc", "aint" to 123, "bb" to "bb"))
             ins.size shouldBe 1
             ins[0].apply {
                 size shouldBe 4
@@ -161,7 +161,7 @@ internal class JdbcExtensionTest {
         @Test
         fun `throw exception when missing parameter`() {
             val e = shouldThrow<RuntimeException> {
-                conn.execute(sql, mapOf("atext" to "abc"))
+                adminConn.execute(sql, mapOf("atext" to "abc"))
             }
             e.message shouldStartWith "missing parameter in sql"
         }
@@ -170,7 +170,7 @@ internal class JdbcExtensionTest {
 
     @Test
     fun `sql time convert to local time 1`() {
-        val ins = conn.execute("insert into test_table (atext,aint) values (?,?) returning id,adate,adatetime;", "abc", 123)
+        val ins = adminConn.execute("insert into test_table (atext,aint) values (?,?) returning id,adate,adatetime;", "abc", 123)
         ins.size shouldBe 1
         ins[0].apply {
             size shouldBe 3
@@ -184,7 +184,7 @@ internal class JdbcExtensionTest {
     fun `sql time convert to local time 2`() {
         val dateTime = LocalDateTime.now()
         val date = LocalDate.now()
-        val ins = conn.execute("insert into test_table (adatetime,adate) values (?,?) returning adate,adatetime;", dateTime, date)
+        val ins = adminConn.execute("insert into test_table (adatetime,adate) values (?,?) returning adate,adatetime;", dateTime, date)
         ins.size shouldBe 1
         ins[0].apply {
             size shouldBe 2

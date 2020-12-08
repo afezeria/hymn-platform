@@ -1,6 +1,6 @@
 package github.afezeria.hymn.common.sql.trigger
 
-import github.afezeria.hymn.common.conn
+import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.sql.DEFAULT_ACCOUNT_ID
 import github.afezeria.hymn.common.sql.DEFAULT_ACCOUNT_NAME
 import github.afezeria.hymn.common.util.execute
@@ -23,7 +23,7 @@ class ModuleObjectTest {
         @AfterAll
         @JvmStatic
         fun clear() {
-            conn.use {
+            adminConn.use {
                 it.execute("alter table hymn.core_b_object disable trigger all")
                 it.execute("alter table hymn.core_b_object_field disable trigger all")
                 it.execute(
@@ -40,7 +40,7 @@ class ModuleObjectTest {
     @Test
     @Order(1)
     fun `throw when not specify source_table`() {
-        conn.use {
+        adminConn.use {
             val e = shouldThrow<PSQLException> {
                 it.execute("""
 insert into hymn.core_b_object(name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
@@ -57,7 +57,7 @@ values ('模块对象','module_obj',true,'core','模块对象',?,?,?,?,?,?) retu
     @Test
     @Order(2)
     fun `throw when source_table does not exists`() {
-        conn.use {
+        adminConn.use {
             val e = shouldThrow<PSQLException> {
                 it.execute("""
 insert into hymn.core_b_object(source_table,name,api,active,module_api,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
@@ -74,7 +74,7 @@ values ('sys_test_obj','模块对象','module_obj',true,'core','模块对象',?,
     @Test
     @Order(3)
     fun insert() {
-        conn.use {
+        adminConn.use {
             it.execute("""
                     create table hymn.sys_test_obj(
                     id text primary key ,

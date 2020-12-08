@@ -1,6 +1,6 @@
 package github.afezeria.hymn.common.sql.util
 
-import github.afezeria.hymn.common.conn
+import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.sql.BaseDbTest
 import github.afezeria.hymn.common.util.execute
 import io.kotest.assertions.throwables.shouldThrow
@@ -16,7 +16,7 @@ import org.postgresql.util.PSQLException
 class ThrowIfApiIsIllegalTest : BaseDbTest() {
     @Test
     fun legalApi() {
-        conn.use {
+        adminConn.use {
             val result = it.execute("select hymn.throw_if_api_is_illegal('object_api','abc')")
             result.size shouldBe 1
             result[0]["throw_if_api_is_illegal"] shouldBe PGobject().apply { type = "void";value = "" }
@@ -25,7 +25,7 @@ class ThrowIfApiIsIllegalTest : BaseDbTest() {
 
     @Test
     fun throwExceptionWhenApiIsKeyword() {
-        conn.use {
+        adminConn.use {
             val exception = shouldThrow<PSQLException> {
                 it.execute("select hymn.throw_if_api_is_illegal('object_api','table')")
             }
@@ -36,7 +36,7 @@ class ThrowIfApiIsIllegalTest : BaseDbTest() {
 
     @Test
     fun throwExceptionWhenApiIsTooShort() {
-        conn.use {
+        adminConn.use {
             val exception = shouldThrow<PSQLException> {
                 it.execute("select hymn.throw_if_api_is_illegal('object_api','t')")
             }
@@ -47,7 +47,7 @@ class ThrowIfApiIsIllegalTest : BaseDbTest() {
 
     @Test
     fun throwExceptionWhenApiIsTooLong() {
-        conn.use {
+        adminConn.use {
             val exception = shouldThrow<PSQLException> {
                 it.execute("select hymn.throw_if_api_is_illegal('object_api','ttttttttttttttttttttttttttttttttttttttttttt')")
             }
@@ -58,7 +58,7 @@ class ThrowIfApiIsIllegalTest : BaseDbTest() {
 
     @Test
     fun throwExceptionWhenApiStartWithUnderline() {
-        conn.use {
+        adminConn.use {
             val exception = shouldThrow<PSQLException> {
                 it.execute("select hymn.throw_if_api_is_illegal('object_api','_abc')")
             }
@@ -69,7 +69,7 @@ class ThrowIfApiIsIllegalTest : BaseDbTest() {
 
     @Test
     fun throwExceptionWhenApiContainIllegalCharacter() {
-        conn.use {
+        adminConn.use {
             var exception = shouldThrow<PSQLException> {
                 it.execute("select hymn.throw_if_api_is_illegal('object_api','ab#')")
             }

@@ -1,6 +1,6 @@
-package github.afezeria.hymn.common.sql.trigger
+package github.afezeria.hymn.common.sql.bobject
 
-import github.afezeria.hymn.common.conn
+import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.sql.BaseDbTest
 import github.afezeria.hymn.common.sql.COMMON_INFO
 import github.afezeria.hymn.common.sql.DEFAULT_ACCOUNT_ID
@@ -28,7 +28,7 @@ class CustomObjectTest : BaseDbTest() {
         @JvmStatic
         fun clear() {
             //                clear
-            conn.use {
+            adminConn.use {
 //                it.execute("alter table hymn.core_b_object disable trigger all")
 //                it.execute("alter table hymn.core_b_object_field disable trigger all")
 //                it.execute(
@@ -44,8 +44,9 @@ class CustomObjectTest : BaseDbTest() {
     @Test
     @Order(1)
     fun insert() {
-        conn.use {
-            val insert = it.execute("""
+        adminConn.use {
+            val insert = it.execute(
+                """
 insert into hymn.core_b_object(name,api,active,remark,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
 values ('测试对象','test_obj',true,'编号
 {yyyy}{mm}{dd}{000}',?,?,?,?,?,?) returning *;""",
@@ -75,19 +76,22 @@ values ('测试对象','test_obj',true,'编号
             }
 
 //            创建视图
-            it.execute("""
+            it.execute(
+                """
 select *
 from pg_class pc
          left join pg_namespace pn on pn.oid = pc.relnamespace
 where pn.nspname = 'hymn_view'
   and pc.relname = ?;
 """,
-                insert["api"]).apply {
+                insert["api"]
+            ).apply {
                 size shouldBe 1
             }
 
 //            创建历史记录触发器
-            it.execute("""
+            it.execute(
+                """
 select *
 from pg_trigger
          left join pg_class pc on pg_trigger.tgrelid = pc.oid
@@ -95,7 +99,8 @@ from pg_trigger
 where pc.relname = ?
   and pn.nspname = 'hymn';
 """,
-                insert["source_table"]).apply {
+                insert["source_table"]
+            ).apply {
                 assertSoftly {
                     size shouldBe 1
                     get(0)["tgname"] shouldBe "${insert["source_table"]}_history"
@@ -107,7 +112,7 @@ where pc.relname = ?
     @Test
     @Order(2)
     fun `delete active object`() {
-        conn.use {
+        adminConn.use {
             val e = shouldThrow<PSQLException> {
                 it.execute("delete from hymn.core_b_object where id = ?", id)
             }
@@ -119,9 +124,12 @@ where pc.relname = ?
     @Test
     @Order(3)
     fun `update source_table`() {
-        conn.use {
+        adminConn.use {
             val e = shouldThrow<PSQLException> {
-                it.execute("update hymn.core_b_object set source_table = 'core_account' where id = ?", id)
+                it.execute(
+                    "update hymn.core_b_object set source_table = 'core_account' where id = ?",
+                    id
+                )
             }
             e.sqlState shouldBe "P0001"
             e.message shouldContain "不能更新source_table"
@@ -131,7 +139,7 @@ where pc.relname = ?
     @Test
     @Order(4)
     fun `update api`() {
-        conn.use {
+        adminConn.use {
             val e = shouldThrow<PSQLException> {
                 it.execute("update hymn.core_b_object set api = 'test_object_2' where id = ?", id)
             }
@@ -143,54 +151,74 @@ where pc.relname = ?
     @Test
     @Order(6)
     fun `deactivate object`() {
-        conn.use {
-            val type = it.execute("insert into hymn.core_b_object_type  (object_id, name, remark, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) values (?,'测试类型','',?,?,?,?,now(),now())returning *;", id, *COMMON_INFO)[0]
+        adminConn.use {
+            val type = it.execute(
+                "insert into hymn.core_b_object_type  (object_id, name, remark, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) values (?,'测试类型','',?,?,?,?,now(),now())returning *;",
+                id,
+                *COMMON_INFO
+            )[0]
             it.execute("update hymn.core_b_object set active = false where id = ?", id)
 
 //            新增关联数据
             var e = shouldThrow<PSQLException> {
-                it.execute("insert into hymn.core_b_object_type  (object_id, name, remark, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) values (?,'测试类型','',?,?,?,?,now(),now())returning *;", id, *COMMON_INFO)[0]
+                it.execute(
+                    "insert into hymn.core_b_object_type  (object_id, name, remark, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) values (?,'测试类型','',?,?,?,?,now(),now())returning *;",
+                    id,
+                    *COMMON_INFO
+                )[0]
             }
             e.sqlState shouldBe "P0001"
-            e.message shouldContain "对象已停用，不能新增/更新相关数据"
+            e.message shouldContain "对象 \\[id:[^\\]]+\\] 已停用，不能新增/更新相关数据".toRegex()
 
 //            删除关联数据
             e = shouldThrow {
                 it.execute("delete from hymn.core_b_object_type  where  id= ?", type["id"])
             }
             e.sqlState shouldBe "P0001"
-            e.message shouldContain "对象已停用，不能删除相关数据"
+            e.message shouldContain "对象 \\[id:[^\\]]+\\] 已停用，不能删除相关数据".toRegex()
 //            更新关联数据
             e = shouldThrow<PSQLException> {
-                it.execute("update hymn.core_b_object_type  set name = '测试类型2' where id =?", type["id"])
+                it.execute(
+                    "update hymn.core_b_object_type  set name = '测试类型2' where id =?",
+                    type["id"]
+                )
             }
             e.sqlState shouldBe "P0001"
-            e.message shouldContain "对象已停用，不能新增/更新相关数据"
+            e.message shouldContain "对象 \\[id:[^\\]]+\\] 已停用，不能新增/更新相关数据".toRegex()
         }
     }
 
     @Test
     @Order(7)
     fun `delete object`() {
-        conn.use {
+        adminConn.use {
             val del = it.execute("select * from hymn.core_b_object where id=?", id)[0]
 
             it.execute("delete from hymn.core_b_object where id=?", id)
-            it.execute("select * from hymn.core_b_object_field where object_id=?", id).size shouldBe 0
-            it.execute("select * from hymn.core_b_object_type where object_id=?", id).size shouldBe 0
+            it.execute(
+                "select * from hymn.core_b_object_field where object_id=?",
+                id
+            ).size shouldBe 0
+            it.execute(
+                "select * from hymn.core_b_object_type where object_id=?",
+                id
+            ).size shouldBe 0
 //            清空数据表
             it.execute("select * from hymn.${del["source_table"]}").size shouldBe 0
 //            清空历史记录表
             it.execute("select * from hymn.${del["source_table"]}_history").size shouldBe 0
 //            删除视图
-            it.execute("""
+            it.execute(
+                """
                 select * from pg_class pc
                 left join pg_namespace pn on pc.relnamespace=pn.oid
                 where pn.nspname='hymn_view'
                 and pc.relname = ?
-            """, del["api"]).size shouldBe 0
+            """, del["api"]
+            ).size shouldBe 0
 //            删除触发器
-            it.execute("""
+            it.execute(
+                """
                 select pt.*
                 from pg_trigger pt
                          left join pg_class pc on pt.tgrelid = pc.oid
@@ -198,7 +226,8 @@ where pc.relname = ?
                 where pc.relname = ?
                   and pn.nspname = 'hymn';
 
-            """, del["source_table"]).size shouldBe 0
+            """, del["source_table"]
+            ).size shouldBe 0
         }
     }
 

@@ -436,14 +436,14 @@ $$;
 comment on function hymn.get_remaining_available_field_info(object_api text, out f_type text, out count bigint) is '获取剩余可创建自定义对象数';
 
 
-create or replace function hymn.get_join_table_name(t_api text, f_api text) returns text
+create or replace function hymn.get_join_table_name(view_name text) returns text
     language plpgsql as
 $$
 begin
-    return 'core_dt_join_' || t_api || '_' || f_api;
+    return 'core_' || view_name;
 end;
 $$;
-comment on function hymn.get_join_table_name(t_api text, f_api text) is '获取业务对象多选关联字段对应的中间表表名';
+comment on function hymn.get_join_table_name(view_name text) is '获取业务对象多选关联字段对应的中间表表名';
 
 create or replace function hymn.get_join_view_name(t_api text, f_api text) returns text
     language plpgsql as
@@ -720,8 +720,6 @@ begin
 end ;
 $BODY$;
 comment on function hymn.rebuild_data_table_history_trigger(obj_id text) is '重建数据表的历史记录触发器，生成触发器函数';
-
-
 
 create or replace function hymn.check_field_properties(record_new hymn.core_b_object_field) returns void
     language plpgsql as
@@ -1121,9 +1119,13 @@ create or replace function hymn.field_trigger_fun_before_insert() returns trigge
     language plpgsql as
 $$
 declare
-    record_new    hymn.core_b_object_field := new;
-    column_prefix text;
-    obj           hymn.core_b_object;
+    record_new      hymn.core_b_object_field := new;
+    column_prefix   text;
+    obj             hymn.core_b_object;
+    ref_obj         hymn.core_b_object;
+    join_table_name text;
+    join_view_name  text;
+    sql_str         text;
 begin
     --     检查字段类型约束
     perform hymn.check_field_properties(record_new);
@@ -1150,15 +1152,28 @@ begin
         if not FOUND then
             raise exception '%类型字段的数量已达到上限',hymn.field_type_description(record_new.type);
         end if;
-    end if;
-    if record_new.is_predefined = true and record_new.standard_type = 'name' and
-       record_new.type = 'text' and
-       record_new.api = 'name' then
-        record_new.max_length := 255;
-        record_new.min_length := 1;
-        record_new.visible_row := 1;
-        record_new.default_value := null;
-        record_new.formula := null;
+        if record_new.type = 'mreference' then
+--             字段类型为多选关联字段时创建中间表及视图
+            select * into ref_obj from hymn.core_b_object where id = record_new.ref_id;
+            join_view_name := hymn.get_join_view_name(obj.api, record_new.api);
+            join_table_name := hymn.get_join_table_name(join_view_name);
+--             创建连接表
+            sql_str = format('create table hymn.%I(s_id text, t_id text);', join_table_name);
+            execute sql_str;
+--             创建连接表视图
+            sql_str = format('create view hymn_view.%I as select s_id,t_id from hymn.%I;',
+                             join_view_name, join_table_name);
+            execute sql_str;
+--             创建连接表索引
+            sql_str = format('create index %I on hymn.%I (s_id);', join_table_name || '_s_idx',
+                             join_table_name);
+            execute sql_str;
+            sql_str = format('create index %I on hymn.%I (t_id);', join_table_name || '_t_idx',
+                             join_table_name);
+            execute sql_str;
+            record_new.join_view_name := join_view_name;
+            perform hymn.grant_join_view_permission(join_view_name);
+        end if;
     end if;
     return record_new;
 end;
@@ -1175,12 +1190,8 @@ create or replace function hymn.field_trigger_fun_after_insert() returns trigger
     language plpgsql as
 $$
 declare
-    record_new      hymn.core_b_object_field := new;
-    obj             hymn.core_b_object;
-    ref_obj         hymn.core_b_object;
-    join_table_name text;
-    join_view_name  text;
-    sql_str         text;
+    record_new hymn.core_b_object_field := new;
+    obj        hymn.core_b_object;
 begin
     select * into obj from hymn.core_b_object where id = record_new.object_id;
     if obj.type <> 'remote' then
@@ -1191,26 +1202,7 @@ begin
             if record_new.type = 'auto' then
                 perform hymn.rebuild_auto_numbering_trigger(record_new.object_id);
             end if;
-        elseif record_new.type = 'mreference' then
---             字段类型为多选关联字段时创建中间表及视图
-            select * into ref_obj from hymn.core_b_object where id = record_new.ref_id;
-            join_table_name := hymn.get_join_table_name(obj.api, record_new.api);
-            join_view_name := hymn.get_join_view_name(obj.api, record_new.api);
---             创建连接表
-            sql_str = format('create table hymn.%I(s_id text, t_id text);', join_table_name);
-            execute sql_str;
---             创建连接表视图
-            sql_str = format('create view hymn_view.%I as select s_id,t_id from hymn.%I;',
-                             join_view_name, join_table_name);
-            execute sql_str;
---             创建连接表索引
-            sql_str = format('create index %I on hymn.%I (s_id);', join_table_name || '_s_idx',
-                             join_table_name);
-            execute sql_str;
-            sql_str = format('create index %I on hymn.%I (t_id);', join_table_name || '_t_idx',
-                             join_table_name);
-            execute sql_str;
-            perform hymn.grant_join_view_permission(join_view_name);
+
         end if;
     end if;
     return record_new;
@@ -1243,9 +1235,9 @@ begin
     if record_new.type <> record_old.type then
         raise exception '不能修改字段类型';
     end if;
-    -- 停用字段是独立操作，不能在停用的同时修改其他数据
-    if record_new.active <> record_old.active and record_new.active = false then
-        record_old.active = false;
+    -- 停用/启用字段是独立操作，不能同时修改其他数据
+    if record_new.active <> record_old.active then
+        record_old.active = record_new.active;
         record_old.modify_by = record_new.modify_by;
         record_old.modify_by_id = record_new.modify_by_id;
         record_old.modify_date = record_new.modify_date;
@@ -1255,15 +1247,65 @@ begin
     --     检查字段类型约束
     perform hymn.check_field_properties(record_new);
 
-    if record_new.is_predefined = true and record_new.standard_type = 'name' and
-       record_new.type = 'text' and record_new.api = 'name' then
-        record_new.max_length := 255;
-        record_new.min_length := 1;
-        record_new.visible_row := 1;
-        record_new.default_value := null;
-        record_new.formula := null;
+    --     限制字段只能更新特定属性
+    if record_new.type = 'text' then
+        if record_old.is_predefined = true and record_new.standard_type = 'name' then
+            record_old.name = record_new.name;
+        else
+            record_old.max_length = record_new.max_length;
+            record_old.min_length = record_new.min_length;
+            record_old.visible_row = record_new.visible_row;
+        end if;
+    elseif record_old.type = 'check_box_group' then
+        record_old.optional_number = record_new.optional_number;
+        record_old.dict_id = record_new.dict_id;
+    elseif record_old.type = 'select' then
+        record_old.visible_row = record_new.visible_row;
+        record_old.optional_number = record_new.optional_number;
+        record_old.dict_id = record_new.dict_id;
+        record_old.master_field_id=record_new.master_field_id;
+    elseif record_old.type = 'integer' then
+        record_old.min_length = record_new.min_length;
+        record_old.max_length = record_new.max_length;
+    elseif record_old.type = 'float' then
+        record_old.min_length = record_new.min_length;
+        record_old.max_length = record_new.max_length;
+    elseif record_old.type = 'money' then
+        record_old.min_length = record_new.min_length;
+        record_old.max_length = record_new.max_length;
+    elseif record_old.type = 'master_slave' then
+        record_old.ref_list_label = record_new.ref_list_label;
+        record_old.query_filter = record_new.query_filter;
+    elseif record_old.type = 'reference' then
+        record_old.ref_list_label = record_new.ref_list_label;
+        record_old.ref_delete_policy = record_new.ref_delete_policy;
+        record_old.query_filter = record_new.query_filter;
+    elseif record_old.type = 'mreference' then
+        record_old.ref_list_label = record_new.ref_list_label;
+        record_old.ref_delete_policy = record_new.ref_delete_policy;
+        record_old.query_filter = record_new.query_filter;
+    elseif record_old.type = 'summary' then
+        record_old.s_id = record_new.s_id;
+        record_old.s_field_id = record_new.s_field_id;
+        record_old.s_type = record_new.s_type;
+        record_old.min_length = record_new.min_length;
+        record_old.query_filter = record_new.query_filter;
+    elseif record_old.type = 'auto' then
+        record_old.gen_rule = record_new.gen_rule;
+    elseif record_old.type = 'picture' then
+        record_old.min_length = record_new.min_length;
+        record_old.max_length = record_new.max_length;
     end if;
-    return record_new;
+    if record_old.standard_type is null then
+        record_old.default_value = record_new.default_value;
+        record_old.formula = record_new.formula;
+    end if;
+    record_old.remark = record_new.remark;
+    record_old.help = record_old.help;
+    record_old.modify_by = record_new.modify_by;
+    record_old.modify_by_id = record_new.modify_by_id;
+    record_old.modify_date = record_new.modify_date;
+    return record_old;
 end ;
 $$;
 comment on function hymn.field_trigger_fun_before_update() is '字段 before update 触发器函数，检查字段属性';
@@ -1284,9 +1326,6 @@ declare
     obj_type        text;
     sql_str         text;
     join_table_name text;
-    join_view_name  text;
-    obj             hymn.core_b_object;
-    ref_obj         hymn.core_b_object;
 begin
     select type into obj_type from hymn.core_b_object where id = record_new.object_id;
     if obj_type <> 'remote' then
@@ -1305,20 +1344,15 @@ begin
         if record_old.type = 'mreference' then
             if record_new.active = true and record_old.active = false then
 --                 启用多选关联字段时创建视图
-                select * into obj from hymn.core_b_object where id = record_old.object_id;
-                select * into ref_obj from hymn.core_b_object where id = record_old.ref_id;
-                join_table_name := hymn.get_join_table_name(obj.api, record_new.api);
-                join_view_name := hymn.get_join_view_name(obj.api, record_new.api);
+                join_table_name := hymn.get_join_table_name(record_old.join_view_name);
                 sql_str = format('create view hymn_view.%I as select s_id,t_id from hymn.%I;',
-                                 join_table_name, join_view_name);
+                                 record_old.join_view_name, join_table_name);
                 execute sql_str;
-                perform hymn.grant_join_view_permission(join_view_name);
+                perform hymn.grant_join_view_permission(record_old.join_view_name);
             end if;
             if record_old.active = true and record_new.active = false then
 --                 停用多选关联字段时删除视图
-                select * into obj from hymn.core_b_object where id = record_old.object_id;
-                join_table_name := hymn.get_join_table_name(obj.api, record_new.api);
-                sql_str = format('drop view if exists hymn_view.%I;', join_view_name);
+                sql_str = format('drop view if exists hymn_view.%I;', record_old.join_view_name);
                 execute sql_str;
             end if;
         end if;
@@ -1337,10 +1371,9 @@ create or replace function hymn.field_trigger_fun_before_delete() returns trigge
     language plpgsql as
 $$
 declare
-    record_old      hymn.core_b_object_field := old;
-    obj             hymn.core_b_object;
-    sql_str         text;
-    join_table_name text;
+    record_old hymn.core_b_object_field := old;
+    obj        hymn.core_b_object;
+    sql_str    text;
 begin
     select * into obj from hymn.core_b_object where id = record_old.object_id;
     if record_old.active = true then
@@ -1360,8 +1393,8 @@ begin
               and column_name = record_old.source_column;
         end if;
         if record_old.type = 'mreference' then
-            join_table_name := hymn.get_join_table_name(obj.api, record_old.api);
-            sql_str := format('drop table if exists hymn.%I cascade;');
+            sql_str := format('drop table if exists hymn.%I cascade;',
+                              hymn.get_join_table_name(record_old.join_view_name));
             execute sql_str;
         end if;
     end if;

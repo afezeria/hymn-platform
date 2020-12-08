@@ -1,6 +1,6 @@
 package github.afezeria.hymn.common.sql
 
-import github.afezeria.hymn.common.conn
+import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.util.execute
 import java.time.LocalDateTime
 import java.util.*
@@ -25,14 +25,14 @@ val COMMON_INFO =
     arrayOf(DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME)
 
 fun deleteBObject(id: String) {
-    conn.use {
+    adminConn.use {
         it.execute("update hymn.core_b_object set active=false where id=?", id)
         it.execute("delete from hymn.core_b_object where id=?", id)
     }
 }
 
 fun clearBObject() {
-    conn.use {
+    adminConn.use {
         it.execute("update hymn.core_b_object set active =true where type='custom'")
         it.execute(
             """
@@ -61,7 +61,7 @@ fun randomUUIDStr(): String = UUID.randomUUID().toString().replace("-", "")
 //        lock_state        bool not null default false,
 //        name              text not null,
 fun createBObject(): Map<String, Any?> {
-    conn.use {
+    adminConn.use {
         val obj = it.execute(
             """
             insert into hymn.core_b_object(name,api,active,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
