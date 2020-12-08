@@ -21,10 +21,11 @@ open class BaseDbTest {
             val scripts = listOf(
                 "1.table.sql",
                 "2.history-table-and-trigger.sql",
-                "3.init-data.sql",
-                "4.function.sql",
+                "3.function.sql",
+                "4.init-data.sql",
                 "5.constraint.sql",
                 "6.test-data-table.sql",
+                "7.test-role.sql",
             )
             for (script in scripts) {
                 runSqlScript("$path/src/test/resources/sql/$script")
@@ -35,7 +36,10 @@ open class BaseDbTest {
         private fun runSqlScript(path: String) {
             val proc = prop.run {
                 println("run script $path")
-                val command = "psql \"postgresql://${get("dataSource.user")}:${get("dataSource.password")}@${get("dataSource.serverName")}:${get("dataSource.portNumber")}/${get("dataSource.databaseName")}\" -f $path -q"
+                val command =
+                    "psql \"postgresql://${get("dataSource.user")}:${get("dataSource.password")}@${
+                        get("dataSource.serverName")
+                    }:${get("dataSource.portNumber")}/${get("dataSource.databaseName")}\" -f $path -q"
                 Runtime.getRuntime().exec(arrayOf("bash", "-c", command))
             }
 //            InputStreamReader(proc.inputStream).readLines().forEach(::println)

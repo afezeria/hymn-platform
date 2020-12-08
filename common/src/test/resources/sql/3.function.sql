@@ -1,3 +1,62 @@
+-- 授予 hymn_user 角色业务对象视图的相关权限
+create or replace function hymn.grant_object_view_permission(obj_id text) returns void
+    language plpgsql as
+$$
+declare
+    obj       hymn.core_b_object;
+    perm_text text := 'select';
+    sql_str   text;
+begin
+    select * into obj from hymn.core_b_object where id = obj_id;
+    if not found then
+        raise exception '对象 [id:%] 不存在',obj_id;
+    end if;
+    perform *
+    from pg_class pc
+             join pg_namespace pn on pn.oid = pc.relnamespace
+    where pn.nspname = 'hymn_view'
+      and pc.relkind = 'v'
+      and pc.relname = obj.api;
+    if not FOUND then
+        raise exception '视图 % 不存在',obj.api;
+    end if;
+    if obj.type in ('custom', 'module') then
+        if obj.can_insert then
+            perm_text := perm_text || ',insert';
+        end if;
+        if obj.can_update then
+            perm_text := perm_text || ',update';
+        end if;
+        if obj.can_delete then
+            perm_text := perm_text || ',delete';
+        end if;
+        sql_str := format('grant %s on hymn_view.%I to hymn_user;', perm_text, obj.api);
+        execute sql_str;
+    end if;
+end;
+$$;
+-- 授予 hymn_user 角色表连接视图的权限
+create or replace function hymn.grant_join_view_permission(view_name text) returns void
+    language plpgsql as
+$$
+declare
+    sql_str text;
+begin
+    perform *
+    from pg_class pc
+             join pg_namespace pn on pn.oid = pc.relnamespace
+    where pn.nspname = 'hymn_view'
+      and pc.relkind = 'v'
+      and pc.relname = view_name;
+    if not FOUND then
+        raise exception '视图 % 不存在',view_name;
+    end if;
+    sql_str := format('GRANT select,insert,update,delete ON hymn_view.av to hymn_user;');
+end;
+$$;
+
+
+
 -- 阻止改变所属对象id
 create or replace function hymn.cannot_change_object_id() returns trigger
     language plpgsql as
@@ -124,7 +183,7 @@ declare
 begin
     select * into obj from hymn.core_b_object where id = new.object_id;
     if not FOUND then
-        raise exception '业务对象[id:%]不存在',new.object_id;
+        raise exception '对象 [id:%] 不存在',new.object_id;
     end if;
     if not obj.active then
         raise exception '对象 [id:%] 已停用，不能新增/更新相关数据',new.object_id;
@@ -237,7 +296,7 @@ declare
 begin
     select * into obj from hymn.core_b_object scbo where id = obj_id;
     if not FOUND then
-        raise exception '对象[id:%]不存在',obj_id;
+        raise exception '对象 [id:%] 不存在',obj_id;
     end if;
     if obj.source_table not like 'core_data_table_%' or obj.type <> 'custom' then
         raise exception '非自定义对象需不能自动重置递增序列';
@@ -269,6 +328,7 @@ begin
         execute format('drop view if exists hymn_view.%I', obj.api);
         execute format('create view hymn_view.%I as select %s from hymn.%I', obj.api, columns,
                        obj.source_table);
+        perform hymn.grant_object_view_permission(obj.id);
     end if;
 end;
 $$;
@@ -483,7 +543,7 @@ declare
 begin
     select * into obj from hymn.core_b_object where id = obj_id;
     if not FOUND then
-        raise exception '对象[id:%]不存在',obj_id;
+        raise exception '对象 [id:%] 不存在',obj_id;
     end if;
     if obj.active = false then
         raise exception '对象未启用';
@@ -1150,6 +1210,7 @@ begin
             sql_str = format('create index %I on hymn.%I (t_id);', join_table_name || '_t_idx',
                              join_table_name);
             execute sql_str;
+            perform hymn.grant_join_view_permission(join_view_name);
         end if;
     end if;
     return record_new;
@@ -1251,6 +1312,7 @@ begin
                 sql_str = format('create view hymn_view.%I as select s_id,t_id from hymn.%I;',
                                  join_table_name, join_view_name);
                 execute sql_str;
+                perform hymn.grant_join_view_permission(join_view_name);
             end if;
             if record_old.active = true and record_new.active = false then
 --                 停用多选关联字段时删除视图
