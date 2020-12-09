@@ -233,7 +233,6 @@ begin
     select * into obj from hymn.core_b_object where id = old.object_id;
     if not obj.active then
         raise exception '对象 [id:%] 已停用，不能删除相关数据',new.object_id;
-        raise exception '对象已停用，不能删除相关数据';
     end if;
     return old;
 end;
@@ -276,12 +275,12 @@ create or replace function hymn.throw_if_api_is_illegal(api_name text, api_value
 $$
 declare
 begin
-    if api_value not similar to '[a-zA-Z][a-zA-Z0-9_]{1,24}' then
-        raise exception 'invalid %, must match [a-zA-Z][a-zA-Z0-9_]{1,24}',api_name;
+    if api_value not similar to '[a-zA-Z][a-zA-Z0-9_]{1,22}' then
+        raise exception '无效的 %, 值必须匹配正则: [a-zA-Z][a-zA-Z0-9_]{1,22}',api_name;
     end if;
     perform keyword from hymn.sql_keyword where keyword = lower(api_value);
     if FOUND then
-        raise exception '无效的%, % 是数据库关键字',api_name,api_value;
+        raise exception '无效的 %, % 是数据库关键字',api_name,api_value;
     end if;
 end;
 $$;
@@ -449,7 +448,7 @@ create or replace function hymn.get_join_view_name(t_api text, f_api text) retur
     language plpgsql as
 $$
 begin
-    return 'dt_join_' || t_api || '_' || f_api;
+    return 'join_' || t_api || '_' || f_api;
 end;
 $$;
 comment on function hymn.get_join_view_name(t_api text, f_api text) is '获取业务对象多选关联字段对应的中间表视图名';

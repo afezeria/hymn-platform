@@ -396,7 +396,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
                     where pn.nspname = 'hymn_view'
                       and pc.relkind = 'v'
                     and pc.relname=?
-                """, "dt_join_${objApi}_${field["api"]}"
+                """, "join_${objApi}_${field["api"]}"
             ).size shouldBe 1
             it.execute(
                 """
@@ -406,11 +406,11 @@ class FieldInsertSuccessTest : BaseDbTest() {
                     where pn.nspname = 'hymn'
                       and pc.relkind = 'r'
                     and pc.relname=?
-                """, "core_dt_join_${objApi}_${field["api"]}"
+                """, "core_join_${objApi}_${field["api"]}"
             ).size shouldBe 1
             it.execute(
                 """
-                    insert into hymn_view.dt_join_${objApi}_${field["api"]} (s_id,t_id) values (?,?) returning *;
+                    insert into hymn_view.join_${objApi}_${field["api"]} (s_id,t_id) values (?,?) returning *;
                 """, randomUUIDStr(), randomUUIDStr()
             ).size shouldBe 1
         }

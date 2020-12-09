@@ -33,7 +33,7 @@ class ThrowIfApiIsIllegalTest : BaseDbTest() {
                 it.execute("select hymn.throw_if_api_is_illegal('object_api','table')")
             }
             exception.sqlState shouldBe "P0001"
-            exception.message shouldContain "无效的.*?是数据库关键字".toRegex()
+            exception.message shouldContain "无效的 .*?是数据库关键字".toRegex()
         }
     }
 
@@ -44,7 +44,7 @@ class ThrowIfApiIsIllegalTest : BaseDbTest() {
                 it.execute("select hymn.throw_if_api_is_illegal('object_api','t')")
             }
             exception.sqlState shouldBe "P0001"
-            exception.message shouldContain "invalid object_api, must match [a-zA-Z][a-zA-Z0-9_]{1,24}"
+            exception.message shouldContain "无效的 \\w+, 值必须匹配正则: \\[a-zA-Z\\]\\[a-zA-Z0-9_\\]\\{1,22\\}".toRegex()
         }
     }
 
@@ -55,7 +55,7 @@ class ThrowIfApiIsIllegalTest : BaseDbTest() {
                 it.execute("select hymn.throw_if_api_is_illegal('object_api','ttttttttttttttttttttttttttttt')")
             }
             exception.sqlState shouldBe "P0001"
-            exception.message shouldContain "invalid object_api, must match [a-zA-Z][a-zA-Z0-9_]{1,24}"
+            exception.message shouldContain "无效的 \\w+, 值必须匹配正则: \\[a-zA-Z\\]\\[a-zA-Z0-9_\\]\\{1,22\\}".toRegex()
         }
     }
 
@@ -66,7 +66,7 @@ class ThrowIfApiIsIllegalTest : BaseDbTest() {
                 it.execute("select hymn.throw_if_api_is_illegal('object_api','_abc')")
             }
             exception.sqlState shouldBe "P0001"
-            exception.message shouldContain "invalid object_api, must match [a-zA-Z][a-zA-Z0-9_]{1,24}"
+            exception.message shouldContain "无效的 \\w+, 值必须匹配正则: \\[a-zA-Z\\]\\[a-zA-Z0-9_\\]\\{1,22\\}".toRegex()
         }
     }
 
@@ -78,13 +78,13 @@ class ThrowIfApiIsIllegalTest : BaseDbTest() {
                     it.execute("select hymn.throw_if_api_is_illegal('object_api','ab#')")
                 }
                 exception.sqlState shouldBe "P0001"
-                exception.message shouldContain "invalid object_api, must match [a-zA-Z][a-zA-Z0-9_]{1,24}"
+                exception.message shouldContain "无效的 \\w+, 值必须匹配正则: \\[a-zA-Z\\]\\[a-zA-Z0-9_\\]\\{1,22\\}".toRegex()
 
                 exception = shouldThrow {
                     it.execute("select hymn.throw_if_api_is_illegal('object_api','?abc')")
                 }
                 exception.sqlState shouldBe "P0001"
-                exception.message shouldContain "invalid object_api, must match [a-zA-Z][a-zA-Z0-9_]{1,24}"
+                exception.message shouldContain "无效的 \\w+, 值必须匹配正则: \\[a-zA-Z\\]\\[a-zA-Z0-9_\\]\\{1,22\\}".toRegex()
             }
         }
     }
