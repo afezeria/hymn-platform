@@ -51,7 +51,8 @@ begin
     if not FOUND then
         raise exception '视图 % 不存在',view_name;
     end if;
-    sql_str := format('GRANT select,insert,update,delete ON hymn_view.av to hymn_user;');
+    sql_str := format('grant select,insert,update,delete on hymn_view.%I to hymn_user;', view_name);
+    execute sql_str;
 end;
 $$;
 
@@ -578,8 +579,7 @@ begin
                           format(E'%s text := %L;\n', template_name, field.gen_rule);
 
             fun_body := fun_body ||
-                        format(E'raise notice ''%%'',seq;\n'
-                                   '%s := replace(%s, ''{yyyy}'', year_v);\n'
+                        format(E'%s := replace(%s, ''{yyyy}'', year_v);\n'
                                    '%s := replace(%s, ''{yy}'', yy_v);\n'
                                    '%s := replace(%s, ''{mm}'', month_v);\n'
                                    '%s := replace(%s, ''{dd}'', day_v);\n'
@@ -624,28 +624,42 @@ create or replace function hymn.rebuild_data_table_history_trigger(obj_id text) 
     language plpgsql as
 $BODY$
 declare
-    obj              hymn.core_b_object;
-    field            hymn.core_b_object_field;
-    data_table_name  text;
-    field_api        text;
-    field_column     text;
-    fun_header       text;
-    fun_body         text := '';
-    fun_tail         text ;
-    trigger_name     text;
-    trigger_fun_name text;
+    obj                hymn.core_b_object;
+    field              hymn.core_b_object_field;
+    data_table_name    text;
+    field_api          text;
+    field_column       text;
+    fun_header         text;
+    fun_body           text := '';
+    fun_tail           text ;
+    trigger_name       text;
+    trigger_fun_name   text;
+    history_table_name text;
+    history_view_name  text;
 begin
     select * into obj from hymn.core_b_object where id = obj_id;
     if not FOUND then
-        raise exception 'object [%] does not exist',obj_id;
+        raise exception '对象 [id:%] 不存在',obj_id;
     end if;
     if obj.active = false then
-        raise exception 'object must be active';
+        raise exception '对象未启用';
+    end if;
+    if obj.type <> 'custom' then
+        raise notice '对象 % 不是自定义业对象，不执行创建历史记录触发器相关动作',obj.api;
+        return;
     end if;
     data_table_name := obj.source_table;
     trigger_fun_name := data_table_name || '_history_trigger_fun';
     trigger_name := data_table_name || '_history';
+    history_table_name := data_table_name || '_history';
+    history_view_name := obj.api || '_history';
 
+--     创建历史记录表在hymn_view中的视图
+    execute format(
+            'create or replace view hymn_view.%I as select id,operation,stamp,change from hymn.%I',
+            history_view_name,
+            history_table_name);
+    execute format('grant select on hymn_view.%I to hymn_user', history_view_name);
     fun_header := format(
             E'create or replace function hymn.%s() returns trigger\n'
                 '    language plpgsql as\n'
@@ -659,18 +673,18 @@ begin
                 'begin\n'
                 '    if tg_op = ''DELETE'' then\n'
                 '        js := to_jsonb(old);\n'
-                '        insert into hymn.%s_history (id, operation, stamp, change)\n'
+                '        insert into hymn.%I (id, operation, stamp, change)\n'
                 '        values (old.id, ''d'', now(), js::text);\n'
-                '    elseif tg_op = ''UPDATE'' then\n', trigger_fun_name, data_table_name);
+                '    elseif tg_op = ''UPDATE'' then\n', trigger_fun_name, history_table_name);
     fun_tail :=
             format(E'    end if;\n'
                 '    return null;\n'
                 'end;\n'
                 '$$;\n');
     for field in select *
-                 from hymn.core_b_object_field
-                 where object_id = obj_id
-                   and field.history = true
+                 from hymn.core_b_object_field cbof
+                 where cbof.object_id = obj_id
+                   and cbof.history = true
         loop
             field_api := field.api;
             field_column := field.source_column;
@@ -695,8 +709,9 @@ begin
                                 field_column, field_column, field_api);
         end loop;
     if fun_body <> '' then
-        fun_body := fun_body || E'    insert into hymn.%s_history (id, operation, stamp, change)\n'
-            '    values (old.id, ''u'', now(), js::text);\n';
+        fun_body := fun_body || format(E'    insert into hymn.%I (id, operation, stamp, change)\n'
+                                           '    values (old.id, ''u'', now(), js::text);\n',
+                                       history_table_name);
     end if;
     execute fun_header || fun_body || fun_tail;
 
@@ -984,6 +999,8 @@ declare
 begin
     if record_new.type = 'custom' then
         perform hymn.reset_increment_seq_of_data_table(record_new.id);
+    end if;
+    if record_new.type <> 'remote' then
 --     创建历史记录触发器
         perform hymn.rebuild_data_table_history_trigger(record_new.id);
     end if;
@@ -1238,22 +1255,11 @@ declare
 begin
     --     状态为停用的字段不允许修改数据
     if record_new.active = record_old.active and record_new.active = false then
-        raise exception '字段已停用，不能更新数据';
+        return old;
     end if;
-    --     禁止修改api和type
-    if record_new.api <> record_old.api then
-        raise exception '不能修改字段api';
-    end if;
+    --     禁止修改type
     if record_new.type <> record_old.type then
         raise exception '不能修改字段类型';
-    end if;
-    -- 停用/启用字段是独立操作，不能同时修改其他数据
-    if record_new.active <> record_old.active then
-        record_old.active = record_new.active;
-        record_old.modify_by = record_new.modify_by;
-        record_old.modify_by_id = record_new.modify_by_id;
-        record_old.modify_date = record_new.modify_date;
-        return record_old;
     end if;
 
 --     关联/汇总字段关联的对象删除后不能启用字段，只能手动删除
@@ -1271,8 +1277,8 @@ begin
        record_old.type in ('integer', 'float', 'money') then
         select cbo.api || '.' || cbof.api
         into summary_field_api
-        from core_b_object_field cbof
-                 left join core_b_object cbo on cbof.object_id = cbo.id
+        from hymn.core_b_object_field cbof
+                 left join hymn.core_b_object cbo on cbof.object_id = cbo.id
         where cbof.type = 'summary'
           and cbof.active = true
           and cbo.active = true
@@ -1282,14 +1288,21 @@ begin
         end if;
     end if;
 
+    -- 停用/启用字段是独立操作，不能同时修改其他数据
+    if record_new.active <> record_old.active then
+        record_old.active = record_new.active;
+        record_old.modify_by = record_new.modify_by;
+        record_old.modify_by_id = record_new.modify_by_id;
+        record_old.modify_date = record_new.modify_date;
+        return record_old;
+    end if;
+
     --     检查字段类型约束
     perform hymn.check_field_properties(record_new);
 
     --     限制字段只能更新特定属性
     if record_new.type = 'text' then
-        if record_old.is_predefined = true and record_new.standard_type = 'name' then
-            record_old.name = record_new.name;
-        else
+        if not (record_old.is_predefined = true and record_new.standard_type = 'name') then
             record_old.max_length = record_new.max_length;
             record_old.min_length = record_new.min_length;
             record_old.visible_row = record_new.visible_row;
@@ -1338,12 +1351,15 @@ begin
         record_old.default_value = record_new.default_value;
         record_old.formula = record_new.formula;
     end if;
+--     通用字段赋值
+    record_old.name = record_new.name;
+    record_old.history = record_new.history;
     record_old.remark = record_new.remark;
-    record_old.help = record_old.help;
+    record_old.help = record_new.help;
     record_old.modify_by = record_new.modify_by;
     record_old.modify_by_id = record_new.modify_by_id;
     record_old.modify_date = record_new.modify_date;
-    return record_old;
+    return record_new;
 end ;
 $$;
 comment on function hymn.field_trigger_fun_before_update() is '字段 before update 触发器函数，检查字段属性';
@@ -1368,11 +1384,12 @@ begin
     select type into obj_type from hymn.core_b_object where id = record_new.object_id;
     if obj_type <> 'remote' then
         --         启用字段时重新创建视图
-        if record_new.active != record_old.active then
+
+        if record_new.active <> record_old.active then
             perform hymn.rebuild_object_view(record_new.object_id);
         end if;
 --         历史记录状态变更时重置历史记录触发器
-        if record_new.history != record_old.history then
+        if record_new.history <> record_old.history then
             perform hymn.rebuild_data_table_history_trigger(record_new.object_id);
         end if;
         if record_new.type = 'auto' and record_old.gen_rule != record_new.gen_rule then
@@ -1403,6 +1420,7 @@ drop trigger if exists c00_field_after_update on hymn.core_b_object_field;
 create trigger c00_field_after_update
     after update
     on hymn.core_b_object_field
+    for each row
 execute function hymn.field_trigger_fun_after_update();
 
 create or replace function hymn.field_trigger_fun_before_delete() returns trigger
@@ -1414,8 +1432,10 @@ declare
     sql_str    text;
 begin
     select * into obj from hymn.core_b_object where id = record_old.object_id;
-    if record_old.active = true then
-        raise exception '无法删除启用的字段';
+    if FOUND then
+        if record_old.active = true then
+            raise exception '字段 % 未停用，无法删除',record_old.api;
+        end if;
     end if;
     if obj.type <> 'remote' then
         --     如果found为true说明只删除了字段，需要执行数据清理和归还字段资源
@@ -1426,7 +1446,7 @@ begin
                            record_old.source_column);
             execute sql_str;
             update hymn.core_column_field_mapping
-            set column_name = null
+            set field_api = null
             where table_name = obj.source_table
               and column_name = record_old.source_column;
         end if;
@@ -1443,4 +1463,5 @@ drop trigger if exists c00_field_before_delete on hymn.core_b_object_field;
 create trigger c00_field_before_delete
     before delete
     on hymn.core_b_object_field
+    for each row
 execute function hymn.field_trigger_fun_before_delete();

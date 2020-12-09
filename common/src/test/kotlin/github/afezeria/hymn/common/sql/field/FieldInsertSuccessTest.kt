@@ -2,6 +2,7 @@ package github.afezeria.hymn.common.sql.field
 
 import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.sql.*
+import github.afezeria.hymn.common.userConn
 import github.afezeria.hymn.common.util.execute
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -364,32 +365,22 @@ class FieldInsertSuccessTest : BaseDbTest() {
     @Test
     fun multipleReference() {
 
-        adminConn.use {
-            val masterObj = it.execute(
-                """
-                    insert into hymn.core_b_object(name,api,active,create_by_id,create_by,modify_by_id,
-                        modify_by,create_date,modify_date)
-                    values ('测试对象3','test_obj3',true,?,?,?,?,?,?) returning *;
-                    """,
-                DEFAULT_ACCOUNT_ID,
-                DEFAULT_ACCOUNT_NAME,
-                DEFAULT_ACCOUNT_ID,
-                DEFAULT_ACCOUNT_NAME,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-            )[0]
-
-            val field = it.execute(
-                """
+        val master = createBObject()
+        val masterId = master["id"] as String
+        val field:MutableMap<String,Any?>
+        try{
+            adminConn.use {
+                field = it.execute(
+                    """
                     insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'多选关联对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
-                objId, masterObj["id"], *COMMON_INFO
-            )[0]
-            (field["source_column"] as String) shouldStartWith "pl"
-            it.execute(
-                """
+                    objId, masterId, *COMMON_INFO
+                )[0]
+                (field["source_column"] as String) shouldStartWith "pl"
+                it.execute(
+                    """
                     select *
                     from pg_class pc
                              left join pg_namespace pn on pn.oid = pc.relnamespace
@@ -397,9 +388,9 @@ class FieldInsertSuccessTest : BaseDbTest() {
                       and pc.relkind = 'v'
                     and pc.relname=?
                 """, "join_${objApi}_${field["api"]}"
-            ).size shouldBe 1
-            it.execute(
-                """
+                ).size shouldBe 1
+                it.execute(
+                    """
                     select *
                     from pg_class pc
                              left join pg_namespace pn on pn.oid = pc.relnamespace
@@ -407,12 +398,17 @@ class FieldInsertSuccessTest : BaseDbTest() {
                       and pc.relkind = 'r'
                     and pc.relname=?
                 """, "core_join_${objApi}_${field["api"]}"
-            ).size shouldBe 1
-            it.execute(
-                """
+                ).size shouldBe 1
+            }
+            userConn.use{
+                it.execute(
+                    """
                     insert into hymn_view.join_${objApi}_${field["api"]} (s_id,t_id) values (?,?) returning *;
                 """, randomUUIDStr(), randomUUIDStr()
-            ).size shouldBe 1
+                ).size shouldBe 1
+            }
+        }finally {
+            deleteBObject(masterId)
         }
     }
 

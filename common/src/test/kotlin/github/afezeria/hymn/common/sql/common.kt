@@ -26,12 +26,15 @@ val COMMON_INFO =
 
 fun deleteBObject(id: String) {
     adminConn.use {
-        it.execute(
-            "update hymn.core_b_object_field set active=false where ref_id=? and active=true",
-            id
-        )
-        it.execute("update hymn.core_b_object set active=false where id=?", id)
-        it.execute("delete from hymn.core_b_object where id=?", id)
+        val obj = it.execute("select * from hymn.core_b_object where id = ?", id)
+        if (obj.isNotEmpty()) {
+            it.execute(
+                "update hymn.core_b_object_field set active=false where ref_id=? and active=true",
+                id
+            )
+            it.execute("update hymn.core_b_object set active=false where id=?", id)
+            it.execute("delete from hymn.core_b_object where id=?", id)
+        }
     }
 }
 
@@ -41,7 +44,7 @@ fun clearBObject() {
         it.execute(
             """
             update hymn.core_b_object_field set active = false 
-            where object_id in 
+            where active=true and object_id in 
                 (select id from hymn.core_b_object where core_b_object.type='custom')
         """
         )
@@ -68,8 +71,8 @@ fun createBObject(): Map<String, Any?> {
     adminConn.use {
         val obj = it.execute(
             """
-            insert into hymn.core_b_object(name,api,active,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
-            values ('测试对象','test_obj${objSeq.nextInt()}',true,?,?,?,?,?,?) returning *;
+            insert into hymn.core_b_object(name,api,active,can_insert,can_update,can_delete,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+            values ('测试对象','test_obj${objSeq.nextInt()}',true,true,true,true,?,?,?,?,?,?) returning *;
             """,
             DEFAULT_ACCOUNT_ID,
             DEFAULT_ACCOUNT_NAME,
