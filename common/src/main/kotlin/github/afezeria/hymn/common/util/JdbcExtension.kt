@@ -1,5 +1,6 @@
 package github.afezeria.hymn.common.util
 
+import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
 import java.sql.*
 
@@ -7,11 +8,16 @@ import java.sql.*
  * @author afezeria
  */
 
+private val logger = KotlinLogging.logger {}
+
 /**
  * @param sql 待执行sql语句，命名参数，格式为 #{param}
  * @param params 参数哈希
  */
-fun Connection.execute(@Language("sql") sql: String, params: Map<String, Any?>): MutableList<MutableMap<String, Any?>> {
+fun Connection.execute(
+    @Language("sql") sql: String,
+    params: Map<String, Any?>
+): MutableList<MutableMap<String, Any?>> {
     return parseNamingSql(sql, params).run {
         execute(first, second)
     }
@@ -22,26 +28,47 @@ fun Connection.execute(@Language("sql") sql: String, params: Map<String, Any?>):
  * @param sql 待执行sql语句，占位符为 ?
  * @param params 参数列表
  */
-fun Connection.execute(@Language("sql") sql: String, params: List<Any?>): MutableList<MutableMap<String, Any?>> {
+fun Connection.execute(
+    @Language("sql") sql: String,
+    params: List<Any?>
+): MutableList<MutableMap<String, Any?>> {
     return execute(sql, *params.toTypedArray())
 }
+
 
 /**
  * @param sql 待执行sql语句，占位符为 ?
  * @param params 参数
  */
-fun Connection.execute(@Language("sql") sql: String, vararg params: Any?): MutableList<MutableMap<String, Any?>> {
+fun Connection.execute(
+    @Language("sql") sql: String,
+    vararg params: Any?
+): MutableList<MutableMap<String, Any?>> {
     return if (params.isNotEmpty()) {
         prepareStatement(sql).use {
             params.forEachIndexed { index, any ->
                 it.setObject(index + 1, any)
             }
             it.execute()
+            if (logger.isDebugEnabled) {
+                var warnings = it.warnings
+                while (warnings != null) {
+                    logger.debug(warnings.message)
+                    warnings = warnings.nextWarning
+                }
+            }
             it.resultSet.toList()
         }
     } else {
         createStatement().use {
             it.execute(sql)
+            if (logger.isDebugEnabled) {
+                var warnings = it.warnings
+                while (warnings != null) {
+                    logger.debug(warnings.message)
+                    warnings = warnings.nextWarning
+                }
+            }
             it.resultSet.toList()
         }
     }

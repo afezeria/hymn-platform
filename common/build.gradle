@@ -19,13 +19,16 @@ dependencies {
     implementation "com.fasterxml.jackson.module:jackson-module-parameter-names:2.11.3"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3"
 
+    implementation 'io.github.microutils:kotlin-logging:1.12.0'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+
 
     implementation 'org.springframework.boot:spring-boot-starter-aop'
 
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
 
     compile group: "org.ktorm", name: "ktorm-core", version: "$ktormVersion"
 
