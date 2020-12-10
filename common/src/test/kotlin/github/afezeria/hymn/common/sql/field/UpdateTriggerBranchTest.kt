@@ -5,6 +5,7 @@ import github.afezeria.hymn.common.sql.*
 import github.afezeria.hymn.common.userConn
 import github.afezeria.hymn.common.util.execute
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import mu.KLogging
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.postgresql.util.PSQLException
+import java.time.LocalDateTime
 
 /**
  * @author afezeria
@@ -269,22 +271,125 @@ class UpdateTriggerBranchTest : BaseDbTest() {
                 DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, typeId,
             )[0]
             it.execute("update hymn_view.${objApi} set tfield__cf='def' where id = ?", data["id"])
+            it.execute(
+                "select * from hymn_view.${objApi}_history"
+            ).size shouldBe 0
         }
         adminConn.use {
-            it.execute(
-                "select * from hymn.${obj["source_table"]}_history"
-            ).size shouldBe 0
             it.execute("update hymn.core_b_object_field set history=true where id = ?", field["id"])
         }
         userConn.use {
             it.execute("update hymn_view.${objApi} set tfield__cf='123' where id = ?", data["id"])
-        }
-        adminConn.use {
             it.execute(
-                "select * from hymn.${obj["source_table"]}_history"
+                "select * from hymn_view.${objApi}_history"
             ).size shouldBe 1
         }
     }
 
+    @Test
+    fun `dynamically rebuild auto number triggers`() {
+        val field: MutableMap<String, Any?>
+        val fieldApi: String
+        adminConn.use {
+            field = it.execute(
+                """
+                    insert into hymn.core_b_object_field (object_id, name, api, type,gen_rule, create_by_id, 
+                        create_by, modify_by_id, modify_by, create_date, modify_date) 
+                    values (?,'自动编号字段','autofield','auto','{yyyy}{mm}{000}',?,?,?,?,now(),now()) returning *;
+                    """,
+                objId, *COMMON_INFO
+            )[0]
+            fieldApi = field["api"] as String
+        }
+        val now = LocalDateTime.now()
+        userConn.use {
+            val data = it.execute(
+                """
+                    insert into hymn_view.${objApi} (owner_id,create_by_id,modify_by_id,type_id,
+                        create_date,modify_date)
+                    values (?,?,?,?,now(),now()) returning *
+                """,
+                DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, typeId,
+            )[0]
+            data[fieldApi] as String shouldContain "${now.year}${now.monthValue}\\d{3}".toRegex()
+        }
+        adminConn.use {
+            it.execute(
+                "update hymn.core_b_object_field set gen_rule='{yyyy}{mm}{dd}{00}' where id = ?",
+                field["id"]
+            )
+        }
+        userConn.use {
+            val data = it.execute(
+                """
+                    insert into hymn_view.${objApi} (owner_id,create_by_id,modify_by_id,type_id,
+                        create_date,modify_date)
+                    values (?,?,?,?,now(),now()) returning *
+                """,
+                DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, typeId,
+            )[0]
+            data[fieldApi] as String shouldContain "${now.year}${now.monthValue}${now.dayOfMonth}\\d{2}".toRegex()
+        }
+    }
 
+    @Test
+    fun `dynamically rebuild join view when active state of mreference field changes`() {
+        val refObj = createBObject()
+        val refId = refObj["id"] as String
+        try {
+            adminConn.use {
+                val field = it.execute(
+                    """
+                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                        ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
+                    values (?,'多选关联对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
+                    """,
+                    objId, refId, *COMMON_INFO
+                )[0]
+                val fieldId = field["id"] as String
+//                停用字段删除视图
+                it.execute(
+                    "update hymn.core_b_object_field set active=false where id = ?",
+                    fieldId
+                )
+                it.execute(
+                    """
+                    select * from pg_class pc 
+                        left join pg_namespace pn on pc.relnamespace = pn.oid
+                    where pn.nspname='hymn_view' and pc.relkind='v'
+                        and pc.relname=?
+                """, field["join_view_name"]
+                ).size shouldBe 0
+//                启用字段重建视图
+                it.execute(
+                    "update hymn.core_b_object_field set active=true where id = ?",
+                    fieldId
+                )
+                it.execute(
+                    """
+                    select * from pg_class pc 
+                        left join pg_namespace pn on pc.relnamespace = pn.oid
+                    where pn.nspname='hymn_view' and pc.relkind='v'
+                        and pc.relname=?
+                """, field["join_view_name"]
+                ).size shouldBe 1
+                it.execute(
+                    """
+                       select * from information_schema.role_table_grants rtg
+                       where table_schema='hymn_view'
+                       and table_name=? 
+                       and grantee='hymn_user'
+                    """, field["join_view_name"]
+                ).map { it["privilege_type"] } shouldContainAll listOf(
+                    "SELECT",
+                    "INSERT",
+                    "UPDATE",
+                    "DELETE"
+                )
+            }
+        } finally {
+            deleteBObject(refId)
+        }
+
+    }
 }

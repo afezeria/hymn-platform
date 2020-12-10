@@ -48,6 +48,8 @@ alter table hymn.core_custom_interface
     add constraint core_custom_interface_api_uk unique (api);
 alter table hymn.core_dict
     add constraint core_dict_api_uk unique (api);
+alter table hymn.core_b_object
+    add constraint core_b_object_api_uk unique (api);
 alter table hymn.core_b_object_field
     add constraint core_b_object_field_api_uk unique (object_id, api);
 

@@ -530,16 +530,17 @@ create or replace function hymn.rebuild_auto_numbering_trigger(obj_id text) retu
     language plpgsql as
 $BODY$
 declare
-    obj                                hymn.core_b_object;
-    field                              hymn.core_b_object_field;
-    template_name                      text;
-    data_table_name                    text;
-    data_table_auto_numbering_seq_name text;
-    fun_header                         text;
-    fun_body                           text := E'begin\n';
-    fun_tail                           text := E'    return new;\nend;\n$$;\n';
-    trigger_name                       text;
-    trigger_fun_name                   text;
+    obj                  hymn.core_b_object;
+    field                hymn.core_b_object_field;
+    template_name        text;
+    data_table_name      text;
+    auto_number_seq_name text;
+    fun_header           text;
+    fun_body             text := E'begin\n';
+    fun_tail             text := E'    return new;\nend;\n$$;\n';
+    trigger_name         text;
+    trigger_fun_name     text;
+    sql_str              text;
 begin
     select * into obj from hymn.core_b_object where id = obj_id;
     if not FOUND then
@@ -548,17 +549,37 @@ begin
     if obj.active = false then
         raise exception '对象未启用';
     end if;
+    if obj.type <> 'custom' then
+        raise notice '对象 % 不是自定义业对象，不支持创建自动编号字段',obj.api;
+        return;
+    end if;
+
+
     data_table_name := obj.source_table;
-    trigger_fun_name := data_table_name || '_auto_numbering_trigger_fun';
-    trigger_name := data_table_name || '_auto_numbering';
-    data_table_auto_numbering_seq_name := data_table_name || '_seq';
+    trigger_fun_name := obj.api || '_auto_number_trigger_fun';
+    trigger_name := obj.api || '_auto_number';
+    auto_number_seq_name := obj.api || '_auto_number_seq';
+
+    perform *
+    from pg_class pc
+             left join pg_namespace pn on pn.oid = pc.relnamespace
+    where pn.nspname = 'hymn_view'
+      and pc.relkind = 'S'
+      and pc.relname = auto_number_seq_name;
+    if not FOUND then
+        sql_str := format('create sequence hymn_view.%I start 1', auto_number_seq_name);
+        execute sql_str;
+        sql_str :=
+                format('grant usage on sequence hymn_view.%I to hymn_user;', auto_number_seq_name);
+        execute sql_str;
+    end if;
 
     fun_header := format(
-            E'create or replace function hymn.%s() returns trigger\n'
+            E'create or replace function hymn.%I() returns trigger\n'
                 '   language plpgsql as\n'
                 '$$\n'
                 'declare\n'
-                'seq             text      := nextval(''hymn.%s'');\n'
+                'seq             text      := nextval(''hymn_view.%s'');\n'
                 'now             timestamp := now();\n'
                 'year_v            text      := date_part(''year'', now);\n'
                 'yy_v              text      := substr(year_v, 3);\n'
@@ -567,7 +588,7 @@ begin
                 'hour_v            text      := date_part(''hour'', now);\n'
                 'minute_v          text      := date_part(''minute'', now);\n'
                 'size              int;\n'
-                'tmp             text;\n', trigger_fun_name, data_table_auto_numbering_seq_name);
+                'tmp             text;\n', trigger_fun_name, auto_number_seq_name);
 
     for field in select *
                  from hymn.core_b_object_field
@@ -635,7 +656,7 @@ declare
     trigger_name       text;
     trigger_fun_name   text;
     history_table_name text;
-    history_view_name  text;
+    sql_str            text;
 begin
     select * into obj from hymn.core_b_object where id = obj_id;
     if not FOUND then
@@ -651,17 +672,27 @@ begin
     data_table_name := obj.source_table;
     trigger_fun_name := data_table_name || '_history_trigger_fun';
     trigger_name := data_table_name || '_history';
-    history_table_name := data_table_name || '_history';
-    history_view_name := obj.api || '_history';
+    history_table_name := obj.api || '_history';
+--     创建历史记录表及索引
+    perform *
+    from pg_class pc
+             left join pg_namespace pn on pc.relnamespace = pn.oid
+    where pn.nspname = 'hymn_view'
+      and pc.relname = history_table_name;
+    if not FOUND then
+        sql_str := format('create table hymn_view.%I ' ||
+                          '(id text,operation text,stamp timestamptz,change text)',
+                          history_table_name);
+        execute sql_str;
+        sql_str := format('create index on hymn_view.%I (id)', history_table_name);
+        execute sql_str;
+        sql_str := format('grant select,insert on table hymn_view.%I to hymn_user',
+                          history_table_name);
+        execute sql_str;
+    end if;
 
---     创建历史记录表在hymn_view中的视图
-    execute format(
-            'create or replace view hymn_view.%I as select id,operation,stamp,change from hymn.%I',
-            history_view_name,
-            history_table_name);
-    execute format('grant select on hymn_view.%I to hymn_user', history_view_name);
     fun_header := format(
-            E'create or replace function hymn.%s() returns trigger\n'
+            E'create or replace function hymn.%I() returns trigger\n'
                 '    language plpgsql as\n'
                 '$$\n'
                 'declare\n'
@@ -673,7 +704,7 @@ begin
                 'begin\n'
                 '    if tg_op = ''DELETE'' then\n'
                 '        js := to_jsonb(old);\n'
-                '        insert into hymn.%I (id, operation, stamp, change)\n'
+                '        insert into hymn_view.%I (id, operation, stamp, change)\n'
                 '        values (old.id, ''d'', now(), js::text);\n'
                 '    elseif tg_op = ''UPDATE'' then\n', trigger_fun_name, history_table_name);
     fun_tail :=
@@ -709,9 +740,10 @@ begin
                                 field_column, field_column, field_api);
         end loop;
     if fun_body <> '' then
-        fun_body := fun_body || format(E'    insert into hymn.%I (id, operation, stamp, change)\n'
-                                           '    values (old.id, ''u'', now(), js::text);\n',
-                                       history_table_name);
+        fun_body := fun_body ||
+                    format(E'    insert into hymn_view.%I (id, operation, stamp, change)\n'
+                               '    values (old.id, ''u'', now(), js::text);\n',
+                           history_table_name);
     end if;
     execute fun_header || fun_body || fun_tail;
 
@@ -945,6 +977,9 @@ declare
     record_new hymn.core_b_object := new;
 begin
     perform hymn.throw_if_api_is_illegal('api', record_new.api);
+    if record_new.api similar to '%_history' then
+        raise exception '对象api不能以 _history 结尾';
+    end if;
 
     record_new.active = true;
 
@@ -997,9 +1032,9 @@ $$
 declare
     record_new hymn.core_b_object := new;
 begin
-    if record_new.type = 'custom' then
-        perform hymn.reset_increment_seq_of_data_table(record_new.id);
-    end if;
+    --     if record_new.type = 'custom' then
+--         perform hymn.reset_increment_seq_of_data_table(record_new.id);
+--     end if;
     if record_new.type <> 'remote' then
 --     创建历史记录触发器
         perform hymn.rebuild_data_table_history_trigger(record_new.id);
@@ -1101,15 +1136,24 @@ begin
             sql_str := format('truncate hymn.%I', record_old.source_table);
             execute sql_str;
             -- 删除历史记录
-            sql_str := format('truncate hymn.%I_history', record_old.source_table);
+            sql_str := format('drop table hymn_view.%s_history cascade', record_old.api);
             execute sql_str;
+--             删除序列
+            sql_str := format('drop sequence if exists hymn_view.%s_auto_number_seq cascade',
+                              record_old.api);
+--             删除引用当前对象的多选关联字段
+            delete
+            from hymn.core_b_object_field
+            where type = 'mreference'
+              and ref_id = record_old.id;
+
             --     删除触发器及触发器函数
             for trigger_fun_name,trigger_name in select pp.proname, pt.tgname
                                                  from pg_trigger pt
                                                           left join pg_class pc on pt.tgrelid = pc.oid
                                                           left join pg_namespace pn on pn.oid = pc.relnamespace
                                                           left join pg_proc pp on pt.tgfoid = pp.oid
-                                                 where pc.relname = 'core_data_table_001'
+                                                 where pc.relname = record_old.source_table
                                                    and pn.nspname = 'hymn'
                 loop
                     sql_str := format('drop trigger if exists %I on hymn.%I cascade;', trigger_name,
@@ -1226,10 +1270,10 @@ begin
         if record_new.source_column not like 'pl_%' then
 --     构建视图
             perform hymn.rebuild_object_view(record_new.object_id);
+        end if;
 --     如果是自动编号字段则重建触发器
-            if record_new.type = 'auto' then
-                perform hymn.rebuild_auto_numbering_trigger(record_new.object_id);
-            end if;
+        if obj.type = 'custom' and record_new.type = 'auto' then
+            perform hymn.rebuild_auto_numbering_trigger(record_new.object_id);
         end if;
     end if;
     return record_new;
@@ -1392,7 +1436,8 @@ begin
         if record_new.history <> record_old.history then
             perform hymn.rebuild_data_table_history_trigger(record_new.object_id);
         end if;
-        if record_new.type = 'auto' and record_old.gen_rule != record_new.gen_rule then
+        if obj_type = 'custom' and record_new.type = 'auto' and
+           record_old.gen_rule != record_new.gen_rule then
 --          如果是自动编号字段则重建触发器
             perform hymn.rebuild_auto_numbering_trigger(record_new.object_id);
         end if;
@@ -1438,23 +1483,26 @@ begin
         end if;
     end if;
     if obj.type <> 'remote' then
-        --     如果found为true说明只删除了字段，需要执行数据清理和归还字段资源
---     如果为false说明执行的是删除对象的流程，相关的操作由对象触发器处理
-        if FOUND then
-            sql_str :=
-                    format('update hymn.%I set %I = null', obj.source_table,
-                           record_old.source_column);
-            execute sql_str;
-            update hymn.core_column_field_mapping
-            set field_api = null
-            where table_name = obj.source_table
-              and column_name = record_old.source_column;
-        end if;
         if record_old.type = 'mreference' then
             sql_str := format('drop table if exists hymn.%I cascade;',
                               hymn.get_join_table_name(record_old.join_view_name));
             execute sql_str;
         end if;
+        --     如果found为true说明只删除了字段，需要执行数据清理和归还字段资源
+--     如果为false说明执行的是删除对象的流程，相关的操作由对象触发器处理
+        if FOUND then
+            if record_old.type <> 'mreference' then
+                sql_str :=
+                        format('update hymn.%I set %I = null', obj.source_table,
+                               record_old.source_column);
+                execute sql_str;
+            end if;
+            update hymn.core_column_field_mapping
+            set field_api = null
+            where table_name = obj.source_table
+              and column_name = record_old.source_column;
+        end if;
+
     end if;
     return old;
 end;

@@ -1552,14 +1552,6 @@ create table hymn.core_data_table_001(
     datetime019 timestamptz,
     datetime020 timestamptz
 );
-create table hymn.core_data_table_001_history
-(
-    id        text,
-    operation text,
-    stamp     timestamp,
-    change    text
-);
-grant select,insert on table hymn.core_data_table_001_history to hymn_user;
 
 create index core_data_table_001_owner_id_idx on hymn.core_data_table_001 (owner_id);
 create index core_data_table_001_create_by_id_idx on hymn.core_data_table_001 (create_by_id);
@@ -1828,14 +1820,6 @@ create table hymn.core_data_table_002(
     datetime019 timestamptz,
     datetime020 timestamptz
 );
-create table hymn.core_data_table_002_history
-(
-    id        text,
-    operation text,
-    stamp     timestamp,
-    change    text
-);
-grant select,insert on table hymn.core_data_table_002_history to hymn_user;
 
 create index core_data_table_002_owner_id_idx on hymn.core_data_table_002 (owner_id);
 create index core_data_table_002_create_by_id_idx on hymn.core_data_table_002 (create_by_id);
@@ -2104,14 +2088,6 @@ create table hymn.core_data_table_003(
     datetime019 timestamptz,
     datetime020 timestamptz
 );
-create table hymn.core_data_table_003_history
-(
-    id        text,
-    operation text,
-    stamp     timestamp,
-    change    text
-);
-grant select,insert on table hymn.core_data_table_003_history to hymn_user;
 
 create index core_data_table_003_owner_id_idx on hymn.core_data_table_003 (owner_id);
 create index core_data_table_003_create_by_id_idx on hymn.core_data_table_003 (create_by_id);
@@ -2380,14 +2356,6 @@ create table hymn.core_data_table_004(
     datetime019 timestamptz,
     datetime020 timestamptz
 );
-create table hymn.core_data_table_004_history
-(
-    id        text,
-    operation text,
-    stamp     timestamp,
-    change    text
-);
-grant select,insert on table hymn.core_data_table_004_history to hymn_user;
 
 create index core_data_table_004_owner_id_idx on hymn.core_data_table_004 (owner_id);
 create index core_data_table_004_create_by_id_idx on hymn.core_data_table_004 (create_by_id);
@@ -2656,14 +2624,6 @@ create table hymn.core_data_table_005(
     datetime019 timestamptz,
     datetime020 timestamptz
 );
-create table hymn.core_data_table_005_history
-(
-    id        text,
-    operation text,
-    stamp     timestamp,
-    change    text
-);
-grant select,insert on table hymn.core_data_table_005_history to hymn_user;
 
 create index core_data_table_005_owner_id_idx on hymn.core_data_table_005 (owner_id);
 create index core_data_table_005_create_by_id_idx on hymn.core_data_table_005 (create_by_id);
@@ -2671,23 +2631,3 @@ create index core_data_table_005_modify_by_id_idx on hymn.core_data_table_005 (m
 create index core_data_table_005_created_date_idx on hymn.core_data_table_005 (create_date);
 create index core_data_table_005_modify_date_idx on hymn.core_data_table_005 (modify_date);
 create index core_data_table_005_name_idx on hymn.core_data_table_005 (name);
-
-drop sequence if exists hymn.core_data_table_001_seq;
-create sequence hymn.core_data_table_001_seq start 1;
-grant usage on sequence hymn.core_data_table_001_seq to hymn_user;
-
-drop sequence if exists hymn.core_data_table_002_seq;
-create sequence hymn.core_data_table_002_seq start 1;
-grant usage on sequence hymn.core_data_table_002_seq to hymn_user;
-
-drop sequence if exists hymn.core_data_table_003_seq;
-create sequence hymn.core_data_table_003_seq start 1;
-grant usage on sequence hymn.core_data_table_003_seq to hymn_user;
-
-drop sequence if exists hymn.core_data_table_004_seq;
-create sequence hymn.core_data_table_004_seq start 1;
-grant usage on sequence hymn.core_data_table_004_seq to hymn_user;
-
-drop sequence if exists hymn.core_data_table_005_seq;
-create sequence hymn.core_data_table_005_seq start 1;
-grant usage on sequence hymn.core_data_table_005_seq to hymn_user;

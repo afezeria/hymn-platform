@@ -5,7 +5,6 @@ drop schema if exists hymn_view cascade;
 create schema hymn_view;
 
 grant usage on schema hymn_view to hymn_user;
-grant usage on schema hymn to hymn_user;
 
 drop table if exists hymn.core_account cascade;
 create table hymn.core_account

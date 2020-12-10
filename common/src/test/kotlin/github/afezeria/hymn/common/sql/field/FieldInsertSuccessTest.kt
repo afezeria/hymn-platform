@@ -367,8 +367,8 @@ class FieldInsertSuccessTest : BaseDbTest() {
 
         val master = createBObject()
         val masterId = master["id"] as String
-        val field:MutableMap<String,Any?>
-        try{
+        val field: MutableMap<String, Any?>
+        try {
             adminConn.use {
                 field = it.execute(
                     """
@@ -400,87 +400,68 @@ class FieldInsertSuccessTest : BaseDbTest() {
                 """, "core_join_${objApi}_${field["api"]}"
                 ).size shouldBe 1
             }
-            userConn.use{
+            userConn.use {
                 it.execute(
                     """
                     insert into hymn_view.join_${objApi}_${field["api"]} (s_id,t_id) values (?,?) returning *;
                 """, randomUUIDStr(), randomUUIDStr()
                 ).size shouldBe 1
             }
-        }finally {
+        } finally {
             deleteBObject(masterId)
         }
     }
 
     @Test
     fun reference() {
-        adminConn.use {
-            val refObj = it.execute(
-                """
-                    insert into hymn.core_b_object(name,api,active,create_by_id,create_by,modify_by_id,
-                        modify_by,create_date,modify_date)
-                    values ('测试对象4','test_obj2',true,?,?,?,?,?,?) returning *;
-                    """,
-                DEFAULT_ACCOUNT_ID,
-                DEFAULT_ACCOUNT_NAME,
-                DEFAULT_ACCOUNT_ID,
-                DEFAULT_ACCOUNT_NAME,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-            )[0]
-
-            val field = it.execute(
-                """
+        val refObj = createBObject()
+        val refId = refObj["id"] as String
+        val fieldApi: String
+        try {
+            adminConn.use {
+                val field = it.execute(
+                    """
                     insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'关联','reffield','reference',?,'null',?,?,?,?,now(),now()) returning *;
                     """,
-                objId, refObj["id"], *COMMON_INFO
-            )[0]
-            (field["source_column"] as String) shouldContain "text"
-            it.fieldShouldExists("reffield")
-            masterObjId = refObj["id"] as String
-            masterFieldId = field["id"] as String
-            it.execute(
-                """
+                    objId, refObj["id"], *COMMON_INFO
+                )[0]
+                fieldApi = field["api"] as String
+                (field["source_column"] as String) shouldContain "text"
+                it.fieldShouldExists("reffield")
+            }
+            userConn.use {
+                it.execute(
+                    """
                         insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
-                            modify_by_id,type_id,${field["api"]}) 
+                            modify_by_id,type_id,${fieldApi}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
-                *STANDARD_FIELD, randomUUIDStr()
-            ).size shouldBe 1
-
+                    *STANDARD_FIELD, randomUUIDStr()
+                ).size shouldBe 1
+            }
+        } finally {
+            deleteBObject(refId)
         }
     }
 
     @Test
     @Order(10)
     fun masteslave() {
+        val master = createBObject()
+        val masterId = master["id"] as String
         adminConn.use {
-            val masterObj = it.execute(
-                """
-                    insert into hymn.core_b_object(name,api,active,create_by_id,create_by,modify_by_id,
-                        modify_by,create_date,modify_date)
-                    values ('测试对象2','test_obj2',true,?,?,?,?,?,?) returning *;
-                    """,
-                DEFAULT_ACCOUNT_ID,
-                DEFAULT_ACCOUNT_NAME,
-                DEFAULT_ACCOUNT_ID,
-                DEFAULT_ACCOUNT_NAME,
-                LocalDateTime.now(),
-                LocalDateTime.now()
-            )[0]
-
             val field = it.execute(
                 """
                     insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
-                objId, masterObj["id"], *COMMON_INFO
+                objId, masterId, *COMMON_INFO
             )[0]
             (field["source_column"] as String) shouldBe "master001"
             it.fieldShouldExists("masterfield")
-            masterObjId = masterObj["id"] as String
+            masterObjId = masterId
             masterFieldId = field["id"] as String
             it.execute(
                 """
