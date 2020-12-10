@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 /**
  * @author afezeria
  */
-class UpdateTriggerBranchTest : BaseDbTest() {
+class UpdateTriggerTest : BaseDbTest() {
     companion object : KLogging() {
         lateinit var objId: String
         lateinit var objSourceTable: String

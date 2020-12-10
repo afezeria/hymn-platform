@@ -365,8 +365,8 @@ class FieldInsertSuccessTest : BaseDbTest() {
     @Test
     fun multipleReference() {
 
-        val master = createBObject()
-        val masterId = master["id"] as String
+        val refObj = createBObject()
+        val refId = refObj["id"] as String
         val field: MutableMap<String, Any?>
         try {
             adminConn.use {
@@ -376,7 +376,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'多选关联对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
-                    objId, masterId, *COMMON_INFO
+                    objId, refId, *COMMON_INFO
                 )[0]
                 (field["source_column"] as String) shouldStartWith "pl"
                 it.execute(
@@ -408,7 +408,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
                 ).size shouldBe 1
             }
         } finally {
-            deleteBObject(masterId)
+            deleteBObject(refId)
         }
     }
 

@@ -16,7 +16,7 @@ import org.postgresql.util.PSQLException
 /**
  * @author afezeria
  */
-class InsertTriggerBranchTest : BaseDbTest() {
+class InsertTriggerTest : BaseDbTest() {
     companion object {
         lateinit var objId: String
         lateinit var objSourceTable: String
@@ -185,6 +185,4 @@ class InsertTriggerBranchTest : BaseDbTest() {
             }
         }
     }
-
-
 }

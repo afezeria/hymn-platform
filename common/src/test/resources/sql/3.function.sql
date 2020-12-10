@@ -454,78 +454,6 @@ end;
 $$;
 comment on function hymn.get_join_view_name(t_api text, f_api text) is '获取业务对象多选关联字段对应的中间表视图名';
 
-
--- 创建数据字典，用于创建多选和单选的字段时生成字典数据
-create or replace function hymn.create_dict_by_field(field hymn.core_b_object_field) returns uuid
-    language plpgsql as
-$$
-declare
-    object_row  hymn.core_b_object;
-    dict_name   text;
-    dict_api    text;
-    new_dict_id text;
-    item        record;
-begin
-    select * into object_row from hymn.core_b_object where id = field.object_id;
-    if not FOUND then
-        raise exception 'core_b_object [id:%] not found',field.object_id;
-    end if;
-    dict_name := object_row.api || '_' || field.name;
-    dict_api := object_row.api || '_' || field.name;
---     字典id不为空，表示当前字段选项值直接复制已有字典
-    if field.dict_id is not null then
-        select * from hymn.core_dict where id = field.dict_id;
-        if not FOUND then
-            raise exception 'core_dict [id:%] not found',field.dict_id;
-        end if;
---          新建字典
-        insert into hymn.core_dict (field_id, parent_dict_id, name, api, remark, create_by_id,
-                                    create_by, modify_by_id, modify_by, create_date,
-                                    modify_date)
-        values (field.id, field.dict_id, dict_name, dict_api, format('copy from [id:%s]', field_id),
-                field.create_by_id, field.create_by, field.modify_by_id,
-                field.modify_by, field.create_date, field.modify_date)
-        returning id into new_dict_id;
---         复制字典项
-        for item in select * from hymn.core_dict_item where dict_id = field.dict_id
-            loop
-                insert into hymn.core_dict_item (dict_id, name, code, parent_code,
-                                                 create_by_id,
-                                                 create_by, modify_by_id, modify_by,
-                                                 create_date, modify_date)
-                values (new_dict_id, item.name, item.code, item.parent_code, field.create_by_id,
-                        field.create_by, field.modify_by_id, field.modify_by,
-                        field.create_date, field.modify_date);
-            end loop;
-    else
---         新建字典
-        insert into hymn.core_dict (field_id, parent_dict_id, name, api, remark, create_by_id,
-                                    create_by, modify_by_id, modify_by, create_date,
-                                    modify_date)
-        values (field.id, null, dict_name, dict_api, 'auto-generated',
-                field.create_by_id, field.create_by, field.modify_by_id,
-                field.modify_by, field.create_date, field.modify_date)
-        returning id into new_dict_id;
---         新建字典项
-        FOR item IN SELECT *
-                    FROM json_to_recordset(field.tmp::json)
-                             as x(name text, code text, parent_code text)
-            LOOP
-                insert into hymn.core_dict_item (dict_id, name, code, parent_code,
-                                                 create_by_id,
-                                                 create_by, modify_by_id, modify_by,
-                                                 create_date, modify_date)
-                values (new_dict_id, item.name, item.code, item.parent_code, field.create_by_id,
-                        field.create_by, field.modify_by_id, field.modify_by,
-                        field.create_date, field.modify_date);
-            END LOOP;
-    end if;
-    return new_dict_id;
-end;
-$$;
-comment on function hymn.create_dict_by_field(field hymn.core_b_object_field) is '根据字段内容创建数据字典，在创建字段的触发器中调用';
-
-
 create or replace function hymn.rebuild_auto_numbering_trigger(obj_id text) returns void
     language plpgsql as
 $BODY$
@@ -1482,27 +1410,29 @@ begin
             raise exception '字段 % 未停用，无法删除',record_old.api;
         end if;
     end if;
-    if obj.type <> 'remote' then
-        if record_old.type = 'mreference' then
-            sql_str := format('drop table if exists hymn.%I cascade;',
-                              hymn.get_join_table_name(record_old.join_view_name));
-            execute sql_str;
-        end if;
-        --     如果found为true说明只删除了字段，需要执行数据清理和归还字段资源
---     如果为false说明执行的是删除对象的流程，相关的操作由对象触发器处理
-        if FOUND then
-            if record_old.type <> 'mreference' then
-                sql_str :=
-                        format('update hymn.%I set %I = null', obj.source_table,
-                               record_old.source_column);
+--     删除预定义字段需手动处理
+    if record_old.is_predefined = false then
+        if obj.type <> 'remote' then
+            if record_old.type = 'mreference' then
+                sql_str := format('drop table if exists hymn.%I cascade;',
+                                  hymn.get_join_table_name(record_old.join_view_name));
                 execute sql_str;
             end if;
-            update hymn.core_column_field_mapping
-            set field_api = null
-            where table_name = obj.source_table
-              and column_name = record_old.source_column;
+            --     如果found为true说明只删除了字段，需要执行数据清理和归还字段资源
+--     如果为false说明执行的是删除对象的流程，相关的操作由对象触发器处理
+            if FOUND then
+                if record_old.type <> 'mreference' then
+                    sql_str :=
+                            format('update hymn.%I set %I = null', obj.source_table,
+                                   record_old.source_column);
+                    execute sql_str;
+                end if;
+                update hymn.core_column_field_mapping
+                set field_api = null
+                where table_name = obj.source_table
+                  and column_name = record_old.source_column;
+            end if;
         end if;
-
     end if;
     return old;
 end;
