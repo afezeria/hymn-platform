@@ -960,10 +960,7 @@ $$
 declare
     record_new hymn.core_b_object := new;
 begin
-    --     if record_new.type = 'custom' then
---         perform hymn.reset_increment_seq_of_data_table(record_new.id);
---     end if;
-    if record_new.type <> 'remote' then
+    if record_new.type = 'custom' then
 --     创建历史记录触发器
         perform hymn.rebuild_data_table_history_trigger(record_new.id);
     end if;
@@ -990,12 +987,15 @@ declare
     sql_str       text;
     ref_field_arr text;
 begin
-    if record_old.active = false and record_new.active = false then
-        return null;
+    --     停用对对象停用状态未改变时不能更新其他状态
+    if record_new.active = false and record_old.active = false then
+        return record_old;
     end if;
+
     if record_new.source_table <> record_old.source_table then
-        raise exception '不能更新source_table';
+        raise exception '不能修改source_table';
     end if;
+--     停用对象时删除视图
     if record_old.active = true and record_new.active = false then
 --         停用对象时不能有其他对象引用当前对象
         select array_agg(scbo.api || '.' || scbof.api)::text
@@ -1012,8 +1012,18 @@ begin
         sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
         execute sql_str;
     end if;
+--     启用时重建视图
     if record_old.active = false and record_new.active = true then
         perform hymn.rebuild_object_view(record_old.id);
+    end if;
+
+    -- 停用/启用是独立操作，不能同时修改其他数据
+    if record_new.active <> record_old.active then
+        record_old.active = record_new.active;
+        record_old.modify_by = record_new.modify_by;
+        record_old.modify_by_id = record_new.modify_by_id;
+        record_old.modify_date = record_new.modify_date;
+        return record_old;
     end if;
     return record_new;
 end;
@@ -1057,8 +1067,8 @@ declare
 begin
     if record_old.type <> 'remote' then
         --     删除视图
-        sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
-        execute sql_str;
+--         sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
+--         execute sql_str;
         if record_old.type = 'custom' then
             -- 删除数据
             sql_str := format('truncate hymn.%I', record_old.source_table);
@@ -1069,6 +1079,7 @@ begin
 --             删除序列
             sql_str := format('drop sequence if exists hymn_view.%s_auto_number_seq cascade',
                               record_old.api);
+            execute sql_str;
 --             删除引用当前对象的多选关联字段
             delete
             from hymn.core_b_object_field

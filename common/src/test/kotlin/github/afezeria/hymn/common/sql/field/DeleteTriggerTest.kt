@@ -1,10 +1,7 @@
 package github.afezeria.hymn.common.sql.field
 
 import github.afezeria.hymn.common.adminConn
-import github.afezeria.hymn.common.sql.COMMON_INFO
-import github.afezeria.hymn.common.sql.DEFAULT_ACCOUNT_ID
-import github.afezeria.hymn.common.sql.createBObject
-import github.afezeria.hymn.common.sql.deleteBObject
+import github.afezeria.hymn.common.sql.*
 import github.afezeria.hymn.common.userConn
 import github.afezeria.hymn.common.util.execute
 import io.kotest.assertions.throwables.shouldThrow
@@ -19,7 +16,7 @@ import org.postgresql.util.PSQLException
 /**
  * @author afezeria
  */
-class DeleteTriggerTest {
+class DeleteTriggerTest :BaseDbTest(){
     companion object : KLogging() {
         lateinit var objId: String
         lateinit var objSourceTable: String

@@ -38,17 +38,25 @@ fun deleteBObject(id: String) {
     }
 }
 
+val PREDEFINED_OBJECT = listOf("account", "role", "org", "object_type")
+
 fun clearBObject() {
     adminConn.use {
-        it.execute("update hymn.core_b_object set active =true where type='custom'")
+        it.execute(
+            "update hymn.core_b_object set active = true where api not in (?,?,?,?)",
+            PREDEFINED_OBJECT
+        )
         it.execute(
             """
             update hymn.core_b_object_field set active = false 
             where active=true and object_id in 
-                (select id from hymn.core_b_object where core_b_object.type='custom')
-        """
+                (select id from hymn.core_b_object where api not in (?,?,?,?))
+        """, PREDEFINED_OBJECT
         )
-        it.execute("update hymn.core_b_object set active =false where type='custom'")
+        it.execute(
+            "update hymn.core_b_object set active = false where api not in (?,?,?,?)",
+            PREDEFINED_OBJECT
+        )
         it.execute("delete from hymn.core_b_object where active = false")
     }
     objSeq = (1..100000).iterator()
@@ -58,15 +66,6 @@ private var objSeq = (1..100000).iterator()
 
 fun randomUUIDStr(): String = UUID.randomUUID().toString().replace("-", "")
 
-//        id                text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-//        owner_id          text not null,
-//        create_by_id      text not null,
-//        modify_by_id      text not null,
-//        create_date       timestamptz not null,
-//        modify_date       timestamptz not null,
-//        type_id           text not null,
-//        lock_state        bool not null default false,
-//        name              text not null,
 fun createBObject(): Map<String, Any?> {
     adminConn.use {
         val obj = it.execute(
