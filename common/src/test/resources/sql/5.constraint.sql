@@ -5,7 +5,7 @@ alter table hymn.core_custom_button
     add check ( action in
                 ('eval', 'open_in_current_tab', 'open_in_new_tab', 'open_in_new_window') );
 alter table hymn.core_custom_button
-    add check ( client_type in ('browser', 'android') );
+    add check ( client_type in ('browser', 'mobile') );
 
 alter table hymn.core_b_object_field
     add check ( ref_delete_policy in ('cascade', 'restrict', 'null'));
