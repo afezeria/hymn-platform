@@ -11,6 +11,7 @@ import java.sql.*
 private val logger = KotlinLogging.logger {}
 
 /**
+ * 执行sql，支持命名参数
  * @param sql 待执行sql语句，命名参数，格式为 #{param}
  * @param params 参数哈希
  */
@@ -25,7 +26,8 @@ fun Connection.execute(
 
 
 /**
- * @param sql 待执行sql语句，占位符为 ?
+ * 执行sql，支持 ? 占位符
+ * @param sql 待执行sql语句
  * @param params 参数列表
  */
 fun Connection.execute(
@@ -37,7 +39,8 @@ fun Connection.execute(
 
 
 /**
- * @param sql 待执行sql语句，占位符为 ?
+ * 执行sql，支持 ? 占位符
+ * @param sql 待执行sql语句
  * @param params 参数
  */
 fun Connection.execute(
