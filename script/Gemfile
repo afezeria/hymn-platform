@@ -1,0 +1,13 @@
+# frozen_string_literal: true
+
+source 'https://rubygems.org'
+
+git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
+
+gem 'http', '4.4.1'
+gem 'json', '2.3.0'
+gem 'logger', '1.4.2'
+gem 'pg', '1.2.3'
+gem "mustache", "~> 1.0"
+
+# gem "rails"
