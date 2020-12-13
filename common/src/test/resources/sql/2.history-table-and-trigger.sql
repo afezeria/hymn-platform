@@ -1,8 +1,8 @@
 drop table if exists hymn.core_account_history cascade;
 create table hymn.core_account_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     lock_time timestamp,
     name text,
@@ -94,14 +94,11 @@ create trigger core_account_history_del
     on hymn.core_account
     for each row
 execute function hymn.core_account_history_del();
-
-
-
 drop table if exists hymn.core_account_menu_layout_history cascade;
 create table hymn.core_account_menu_layout_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     account_id text,
     client_type text,
@@ -155,14 +152,11 @@ create trigger core_account_menu_layout_history_del
     on hymn.core_account_menu_layout
     for each row
 execute function hymn.core_account_menu_layout_history_del();
-
-
-
 drop table if exists hymn.core_account_object_view_history cascade;
 create table hymn.core_account_object_view_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     copy_id text,
     remark text,
@@ -221,14 +215,11 @@ create trigger core_account_object_view_history_del
     on hymn.core_account_object_view
     for each row
 execute function hymn.core_account_object_view_history_del();
-
-
-
 drop table if exists hymn.core_b_object_history cascade;
 create table hymn.core_b_object_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     name text,
     api text,
@@ -291,14 +282,11 @@ create trigger core_b_object_history_del
     on hymn.core_b_object
     for each row
 execute function hymn.core_b_object_history_del();
-
-
-
 drop table if exists hymn.core_b_object_field_history cascade;
 create table hymn.core_b_object_field_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     source_column text,
     object_id text,
@@ -378,14 +366,11 @@ create trigger core_b_object_field_history_del
     on hymn.core_b_object_field
     for each row
 execute function hymn.core_b_object_field_history_del();
-
-
-
 drop table if exists hymn.core_b_object_field_perm_history cascade;
 create table hymn.core_b_object_field_perm_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     role_id text,
     object_id text,
@@ -441,14 +426,11 @@ create trigger core_b_object_field_perm_history_del
     on hymn.core_b_object_field_perm
     for each row
 execute function hymn.core_b_object_field_perm_history_del();
-
-
-
 drop table if exists hymn.core_b_object_layout_history cascade;
 create table hymn.core_b_object_layout_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     object_id text,
     name text,
@@ -508,18 +490,15 @@ create trigger core_b_object_layout_history_del
     on hymn.core_b_object_layout
     for each row
 execute function hymn.core_b_object_layout_history_del();
-
-
-
 drop table if exists hymn.core_b_object_mapping_history cascade;
 create table hymn.core_b_object_mapping_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     source_object_id text,
-    target_object_id text,
     source_type_id text,
+    target_object_id text,
     target_type_id text,
     create_by_id text,
     create_by text,
@@ -570,28 +549,23 @@ create trigger core_b_object_mapping_history_del
     on hymn.core_b_object_mapping
     for each row
 execute function hymn.core_b_object_mapping_history_del();
-
-
-
 drop table if exists hymn.core_b_object_mapping_item_history cascade;
 create table hymn.core_b_object_mapping_item_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     mapping_id text,
-    source_object_api text,
-    target_object_api text,
-    source_field_api text,
-    target_field_api text,
-    ref_field1_api text,
-    ref_field1_object_api text,
-    ref_field2_api text,
-    ref_field2_object_api text,
-    ref_field3_api text,
-    ref_field3_object_api text,
-    ref_field4_api text,
-    ref_field4_object_api text,
+    source_field_id text,
+    target_field_id text,
+    ref_field1_id text,
+    ref_field1_object_id text,
+    ref_field2_id text,
+    ref_field2_object_id text,
+    ref_field3_id text,
+    ref_field3_object_id text,
+    ref_field4_id text,
+    ref_field4_object_id text,
     create_by_id text,
     create_by text,
     modify_by_id text,
@@ -641,18 +615,14 @@ create trigger core_b_object_mapping_item_history_del
     on hymn.core_b_object_mapping_item
     for each row
 execute function hymn.core_b_object_mapping_item_history_del();
-
-
-
 drop table if exists hymn.core_b_object_perm_history cascade;
 create table hymn.core_b_object_perm_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     role_id text,
     object_id text,
-    object_api_name text,
     ins bool,
     upd bool,
     del bool,
@@ -711,14 +681,11 @@ create trigger core_b_object_perm_history_del
     on hymn.core_b_object_perm
     for each row
 execute function hymn.core_b_object_perm_history_del();
-
-
-
 drop table if exists hymn.core_b_object_trigger_history cascade;
 create table hymn.core_b_object_trigger_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     active bool,
     remark text,
@@ -779,14 +746,11 @@ create trigger core_b_object_trigger_history_del
     on hymn.core_b_object_trigger
     for each row
 execute function hymn.core_b_object_trigger_history_del();
-
-
-
 drop table if exists hymn.core_b_object_type_history cascade;
 create table hymn.core_b_object_type_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     object_id text,
     name text,
@@ -841,15 +805,13 @@ create trigger core_b_object_type_history_del
     on hymn.core_b_object_type
     for each row
 execute function hymn.core_b_object_type_history_del();
-
-
-
 drop table if exists hymn.core_b_object_type_available_options_history cascade;
 create table hymn.core_b_object_type_available_options_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
+    object_id text,
     type_id text,
     field_id text,
     dict_item_id text,
@@ -902,14 +864,11 @@ create trigger core_b_object_type_available_options_history_del
     on hymn.core_b_object_type_available_options
     for each row
 execute function hymn.core_b_object_type_available_options_history_del();
-
-
-
 drop table if exists hymn.core_b_object_type_layout_history cascade;
 create table hymn.core_b_object_type_layout_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     role_id text,
     object_id text,
@@ -964,14 +923,11 @@ create trigger core_b_object_type_layout_history_del
     on hymn.core_b_object_type_layout
     for each row
 execute function hymn.core_b_object_type_layout_history_del();
-
-
-
 drop table if exists hymn.core_b_object_type_perm_history cascade;
 create table hymn.core_b_object_type_perm_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     role_id text,
     object_id text,
@@ -1026,14 +982,11 @@ create trigger core_b_object_type_perm_history_del
     on hymn.core_b_object_type_perm
     for each row
 execute function hymn.core_b_object_type_perm_history_del();
-
-
-
 drop table if exists hymn.core_business_code_ref_history cascade;
 create table hymn.core_business_code_ref_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     trigger_id text,
     interface_id text,
@@ -1091,14 +1044,11 @@ create trigger core_business_code_ref_history_del
     on hymn.core_business_code_ref
     for each row
 execute function hymn.core_business_code_ref_history_del();
-
-
-
 drop table if exists hymn.core_button_perm_history cascade;
 create table hymn.core_button_perm_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     role_id text,
     button_id text,
@@ -1152,14 +1102,62 @@ create trigger core_button_perm_history_del
     on hymn.core_button_perm
     for each row
 execute function hymn.core_button_perm_history_del();
-
-
-
+drop table if exists hymn.core_column_field_mapping_history cascade;
+create table hymn.core_column_field_mapping_history
+(
+    operation text,
+    stamp timestamp,
+    table_name text,
+    column_name text,
+    field_api text
+);
+create or replace function hymn.core_column_field_mapping_history_ins() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_column_field_mapping_history select 'i',now(),new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_column_field_mapping_history_upd() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_column_field_mapping_history select 'u',now(),new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_column_field_mapping_history_del() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_column_field_mapping_history select 'd',now(),old.*;
+    return null;
+end
+$$;
+drop trigger if exists core_column_field_mapping_history_ins on hymn.core_column_field_mapping;
+create trigger core_column_field_mapping_history_ins
+    after insert
+    on hymn.core_column_field_mapping
+    for each row
+execute function hymn.core_column_field_mapping_history_ins();
+drop trigger if exists core_column_field_mapping_history_upd on hymn.core_column_field_mapping;
+create trigger core_column_field_mapping_history_upd
+    after update
+    on hymn.core_column_field_mapping
+    for each row
+execute function hymn.core_column_field_mapping_history_upd();
+drop trigger if exists core_column_field_mapping_history_del on hymn.core_column_field_mapping;
+create trigger core_column_field_mapping_history_del
+    after delete
+    on hymn.core_column_field_mapping
+    for each row
+execute function hymn.core_column_field_mapping_history_del();
 drop table if exists hymn.core_config_history cascade;
 create table hymn.core_config_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     key text,
     value text,
@@ -1212,14 +1210,11 @@ create trigger core_config_history_del
     on hymn.core_config
     for each row
 execute function hymn.core_config_history_del();
-
-
-
 drop table if exists hymn.core_cron_job_history cascade;
 create table hymn.core_cron_job_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     active bool,
     shared_code_id text,
@@ -1275,14 +1270,11 @@ create trigger core_cron_job_history_del
     on hymn.core_cron_job
     for each row
 execute function hymn.core_cron_job_history_del();
-
-
-
 drop table if exists hymn.core_custom_button_history cascade;
 create table hymn.core_custom_button_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     remark text,
     object_id text,
@@ -1340,14 +1332,11 @@ create trigger core_custom_button_history_del
     on hymn.core_custom_button
     for each row
 execute function hymn.core_custom_button_history_del();
-
-
-
 drop table if exists hymn.core_custom_component_history cascade;
 create table hymn.core_custom_component_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     api text,
     name text,
@@ -1401,14 +1390,11 @@ create trigger core_custom_component_history_del
     on hymn.core_custom_component
     for each row
 execute function hymn.core_custom_component_history_del();
-
-
-
 drop table if exists hymn.core_custom_interface_history cascade;
 create table hymn.core_custom_interface_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     api text,
     name text,
@@ -1466,14 +1452,11 @@ create trigger core_custom_interface_history_del
     on hymn.core_custom_interface
     for each row
 execute function hymn.core_custom_interface_history_del();
-
-
-
 drop table if exists hymn.core_custom_menu_item_history cascade;
 create table hymn.core_custom_menu_item_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     name text,
     path text,
@@ -1530,14 +1513,11 @@ create trigger core_custom_menu_item_history_del
     on hymn.core_custom_menu_item
     for each row
 execute function hymn.core_custom_menu_item_history_del();
-
-
-
 drop table if exists hymn.core_custom_page_history cascade;
 create table hymn.core_custom_page_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     api text,
     name text,
@@ -1593,14 +1573,11 @@ create trigger core_custom_page_history_del
     on hymn.core_custom_page
     for each row
 execute function hymn.core_custom_page_history_del();
-
-
-
 drop table if exists hymn.core_dict_history cascade;
 create table hymn.core_dict_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     field_id text,
     parent_dict_id text,
@@ -1656,14 +1633,11 @@ create trigger core_dict_history_del
     on hymn.core_dict
     for each row
 execute function hymn.core_dict_history_del();
-
-
-
 drop table if exists hymn.core_dict_item_history cascade;
 create table hymn.core_dict_item_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     dict_id text,
     name text,
@@ -1718,14 +1692,11 @@ create trigger core_dict_item_history_del
     on hymn.core_dict_item
     for each row
 execute function hymn.core_dict_item_history_del();
-
-
-
 drop table if exists hymn.core_menu_item_perm_history cascade;
 create table hymn.core_menu_item_perm_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     role_id text,
     menu_item_id text,
@@ -1779,14 +1750,65 @@ create trigger core_menu_item_perm_history_del
     on hymn.core_menu_item_perm
     for each row
 execute function hymn.core_menu_item_perm_history_del();
-
-
-
+drop table if exists hymn.core_module_function_history cascade;
+create table hymn.core_module_function_history
+(
+    operation text,
+    stamp timestamp,
+    id text,
+    module_name text,
+    api text,
+    name text,
+    remark text,
+    create_date text
+);
+create or replace function hymn.core_module_function_history_ins() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_module_function_history select 'i',now(),new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_module_function_history_upd() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_module_function_history select 'u',now(),new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_module_function_history_del() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_module_function_history select 'd',now(),old.*;
+    return null;
+end
+$$;
+drop trigger if exists core_module_function_history_ins on hymn.core_module_function;
+create trigger core_module_function_history_ins
+    after insert
+    on hymn.core_module_function
+    for each row
+execute function hymn.core_module_function_history_ins();
+drop trigger if exists core_module_function_history_upd on hymn.core_module_function;
+create trigger core_module_function_history_upd
+    after update
+    on hymn.core_module_function
+    for each row
+execute function hymn.core_module_function_history_upd();
+drop trigger if exists core_module_function_history_del on hymn.core_module_function;
+create trigger core_module_function_history_del
+    after delete
+    on hymn.core_module_function
+    for each row
+execute function hymn.core_module_function_history_del();
 drop table if exists hymn.core_module_function_perm_history cascade;
 create table hymn.core_module_function_perm_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     role_id text,
     module_function_id text,
@@ -1840,14 +1862,11 @@ create trigger core_module_function_perm_history_del
     on hymn.core_module_function_perm
     for each row
 execute function hymn.core_module_function_perm_history_del();
-
-
-
 drop table if exists hymn.core_org_history cascade;
 create table hymn.core_org_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     name text,
     director_id text,
@@ -1912,14 +1931,11 @@ create trigger core_org_history_del
     on hymn.core_org
     for each row
 execute function hymn.core_org_history_del();
-
-
-
 drop table if exists hymn.core_role_history cascade;
 create table hymn.core_role_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     name text,
     remark text,
@@ -1972,14 +1988,11 @@ create trigger core_role_history_del
     on hymn.core_role
     for each row
 execute function hymn.core_role_history_del();
-
-
-
 drop table if exists hymn.core_shared_code_history cascade;
 create table hymn.core_shared_code_history
 (
-    operation    text,
-    stamp        timestamp,
+    operation text,
+    stamp timestamp,
     id text,
     api text,
     type text,
@@ -2035,3 +2048,53 @@ create trigger core_shared_code_history_del
     on hymn.core_shared_code
     for each row
 execute function hymn.core_shared_code_history_del();
+drop table if exists hymn.core_table_obj_mapping_history cascade;
+create table hymn.core_table_obj_mapping_history
+(
+    operation text,
+    stamp timestamp,
+    table_name text,
+    obj_api text
+);
+create or replace function hymn.core_table_obj_mapping_history_ins() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_table_obj_mapping_history select 'i',now(),new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_table_obj_mapping_history_upd() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_table_obj_mapping_history select 'u',now(),new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_table_obj_mapping_history_del() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_table_obj_mapping_history select 'd',now(),old.*;
+    return null;
+end
+$$;
+drop trigger if exists core_table_obj_mapping_history_ins on hymn.core_table_obj_mapping;
+create trigger core_table_obj_mapping_history_ins
+    after insert
+    on hymn.core_table_obj_mapping
+    for each row
+execute function hymn.core_table_obj_mapping_history_ins();
+drop trigger if exists core_table_obj_mapping_history_upd on hymn.core_table_obj_mapping;
+create trigger core_table_obj_mapping_history_upd
+    after update
+    on hymn.core_table_obj_mapping
+    for each row
+execute function hymn.core_table_obj_mapping_history_upd();
+drop trigger if exists core_table_obj_mapping_history_del on hymn.core_table_obj_mapping;
+create trigger core_table_obj_mapping_history_del
+    after delete
+    on hymn.core_table_obj_mapping
+    for each row
+execute function hymn.core_table_obj_mapping_history_del();

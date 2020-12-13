@@ -64,7 +64,8 @@ comment on column hymn.core_account.online_rule is '在线规则，限制每客�
 comment on column hymn.core_account.active is '是否启用';
 comment on column hymn.core_account.admin is '是否是管理员';
 comment on column hymn.core_account.leader_id is '直接上级id';
-comment on column hymn.core_account.org_id is '所属组织id ;; fk:[core_role restrict]';
+comment on column hymn.core_account.org_id is '所属组织id ;; fk:[core_org restrict]';
+comment on column hymn.core_account.role_id is '所属组织id ;; fk:[core_role restrict]';
 comment on column hymn.core_account.root is '是否是初始帐号';
 comment on column hymn.core_account.text001 is '##ignore 预留字段';
 comment on column hymn.core_account.text002 is '##ignore 预留字段';
@@ -427,7 +428,7 @@ comment on column hymn.core_b_object.name is '业务对象名称，用于页面�
 comment on column hymn.core_b_object.api is '业务对象api，唯一标识 ;;uk';
 comment on column hymn.core_b_object.active is '是否启用，停用后无法进行增删改查等操作';
 comment on column hymn.core_b_object.source_table is '实际表名，例： core_data_table_500';
-comment on column hymn.core_b_object.module_api is '模块api名称，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_b_object 和 core_b_object_field 数据来支持在触发器中使用DataService提供的通用操作';
+comment on column hymn.core_b_object.module_api is '模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_b_object 和 core_b_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]';
 comment on column hymn.core_b_object.can_insert is '模块对象及远程对象是否可以新增数据';
 comment on column hymn.core_b_object.can_update is '模块对象是及远程对象否可以更新数据';
 comment on column hymn.core_b_object.can_update is '模块对象是及远程对象否可以删除数据';
@@ -555,10 +556,11 @@ type: 图片 picture
 required: min_length （图片数量）, max_length （图片大小，单位：kb）
 optional:
 rule: min_length >= 1, max_length > 0
+;;uk:[[object_id api]]
 ';
 comment on column hymn.core_b_object_field.source_column is '字段对应的实际表中的列名,对象为远程对象时该字段填充空字符串';
 comment on column hymn.core_b_object_field.object_id is '所属业务对象id ;;fk:[core_b_object cascade]';
-comment on column hymn.core_b_object_field.api is 'api名称，用于触发器和自定义接口 ;;uk';
+comment on column hymn.core_b_object_field.api is 'api名称，用于触发器和自定义接口';
 comment on column hymn.core_b_object_field.name is '名称，用于页面显示';
 comment on column hymn.core_b_object_field.type is '字段类型 ;;optional_value:[text(文本),check_box(复选框),check_box_group(复选框组),select(下拉菜单),integer(整型),float(浮点型),money(货币),date(日期),datetime(日期时间),master_slave(主详),reference(关联关系),mreference(多选关联关系),summary(汇总),auto(自动编号),picture(图片);';
 comment on column hymn.core_b_object_field.history is '是否启用历史记录';
@@ -705,11 +707,11 @@ create table hymn.core_b_object_trigger
     create_date  timestamp not null,
     modify_date  timestamp not null
 );
-comment on table hymn.core_b_object_trigger is '触发器 ;;uk[[object_id api]]';
+comment on table hymn.core_b_object_trigger is '触发器 ;;uk:[[object_id api]]';
 comment on column hymn.core_b_object_trigger.active is '是否启用';
 comment on column hymn.core_b_object_trigger.object_id is '所属业务对象id';
 comment on column hymn.core_b_object_trigger.name is '触发器名称，用于后台显示';
-comment on column hymn.core_b_object_trigger.api is 'api名称，用于报错显示和后台查看 ;; uk';
+comment on column hymn.core_b_object_trigger.api is 'api名称，用于报错显示和后台查看';
 comment on column hymn.core_b_object_trigger.ord is '优先级';
 comment on column hymn.core_b_object_trigger.event is '触发时间 ;;optional_value:[BEFORE_INSERT,BEFORE_UPDATE,BEFORE_UPSERT,BEFORE_DELETE,AFTER_INSERT,AFTER_UPDATE,AFTER_UPSERT,AFTER_DELETE]';
 comment on column hymn.core_b_object_trigger.code is '触发器代码';
@@ -774,20 +776,32 @@ comment on column hymn.core_b_object_mapping_item.ref_field3_object_id is 'ref_f
 comment on column hymn.core_b_object_mapping_item.ref_field4_id is '引用字段4 ;;fk:[core_b_object_field cascade]';
 comment on column hymn.core_b_object_mapping_item.ref_field4_object_id is 'ref_field4_api 表示的字段所属的对象api，也是 ref_field3_api 关联的对象的api ;;fk:[core_b_object cascade]';
 
+drop table if exists hymn.core_module;
+create table hymn.core_module
+(
+    api         text primary key,
+    name        text not null,
+    remark      text not null,
+    version     text not null,
+    create_date timestamptz default now()
+);
+comment on table hymn.core_module is '模块列表';
+comment on column hymn.core_module.api is '模块api';
+comment on column hymn.core_module.name is '模块名称';
 
 
 drop table if exists hymn.core_module_function;
 create table hymn.core_module_function
 (
     id          text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    module_name text not null,
+    module_api  text not null,
     api         text not null,
     name        text not null,
-    remark      text not null,
+    remark      text,
     create_date text             default now()
 );
-comment on table hymn.core_module_function is '模块功能表，模块中的功能需要根据角色进行权限控制时在该表中添加相关数据';
-comment on column hymn.core_module_function.module_name is '模块名称，权限管理界面中功能管理区域根据模块名分组';
+comment on table hymn.core_module_function is '模块功能表，模块中的功能需要根据角色进行权限控制时在该表中添加相关数据 ;;uk:[[module_name ]';
+comment on column hymn.core_module_function.module_api is '关联模块 ;;fk:[core_module cascade]';
 comment on column hymn.core_module_function.api is '功能api名称，格式为模块名+功能名，例：wechat.approval ;;uk';
 comment on column hymn.core_module_function.name is '功能名称';
 

@@ -17,6 +17,9 @@ values ('301c35c23be449abb5bdf6c80b6878af', '管理员权限', '', '911c60ea5d62
         'system admin', '911c60ea5d62420794d86eeecfddce7c', 'system admin', '2020-01-01 00:00:00',
         '2020-01-01 00:00:00');
 
+insert into hymn.core_module (api, name, remark, version, create_date)
+values ('core','基础','','0.0.1','2020-01-01 00:00:00');
+
 insert into hymn.core_b_object (id, name, api, source_table, active, type, module_api, can_insert,
                                 can_update, remark,
                                 create_by_id, create_by, modify_by_id, modify_by, create_date,
