@@ -42,14 +42,14 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
             val ref = createBObject()
             refId = ref["id"] as String
             adminConn.use {
-                it.execute("update hymn.core_b_object set active=false where id=?", refId)
+                it.execute("update hymn.core_biz_object set active=false where id=?", refId)
             }
             val childObj = createBObject()
             childId = childObj["id"] as String
             adminConn.use {
                 val childField = it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -73,7 +73,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
             val e = shouldThrow<PSQLException> {
                 it.execute(
                     """
-                    insert into hymn.core_b_object_field (source_column,object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (source_column,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, is_predefined,create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (null, ?, '文本字段', 'tfield', 'text', 255, 1, 1, true, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -90,7 +90,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
             val e = shouldThrow<PSQLException> {
                 it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'abc', 255, 1, 1,  ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -109,7 +109,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'text', null, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -119,7 +119,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'text', 255, null, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -129,7 +129,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'text', 255, 1, null, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -141,7 +141,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, optional_number,  
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, optional_number,  
                         dict_id,create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'复选框组','cbgfield','check_box_group','0',null,?,?,?,?,?,now(),now()) returning *;
                     """,
@@ -153,7 +153,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, optional_number,  
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, optional_number,  
                         dict_id,create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'复选框组','cbgfield','check_box_group','0',1,?,?,?,?,?,now(),now()) returning *;
                     """,
@@ -167,7 +167,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, 
                         visible_row,optional_number, dict_id, create_by_id, create_by, modify_by_id, 
                         modify_by, create_date, modify_date) 
                     values (?,'下拉','selectfield','select','0',1,null,?,?,?,?,?,now(),now()) returning *;
@@ -180,7 +180,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, 
                         visible_row,optional_number, dict_id, create_by_id, create_by, modify_by_id, 
                         modify_by, create_date, modify_date) 
                     values (?,'下拉','selectfield','select','0',null,1,?,?,?,?,?,now(),now()) returning *;
@@ -194,7 +194,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, 
                         visible_row,optional_number, dict_id, create_by_id, create_by, modify_by_id, 
                         modify_by, create_date, modify_date) 
                     values (?,'下拉','selectfield','select','0',1,1,?,?,?,?,?,now(),now()) returning *;
@@ -209,7 +209,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'整数','intfield','integer',null,50,?,?,?,?,now(),now()) returning *;
                     """,
@@ -220,7 +220,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'整数','intfield','integer',50000,null,?,?,?,?,now(),now()) returning *;
                     """,
@@ -233,7 +233,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, min_length,  
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, min_length,  
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'浮点数','floatfield','float',null,3,?,?,?,?,now(),now()) returning *;
                     """,
@@ -244,7 +244,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, min_length,  
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, min_length,  
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'浮点数','floatfield','float',13,null,?,?,?,?,now(),now()) returning *;
                     """,
@@ -257,7 +257,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field ( object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field ( biz_object_id, name, api, type, max_length, min_length, 
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'金额','moneyfield','money',null,3,?,?,?,?,now(),now()) returning *;""",
                         objId, *COMMON_INFO
@@ -266,7 +266,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field ( object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field ( biz_object_id, name, api, type, max_length, min_length, 
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'金额','moneyfield','money',13,null,?,?,?,?,now(),now()) returning *;""",
                         objId,
@@ -278,7 +278,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, max_length, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'图片字段','picturefield','picture',null,1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -289,7 +289,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, max_length, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'图片字段','picturefield','picture',1024,null,?,?,?,?,now(),now()) returning *;
                     """,
@@ -302,7 +302,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -312,7 +312,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','mreffield','mreference',?,null,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -324,7 +324,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'关联','reffield','reference',?,'null',?,?,?,?,now(),now()) returning *;
                     """,
@@ -334,7 +334,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'关联','reffield','reference',?,null,?,?,?,?,now(),now()) returning *;
                     """,
@@ -346,7 +346,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,null,?,?,?,?,now(),now()) returning *;
                     """,
@@ -356,7 +356,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -368,7 +368,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id, name, api, type,gen_rule, create_by_id, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type,gen_rule, create_by_id, 
                         create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'自动编号字段','autofield','auto',null,?,?,?,?,now(),now()) returning *;
                     """,
@@ -381,7 +381,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'count',0,?,?,?,?,now(),now()) returning *;
                     """,
@@ -393,7 +393,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,null,0,?,?,?,?,now(),now()) returning *;
                     """,
@@ -405,7 +405,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'count',null,?,?,?,?,now(),now()) returning *;
                     """,
@@ -417,7 +417,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'sum',0,?,?,?,?,now(),now()) returning *;
                     """,
@@ -438,7 +438,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'text', 255, -1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -454,7 +454,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'text', 500000, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -470,7 +470,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'text', 40, 50, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -486,7 +486,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'text', 255, 1, 0, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -505,7 +505,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, optional_number,  
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, optional_number,  
                         dict_id,create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'复选框组','cbgfield','check_box_group','0',0,?,?,?,?,?,now(),now()) returning *;
                     """,
@@ -521,7 +521,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, optional_number,  
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, optional_number,  
                         dict_id,create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'复选框组','cbgfield','check_box_group','0',1,?,?,?,?,?,now(),now()) returning *;
                     """,
@@ -540,7 +540,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, 
                         visible_row,optional_number, dict_id, create_by_id, create_by, modify_by_id, 
                         modify_by, create_date, modify_date) 
                     values (?,'下拉','selectfield','select','0',1,0,?,?,?,?,?,now(),now()) returning *;
@@ -558,7 +558,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, 
                         visible_row,optional_number, dict_id, create_by_id, create_by, modify_by_id, 
                         modify_by, create_date, modify_date) 
                     values (?,'下拉','selectfield','select','0',0,1,?,?,?,?,?,now(),now()) returning *;
@@ -575,7 +575,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, 
                         visible_row,optional_number, dict_id, create_by_id, create_by, modify_by_id, 
                         modify_by, create_date, modify_date) 
                     values (?,'下拉','selectfield','select','0',1,1,?,?,?,?,?,now(),now()) returning *;
@@ -595,7 +595,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'整数','intfield','integer',40,50,?,?,?,?,now(),now()) returning *;
                     """,
@@ -614,7 +614,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, min_length,  
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, min_length,  
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'浮点数','floatfield','float',5,0,?,?,?,?,now(),now()) returning *;
                     """,
@@ -630,7 +630,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, min_length,  
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, min_length,  
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'浮点数','floatfield','float',0,3,?,?,?,?,now(),now()) returning *;
                     """,
@@ -646,7 +646,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, min_length,  
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, min_length,  
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'浮点数','floatfield','float',10,13,?,?,?,?,now(),now()) returning *;
                     """,
@@ -665,7 +665,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field ( object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field ( biz_object_id, name, api, type, max_length, min_length, 
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'金额','moneyfield','money',5,0,?,?,?,?,now(),now()) returning *;""",
                         objId, *COMMON_INFO
@@ -680,7 +680,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field ( object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field ( biz_object_id, name, api, type, max_length, min_length, 
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'金额','moneyfield','money',0,5,?,?,?,?,now(),now()) returning *;""",
                         objId, *COMMON_INFO
@@ -698,7 +698,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, max_length, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'图片字段','picturefield','picture',1,0,?,?,?,?,now(),now()) returning *;
                     """,
@@ -714,7 +714,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, max_length, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'图片字段','picturefield','picture',0,1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -733,7 +733,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -749,7 +749,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -768,7 +768,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'关联','reffield','reference',?,'null',?,?,?,?,now(),now()) returning *;
                     """,
@@ -784,7 +784,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'关联','reffield','reference',?,'null',?,?,?,?,now(),now()) returning *;
                     """,
@@ -803,7 +803,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -819,7 +819,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -838,7 +838,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id, name, api, type,gen_rule, create_by_id, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type,gen_rule, create_by_id, 
                         create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'自动编号字段','autofield','auto','{00}{000}',?,?,?,?,now(),now()) returning *;
                     """,
@@ -857,7 +857,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'count',-1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -875,7 +875,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'count',1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -893,7 +893,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'count',1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -911,7 +911,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 val e = shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'count',1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -928,7 +928,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'max',1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -946,7 +946,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'max',1,?,?,?,?,now(),now()) returning *;
                     """,

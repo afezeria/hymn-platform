@@ -56,14 +56,14 @@ class UpdateTriggerTest : BaseDbTest() {
         adminConn.use {
             it.execute(
                 """
-                    update hymn.core_b_object_field set active=false 
+                    update hymn.core_biz_object_field set active=false 
                     where is_predefined = false
                     and active=true
-                    and object_id = ?
+                    and biz_object_id = ?
                 """, objId
             )
             it.execute(
-                " delete from hymn.core_b_object_field where active = false and object_id = ? ",
+                " delete from hymn.core_biz_object_field where active = false and biz_object_id = ? ",
                 objId
             )
         }
@@ -75,15 +75,15 @@ class UpdateTriggerTest : BaseDbTest() {
         adminConn.use {
             var field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (active,object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (active,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (false,?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
                 objId, *COMMON_INFO
             )[0]
-            it.execute("update hymn.core_b_object_field set active=false where id = ?", field["id"])
+            it.execute("update hymn.core_biz_object_field set active=false where id = ?", field["id"])
             field = it.execute(
-                "update hymn.core_b_object_field set name='测试' where id = ? returning *",
+                "update hymn.core_biz_object_field set name='测试' where id = ? returning *",
                 field["id"]
             )[0]
             field["name"] shouldBe "文本字段"
@@ -95,7 +95,7 @@ class UpdateTriggerTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (active,object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (active,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (false,?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -103,7 +103,7 @@ class UpdateTriggerTest : BaseDbTest() {
             )[0]
             val e = shouldThrow<PSQLException> {
                 it.execute(
-                    "update hymn.core_b_object_field set type='bbb' where id = ?",
+                    "update hymn.core_biz_object_field set type='bbb' where id = ?",
                     field["id"]
                 )
             }
@@ -119,20 +119,20 @@ class UpdateTriggerTest : BaseDbTest() {
             adminConn.use {
                 val fieldId = it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
                     objId, masterId, *COMMON_INFO
                 )[0]["id"] as String
                 it.execute(
-                    "update hymn.core_b_object_field set active=false where id = ?",
+                    "update hymn.core_biz_object_field set active=false where id = ?",
                     fieldId
                 )
                 deleteBObject(masterId)
                 val e = shouldThrow<PSQLException> {
                     it.execute(
-                        "update hymn.core_b_object_field set active=true where id = ?",
+                        "update hymn.core_biz_object_field set active=true where id = ?",
                         fieldId
                     )
                     println()
@@ -150,15 +150,15 @@ class UpdateTriggerTest : BaseDbTest() {
         adminConn.use {
             var field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
                 objId, *COMMON_INFO
             )[0]
-            it.execute("update hymn.core_b_object_field set active=false where id = ?", field["id"])
+            it.execute("update hymn.core_biz_object_field set active=false where id = ?", field["id"])
             field = it.execute(
-                "update hymn.core_b_object_field set active =true , name='测试' where id = ? returning *",
+                "update hymn.core_biz_object_field set active =true , name='测试' where id = ? returning *",
                 field["id"]
             )[0]
             field["active"] shouldBe true
@@ -174,7 +174,7 @@ class UpdateTriggerTest : BaseDbTest() {
             adminConn.use {
                 val fieldId = it.execute(
                     """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'整数','intfield','integer',50000,50,?,?,?,?,now(),now()) returning *;
                     """,
@@ -182,7 +182,7 @@ class UpdateTriggerTest : BaseDbTest() {
                 )[0]["id"]
                 val relField = it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -191,7 +191,7 @@ class UpdateTriggerTest : BaseDbTest() {
 
                 val summary = it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'max',0,?,?,?,?,now(),now()) returning *;
                     """,
@@ -199,7 +199,7 @@ class UpdateTriggerTest : BaseDbTest() {
                 )[0]
                 val e = shouldThrow<PSQLException> {
                     it.execute(
-                        "update hymn.core_b_object_field set active = false where id = ?",
+                        "update hymn.core_biz_object_field set active = false where id = ?",
                         fieldId
                     )
                 }
@@ -215,14 +215,14 @@ class UpdateTriggerTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (active,object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (active,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (false,?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
                 objId, *COMMON_INFO
             )[0]
             val fieldId = field["id"] as String
-            it.execute("update hymn.core_b_object_field set active=false where id = ?", fieldId)
+            it.execute("update hymn.core_biz_object_field set active=false where id = ?", fieldId)
             it.execute(
                 """
                     select * from pg_attribute pa left join pg_class pc on pa.attrelid=pc.oid
@@ -233,7 +233,7 @@ class UpdateTriggerTest : BaseDbTest() {
                 """,
                 objApi, field["api"]
             ).size shouldBe 0
-            it.execute("update hymn.core_b_object_field set active=true where id = ?", fieldId)
+            it.execute("update hymn.core_biz_object_field set active=true where id = ?", fieldId)
             it.execute(
                 """
                     select * from pg_attribute pa left join pg_class pc on pa.attrelid=pc.oid
@@ -253,7 +253,7 @@ class UpdateTriggerTest : BaseDbTest() {
         adminConn.use {
             field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (active,object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (active,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (false,?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -276,7 +276,7 @@ class UpdateTriggerTest : BaseDbTest() {
             ).size shouldBe 0
         }
         adminConn.use {
-            it.execute("update hymn.core_b_object_field set history=true where id = ?", field["id"])
+            it.execute("update hymn.core_biz_object_field set history=true where id = ?", field["id"])
         }
         userConn.use {
             it.execute("update hymn_view.${objApi} set tfield__cf='123' where id = ?", data["id"])
@@ -293,7 +293,7 @@ class UpdateTriggerTest : BaseDbTest() {
         adminConn.use {
             field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (object_id, name, api, type,gen_rule, create_by_id, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type,gen_rule, create_by_id, 
                         create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'自动编号字段','autofield','auto','{yyyy}{mm}{000}',?,?,?,?,now(),now()) returning *;
                     """,
@@ -315,7 +315,7 @@ class UpdateTriggerTest : BaseDbTest() {
         }
         adminConn.use {
             it.execute(
-                "update hymn.core_b_object_field set gen_rule='{yyyy}{mm}{dd}{00}' where id = ?",
+                "update hymn.core_biz_object_field set gen_rule='{yyyy}{mm}{dd}{00}' where id = ?",
                 field["id"]
             )
         }
@@ -340,7 +340,7 @@ class UpdateTriggerTest : BaseDbTest() {
             adminConn.use {
                 val field = it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'多选关联对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -349,7 +349,7 @@ class UpdateTriggerTest : BaseDbTest() {
                 val fieldId = field["id"] as String
 //                停用字段删除视图
                 it.execute(
-                    "update hymn.core_b_object_field set active=false where id = ?",
+                    "update hymn.core_biz_object_field set active=false where id = ?",
                     fieldId
                 )
                 it.execute(
@@ -362,7 +362,7 @@ class UpdateTriggerTest : BaseDbTest() {
                 ).size shouldBe 0
 //                启用字段重建视图
                 it.execute(
-                    "update hymn.core_b_object_field set active=true where id = ?",
+                    "update hymn.core_biz_object_field set active=true where id = ?",
                     fieldId
                 )
                 it.execute(

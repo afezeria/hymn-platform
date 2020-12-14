@@ -73,7 +73,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'文本字段','tfield','text',255,1,1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -97,7 +97,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'单选字段','cbfield','check_box',?,?,?,?,now(),now()) returning *;
                     """,
                 objId,
@@ -128,7 +128,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             )[0]
             val field = it.execute(
                 """
-                insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, optional_number,  
+                insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, optional_number,  
                     dict_id,create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                 values (?,'复选框组','cbgfield','check_box_group','0',1,?,?,?,?,?,now(),now()) returning *;
                 """,
@@ -163,7 +163,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             )[0]
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, default_value, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, default_value, 
                         visible_row,optional_number, dict_id, create_by_id, create_by, modify_by_id, 
                         modify_by, create_date, modify_date) 
                     values (?,'下拉','selectfield','select','0',1,1,?,?,?,?,?,now(),now()) returning *;
@@ -190,7 +190,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'整数','intfield','integer',50000,50,?,?,?,?,now(),now()) returning *;
                     """,
@@ -215,7 +215,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  max_length, min_length,  
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  max_length, min_length,  
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'浮点数','floatfield','float',13,3,?,?,?,?,now(),now()) returning *;
                     """,
@@ -240,7 +240,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field ( object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field ( biz_object_id, name, api, type, max_length, min_length, 
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'金额','moneyfield','money',13,3,?,?,?,?,now(),now()) returning *;""",
                 objId,
@@ -264,7 +264,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  create_by_id, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  create_by_id, 
                         create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'日期','datefield','date',?,?,?,?,now(),now()) returning *;
                     """,
@@ -289,7 +289,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type,  create_by_id, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type,  create_by_id, 
                         create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'日期时间','datetimefield','datetime',?,?,?,?,now(),now()) returning *;""",
                 objId,
@@ -313,7 +313,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (object_id, name, api, type,gen_rule, create_by_id, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type,gen_rule, create_by_id, 
                         create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'自动编号字段','autofield','auto','{yyyy}{mm}{000}',?,?,?,?,now(),now()) returning *;
                     """,
@@ -341,7 +341,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field  ( object_id, name, api, type, max_length, 
+                    insert into hymn.core_biz_object_field  ( biz_object_id, name, api, type, max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'图片字段','picturefield','picture',1024,1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -372,7 +372,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             adminConn.use {
                 field = it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'多选关联对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -421,7 +421,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             adminConn.use {
                 val field = it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'关联','reffield','reference',?,'null',?,?,?,?,now(),now()) returning *;
                     """,
@@ -453,7 +453,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -480,7 +480,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'汇总','summaryfield','summary',?,?,'count',0,?,?,?,?,now(),now()) returning *;
                     """,

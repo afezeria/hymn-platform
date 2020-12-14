@@ -1,19 +1,19 @@
 -- table constraint
-alter table hymn.core_b_object_field
-    add unique (object_id,api);
-alter table hymn.core_b_object_field_perm
+alter table hymn.core_biz_object_field
+    add unique (biz_object_id,api);
+alter table hymn.core_biz_object_field_perm
     add unique (role_id,field_id);
-alter table hymn.core_b_object_layout
-    add unique (object_id,name);
-alter table hymn.core_b_object_perm
-    add unique (role_id,object_id);
-alter table hymn.core_b_object_trigger
-    add unique (object_id,api);
-alter table hymn.core_b_object_type
-    add unique (object_id,name);
-alter table hymn.core_b_object_type_layout
-    add unique (role_id,object_id,type_id,layout_id);
-alter table hymn.core_b_object_type_perm
+alter table hymn.core_biz_object_layout
+    add unique (biz_object_id,name);
+alter table hymn.core_biz_object_perm
+    add unique (role_id,biz_object_id);
+alter table hymn.core_biz_object_trigger
+    add unique (biz_object_id,api);
+alter table hymn.core_biz_object_type
+    add unique (biz_object_id,name);
+alter table hymn.core_biz_object_type_layout
+    add unique (role_id,biz_object_id,type_id,layout_id);
+alter table hymn.core_biz_object_type_perm
     add unique (role_id,type_id);
 alter table hymn.core_button_perm
     add unique (role_id,button_id);
@@ -35,89 +35,89 @@ alter table hymn.core_account_menu_layout
 alter table hymn.core_account_object_view
     add foreign key (account_id) references hymn.core_account on delete cascade;
 alter table hymn.core_account_object_view
-    add foreign key (object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object
-    add constraint core_b_object_api_uk unique (api);
-alter table hymn.core_b_object
+    add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object
+    add constraint core_biz_object_api_uk unique (api);
+alter table hymn.core_biz_object
     add check ( type in ('custom', 'module', 'remote') );
-alter table hymn.core_b_object
+alter table hymn.core_biz_object
     add foreign key (module_api) references hymn.core_module on delete cascade;
-alter table hymn.core_b_object_field
-    add foreign key (object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_field_perm
+alter table hymn.core_biz_object_field
+    add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_field_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
-alter table hymn.core_b_object_field_perm
-    add foreign key (object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_field_perm
-    add foreign key (field_id) references hymn.core_b_object_field on delete cascade;
-alter table hymn.core_b_object_layout
-    add foreign key (object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_mapping
-    add foreign key (source_object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_mapping
-    add foreign key (source_type_id) references hymn.core_b_object_type on delete cascade;
-alter table hymn.core_b_object_mapping
-    add foreign key (target_object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_mapping
-    add foreign key (target_type_id) references hymn.core_b_object_type on delete cascade;
-alter table hymn.core_b_object_mapping_item
-    add foreign key (source_field_id) references hymn.core_b_object_field on delete cascade;
-alter table hymn.core_b_object_mapping_item
-    add foreign key (target_field_id) references hymn.core_b_object_field on delete cascade;
-alter table hymn.core_b_object_mapping_item
-    add foreign key (ref_field1_id) references hymn.core_b_object_field on delete cascade;
-alter table hymn.core_b_object_mapping_item
-    add foreign key (ref_field1_object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_mapping_item
-    add foreign key (ref_field2_id) references hymn.core_b_object_field on delete cascade;
-alter table hymn.core_b_object_mapping_item
-    add foreign key (ref_field2_object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_mapping_item
-    add foreign key (ref_field3_id) references hymn.core_b_object_field on delete cascade;
-alter table hymn.core_b_object_mapping_item
-    add foreign key (ref_field3_object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_mapping_item
-    add foreign key (ref_field4_id) references hymn.core_b_object_field on delete cascade;
-alter table hymn.core_b_object_mapping_item
-    add foreign key (ref_field4_object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_perm
+alter table hymn.core_biz_object_field_perm
+    add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_field_perm
+    add foreign key (field_id) references hymn.core_biz_object_field on delete cascade;
+alter table hymn.core_biz_object_layout
+    add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_mapping
+    add foreign key (source_biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_mapping
+    add foreign key (source_type_id) references hymn.core_biz_object_type on delete cascade;
+alter table hymn.core_biz_object_mapping
+    add foreign key (target_biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_mapping
+    add foreign key (target_type_id) references hymn.core_biz_object_type on delete cascade;
+alter table hymn.core_biz_object_mapping_item
+    add foreign key (source_field_id) references hymn.core_biz_object_field on delete cascade;
+alter table hymn.core_biz_object_mapping_item
+    add foreign key (target_field_id) references hymn.core_biz_object_field on delete cascade;
+alter table hymn.core_biz_object_mapping_item
+    add foreign key (ref_field1_id) references hymn.core_biz_object_field on delete cascade;
+alter table hymn.core_biz_object_mapping_item
+    add foreign key (ref_field1_biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_mapping_item
+    add foreign key (ref_field2_id) references hymn.core_biz_object_field on delete cascade;
+alter table hymn.core_biz_object_mapping_item
+    add foreign key (ref_field2_biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_mapping_item
+    add foreign key (ref_field3_id) references hymn.core_biz_object_field on delete cascade;
+alter table hymn.core_biz_object_mapping_item
+    add foreign key (ref_field3_biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_mapping_item
+    add foreign key (ref_field4_id) references hymn.core_biz_object_field on delete cascade;
+alter table hymn.core_biz_object_mapping_item
+    add foreign key (ref_field4_biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
-alter table hymn.core_b_object_perm
-    add foreign key (object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_trigger
+alter table hymn.core_biz_object_perm
+    add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_trigger
     add check ( lang in ('javascript') );
-alter table hymn.core_b_object_trigger
+alter table hymn.core_biz_object_trigger
     add check ( event in ('BEFORE_INSERT', 'BEFORE_UPDATE', 'BEFORE_UPSERT', 'BEFORE_DELETE', 'AFTER_INSERT', 'AFTER_UPDATE', 'AFTER_UPSERT', 'AFTER_DELETE') );
-alter table hymn.core_b_object_type
-    add foreign key (object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_type_available_options
-    add foreign key (type_id) references hymn.core_b_object_type on delete cascade;
-alter table hymn.core_b_object_type_available_options
-    add foreign key (field_id) references hymn.core_b_object_field on delete cascade;
-alter table hymn.core_b_object_type_available_options
+alter table hymn.core_biz_object_type
+    add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_type_available_options
+    add foreign key (type_id) references hymn.core_biz_object_type on delete cascade;
+alter table hymn.core_biz_object_type_available_options
+    add foreign key (field_id) references hymn.core_biz_object_field on delete cascade;
+alter table hymn.core_biz_object_type_available_options
     add foreign key (dict_item_id) references hymn.core_dict_item on delete cascade;
-alter table hymn.core_b_object_type_layout
+alter table hymn.core_biz_object_type_layout
     add foreign key (role_id) references hymn.core_role on delete cascade;
-alter table hymn.core_b_object_type_layout
-    add foreign key (object_id) references hymn.core_b_object on delete cascade;
-alter table hymn.core_b_object_type_layout
-    add foreign key (type_id) references hymn.core_b_object_type on delete cascade;
-alter table hymn.core_b_object_type_layout
-    add foreign key (layout_id) references hymn.core_b_object_layout on delete cascade;
-alter table hymn.core_b_object_type_perm
+alter table hymn.core_biz_object_type_layout
+    add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_type_layout
+    add foreign key (type_id) references hymn.core_biz_object_type on delete cascade;
+alter table hymn.core_biz_object_type_layout
+    add foreign key (layout_id) references hymn.core_biz_object_layout on delete cascade;
+alter table hymn.core_biz_object_type_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
-alter table hymn.core_b_object_type_perm
-    add foreign key (type_id) references hymn.core_b_object_type on delete cascade;
+alter table hymn.core_biz_object_type_perm
+    add foreign key (type_id) references hymn.core_biz_object_type on delete cascade;
 alter table hymn.core_business_code_ref
-    add foreign key (trigger_id) references hymn.core_b_object_trigger on delete cascade;
+    add foreign key (trigger_id) references hymn.core_biz_object_trigger on delete cascade;
 alter table hymn.core_business_code_ref
     add foreign key (interface_id) references hymn.core_custom_interface on delete cascade;
 alter table hymn.core_business_code_ref
     add foreign key (shared_code_id) references hymn.core_shared_code on delete cascade;
 alter table hymn.core_business_code_ref
-    add foreign key (object_id) references hymn.core_b_object on delete cascade;
+    add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
 alter table hymn.core_business_code_ref
-    add foreign key (field_id) references hymn.core_b_object_field on delete cascade;
+    add foreign key (field_id) references hymn.core_biz_object_field on delete cascade;
 alter table hymn.core_business_code_ref
     add foreign key (org_id) references hymn.core_org on delete cascade;
 alter table hymn.core_business_code_ref

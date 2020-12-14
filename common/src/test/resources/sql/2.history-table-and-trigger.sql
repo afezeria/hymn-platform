@@ -163,7 +163,7 @@ create table hymn.core_account_object_view_history
     global_view bool,
     default_view bool,
     account_id text,
-    object_id text,
+    biz_object_id text,
     name text,
     view_json text,
     create_by_id text,
@@ -215,8 +215,8 @@ create trigger core_account_object_view_history_del
     on hymn.core_account_object_view
     for each row
 execute function hymn.core_account_object_view_history_del();
-drop table if exists hymn.core_b_object_history cascade;
-create table hymn.core_b_object_history
+drop table if exists hymn.core_biz_object_history cascade;
+create table hymn.core_biz_object_history
 (
     operation text,
     stamp timestamp,
@@ -240,56 +240,56 @@ create table hymn.core_b_object_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_history_ins() returns trigger
+create or replace function hymn.core_biz_object_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_history_upd() returns trigger
+create or replace function hymn.core_biz_object_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_history_del() returns trigger
+create or replace function hymn.core_biz_object_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_history_ins on hymn.core_b_object;
-create trigger core_b_object_history_ins
+drop trigger if exists core_biz_object_history_ins on hymn.core_biz_object;
+create trigger core_biz_object_history_ins
     after insert
-    on hymn.core_b_object
+    on hymn.core_biz_object
     for each row
-execute function hymn.core_b_object_history_ins();
-drop trigger if exists core_b_object_history_upd on hymn.core_b_object;
-create trigger core_b_object_history_upd
+execute function hymn.core_biz_object_history_ins();
+drop trigger if exists core_biz_object_history_upd on hymn.core_biz_object;
+create trigger core_biz_object_history_upd
     after update
-    on hymn.core_b_object
+    on hymn.core_biz_object
     for each row
-execute function hymn.core_b_object_history_upd();
-drop trigger if exists core_b_object_history_del on hymn.core_b_object;
-create trigger core_b_object_history_del
+execute function hymn.core_biz_object_history_upd();
+drop trigger if exists core_biz_object_history_del on hymn.core_biz_object;
+create trigger core_biz_object_history_del
     after delete
-    on hymn.core_b_object
+    on hymn.core_biz_object
     for each row
-execute function hymn.core_b_object_history_del();
-drop table if exists hymn.core_b_object_field_history cascade;
-create table hymn.core_b_object_field_history
+execute function hymn.core_biz_object_history_del();
+drop table if exists hymn.core_biz_object_field_history cascade;
+create table hymn.core_biz_object_field_history
 (
     operation text,
     stamp timestamp,
     id text,
     source_column text,
-    object_id text,
+    biz_object_id text,
     name text,
     api text,
     type text,
@@ -324,56 +324,56 @@ create table hymn.core_b_object_field_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_field_history_ins() returns trigger
+create or replace function hymn.core_biz_object_field_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_field_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_field_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_field_history_upd() returns trigger
+create or replace function hymn.core_biz_object_field_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_field_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_field_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_field_history_del() returns trigger
+create or replace function hymn.core_biz_object_field_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_field_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_field_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_field_history_ins on hymn.core_b_object_field;
-create trigger core_b_object_field_history_ins
+drop trigger if exists core_biz_object_field_history_ins on hymn.core_biz_object_field;
+create trigger core_biz_object_field_history_ins
     after insert
-    on hymn.core_b_object_field
+    on hymn.core_biz_object_field
     for each row
-execute function hymn.core_b_object_field_history_ins();
-drop trigger if exists core_b_object_field_history_upd on hymn.core_b_object_field;
-create trigger core_b_object_field_history_upd
+execute function hymn.core_biz_object_field_history_ins();
+drop trigger if exists core_biz_object_field_history_upd on hymn.core_biz_object_field;
+create trigger core_biz_object_field_history_upd
     after update
-    on hymn.core_b_object_field
+    on hymn.core_biz_object_field
     for each row
-execute function hymn.core_b_object_field_history_upd();
-drop trigger if exists core_b_object_field_history_del on hymn.core_b_object_field;
-create trigger core_b_object_field_history_del
+execute function hymn.core_biz_object_field_history_upd();
+drop trigger if exists core_biz_object_field_history_del on hymn.core_biz_object_field;
+create trigger core_biz_object_field_history_del
     after delete
-    on hymn.core_b_object_field
+    on hymn.core_biz_object_field
     for each row
-execute function hymn.core_b_object_field_history_del();
-drop table if exists hymn.core_b_object_field_perm_history cascade;
-create table hymn.core_b_object_field_perm_history
+execute function hymn.core_biz_object_field_history_del();
+drop table if exists hymn.core_biz_object_field_perm_history cascade;
+create table hymn.core_biz_object_field_perm_history
 (
     operation text,
     stamp timestamp,
     id text,
     role_id text,
-    object_id text,
+    biz_object_id text,
     field_id text,
     p_read bool,
     p_edit bool,
@@ -384,55 +384,55 @@ create table hymn.core_b_object_field_perm_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_field_perm_history_ins() returns trigger
+create or replace function hymn.core_biz_object_field_perm_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_field_perm_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_field_perm_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_field_perm_history_upd() returns trigger
+create or replace function hymn.core_biz_object_field_perm_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_field_perm_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_field_perm_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_field_perm_history_del() returns trigger
+create or replace function hymn.core_biz_object_field_perm_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_field_perm_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_field_perm_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_field_perm_history_ins on hymn.core_b_object_field_perm;
-create trigger core_b_object_field_perm_history_ins
+drop trigger if exists core_biz_object_field_perm_history_ins on hymn.core_biz_object_field_perm;
+create trigger core_biz_object_field_perm_history_ins
     after insert
-    on hymn.core_b_object_field_perm
+    on hymn.core_biz_object_field_perm
     for each row
-execute function hymn.core_b_object_field_perm_history_ins();
-drop trigger if exists core_b_object_field_perm_history_upd on hymn.core_b_object_field_perm;
-create trigger core_b_object_field_perm_history_upd
+execute function hymn.core_biz_object_field_perm_history_ins();
+drop trigger if exists core_biz_object_field_perm_history_upd on hymn.core_biz_object_field_perm;
+create trigger core_biz_object_field_perm_history_upd
     after update
-    on hymn.core_b_object_field_perm
+    on hymn.core_biz_object_field_perm
     for each row
-execute function hymn.core_b_object_field_perm_history_upd();
-drop trigger if exists core_b_object_field_perm_history_del on hymn.core_b_object_field_perm;
-create trigger core_b_object_field_perm_history_del
+execute function hymn.core_biz_object_field_perm_history_upd();
+drop trigger if exists core_biz_object_field_perm_history_del on hymn.core_biz_object_field_perm;
+create trigger core_biz_object_field_perm_history_del
     after delete
-    on hymn.core_b_object_field_perm
+    on hymn.core_biz_object_field_perm
     for each row
-execute function hymn.core_b_object_field_perm_history_del();
-drop table if exists hymn.core_b_object_layout_history cascade;
-create table hymn.core_b_object_layout_history
+execute function hymn.core_biz_object_field_perm_history_del();
+drop table if exists hymn.core_biz_object_layout_history cascade;
+create table hymn.core_biz_object_layout_history
 (
     operation text,
     stamp timestamp,
     id text,
-    object_id text,
+    biz_object_id text,
     name text,
     remark text,
     rel_field_json_arr text,
@@ -448,57 +448,57 @@ create table hymn.core_b_object_layout_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_layout_history_ins() returns trigger
+create or replace function hymn.core_biz_object_layout_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_layout_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_layout_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_layout_history_upd() returns trigger
+create or replace function hymn.core_biz_object_layout_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_layout_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_layout_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_layout_history_del() returns trigger
+create or replace function hymn.core_biz_object_layout_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_layout_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_layout_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_layout_history_ins on hymn.core_b_object_layout;
-create trigger core_b_object_layout_history_ins
+drop trigger if exists core_biz_object_layout_history_ins on hymn.core_biz_object_layout;
+create trigger core_biz_object_layout_history_ins
     after insert
-    on hymn.core_b_object_layout
+    on hymn.core_biz_object_layout
     for each row
-execute function hymn.core_b_object_layout_history_ins();
-drop trigger if exists core_b_object_layout_history_upd on hymn.core_b_object_layout;
-create trigger core_b_object_layout_history_upd
+execute function hymn.core_biz_object_layout_history_ins();
+drop trigger if exists core_biz_object_layout_history_upd on hymn.core_biz_object_layout;
+create trigger core_biz_object_layout_history_upd
     after update
-    on hymn.core_b_object_layout
+    on hymn.core_biz_object_layout
     for each row
-execute function hymn.core_b_object_layout_history_upd();
-drop trigger if exists core_b_object_layout_history_del on hymn.core_b_object_layout;
-create trigger core_b_object_layout_history_del
+execute function hymn.core_biz_object_layout_history_upd();
+drop trigger if exists core_biz_object_layout_history_del on hymn.core_biz_object_layout;
+create trigger core_biz_object_layout_history_del
     after delete
-    on hymn.core_b_object_layout
+    on hymn.core_biz_object_layout
     for each row
-execute function hymn.core_b_object_layout_history_del();
-drop table if exists hymn.core_b_object_mapping_history cascade;
-create table hymn.core_b_object_mapping_history
+execute function hymn.core_biz_object_layout_history_del();
+drop table if exists hymn.core_biz_object_mapping_history cascade;
+create table hymn.core_biz_object_mapping_history
 (
     operation text,
     stamp timestamp,
     id text,
-    source_object_id text,
+    source_biz_object_id text,
     source_type_id text,
-    target_object_id text,
+    target_biz_object_id text,
     target_type_id text,
     create_by_id text,
     create_by text,
@@ -507,50 +507,50 @@ create table hymn.core_b_object_mapping_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_mapping_history_ins() returns trigger
+create or replace function hymn.core_biz_object_mapping_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_mapping_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_mapping_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_mapping_history_upd() returns trigger
+create or replace function hymn.core_biz_object_mapping_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_mapping_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_mapping_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_mapping_history_del() returns trigger
+create or replace function hymn.core_biz_object_mapping_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_mapping_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_mapping_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_mapping_history_ins on hymn.core_b_object_mapping;
-create trigger core_b_object_mapping_history_ins
+drop trigger if exists core_biz_object_mapping_history_ins on hymn.core_biz_object_mapping;
+create trigger core_biz_object_mapping_history_ins
     after insert
-    on hymn.core_b_object_mapping
+    on hymn.core_biz_object_mapping
     for each row
-execute function hymn.core_b_object_mapping_history_ins();
-drop trigger if exists core_b_object_mapping_history_upd on hymn.core_b_object_mapping;
-create trigger core_b_object_mapping_history_upd
+execute function hymn.core_biz_object_mapping_history_ins();
+drop trigger if exists core_biz_object_mapping_history_upd on hymn.core_biz_object_mapping;
+create trigger core_biz_object_mapping_history_upd
     after update
-    on hymn.core_b_object_mapping
+    on hymn.core_biz_object_mapping
     for each row
-execute function hymn.core_b_object_mapping_history_upd();
-drop trigger if exists core_b_object_mapping_history_del on hymn.core_b_object_mapping;
-create trigger core_b_object_mapping_history_del
+execute function hymn.core_biz_object_mapping_history_upd();
+drop trigger if exists core_biz_object_mapping_history_del on hymn.core_biz_object_mapping;
+create trigger core_biz_object_mapping_history_del
     after delete
-    on hymn.core_b_object_mapping
+    on hymn.core_biz_object_mapping
     for each row
-execute function hymn.core_b_object_mapping_history_del();
-drop table if exists hymn.core_b_object_mapping_item_history cascade;
-create table hymn.core_b_object_mapping_item_history
+execute function hymn.core_biz_object_mapping_history_del();
+drop table if exists hymn.core_biz_object_mapping_item_history cascade;
+create table hymn.core_biz_object_mapping_item_history
 (
     operation text,
     stamp timestamp,
@@ -559,13 +559,13 @@ create table hymn.core_b_object_mapping_item_history
     source_field_id text,
     target_field_id text,
     ref_field1_id text,
-    ref_field1_object_id text,
+    ref_field1_biz_object_id text,
     ref_field2_id text,
-    ref_field2_object_id text,
+    ref_field2_biz_object_id text,
     ref_field3_id text,
-    ref_field3_object_id text,
+    ref_field3_biz_object_id text,
     ref_field4_id text,
-    ref_field4_object_id text,
+    ref_field4_biz_object_id text,
     create_by_id text,
     create_by text,
     modify_by_id text,
@@ -573,56 +573,56 @@ create table hymn.core_b_object_mapping_item_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_mapping_item_history_ins() returns trigger
+create or replace function hymn.core_biz_object_mapping_item_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_mapping_item_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_mapping_item_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_mapping_item_history_upd() returns trigger
+create or replace function hymn.core_biz_object_mapping_item_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_mapping_item_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_mapping_item_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_mapping_item_history_del() returns trigger
+create or replace function hymn.core_biz_object_mapping_item_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_mapping_item_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_mapping_item_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_mapping_item_history_ins on hymn.core_b_object_mapping_item;
-create trigger core_b_object_mapping_item_history_ins
+drop trigger if exists core_biz_object_mapping_item_history_ins on hymn.core_biz_object_mapping_item;
+create trigger core_biz_object_mapping_item_history_ins
     after insert
-    on hymn.core_b_object_mapping_item
+    on hymn.core_biz_object_mapping_item
     for each row
-execute function hymn.core_b_object_mapping_item_history_ins();
-drop trigger if exists core_b_object_mapping_item_history_upd on hymn.core_b_object_mapping_item;
-create trigger core_b_object_mapping_item_history_upd
+execute function hymn.core_biz_object_mapping_item_history_ins();
+drop trigger if exists core_biz_object_mapping_item_history_upd on hymn.core_biz_object_mapping_item;
+create trigger core_biz_object_mapping_item_history_upd
     after update
-    on hymn.core_b_object_mapping_item
+    on hymn.core_biz_object_mapping_item
     for each row
-execute function hymn.core_b_object_mapping_item_history_upd();
-drop trigger if exists core_b_object_mapping_item_history_del on hymn.core_b_object_mapping_item;
-create trigger core_b_object_mapping_item_history_del
+execute function hymn.core_biz_object_mapping_item_history_upd();
+drop trigger if exists core_biz_object_mapping_item_history_del on hymn.core_biz_object_mapping_item;
+create trigger core_biz_object_mapping_item_history_del
     after delete
-    on hymn.core_b_object_mapping_item
+    on hymn.core_biz_object_mapping_item
     for each row
-execute function hymn.core_b_object_mapping_item_history_del();
-drop table if exists hymn.core_b_object_perm_history cascade;
-create table hymn.core_b_object_perm_history
+execute function hymn.core_biz_object_mapping_item_history_del();
+drop table if exists hymn.core_biz_object_perm_history cascade;
+create table hymn.core_biz_object_perm_history
 (
     operation text,
     stamp timestamp,
     id text,
     role_id text,
-    object_id text,
+    biz_object_id text,
     ins bool,
     upd bool,
     del bool,
@@ -639,57 +639,57 @@ create table hymn.core_b_object_perm_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_perm_history_ins() returns trigger
+create or replace function hymn.core_biz_object_perm_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_perm_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_perm_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_perm_history_upd() returns trigger
+create or replace function hymn.core_biz_object_perm_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_perm_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_perm_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_perm_history_del() returns trigger
+create or replace function hymn.core_biz_object_perm_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_perm_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_perm_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_perm_history_ins on hymn.core_b_object_perm;
-create trigger core_b_object_perm_history_ins
+drop trigger if exists core_biz_object_perm_history_ins on hymn.core_biz_object_perm;
+create trigger core_biz_object_perm_history_ins
     after insert
-    on hymn.core_b_object_perm
+    on hymn.core_biz_object_perm
     for each row
-execute function hymn.core_b_object_perm_history_ins();
-drop trigger if exists core_b_object_perm_history_upd on hymn.core_b_object_perm;
-create trigger core_b_object_perm_history_upd
+execute function hymn.core_biz_object_perm_history_ins();
+drop trigger if exists core_biz_object_perm_history_upd on hymn.core_biz_object_perm;
+create trigger core_biz_object_perm_history_upd
     after update
-    on hymn.core_b_object_perm
+    on hymn.core_biz_object_perm
     for each row
-execute function hymn.core_b_object_perm_history_upd();
-drop trigger if exists core_b_object_perm_history_del on hymn.core_b_object_perm;
-create trigger core_b_object_perm_history_del
+execute function hymn.core_biz_object_perm_history_upd();
+drop trigger if exists core_biz_object_perm_history_del on hymn.core_biz_object_perm;
+create trigger core_biz_object_perm_history_del
     after delete
-    on hymn.core_b_object_perm
+    on hymn.core_biz_object_perm
     for each row
-execute function hymn.core_b_object_perm_history_del();
-drop table if exists hymn.core_b_object_trigger_history cascade;
-create table hymn.core_b_object_trigger_history
+execute function hymn.core_biz_object_perm_history_del();
+drop table if exists hymn.core_biz_object_trigger_history cascade;
+create table hymn.core_biz_object_trigger_history
 (
     operation text,
     stamp timestamp,
     id text,
     active bool,
     remark text,
-    object_id text,
+    biz_object_id text,
     name text,
     api text,
     lang text,
@@ -704,55 +704,55 @@ create table hymn.core_b_object_trigger_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_trigger_history_ins() returns trigger
+create or replace function hymn.core_biz_object_trigger_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_trigger_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_trigger_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_trigger_history_upd() returns trigger
+create or replace function hymn.core_biz_object_trigger_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_trigger_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_trigger_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_trigger_history_del() returns trigger
+create or replace function hymn.core_biz_object_trigger_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_trigger_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_trigger_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_trigger_history_ins on hymn.core_b_object_trigger;
-create trigger core_b_object_trigger_history_ins
+drop trigger if exists core_biz_object_trigger_history_ins on hymn.core_biz_object_trigger;
+create trigger core_biz_object_trigger_history_ins
     after insert
-    on hymn.core_b_object_trigger
+    on hymn.core_biz_object_trigger
     for each row
-execute function hymn.core_b_object_trigger_history_ins();
-drop trigger if exists core_b_object_trigger_history_upd on hymn.core_b_object_trigger;
-create trigger core_b_object_trigger_history_upd
+execute function hymn.core_biz_object_trigger_history_ins();
+drop trigger if exists core_biz_object_trigger_history_upd on hymn.core_biz_object_trigger;
+create trigger core_biz_object_trigger_history_upd
     after update
-    on hymn.core_b_object_trigger
+    on hymn.core_biz_object_trigger
     for each row
-execute function hymn.core_b_object_trigger_history_upd();
-drop trigger if exists core_b_object_trigger_history_del on hymn.core_b_object_trigger;
-create trigger core_b_object_trigger_history_del
+execute function hymn.core_biz_object_trigger_history_upd();
+drop trigger if exists core_biz_object_trigger_history_del on hymn.core_biz_object_trigger;
+create trigger core_biz_object_trigger_history_del
     after delete
-    on hymn.core_b_object_trigger
+    on hymn.core_biz_object_trigger
     for each row
-execute function hymn.core_b_object_trigger_history_del();
-drop table if exists hymn.core_b_object_type_history cascade;
-create table hymn.core_b_object_type_history
+execute function hymn.core_biz_object_trigger_history_del();
+drop table if exists hymn.core_biz_object_type_history cascade;
+create table hymn.core_biz_object_type_history
 (
     operation text,
     stamp timestamp,
     id text,
-    object_id text,
+    biz_object_id text,
     name text,
     active bool,
     remark text,
@@ -763,55 +763,55 @@ create table hymn.core_b_object_type_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_type_history_ins() returns trigger
+create or replace function hymn.core_biz_object_type_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_type_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_type_history_upd() returns trigger
+create or replace function hymn.core_biz_object_type_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_type_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_type_history_del() returns trigger
+create or replace function hymn.core_biz_object_type_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_type_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_type_history_ins on hymn.core_b_object_type;
-create trigger core_b_object_type_history_ins
+drop trigger if exists core_biz_object_type_history_ins on hymn.core_biz_object_type;
+create trigger core_biz_object_type_history_ins
     after insert
-    on hymn.core_b_object_type
+    on hymn.core_biz_object_type
     for each row
-execute function hymn.core_b_object_type_history_ins();
-drop trigger if exists core_b_object_type_history_upd on hymn.core_b_object_type;
-create trigger core_b_object_type_history_upd
+execute function hymn.core_biz_object_type_history_ins();
+drop trigger if exists core_biz_object_type_history_upd on hymn.core_biz_object_type;
+create trigger core_biz_object_type_history_upd
     after update
-    on hymn.core_b_object_type
+    on hymn.core_biz_object_type
     for each row
-execute function hymn.core_b_object_type_history_upd();
-drop trigger if exists core_b_object_type_history_del on hymn.core_b_object_type;
-create trigger core_b_object_type_history_del
+execute function hymn.core_biz_object_type_history_upd();
+drop trigger if exists core_biz_object_type_history_del on hymn.core_biz_object_type;
+create trigger core_biz_object_type_history_del
     after delete
-    on hymn.core_b_object_type
+    on hymn.core_biz_object_type
     for each row
-execute function hymn.core_b_object_type_history_del();
-drop table if exists hymn.core_b_object_type_available_options_history cascade;
-create table hymn.core_b_object_type_available_options_history
+execute function hymn.core_biz_object_type_history_del();
+drop table if exists hymn.core_biz_object_type_available_options_history cascade;
+create table hymn.core_biz_object_type_available_options_history
 (
     operation text,
     stamp timestamp,
     id text,
-    object_id text,
+    biz_object_id text,
     type_id text,
     field_id text,
     dict_item_id text,
@@ -822,56 +822,56 @@ create table hymn.core_b_object_type_available_options_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_type_available_options_history_ins() returns trigger
+create or replace function hymn.core_biz_object_type_available_options_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_available_options_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_type_available_options_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_type_available_options_history_upd() returns trigger
+create or replace function hymn.core_biz_object_type_available_options_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_available_options_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_type_available_options_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_type_available_options_history_del() returns trigger
+create or replace function hymn.core_biz_object_type_available_options_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_available_options_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_type_available_options_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_type_available_options_history_ins on hymn.core_b_object_type_available_options;
-create trigger core_b_object_type_available_options_history_ins
+drop trigger if exists core_biz_object_type_available_options_history_ins on hymn.core_biz_object_type_available_options;
+create trigger core_biz_object_type_available_options_history_ins
     after insert
-    on hymn.core_b_object_type_available_options
+    on hymn.core_biz_object_type_available_options
     for each row
-execute function hymn.core_b_object_type_available_options_history_ins();
-drop trigger if exists core_b_object_type_available_options_history_upd on hymn.core_b_object_type_available_options;
-create trigger core_b_object_type_available_options_history_upd
+execute function hymn.core_biz_object_type_available_options_history_ins();
+drop trigger if exists core_biz_object_type_available_options_history_upd on hymn.core_biz_object_type_available_options;
+create trigger core_biz_object_type_available_options_history_upd
     after update
-    on hymn.core_b_object_type_available_options
+    on hymn.core_biz_object_type_available_options
     for each row
-execute function hymn.core_b_object_type_available_options_history_upd();
-drop trigger if exists core_b_object_type_available_options_history_del on hymn.core_b_object_type_available_options;
-create trigger core_b_object_type_available_options_history_del
+execute function hymn.core_biz_object_type_available_options_history_upd();
+drop trigger if exists core_biz_object_type_available_options_history_del on hymn.core_biz_object_type_available_options;
+create trigger core_biz_object_type_available_options_history_del
     after delete
-    on hymn.core_b_object_type_available_options
+    on hymn.core_biz_object_type_available_options
     for each row
-execute function hymn.core_b_object_type_available_options_history_del();
-drop table if exists hymn.core_b_object_type_layout_history cascade;
-create table hymn.core_b_object_type_layout_history
+execute function hymn.core_biz_object_type_available_options_history_del();
+drop table if exists hymn.core_biz_object_type_layout_history cascade;
+create table hymn.core_biz_object_type_layout_history
 (
     operation text,
     stamp timestamp,
     id text,
     role_id text,
-    object_id text,
+    biz_object_id text,
     type_id text,
     layout_id text,
     create_by_id text,
@@ -881,56 +881,56 @@ create table hymn.core_b_object_type_layout_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_type_layout_history_ins() returns trigger
+create or replace function hymn.core_biz_object_type_layout_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_layout_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_type_layout_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_type_layout_history_upd() returns trigger
+create or replace function hymn.core_biz_object_type_layout_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_layout_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_type_layout_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_type_layout_history_del() returns trigger
+create or replace function hymn.core_biz_object_type_layout_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_layout_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_type_layout_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_type_layout_history_ins on hymn.core_b_object_type_layout;
-create trigger core_b_object_type_layout_history_ins
+drop trigger if exists core_biz_object_type_layout_history_ins on hymn.core_biz_object_type_layout;
+create trigger core_biz_object_type_layout_history_ins
     after insert
-    on hymn.core_b_object_type_layout
+    on hymn.core_biz_object_type_layout
     for each row
-execute function hymn.core_b_object_type_layout_history_ins();
-drop trigger if exists core_b_object_type_layout_history_upd on hymn.core_b_object_type_layout;
-create trigger core_b_object_type_layout_history_upd
+execute function hymn.core_biz_object_type_layout_history_ins();
+drop trigger if exists core_biz_object_type_layout_history_upd on hymn.core_biz_object_type_layout;
+create trigger core_biz_object_type_layout_history_upd
     after update
-    on hymn.core_b_object_type_layout
+    on hymn.core_biz_object_type_layout
     for each row
-execute function hymn.core_b_object_type_layout_history_upd();
-drop trigger if exists core_b_object_type_layout_history_del on hymn.core_b_object_type_layout;
-create trigger core_b_object_type_layout_history_del
+execute function hymn.core_biz_object_type_layout_history_upd();
+drop trigger if exists core_biz_object_type_layout_history_del on hymn.core_biz_object_type_layout;
+create trigger core_biz_object_type_layout_history_del
     after delete
-    on hymn.core_b_object_type_layout
+    on hymn.core_biz_object_type_layout
     for each row
-execute function hymn.core_b_object_type_layout_history_del();
-drop table if exists hymn.core_b_object_type_perm_history cascade;
-create table hymn.core_b_object_type_perm_history
+execute function hymn.core_biz_object_type_layout_history_del();
+drop table if exists hymn.core_biz_object_type_perm_history cascade;
+create table hymn.core_biz_object_type_perm_history
 (
     operation text,
     stamp timestamp,
     id text,
     role_id text,
-    object_id text,
+    biz_object_id text,
     type_id text,
     visible bool,
     create_by_id text,
@@ -940,48 +940,48 @@ create table hymn.core_b_object_type_perm_history
     create_date timestamp,
     modify_date timestamp
 );
-create or replace function hymn.core_b_object_type_perm_history_ins() returns trigger
+create or replace function hymn.core_biz_object_type_perm_history_ins() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_perm_history select 'i',now(),new.*;
+    insert into hymn.core_biz_object_type_perm_history select 'i',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_type_perm_history_upd() returns trigger
+create or replace function hymn.core_biz_object_type_perm_history_upd() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_perm_history select 'u',now(),new.*;
+    insert into hymn.core_biz_object_type_perm_history select 'u',now(),new.*;
     return null;
 end
 $$;
-create or replace function hymn.core_b_object_type_perm_history_del() returns trigger
+create or replace function hymn.core_biz_object_type_perm_history_del() returns trigger
     language plpgsql as
 $$
 begin
-    insert into hymn.core_b_object_type_perm_history select 'd',now(),old.*;
+    insert into hymn.core_biz_object_type_perm_history select 'd',now(),old.*;
     return null;
 end
 $$;
-drop trigger if exists core_b_object_type_perm_history_ins on hymn.core_b_object_type_perm;
-create trigger core_b_object_type_perm_history_ins
+drop trigger if exists core_biz_object_type_perm_history_ins on hymn.core_biz_object_type_perm;
+create trigger core_biz_object_type_perm_history_ins
     after insert
-    on hymn.core_b_object_type_perm
+    on hymn.core_biz_object_type_perm
     for each row
-execute function hymn.core_b_object_type_perm_history_ins();
-drop trigger if exists core_b_object_type_perm_history_upd on hymn.core_b_object_type_perm;
-create trigger core_b_object_type_perm_history_upd
+execute function hymn.core_biz_object_type_perm_history_ins();
+drop trigger if exists core_biz_object_type_perm_history_upd on hymn.core_biz_object_type_perm;
+create trigger core_biz_object_type_perm_history_upd
     after update
-    on hymn.core_b_object_type_perm
+    on hymn.core_biz_object_type_perm
     for each row
-execute function hymn.core_b_object_type_perm_history_upd();
-drop trigger if exists core_b_object_type_perm_history_del on hymn.core_b_object_type_perm;
-create trigger core_b_object_type_perm_history_del
+execute function hymn.core_biz_object_type_perm_history_upd();
+drop trigger if exists core_biz_object_type_perm_history_del on hymn.core_biz_object_type_perm;
+create trigger core_biz_object_type_perm_history_del
     after delete
-    on hymn.core_b_object_type_perm
+    on hymn.core_biz_object_type_perm
     for each row
-execute function hymn.core_b_object_type_perm_history_del();
+execute function hymn.core_biz_object_type_perm_history_del();
 drop table if exists hymn.core_business_code_ref_history cascade;
 create table hymn.core_business_code_ref_history
 (
@@ -991,7 +991,7 @@ create table hymn.core_business_code_ref_history
     trigger_id text,
     interface_id text,
     shared_code_id text,
-    object_id text,
+    biz_object_id text,
     field_id text,
     org_id text,
     role_id text,
@@ -1277,7 +1277,7 @@ create table hymn.core_custom_button_history
     stamp timestamp,
     id text,
     remark text,
-    object_id text,
+    biz_object_id text,
     name text,
     api text,
     client_type text,
@@ -1750,13 +1750,66 @@ create trigger core_menu_item_perm_history_del
     on hymn.core_menu_item_perm
     for each row
 execute function hymn.core_menu_item_perm_history_del();
+drop table if exists hymn.core_module_history cascade;
+create table hymn.core_module_history
+(
+    operation text,
+    stamp timestamp,
+    api text,
+    name text,
+    remark text,
+    version text,
+    create_date timestamptz
+);
+create or replace function hymn.core_module_history_ins() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_module_history select 'i',now(),new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_module_history_upd() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_module_history select 'u',now(),new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_module_history_del() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_module_history select 'd',now(),old.*;
+    return null;
+end
+$$;
+drop trigger if exists core_module_history_ins on hymn.core_module;
+create trigger core_module_history_ins
+    after insert
+    on hymn.core_module
+    for each row
+execute function hymn.core_module_history_ins();
+drop trigger if exists core_module_history_upd on hymn.core_module;
+create trigger core_module_history_upd
+    after update
+    on hymn.core_module
+    for each row
+execute function hymn.core_module_history_upd();
+drop trigger if exists core_module_history_del on hymn.core_module;
+create trigger core_module_history_del
+    after delete
+    on hymn.core_module
+    for each row
+execute function hymn.core_module_history_del();
 drop table if exists hymn.core_module_function_history cascade;
 create table hymn.core_module_function_history
 (
     operation text,
     stamp timestamp,
     id text,
-    module_name text,
+    module_api text,
     api text,
     name text,
     remark text,

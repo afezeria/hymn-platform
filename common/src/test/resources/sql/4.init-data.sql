@@ -20,7 +20,7 @@ values ('301c35c23be449abb5bdf6c80b6878af', '管理员权限', '', '911c60ea5d62
 insert into hymn.core_module (api, name, remark, version, create_date)
 values ('core','基础','','0.0.1','2020-01-01 00:00:00');
 
-insert into hymn.core_b_object (id, name, api, source_table, active, type, module_api, can_insert,
+insert into hymn.core_biz_object (id, name, api, source_table, active, type, module_api, can_insert,
                                 can_update, remark,
                                 create_by_id, create_by, modify_by_id, modify_by, create_date,
                                 modify_date)
@@ -36,7 +36,7 @@ values ('bcf5f00c2e6c494ea2318912a639031a', '用户', 'account', 'core_account',
         false, false, '组织表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
-       ('09da56a7de514895aea5c596820d0ced', '业务类型', 'object_type', 'core_b_object_type',
+       ('09da56a7de514895aea5c596820d0ced', '业务类型', 'object_type', 'core_biz_object_type',
         true, 'module', 'core', false, false, '自定义对象业务类型表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00')
@@ -57,7 +57,7 @@ values ('c31ec080066a432e9d1399b912c417c7', '4a6010cceea948d6856aac09e8aa19c0', 
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00');
 
-insert into hymn.core_b_object_field (id, source_column, object_id, name, api, type, active,
+insert into hymn.core_biz_object_field (id, source_column, biz_object_id, name, api, type, active,
                                       history, default_value, formula, max_length, min_length,
                                       visible_row, dict_id, master_field_id, optional_number,
                                       ref_id, ref_list_label, ref_delete_policy, query_filter,

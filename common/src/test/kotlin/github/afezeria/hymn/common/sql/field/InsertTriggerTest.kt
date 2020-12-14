@@ -52,14 +52,14 @@ class InsertTriggerTest : BaseDbTest() {
         adminConn.use {
             it.execute(
                 """
-                    update hymn.core_b_object_field set active=false 
+                    update hymn.core_biz_object_field set active=false 
                     where is_predefined = false
                     and active=true
-                    and object_id = ?
+                    and biz_object_id = ?
                 """, objId
             )
             it.execute(
-                " delete from hymn.core_b_object_field where active = false and object_id = ? ",
+                " delete from hymn.core_biz_object_field where active = false and biz_object_id = ? ",
                 objId
             )
         }
@@ -70,7 +70,7 @@ class InsertTriggerTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (active,object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (active,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (false,?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -85,7 +85,7 @@ class InsertTriggerTest : BaseDbTest() {
         adminConn.use {
             val obj = it.execute(
                 """
-                insert into hymn.core_b_object(name,api,type,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+                insert into hymn.core_biz_object(name,api,type,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
                 values ('测试对象','remote_obj','remote',?,?,?,?,now(),now()) returning *;
                 """,
                 *COMMON_INFO
@@ -94,7 +94,7 @@ class InsertTriggerTest : BaseDbTest() {
             try {
                 val field = it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -113,7 +113,7 @@ class InsertTriggerTest : BaseDbTest() {
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (active,object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (active,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (false,?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -130,7 +130,7 @@ class InsertTriggerTest : BaseDbTest() {
             adminConn.use {
                 val field1 = it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -139,7 +139,7 @@ class InsertTriggerTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -157,7 +157,7 @@ class InsertTriggerTest : BaseDbTest() {
         adminConn.use {
             val obj = it.execute(
                 """
-                insert into hymn.core_b_object(name,api,type,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+                insert into hymn.core_biz_object(name,api,type,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
                 values ('测试对象','remote_obj','remote',?,?,?,?,now(),now()) returning *;
                 """,
                 *COMMON_INFO
@@ -166,7 +166,7 @@ class InsertTriggerTest : BaseDbTest() {
             try {
                 it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,

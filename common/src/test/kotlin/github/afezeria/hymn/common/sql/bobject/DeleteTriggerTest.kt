@@ -28,7 +28,7 @@ class DeleteTriggerTest : BaseDbTest() {
         val id = obj["id"] as String
         adminConn.use {
             shouldThrow<PSQLException> {
-                it.execute("delete from hymn.core_b_object where id=?", id)
+                it.execute("delete from hymn.core_biz_object where id=?", id)
             }.message shouldContain "无法删除启用的对象"
         }
     }
@@ -46,7 +46,7 @@ class DeleteTriggerTest : BaseDbTest() {
 //            创建关联表
             val refField = it.execute(
                 """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'多选关联对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -56,7 +56,7 @@ class DeleteTriggerTest : BaseDbTest() {
 //            创建字段
             it.execute(
                 """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'文本字段','tfield','text',255,1,1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -88,7 +88,7 @@ class DeleteTriggerTest : BaseDbTest() {
             )
         }
         adminConn.use {
-            it.execute("update hymn.core_b_object_field set active=false where id=?", refFieldId)
+            it.execute("update hymn.core_biz_object_field set active=false where id=?", refFieldId)
             it.execute("select * from hymn_view.${api}").size shouldBeGreaterThan 0
             it.execute("select * from hymn_view.${api}_history").size shouldBeGreaterThan 0
 //            存在递增序列
@@ -100,7 +100,7 @@ class DeleteTriggerTest : BaseDbTest() {
             ).size shouldBe 1
 //            存在引用字段
             it.execute(
-                "select * from hymn.core_b_object_field where ref_id = ?",
+                "select * from hymn.core_biz_object_field where ref_id = ?",
                 id
             ).size shouldBe 1
 //            存在触发器
@@ -129,14 +129,14 @@ class DeleteTriggerTest : BaseDbTest() {
 
 
 //            停用并删除对象
-            it.execute("update hymn.core_b_object set active=false where id=?", id)
+            it.execute("update hymn.core_biz_object set active=false where id=?", id)
             it.execute(
                 """
                     select * from information_schema.tables t 
                     where table_name = '${api}' and table_schema = 'hymn_view'
                 """
             ).size shouldBe 0
-            it.execute("delete from hymn.core_b_object where id=?", id)
+            it.execute("delete from hymn.core_biz_object where id=?", id)
 
 //            数据表已清空
             it.execute("select * from hymn.${sourceTable}").size shouldBe 0
@@ -156,7 +156,7 @@ class DeleteTriggerTest : BaseDbTest() {
             ).size shouldBe 0
 //            关联字段已删除
             it.execute(
-                "select * from hymn.core_b_object_field where ref_id = ?",
+                "select * from hymn.core_biz_object_field where ref_id = ?",
                 id
             ).size shouldBe 0
 //            触发器已删除

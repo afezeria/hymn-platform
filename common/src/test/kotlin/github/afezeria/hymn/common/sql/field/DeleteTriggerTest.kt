@@ -52,7 +52,7 @@ class DeleteTriggerTest :BaseDbTest(){
         adminConn.use {
             val field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'文本字段','tfield','text',255,1,1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -60,7 +60,7 @@ class DeleteTriggerTest :BaseDbTest(){
                 *COMMON_INFO
             )[0]
             val e = shouldThrow<PSQLException> {
-                it.execute("delete from hymn.core_b_object_field where id = ?", field["id"])
+                it.execute("delete from hymn.core_biz_object_field where id = ?", field["id"])
             }
             e.message shouldContain "字段 ${field["api"]} 未停用，无法删除"
         }
@@ -72,7 +72,7 @@ class DeleteTriggerTest :BaseDbTest(){
         adminConn.use {
             field = it.execute(
                 """
-                    insert into hymn.core_b_object_field (object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'文本字段','tfield2','text',255,1,1,?,?,?,?,now(),now()) returning *;
                     """,
@@ -99,8 +99,8 @@ class DeleteTriggerTest :BaseDbTest(){
             it.execute(
                 "select * from hymn.${objSourceTable} where ${field["source_column"]} is not null"
             ).size shouldBe 1
-            it.execute("update hymn.core_b_object_field set active=false where id=?", field["id"])
-            it.execute("delete from hymn.core_b_object_field where id = ?", field["id"])
+            it.execute("update hymn.core_biz_object_field set active=false where id=?", field["id"])
+            it.execute("delete from hymn.core_biz_object_field where id = ?", field["id"])
             it.execute(
                 "select * from hymn.core_column_field_mapping where table_name=? and field_api=?",
                 objSourceTable, field["api"]
@@ -119,7 +119,7 @@ class DeleteTriggerTest :BaseDbTest(){
             adminConn.use {
                 val field = it.execute(
                     """
-                    insert into hymn.core_b_object_field (object_id,name,api,type,ref_id,ref_delete_policy,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,'多选关联对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -142,11 +142,11 @@ class DeleteTriggerTest :BaseDbTest(){
                     """
                 ).size shouldBe 1
                 it.execute(
-                    "update hymn.core_b_object_field set active=false where id=?",
+                    "update hymn.core_biz_object_field set active=false where id=?",
                     field["id"]
                 )
                 it.execute(
-                    "delete from hymn.core_b_object_field where id=?",
+                    "delete from hymn.core_biz_object_field where id=?",
                     field["id"]
                 )
                 it.execute(

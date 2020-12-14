@@ -28,7 +28,7 @@ class InsertTriggerTest :BaseDbTest(){
             val e = shouldThrow<PSQLException> {
                 it.execute(
                     """
-                insert into hymn.core_b_object(name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
                 values ('测试对象','test_obj_history',?,?,?,?,now(),now()) returning *;
                 """,
@@ -44,7 +44,7 @@ class InsertTriggerTest :BaseDbTest(){
         adminConn.use {
             val data = it.execute(
                 """
-                insert into hymn.core_b_object(active,name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(active,name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
                 values (false,'测试对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
@@ -59,7 +59,7 @@ class InsertTriggerTest :BaseDbTest(){
         adminConn.use {
             val data = it.execute(
                 """
-                insert into hymn.core_b_object(name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
                 values ('测试对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
@@ -74,7 +74,7 @@ class InsertTriggerTest :BaseDbTest(){
         adminConn.use {
             val data = it.execute(
                 """
-                insert into hymn.core_b_object(type,name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(type,name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
                 values ('remote','测试对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
@@ -91,7 +91,7 @@ class InsertTriggerTest :BaseDbTest(){
                 for (i in (1..10)) {
                     it.execute(
                         """
-                insert into hymn.core_b_object(name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
                 values ('测试对象','ab${i}',?,?,?,?,now(),now()) returning *;
                 """,
@@ -110,7 +110,7 @@ class InsertTriggerTest :BaseDbTest(){
             val e = shouldThrow<PSQLException> {
                 it.execute(
                     """
-                    insert into hymn.core_b_object(name,api,type,module_api,remark,create_by_id,create_by,
+                    insert into hymn.core_biz_object(name,api,type,module_api,remark,create_by_id,create_by,
                         modify_by_id,modify_by,create_date,modify_date)
                     values ('模块对象','module_obj','module','core','模块对象',?,?,?,?,now(),now()) returning *;
                     """,
@@ -128,7 +128,7 @@ class InsertTriggerTest :BaseDbTest(){
             val e = shouldThrow<PSQLException> {
                 it.execute(
                     """
-                    insert into hymn.core_b_object(source_table,name,api,type,module_api,remark,
+                    insert into hymn.core_biz_object(source_table,name,api,type,module_api,remark,
                         create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
                     values ('sys_test_obj','模块对象','module_obj','module','core','模块对象',
                         ?,?,?,?,now(),now()) returning *;
@@ -146,7 +146,7 @@ class InsertTriggerTest :BaseDbTest(){
         adminConn.use {
             var data = it.execute(
                 """
-                insert into hymn.core_b_object(name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
                 values ('测试对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
@@ -177,7 +177,7 @@ class InsertTriggerTest :BaseDbTest(){
             try {
                 data = it.execute(
                     """
-                insert into hymn.core_b_object(type,source_table,name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(type,source_table,name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
                 values ('module','module_table1','模块对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
@@ -214,7 +214,7 @@ class InsertTriggerTest :BaseDbTest(){
         adminConn.use {
             var data = it.execute(
                 """
-                insert into hymn.core_b_object(name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
                 values ('测试对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
@@ -233,7 +233,7 @@ class InsertTriggerTest :BaseDbTest(){
             try {
                 data = it.execute(
                     """
-                insert into hymn.core_b_object(type,source_table,name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(type,source_table,name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
                 values ('module','module_table1','模块对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
