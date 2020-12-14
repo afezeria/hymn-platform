@@ -1,7 +1,7 @@
 require 'pg'
 require 'stringio'
-require '../constant'
-require '../config'
+require_relative  '../constant'
+require_relative  '../config'
 
 conn = PG.connect Config::DB
 table_regex = /^core(?!_data_table).*(?<!history)$/

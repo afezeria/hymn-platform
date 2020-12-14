@@ -1,5 +1,0 @@
-host: '127.0.0.1'
-dbname: 'test'
-user: 'test'
-password: '123456'
-options: '-c search_path=hymn'

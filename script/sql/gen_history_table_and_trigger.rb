@@ -1,7 +1,7 @@
 require 'stringio'
 require 'pg'
-require '../constant'
-require '../config'
+require_relative '../constant'
+require_relative '../config'
 
 conn = PG.connect Config::DB
 module_name = 'core'
@@ -10,15 +10,10 @@ io = StringIO.new
 
 conn.exec Constant::QUERY_TABLE do |r|
   columns = conn.exec(Constant::QUERY_COLUMN)
-  #               .filter do |c|
-  #   true
-  #   # c['comment'] == nil || !c['comment'].start_with?('##ignore')
-  # end
 
   r.filter { |i| i['name'] =~ table_regex }
    .each do |t|
     table_name = t['name']
-    p table_name
     io.write <<EOM
 drop table if exists hymn.#{table_name}_history cascade;
 create table hymn.#{table_name}_history

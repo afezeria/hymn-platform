@@ -1,0 +1,71 @@
+package {{package}}
+
+import {{service_package}}.{{service_class_name}}
+import {{entity_package}}.{{entity_class_name}}
+import {{dto_package}}.{{dto_class_name}}
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.common.util.DataNotFoundException
+import github.afezeria.hymn.common.web.RestResp
+import github.afezeria.hymn.common.web.successRestResp
+import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
+import io.swagger.annotations.*
+import java.util.*
+
+
+/**
+* @author afezeria
+ */
+@RestController
+@RequestMapping("{{router}}")
+@Api({{#table_tag}}tags = ["{{.}}接口"]{{/table_tag}})
+class {{name}}(
+    val {{service_name}}: {{service_class_name}}
+) {
+
+
+    @ApiOperation(value = "查询全部数据", notes = "")
+    @GetMapping
+    fun findAll(): RestResp<{{entity_name}}> {
+        val all = {{service_name}}.findAll()
+        return successRestResp(all)
+    }
+
+
+    @ApiOperation(value = "根据id查询", notes = "无参数时查询全部数据")
+    @GetMapping("/{id}")
+    fun findById(@PathVariable("id") id: String): RestResp<{{entity_name}}> {
+        val entity = {{service_name}}.findById(id)
+            ?: throw DataNotFoundException("CoreAccount".msgById(id))
+        return successRestResp(entity)
+    }
+
+
+    @ApiOperation(value = "新建", notes = "")
+    @PostMapping
+    fun create(@RequestBody dto: {{dto_class_name}}): RestResp<String> {
+        val entity = dto.toEntity()
+        {{service_name}}.insert(entity)
+        return successRestResp(entity.id)
+    }
+
+
+    @ApiOperation(value = "更新", notes = "")
+    @PutMapping("/{id}")
+    fun update(@PathVariable("id") id: String,
+               @RequestBody dto: {{dto_class_name}}): RestResp<Int> {
+        val entity = {{service_name}}.findById(id)
+            ?: throw DataNotFoundException("CoreAccount".msgById(id))
+        dto.update(entity)
+        val count = {{service_name}}.update(entity)
+        return successRestResp(count)
+    }
+
+
+    @ApiOperation(value = "根据id删除", notes = "")
+    @DeleteMapping("/{id}")
+    fun delete(@PathVariable("id") id: String): RestResp<Int> {
+        val count = {{service_name}}.deleteById(id)
+        return successRestResp(count)
+    }
+}

@@ -1,5 +1,5 @@
 require 'stringio'
-require '../config'
+require_relative '../config'
 
 table_count = 5
 io = StringIO.new

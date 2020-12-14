@@ -1,5 +1,8 @@
 require 'yaml'
 
 module Config
-  DB = YAML.load_file "#{__dir__}/db.yaml"
+  f = YAML.load_file "#{__dir__}/config.yaml"
+  DB = f['db']
+  PACKAGE = f['package']
+  MODULE = f['module_name']
 end
