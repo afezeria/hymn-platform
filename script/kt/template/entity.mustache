@@ -1,0 +1,28 @@
+package {{package}}
+
+import java.time.LocalDateTime
+import io.swagger.annotations.ApiModel
+import io.swagger.annotations.ApiModelProperty
+import java.util.*
+
+/**
+ *
+{{#table}}{{#comment_lines}} * {{{.}}}
+{{/comment_lines}}{{/table}}{{#fields}}{{#comment}} * @property {{field_name}} {{comment}}{{/comment}}
+{{/fields}}
+ * @author afezeria
+ */
+@ApiModel(value="{{#table}}{{tag}}{{/table}}",description = """{{#table}}{{comment}}{{/table}}""")
+data class {{name}}(
+
+{{#table.fields}}
+    @ApiModelProperty(value = "{{comment}}",{{#not_null}} required = true{{/not_null}})
+    var {{field_name}}: {{java_type}}{{#not_null}}? = null{{/not_null}},
+{{/table.fields}}
+) {
+
+{{#table.standard_fields}}
+    lateint var {{field_name}}: {{java_type}}
+{{/table.standard_fields}}
+
+}

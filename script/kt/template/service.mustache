@@ -1,0 +1,24 @@
+package {{package}}
+
+import {{entity_package}}.{{entity_class}}
+import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.SessionService
+import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+import java.util.*
+
+/**
+* @author afezeria
+*/
+interface {{name}} {
+
+    fun removeById(id: String): Int
+
+    fun update(e: {{entity_class}}): Int
+
+    fun create(e: {{entity_class}}): Int
+
+    override fun findAll(): List<{{entity_class}}>
+
+    override fun findById(id: String): {{entity_class}}?
+}

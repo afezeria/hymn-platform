@@ -5,28 +5,29 @@ require_relative '../config'
 
 class Gen < Mustache
   self.template_path = __dir__ + '/template'
+  attr_accessor :table
 
   def initialize(table)
     @table = table
   end
 
-  def field_arr
-    @table.column_arr
+  def table_comment
+    @table.comment == nil ? [] : @table.comment.split("\n")
   end
 
   def table_tag
     @table.comment&.split(/[ \n]/)&.first
   end
 
-  def entity_class_name
+  def entity_class
     @table.name.sub(/[[:alpha:]]+_/, '').camelize
   end
 
   def entity_name
-    entity_class_name.l_camelize
+    entity_class.l_camelize
   end
 
-  def table_class_name
+  def table_class
     @table.name.camelize + 's'
   end
 
@@ -35,15 +36,15 @@ class Gen < Mustache
   end
 
   def package
-    Config::PACKAGE + '.' + self.class.to_s.underscore
+    Config::PACKAGE + '.' + self.class.to_s.underscore.gsub('_', '.')
   end
 
   def name
-    send(self.class.to_s.underscore + '_class_name')
+    send(self.class.to_s.underscore + '_class')
   end
 
   def file_name
-    send(self.class.to_s.underscore + '_class_name') + '.kt'
+    send(self.class.to_s.underscore + '_class') + '.kt'
   end
 
   def write_file
@@ -58,9 +59,21 @@ class Gen < Mustache
 
   private
 
+  public def respond_to_missing?(symbol, *several_variants)
+    if symbol.end_with? '_class'
+      true
+    elsif symbol.end_with? '_name'
+      true
+    elsif symbol.end_with? '_package'
+      true
+    else
+      super
+    end
+  end
+
   def method_missing(symbol, *args)
-    if symbol.end_with? '_class_name'
-      missing_class_name symbol
+    if symbol.end_with? '_class'
+      missing_class symbol
     elsif symbol.end_with? '_name'
       missing_name symbol
     elsif symbol.end_with? '_package'
@@ -69,14 +82,14 @@ class Gen < Mustache
   end
 
   def missing_name(symbol)
-    missing_class_name(symbol.to_s.sub(/_name$/, '').to_sym)
+    missing_class(symbol.to_s.sub(/_name$/, '').to_sym)
       .l_camelize
   end
 
-  def missing_class_name(symbol)
-    entity_class_name +
+  def missing_class(symbol)
+    entity_class +
       symbol
-        .to_s.sub(/_class_name$/, '')
+        .to_s.sub(/_class$/, '')
         .camelize
   end
 
@@ -92,10 +105,50 @@ end
 module Db
   class Table < FromHash
     attr_accessor :schema, :name, :comment, :column_arr
+
+    def comment_lines
+      p 'abc'
+      comment&.split(/\n/)
+    end
+
+    def tag
+      comment&.split(/[ \n]/)&.first
+    end
+
+    def description
+      comment&.split(/[ \n]/)&.[](1..)
+    end
+
+    def fields
+      @column_arr.filter { |f| !Constant::STANDARD_FIELD.include?(f.column_name) }
+    end
+
+    def standard_fields
+      @column_arr.filter { |f| Constant::STANDARD_FIELD.include?(f.column_name) }
+    end
   end
 
   class Column < FromHash
-    attr_accessor :name, :sql_type, :not_null, :comment
+    attr_accessor :column_name, :sql_type, :not_null, :comment
+
+    def field_name
+      @column_name.l_camelize
+    end
+
+    def java_type
+      Constant::JAVA_TYPE[@sql_type]
+    end
+
+    def not_null=(i)
+      case i
+      when 't'
+        @not_null = true
+      when 'f'
+        @not_null = false
+      else
+        @not_null = nil
+      end
+    end
   end
 end
 
@@ -110,7 +163,7 @@ end
 
 class Controller < Gen
   def router
-    "/module/#{Config::MODULE}/api/#{entity_class_name.dasherize}"
+    "/module/#{Config::MODULE}/api/#{entity_class.dasherize}"
   end
 end
 

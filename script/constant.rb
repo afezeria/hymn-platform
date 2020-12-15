@@ -28,4 +28,16 @@ WHERE a.attnum > 0
   and pn.nspname = 'hymn'
 ORDER BY c.relname, a.attnum;
 SQL
+
+  STANDARD_FIELD = %w[create_by_id create_by modify_by_id modify_by create_date modify_date id]
+
+  JAVA_TYPE = {
+    "uuid" => "UUID",
+    "text" => "String",
+    "int4" => "Int",
+    "int8" => "Long",
+    "bool" => "Boolean",
+    "timestamp" => "LocalDateTime",
+    "timestamptz" => "LocalDateTime",
+  }
 end

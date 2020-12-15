@@ -25,7 +25,7 @@ EOM
 (1..table_count).each do |x|
   table = table_name x
   io.write <<EOM
-  ('#{table}','master001',null),
+       ('#{table}','master001',null),
 #{(1..5).map { |i| "       ('#{table}','bool#{'%03d' % i}',null)," }.join("\n")}
 #{(1..5).map { |i| "       ('#{table}','pl_mref#{'%03d' % i}',null)," }.join("\n")}
 #{(1..5).map { |i| "       ('#{table}','pl_summary#{'%03d' % i}',null)," }.join("\n")}

@@ -1,8 +1,8 @@
 package {{package}}
 
-import {{service_package}}.{{service_class_name}}
-import {{entity_package}}.{{entity_class_name}}
-import {{dto_package}}.{{dto_class_name}}
+import {{service_package}}.{{service_class}}
+import {{entity_package}}.{{entity_class}}
+import {{dto_package}}.{{dto_class}}
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.web.RestResp
@@ -18,15 +18,15 @@ import java.util.*
  */
 @RestController
 @RequestMapping("{{router}}")
-@Api({{#table_tag}}tags = ["{{.}}接口"]{{/table_tag}})
+@Api({{#table}}{{#tag}}tags = ["{{.}}接口"]{{/tag}}{{/table}})
 class {{name}}(
-    val {{service_name}}: {{service_class_name}}
+    val {{service_name}}: {{service_class}}
 ) {
 
 
     @ApiOperation(value = "查询全部数据", notes = "")
     @GetMapping
-    fun findAll(): RestResp<{{entity_name}}> {
+    fun findAll(): RestResp<{{entity_class}}> {
         val all = {{service_name}}.findAll()
         return successRestResp(all)
     }
@@ -34,7 +34,7 @@ class {{name}}(
 
     @ApiOperation(value = "根据id查询", notes = "无参数时查询全部数据")
     @GetMapping("/{id}")
-    fun findById(@PathVariable("id") id: String): RestResp<{{entity_name}}> {
+    fun findById(@PathVariable("id") id: String): RestResp<{{entity_class}}> {
         val entity = {{service_name}}.findById(id)
             ?: throw DataNotFoundException("CoreAccount".msgById(id))
         return successRestResp(entity)
@@ -43,9 +43,9 @@ class {{name}}(
 
     @ApiOperation(value = "新建", notes = "")
     @PostMapping
-    fun create(@RequestBody dto: {{dto_class_name}}): RestResp<String> {
+    fun create(@RequestBody dto: {{dto_class}}): RestResp<String> {
         val entity = dto.toEntity()
-        {{service_name}}.insert(entity)
+        {{service_name}}.create(entity)
         return successRestResp(entity.id)
     }
 
@@ -53,7 +53,7 @@ class {{name}}(
     @ApiOperation(value = "更新", notes = "")
     @PutMapping("/{id}")
     fun update(@PathVariable("id") id: String,
-               @RequestBody dto: {{dto_class_name}}): RestResp<Int> {
+               @RequestBody dto: {{dto_class}}): RestResp<Int> {
         val entity = {{service_name}}.findById(id)
             ?: throw DataNotFoundException("CoreAccount".msgById(id))
         dto.update(entity)
@@ -65,7 +65,7 @@ class {{name}}(
     @ApiOperation(value = "根据id删除", notes = "")
     @DeleteMapping("/{id}")
     fun delete(@PathVariable("id") id: String): RestResp<Int> {
-        val count = {{service_name}}.deleteById(id)
+        val count = {{service_name}}.removeById(id)
         return successRestResp(count)
     }
 }

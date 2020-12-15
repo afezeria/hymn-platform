@@ -44,6 +44,10 @@ alter table hymn.core_biz_object
     add foreign key (module_api) references hymn.core_module on delete cascade;
 alter table hymn.core_biz_object_field
     add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_biz_object_field
+    add check ( s_type in ('sum', 'count', 'min', 'max') );
+alter table hymn.core_biz_object_field
+    add check ( standard_type in ('create_by_id', 'create_by', 'modify_by_id', 'modify_by', 'create_date', 'modify_date', 'org_id', 'lock_state', 'name', 'type_id', 'owner_id') );
 alter table hymn.core_biz_object_field_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
 alter table hymn.core_biz_object_field_perm
@@ -90,12 +94,6 @@ alter table hymn.core_biz_object_trigger
     add check ( event in ('BEFORE_INSERT', 'BEFORE_UPDATE', 'BEFORE_UPSERT', 'BEFORE_DELETE', 'AFTER_INSERT', 'AFTER_UPDATE', 'AFTER_UPSERT', 'AFTER_DELETE') );
 alter table hymn.core_biz_object_type
     add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
-alter table hymn.core_biz_object_type_available_options
-    add foreign key (type_id) references hymn.core_biz_object_type on delete cascade;
-alter table hymn.core_biz_object_type_available_options
-    add foreign key (field_id) references hymn.core_biz_object_field on delete cascade;
-alter table hymn.core_biz_object_type_available_options
-    add foreign key (dict_item_id) references hymn.core_dict_item on delete cascade;
 alter table hymn.core_biz_object_type_layout
     add foreign key (role_id) references hymn.core_role on delete cascade;
 alter table hymn.core_biz_object_type_layout
@@ -104,6 +102,12 @@ alter table hymn.core_biz_object_type_layout
     add foreign key (type_id) references hymn.core_biz_object_type on delete cascade;
 alter table hymn.core_biz_object_type_layout
     add foreign key (layout_id) references hymn.core_biz_object_layout on delete cascade;
+alter table hymn.core_biz_object_type_options
+    add foreign key (type_id) references hymn.core_biz_object_type on delete cascade;
+alter table hymn.core_biz_object_type_options
+    add foreign key (field_id) references hymn.core_biz_object_field on delete cascade;
+alter table hymn.core_biz_object_type_options
+    add foreign key (dict_item_id) references hymn.core_dict_item on delete cascade;
 alter table hymn.core_biz_object_type_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
 alter table hymn.core_biz_object_type_perm

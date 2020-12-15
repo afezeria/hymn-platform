@@ -805,65 +805,6 @@ create trigger core_biz_object_type_history_del
     on hymn.core_biz_object_type
     for each row
 execute function hymn.core_biz_object_type_history_del();
-drop table if exists hymn.core_biz_object_type_available_options_history cascade;
-create table hymn.core_biz_object_type_available_options_history
-(
-    operation text,
-    stamp timestamp,
-    id text,
-    biz_object_id text,
-    type_id text,
-    field_id text,
-    dict_item_id text,
-    create_by_id text,
-    create_by text,
-    modify_by_id text,
-    modify_by text,
-    create_date timestamp,
-    modify_date timestamp
-);
-create or replace function hymn.core_biz_object_type_available_options_history_ins() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_biz_object_type_available_options_history select 'i',now(),new.*;
-    return null;
-end
-$$;
-create or replace function hymn.core_biz_object_type_available_options_history_upd() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_biz_object_type_available_options_history select 'u',now(),new.*;
-    return null;
-end
-$$;
-create or replace function hymn.core_biz_object_type_available_options_history_del() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_biz_object_type_available_options_history select 'd',now(),old.*;
-    return null;
-end
-$$;
-drop trigger if exists core_biz_object_type_available_options_history_ins on hymn.core_biz_object_type_available_options;
-create trigger core_biz_object_type_available_options_history_ins
-    after insert
-    on hymn.core_biz_object_type_available_options
-    for each row
-execute function hymn.core_biz_object_type_available_options_history_ins();
-drop trigger if exists core_biz_object_type_available_options_history_upd on hymn.core_biz_object_type_available_options;
-create trigger core_biz_object_type_available_options_history_upd
-    after update
-    on hymn.core_biz_object_type_available_options
-    for each row
-execute function hymn.core_biz_object_type_available_options_history_upd();
-drop trigger if exists core_biz_object_type_available_options_history_del on hymn.core_biz_object_type_available_options;
-create trigger core_biz_object_type_available_options_history_del
-    after delete
-    on hymn.core_biz_object_type_available_options
-    for each row
-execute function hymn.core_biz_object_type_available_options_history_del();
 drop table if exists hymn.core_biz_object_type_layout_history cascade;
 create table hymn.core_biz_object_type_layout_history
 (
@@ -923,6 +864,65 @@ create trigger core_biz_object_type_layout_history_del
     on hymn.core_biz_object_type_layout
     for each row
 execute function hymn.core_biz_object_type_layout_history_del();
+drop table if exists hymn.core_biz_object_type_options_history cascade;
+create table hymn.core_biz_object_type_options_history
+(
+    operation text,
+    stamp timestamp,
+    id text,
+    biz_object_id text,
+    type_id text,
+    field_id text,
+    dict_item_id text,
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
+);
+create or replace function hymn.core_biz_object_type_options_history_ins() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_biz_object_type_options_history select 'i',now(),new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_biz_object_type_options_history_upd() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_biz_object_type_options_history select 'u',now(),new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_biz_object_type_options_history_del() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_biz_object_type_options_history select 'd',now(),old.*;
+    return null;
+end
+$$;
+drop trigger if exists core_biz_object_type_options_history_ins on hymn.core_biz_object_type_options;
+create trigger core_biz_object_type_options_history_ins
+    after insert
+    on hymn.core_biz_object_type_options
+    for each row
+execute function hymn.core_biz_object_type_options_history_ins();
+drop trigger if exists core_biz_object_type_options_history_upd on hymn.core_biz_object_type_options;
+create trigger core_biz_object_type_options_history_upd
+    after update
+    on hymn.core_biz_object_type_options
+    for each row
+execute function hymn.core_biz_object_type_options_history_upd();
+drop trigger if exists core_biz_object_type_options_history_del on hymn.core_biz_object_type_options;
+create trigger core_biz_object_type_options_history_del
+    after delete
+    on hymn.core_biz_object_type_options
+    for each row
+execute function hymn.core_biz_object_type_options_history_del();
 drop table if exists hymn.core_biz_object_type_perm_history cascade;
 create table hymn.core_biz_object_type_perm_history
 (

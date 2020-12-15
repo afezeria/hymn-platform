@@ -579,12 +579,12 @@ comment on column hymn.core_biz_object_field.ref_delete_policy is '当字段为�
 comment on column hymn.core_biz_object_field.gen_rule is '编号规则，{000} 递增序列，必填，实际序号大小小于0的个数时将会在前面补0 ; {yyyy}/{yy} 年; {mm} 月; {dd} 日';
 comment on column hymn.core_biz_object_field.s_id is '汇总对象id';
 comment on column hymn.core_biz_object_field.s_field_id is '汇总字段id';
-comment on column hymn.core_biz_object_field.s_type is '汇总类型，可选值：sum/count/min/max';
+comment on column hymn.core_biz_object_field.s_type is '汇总类型 ;;optional_value:[sum(求和),count(总数),min(最小值),max(最大值)]';
 comment on column hymn.core_biz_object_field.query_filter is '字段为汇总字段时表示对子表的过滤条件，字段为引用/主从字段时表示在创建当前对象时查找引用对象的过滤条件，sql where表达式';
 comment on column hymn.core_biz_object_field.help is '说明，显示在页面上的帮助信息';
 comment on column hymn.core_biz_object_field.remark is '备注';
 comment on column hymn.core_biz_object_field.tmp is '辅助列，新建与字典相关的字段时存储字典项数据';
-comment on column hymn.core_biz_object_field.standard_type is '标准类型，可选值：create_by_id 创建人id, create_by 创建人, modify_by_id 修改人id, modify_by 修改人, create_date 创建时间, modify_date 修改时间, org_id 组织id, lock_state 锁定状态, name 名称, type 业务类型, owner_id 所有人 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型';
+comment on column hymn.core_biz_object_field.standard_type is '标准类型 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型 ;; optional_value:[create_by_id(创建人id), create_by(创建人), modify_by_id(修改人id), modify_by(修改人), create_date(创建时间), modify_date(修改时间), org_id(组织id), lock_state(锁定状态), name(名称), type_id(业务类型), owner_id(所有人)]';
 comment on column hymn.core_biz_object_field.is_predefined is '是否是预定义字段，区分对象中的自定义字段与预定义字段，预定义字段该值为true且source_column与api相等，后台对象管理界面中不能删除和修改';
 comment on column hymn.core_biz_object_field.join_view_name is '多选字段中间表视图名，中间表名为视图名加上前缀 core_ ，表结构为（s_id,t_id)，s_id 为当前数据id， t_id为关联数据id';
 
@@ -641,8 +641,8 @@ comment on column hymn.core_biz_object_type.biz_object_id is '所属业务对象
 comment on column hymn.core_biz_object_type.name is '记录类型名称';
 comment on column hymn.core_biz_object_type.active is '是否启用';
 
-drop table if exists hymn.core_biz_object_type_available_options cascade;
-create table hymn.core_biz_object_type_available_options
+drop table if exists hymn.core_biz_object_type_options cascade;
+create table hymn.core_biz_object_type_options
 (
     id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     biz_object_id text      not null,
@@ -656,11 +656,11 @@ create table hymn.core_biz_object_type_available_options
     create_date   timestamp not null,
     modify_date   timestamp not null
 );
-comment on table hymn.core_biz_object_type_available_options is '业务对象记录类型可选项限制
+comment on table hymn.core_biz_object_type_options is '业务对象记录类型可选项限制
 限制指定记录类型时指定字段 （多选/单选）的可用选项';
-comment on column hymn.core_biz_object_type_available_options.type_id is '记录类型id ;;fk:[core_biz_object_type cascade]';
-comment on column hymn.core_biz_object_type_available_options.dict_item_id is '字段关联的字典项id ;;fk:[core_dict_item cascade]';
-comment on column hymn.core_biz_object_type_available_options.field_id is '字段id ;;fk:[core_biz_object_field cascade]';
+comment on column hymn.core_biz_object_type_options.type_id is '记录类型id ;;fk:[core_biz_object_type cascade]';
+comment on column hymn.core_biz_object_type_options.dict_item_id is '字段关联的字典项id ;;fk:[core_dict_item cascade]';
+comment on column hymn.core_biz_object_type_options.field_id is '字段id ;;fk:[core_biz_object_field cascade]';
 
 
 drop table if exists hymn.core_biz_object_type_layout cascade;
