@@ -411,7 +411,7 @@ create table hymn.core_biz_object
     type         text      not null default 'custom',
     remote_url   text,
     remote_token text,
-    module_api   text,
+    module_id   text,
     remark       text      not null default '',
     can_insert   bool,
     can_update   bool,
@@ -428,7 +428,7 @@ comment on column hymn.core_biz_object.name is '业务对象名称，用于页�
 comment on column hymn.core_biz_object.api is '业务对象api，唯一标识 ;;uk';
 comment on column hymn.core_biz_object.active is '是否启用，停用后无法进行增删改查等操作';
 comment on column hymn.core_biz_object.source_table is '实际表名，例： core_data_table_500';
-comment on column hymn.core_biz_object.module_api is '模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]';
+comment on column hymn.core_biz_object.module_id is '模块id，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]';
 comment on column hymn.core_biz_object.can_insert is '模块对象及远程对象是否可以新增数据';
 comment on column hymn.core_biz_object.can_update is '模块对象是及远程对象否可以更新数据';
 comment on column hymn.core_biz_object.can_update is '模块对象是及远程对象否可以删除数据';
@@ -780,29 +780,42 @@ comment on column hymn.core_biz_object_mapping_item.ref_field4_biz_object_id is 
 drop table if exists hymn.core_module;
 create table hymn.core_module
 (
-    api         text primary key,
-    name        text not null,
-    remark      text not null,
-    version     text not null,
-    create_date timestamptz default now()
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    api          text,
+    name         text      not null,
+    remark       text      not null,
+    version      text      not null,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
+
 );
 comment on table hymn.core_module is '模块列表';
-comment on column hymn.core_module.api is '模块api';
+comment on column hymn.core_module.api is '模块api ;;uk';
 comment on column hymn.core_module.name is '模块名称';
 
 
 drop table if exists hymn.core_module_function;
 create table hymn.core_module_function
 (
-    id          text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    module_api  text not null,
-    api         text not null,
-    name        text not null,
-    remark      text,
-    create_date text             default now()
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    module_id    text      not null,
+    api          text      not null,
+    name         text      not null,
+    remark       text,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamp not null,
+    modify_date  timestamp not null
+
 );
-comment on table hymn.core_module_function is '模块功能表，模块中的功能需要根据角色进行权限控制时在该表中添加相关数据 ;;uk:[[module_api api]]';
-comment on column hymn.core_module_function.module_api is '关联模块 ;;fk:[core_module cascade];idx';
+comment on table hymn.core_module_function is '模块功能表，模块中的功能需要根据角色进行权限控制时在该表中添加相关数据 ;;uk:[[module_id api]]';
+comment on column hymn.core_module_function.module_id is '关联模块 ;;fk:[core_module cascade];idx';
 comment on column hymn.core_module_function.api is '功能api名称，格式为模块名+功能名，例：wechat.approval ;;uk';
 comment on column hymn.core_module_function.name is '功能名称';
 

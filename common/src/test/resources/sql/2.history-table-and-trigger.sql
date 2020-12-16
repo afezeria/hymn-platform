@@ -228,7 +228,7 @@ create table hymn.core_biz_object_history
     type text,
     remote_url text,
     remote_token text,
-    module_api text,
+    module_id text,
     remark text,
     can_insert bool,
     can_update bool,
@@ -1755,11 +1755,17 @@ create table hymn.core_module_history
 (
     operation text,
     stamp timestamp,
+    id text,
     api text,
     name text,
     remark text,
     version text,
-    create_date timestamptz
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.core_module_history_ins() returns trigger
     language plpgsql as
@@ -1809,11 +1815,16 @@ create table hymn.core_module_function_history
     operation text,
     stamp timestamp,
     id text,
-    module_api text,
+    module_id text,
     api text,
     name text,
     remark text,
-    create_date text
+    create_by_id text,
+    create_by text,
+    modify_by_id text,
+    modify_by text,
+    create_date timestamp,
+    modify_date timestamp
 );
 create or replace function hymn.core_module_function_history_ins() returns trigger
     language plpgsql as
