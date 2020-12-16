@@ -63,9 +63,9 @@ comment on column hymn.core_account.lock_time is '锁定时间，当前时间小
 comment on column hymn.core_account.online_rule is '在线规则，限制每客户端在线数量或登录ip等, none为无限制';
 comment on column hymn.core_account.active is '是否启用';
 comment on column hymn.core_account.admin is '是否是管理员';
-comment on column hymn.core_account.leader_id is '直接上级id';
-comment on column hymn.core_account.org_id is '所属组织id ;; fk:[core_org restrict]';
-comment on column hymn.core_account.role_id is '所属组织id ;; fk:[core_role restrict]';
+comment on column hymn.core_account.leader_id is '直接上级id ;;idx';
+comment on column hymn.core_account.org_id is '所属组织id ;; fk:[core_org restrict];idx';
+comment on column hymn.core_account.role_id is '所属角色id ;; fk:[core_role restrict];idx';
 comment on column hymn.core_account.root is '是否是初始帐号';
 comment on column hymn.core_account.text001 is '##ignore 预留字段';
 comment on column hymn.core_account.text002 is '##ignore 预留字段';
@@ -189,7 +189,7 @@ create table hymn.core_account_menu_layout
     modify_date  timestamp not null
 );
 comment on table hymn.core_account_menu_layout is '用户侧边栏菜单布局';
-comment on column hymn.core_account_menu_layout.account_id is '用户id ;; fk:[core_account cascade]';
+comment on column hymn.core_account_menu_layout.account_id is '用户id ;; fk:[core_account cascade];idx';
 comment on column hymn.core_account_menu_layout.client_type is '客户端类型 ;; optional_value:[browser(浏览器), mobile(移动端)]';
 comment on column hymn.core_account_menu_layout.layout_json is '布局json字符串';
 
@@ -215,9 +215,9 @@ create table hymn.core_account_object_view
     modify_date   timestamp not null
 );
 comment on table hymn.core_account_object_view is '用户业务对象列表视图';
-comment on column hymn.core_account_object_view.copy_id is '源数据id，修改视图后该字段置空';
-comment on column hymn.core_account_object_view.account_id is '所属用户id ;; fk:[core_account cascade]';
-comment on column hymn.core_account_object_view.biz_object_id is '所属对象id ;; fk:[core_biz_object cascade]';
+comment on column hymn.core_account_object_view.copy_id is '源数据id，修改视图后该字段置空;idx';
+comment on column hymn.core_account_object_view.account_id is '所属用户id ;; fk:[core_account cascade];idx';
+comment on column hymn.core_account_object_view.biz_object_id is '所属对象id ;; fk:[core_biz_object cascade];idx';
 comment on column hymn.core_account_object_view.name is '视图名称';
 comment on column hymn.core_account_object_view.view_json is '视图结构';
 comment on column hymn.core_account_object_view.default_view is '是否是默认视图，只有管理员可以设置';
@@ -244,7 +244,7 @@ create table hymn.core_custom_button
     modify_date   timestamp not null
 );
 comment on table hymn.core_custom_button is '自定义按钮';
-comment on column hymn.core_custom_button.biz_object_id is '业务对象id，不为空时表示该按钮只能在该对象相关页面中使用';
+comment on column hymn.core_custom_button.biz_object_id is '业务对象id，不为空时表示该按钮只能在该对象相关页面中使用;idx';
 comment on column hymn.core_custom_button.api is '唯一标识 ;; uk';
 comment on column hymn.core_custom_button.client_type is '客户端类型，表示只能用在特定类型客户端中 ;; optional_value:[browser(pc端), mobile(移动端)]';
 comment on column hymn.core_custom_button.action is '按钮行为 ;; optional_value:[eval(执行js代码),open_in_current_tab(在当前页面中打开链接),open_in_new_tab(在新标签页中打开链接),open_in_new_window(在新窗口中打开链接)]';
@@ -370,7 +370,7 @@ create table hymn.core_dict
     modify_date    timestamp not null
 );
 comment on table hymn.core_dict is '数据字典';
-comment on column hymn.core_dict.field_id is '表明当前字典是指定字段的字典，不能通用，通用字典可以被任意多选字段使用';
+comment on column hymn.core_dict.field_id is '表明当前字典是指定字段的字典，不能通用，通用字典可以被任意多选字段使用;idx';
 comment on column hymn.core_dict.parent_dict_id is '表明当前字典值依赖与其他字典';
 comment on column hymn.core_dict.name is '字典名称';
 comment on column hymn.core_dict.api is 'api名称 ;;uk';
@@ -393,7 +393,7 @@ create table hymn.core_dict_item
     modify_date  timestamp not null
 );
 comment on table hymn.core_dict_item is '字典项 ;;uk:[[dict_id code]]';
-comment on column hymn.core_dict_item.dict_id is '所属字典id ;;fk:[core_dict cascade]';
+comment on column hymn.core_dict_item.dict_id is '所属字典id ;;fk:[core_dict cascade];idx';
 comment on column hymn.core_dict_item.name is '字典项名称';
 comment on column hymn.core_dict_item.code is '字典项编码';
 comment on column hymn.core_dict_item.parent_code is '父字典中的字典项编码，用于表示多个选项列表的级联关系';
@@ -559,7 +559,7 @@ rule: min_length >= 1, max_length > 0
 ;;uk:[[biz_object_id api]]
 ';
 comment on column hymn.core_biz_object_field.source_column is '字段对应的实际表中的列名,对象为远程对象时该字段填充空字符串';
-comment on column hymn.core_biz_object_field.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade]';
+comment on column hymn.core_biz_object_field.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade];idx';
 comment on column hymn.core_biz_object_field.api is 'api名称，用于触发器和自定义接口';
 comment on column hymn.core_biz_object_field.name is '名称，用于页面显示';
 comment on column hymn.core_biz_object_field.type is '字段类型 ;;optional_value:[text(文本),check_box(复选框),check_box_group(复选框组),select(下拉菜单),integer(整型),float(浮点型),money(货币),date(日期),datetime(日期时间),master_slave(主详),reference(关联关系),mreference(多选关联关系),summary(汇总),auto(自动编号),picture(图片);';
@@ -570,7 +570,7 @@ comment on column hymn.core_biz_object_field.formula is '公式，js代码，由
 comment on column hymn.core_biz_object_field.max_length is '文本类型最大长度/浮点型整数位长度/整型最大值/图片最大数量';
 comment on column hymn.core_biz_object_field.min_length is '文本类型最小长度/浮点型小数位长度/整型最小值/图片最小数量';
 comment on column hymn.core_biz_object_field.visible_row is '文本类型显示行数/下拉选项 （多选）前端显示行数';
-comment on column hymn.core_biz_object_field.dict_id is '单选/多选/下拉对应的数据字典id';
+comment on column hymn.core_biz_object_field.dict_id is '单选/多选/下拉对应的数据字典id;idx';
 comment on column hymn.core_biz_object_field.master_field_id is '下拉字段依赖的主字段id';
 comment on column hymn.core_biz_object_field.optional_number is '副选框和下拉多选的可选个数';
 comment on column hymn.core_biz_object_field.ref_id is '关联的自定义对象id';
@@ -658,7 +658,8 @@ create table hymn.core_biz_object_type_options
 );
 comment on table hymn.core_biz_object_type_options is '业务对象记录类型可选项限制
 限制指定记录类型时指定字段 （多选/单选）的可用选项';
-comment on column hymn.core_biz_object_type_options.type_id is '记录类型id ;;fk:[core_biz_object_type cascade]';
+comment on column hymn.core_biz_object_type_options.biz_object_id is '所属对象 ;;idx';
+comment on column hymn.core_biz_object_type_options.type_id is '记录类型id ;;fk:[core_biz_object_type cascade];idx';
 comment on column hymn.core_biz_object_type_options.dict_item_id is '字段关联的字典项id ;;fk:[core_dict_item cascade]';
 comment on column hymn.core_biz_object_type_options.field_id is '字段id ;;fk:[core_biz_object_field cascade]';
 
@@ -678,9 +679,9 @@ create table hymn.core_biz_object_type_layout
     create_date   timestamp not null,
     modify_date   timestamp not null
 );
-comment on table hymn.core_biz_object_type_layout is '业务对象页面布局和记录类型映射表和角色 ;;uk:[[role_id biz_object_id type_id layout_id]]';
-comment on column hymn.core_biz_object_type_layout.role_id is '角色id ;;fk:[core_role cascade]';
-comment on column hymn.core_biz_object_type_layout.biz_object_id is '业务对象id ;;fk:[core_biz_object cascade]';
+comment on table hymn.core_biz_object_type_layout is '业务对象记录类型、角色和页面布局关联表 ;;uk:[[role_id type_id layout_id]]';
+comment on column hymn.core_biz_object_type_layout.role_id is '角色id ;;fk:[core_role cascade];idx';
+comment on column hymn.core_biz_object_type_layout.biz_object_id is '业务对象id ;;fk:[core_biz_object cascade];idx';
 comment on column hymn.core_biz_object_type_layout.type_id is '记录类型id ;;fk:[core_biz_object_type cascade]';
 comment on column hymn.core_biz_object_type_layout.layout_id is '页面布局id ;;fk:[core_biz_object_layout cascade]';
 
@@ -735,8 +736,8 @@ create table hymn.core_biz_object_mapping
     create_date          timestamp not null,
     modify_date          timestamp not null
 );
-comment on table hymn.core_biz_object_mapping is '对象映射关系 描述以一个对象为基础新建对象时字段间的映射关系 ;;uk[[source_biz_object_id source_type_id target_biz_object_id target_type_id]]';
-comment on column hymn.core_biz_object_mapping.source_biz_object_id is '源对象id ;;fk:[core_biz_object cascade]';
+comment on table hymn.core_biz_object_mapping is '对象映射关系 描述以一个对象的数据为基础新建其他对象的数据时字段间的映射关系，比如根据订单创建发货单时将订单中的字段映射到发货单中 ;;uk[[source_biz_object_id source_type_id target_biz_object_id target_type_id]]';
+comment on column hymn.core_biz_object_mapping.source_biz_object_id is '源对象id ;;fk:[core_biz_object cascade];idx';
 comment on column hymn.core_biz_object_mapping.target_biz_object_id is '目标对象id ;;fk:[core_biz_object cascade]';
 comment on column hymn.core_biz_object_mapping.source_type_id is '源对象记录类型id ;;fk:[core_biz_object_type cascade]';
 comment on column hymn.core_biz_object_mapping.target_type_id is '目标对象记录类型id ;;fk:[core_biz_object_type cascade]';
@@ -800,8 +801,8 @@ create table hymn.core_module_function
     remark      text,
     create_date text             default now()
 );
-comment on table hymn.core_module_function is '模块功能表，模块中的功能需要根据角色进行权限控制时在该表中添加相关数据 ;;uk:[[module_name ]';
-comment on column hymn.core_module_function.module_api is '关联模块 ;;fk:[core_module cascade]';
+comment on table hymn.core_module_function is '模块功能表，模块中的功能需要根据角色进行权限控制时在该表中添加相关数据 ;;uk:[[module_api api]]';
+comment on column hymn.core_module_function.module_api is '关联模块 ;;fk:[core_module cascade];idx';
 comment on column hymn.core_module_function.api is '功能api名称，格式为模块名+功能名，例：wechat.approval ;;uk';
 comment on column hymn.core_module_function.name is '功能名称';
 
@@ -823,7 +824,7 @@ create table hymn.core_module_function_perm
 );
 comment on table hymn.core_module_function_perm is '模块功能权限表 ;;uk:[[role_id module_function_id]]';
 comment on column hymn.core_module_function_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
-comment on column hymn.core_module_function_perm.module_function_id is '功能id ;;fk:[core_module_function cascade]';
+comment on column hymn.core_module_function_perm.module_function_id is '功能id ;;fk:[core_module_function cascade];idx';
 comment on column hymn.core_module_function_perm.perm is '是否有访问权限';
 
 drop table if exists hymn.core_button_perm cascade;
@@ -842,7 +843,7 @@ create table hymn.core_button_perm
 );
 comment on table hymn.core_button_perm is '按钮权限 ;;uk:[[role_id button_id]]';
 comment on column hymn.core_button_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
-comment on column hymn.core_button_perm.button_id is '按钮id ;;fk:[core_custom_button cascade]';
+comment on column hymn.core_button_perm.button_id is '按钮id ;;fk:[core_custom_button cascade];idx';
 comment on column hymn.core_button_perm.visible is '是否可见';
 
 
@@ -863,7 +864,7 @@ create table hymn.core_menu_item_perm
 );
 comment on table hymn.core_menu_item_perm is '菜单项权限';
 comment on column hymn.core_menu_item_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
-comment on column hymn.core_menu_item_perm.menu_item_id is '菜单项id ;;fk:[core_custom_menu_item cascade]';
+comment on column hymn.core_menu_item_perm.menu_item_id is '菜单项id ;;fk:[core_custom_menu_item cascade];idx';
 
 
 
@@ -890,8 +891,8 @@ create table hymn.core_biz_object_perm
     modify_date             timestamp not null
 );
 comment on table hymn.core_biz_object_perm is '对象权限 ;;uk:[[role_id biz_object_id]]';
-comment on column hymn.core_biz_object_perm.role_id is '角色id ;;fk:[core_role cascade]';
-comment on column hymn.core_biz_object_perm.biz_object_id is '对象id ;;fk:[core_biz_object cascade]';
+comment on column hymn.core_biz_object_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
+comment on column hymn.core_biz_object_perm.biz_object_id is '对象id ;;fk:[core_biz_object cascade];idx';
 comment on column hymn.core_biz_object_perm.ins is '创建';
 comment on column hymn.core_biz_object_perm.upd is '更新';
 comment on column hymn.core_biz_object_perm.del is '删除';
@@ -921,9 +922,9 @@ create table hymn.core_biz_object_field_perm
     modify_date   timestamp not null
 );
 comment on table hymn.core_biz_object_field_perm is '字段权限 ;;uk:[[role_id field_id]]';
-comment on column hymn.core_biz_object_field_perm.role_id is '角色id ;;fk:[core_role cascade]';
+comment on column hymn.core_biz_object_field_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
 comment on column hymn.core_biz_object_field_perm.biz_object_id is '对象id ;;fk:[core_biz_object cascade]';
-comment on column hymn.core_biz_object_field_perm.field_id is '字段id ;;fk:[core_biz_object_field cascade]';
+comment on column hymn.core_biz_object_field_perm.field_id is '字段id ;;fk:[core_biz_object_field cascade];idx';
 comment on column hymn.core_biz_object_field_perm.p_read is '可读';
 comment on column hymn.core_biz_object_field_perm.p_edit is '可编辑';
 
@@ -946,8 +947,8 @@ create table hymn.core_biz_object_type_perm
 );
 comment on table hymn.core_biz_object_type_perm is '记录类型权限 ;;uk:[[role_id type_id]]';
 comment on column hymn.core_biz_object_type_perm.role_id is '角色id ;;fk:[core_role cascade]';
-comment on column hymn.core_biz_object_field_perm.biz_object_id is '对象id ;;fk:[core_biz_object cascade]';
-comment on column hymn.core_biz_object_type_perm.type_id is '字段id ;;fk:[core_biz_object_type cascade]';
+comment on column hymn.core_biz_object_type_perm.biz_object_id is '对象id ;;fk:[core_biz_object cascade]';
+comment on column hymn.core_biz_object_type_perm.type_id is '类型id ;;fk:[core_biz_object_type cascade];idx';
 comment on column hymn.core_biz_object_type_perm.visible is '创建数据时选择特定记录类型的权限';
 
 
@@ -1015,7 +1016,7 @@ create table hymn.core_shared_code
 );
 comment on table hymn.core_shared_code is '共享代码 可以在接口、触发器中调用或使用在定时任务中';
 comment on column hymn.core_shared_code.api is 'api名称,也是代码中的函数名称 ;;uk';
-comment on column hymn.core_shared_code.type is '代码类型 可选值 函数代码 function， 任务代码 job';
+comment on column hymn.core_shared_code.type is '代码类型 ;;optional_value:[function(函数代码),job(任务代码)]';
 comment on column hymn.core_shared_code.code is '代码';
 comment on column hymn.core_shared_code.lang is '语言 ;;optional_value:[javascript]';
 comment on column hymn.core_shared_code.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
@@ -1044,9 +1045,9 @@ comment on column hymn.core_business_code_ref.trigger_id is '触发器id ;;fk:[c
 comment on column hymn.core_business_code_ref.interface_id is '接口id ;;fk:[core_custom_interface cascade]';
 comment on column hymn.core_business_code_ref.shared_code_id is '共享代码id ;;fk:[core_shared_code cascade]';
 comment on column hymn.core_business_code_ref.biz_object_id is '被引用对象id ;;fk:[core_biz_object cascade]';
-comment on column hymn.core_business_code_ref.field_id is '被引用字段id ;;fk:[core_biz_object_field cascade]';
-comment on column hymn.core_business_code_ref.org_id is '被引用组织id ;;fk:[core_org cascade]';
-comment on column hymn.core_business_code_ref.role_id is '被引用角色id ;;fk:[core_role cascade]';
+comment on column hymn.core_business_code_ref.field_id is '被引用字段id ;;fk:[core_biz_object_field cascade];idx';
+comment on column hymn.core_business_code_ref.org_id is '被引用组织id ;;fk:[core_org cascade];idx';
+comment on column hymn.core_business_code_ref.role_id is '被引用角色id ;;fk:[core_role cascade];idx';
 
 drop table if exists hymn.core_cron_job;
 create table hymn.core_cron_job
@@ -1069,7 +1070,7 @@ comment on column hymn.core_cron_job.start_date_time is '任务开始时间';
 comment on column hymn.core_cron_job.end_date_time is '任务结束时间';
 comment on column hymn.core_cron_job.active is '是否启用';
 comment on column hymn.core_cron_job.cron is '定时规则';
-comment on column hymn.core_cron_job.shared_code_id is '任务代码id ;;fk:[core_shared_code restrict]';
+comment on column hymn.core_cron_job.shared_code_id is '任务代码id ;;fk:[core_shared_code restrict];idx';
 
 
 drop table if exists hymn.sql_keyword;
