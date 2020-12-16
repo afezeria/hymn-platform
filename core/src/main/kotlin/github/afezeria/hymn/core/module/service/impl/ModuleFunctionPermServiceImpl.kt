@@ -1,0 +1,68 @@
+package github.afezeria.hymn.core.module.service.impl
+
+import github.afezeria.hymn.core.module.entity.ModuleFunctionPerm
+import github.afezeria.hymn.core.module.dao.ModuleFunctionPermDao
+import github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
+import github.afezeria.hymn.core.module.service.ModuleFunctionPermService
+import github.afezeria.hymn.common.util.DataNotFoundException
+import github.afezeria.hymn.common.util.*
+import org.springframework.stereotype.Component
+
+/**
+ * @author afezeria
+ */
+@Component
+class ModuleFunctionPermServiceImpl(
+    private val moduleFunctionPermDao: ModuleFunctionPermDao,
+) : ModuleFunctionPermService {
+    override fun removeById(id: String): Int {
+        moduleFunctionPermDao.selectById(id)
+            ?: throw DataNotFoundException("ModuleFunctionPerm".msgById(id))
+        val i = moduleFunctionPermDao.deleteById(id)
+        return i
+    }
+
+    override fun update(id: String, dto: ModuleFunctionPermDto): Int {
+        val e = moduleFunctionPermDao.selectById(id)
+            ?: throw DataNotFoundException("ModuleFunctionPerm".msgById(id))
+        dto.update(e)
+        val i = moduleFunctionPermDao.update(e)
+        return i
+    }
+
+    override fun create(dto: ModuleFunctionPermDto): String {
+        val e = dto.toEntity()
+        val id = moduleFunctionPermDao.insert(e)
+        return id
+    }
+
+    override fun findAll(): List<ModuleFunctionPerm> {
+        return moduleFunctionPermDao.selectAll()
+    }
+
+
+    override fun findById(id: String): ModuleFunctionPerm? {
+        return moduleFunctionPermDao.selectById(id)
+    }
+
+    override fun findByRoleIdAndModuleFunctionId(
+        roleId: String,
+        moduleFunctionId: String,
+    ): ModuleFunctionPerm? {
+        return moduleFunctionPermDao.selectByRoleIdAndModuleFunctionId(roleId,moduleFunctionId,)
+    }
+
+    override fun findByRoleId(
+        roleId: String,
+    ): List<ModuleFunctionPerm> {
+        return moduleFunctionPermDao.selectByRoleId(roleId,)
+    }
+
+    override fun findByModuleFunctionId(
+        moduleFunctionId: String,
+    ): List<ModuleFunctionPerm> {
+        return moduleFunctionPermDao.selectByModuleFunctionId(moduleFunctionId,)
+    }
+
+
+}

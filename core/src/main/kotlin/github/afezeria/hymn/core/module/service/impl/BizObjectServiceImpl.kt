@@ -1,0 +1,55 @@
+package github.afezeria.hymn.core.module.service.impl
+
+import github.afezeria.hymn.core.module.entity.BizObject
+import github.afezeria.hymn.core.module.dao.BizObjectDao
+import github.afezeria.hymn.core.module.dto.BizObjectDto
+import github.afezeria.hymn.core.module.service.BizObjectService
+import github.afezeria.hymn.common.util.DataNotFoundException
+import github.afezeria.hymn.common.util.*
+import org.springframework.stereotype.Component
+
+/**
+ * @author afezeria
+ */
+@Component
+class BizObjectServiceImpl(
+    private val bizObjectDao: BizObjectDao,
+) : BizObjectService {
+    override fun removeById(id: String): Int {
+        bizObjectDao.selectById(id)
+            ?: throw DataNotFoundException("BizObject".msgById(id))
+        val i = bizObjectDao.deleteById(id)
+        return i
+    }
+
+    override fun update(id: String, dto: BizObjectDto): Int {
+        val e = bizObjectDao.selectById(id)
+            ?: throw DataNotFoundException("BizObject".msgById(id))
+        dto.update(e)
+        val i = bizObjectDao.update(e)
+        return i
+    }
+
+    override fun create(dto: BizObjectDto): String {
+        val e = dto.toEntity()
+        val id = bizObjectDao.insert(e)
+        return id
+    }
+
+    override fun findAll(): List<BizObject> {
+        return bizObjectDao.selectAll()
+    }
+
+
+    override fun findById(id: String): BizObject? {
+        return bizObjectDao.selectById(id)
+    }
+
+    override fun findByApi(
+        api: String,
+    ): BizObject? {
+        return bizObjectDao.selectByApi(api,)
+    }
+
+
+}
