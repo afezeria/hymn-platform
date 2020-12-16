@@ -1,0 +1,48 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id "io.spring.dependency-management"
+    id "org.springframework.boot"
+    id "org.jetbrains.kotlin.plugin.spring"
+}
+
+def ktormVersion = project.ktormVersion
+
+
+dependencies {
+    implementation(project(':common'))
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
+    implementation 'io.github.microutils:kotlin-logging:1.12.0'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+
+
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+
+
+    compile group: "org.ktorm", name: "ktorm-core", version: "$ktormVersion"
+
+    testCompile "org.postgresql:postgresql:42.2.10"
+    testCompile group: "com.zaxxer", name: "HikariCP", version: "3.4.5"
+
+    testImplementation 'io.kotest:kotest-assertions-core-jvm:4.3.1' //单独使用kotest的断言库时引入的依赖
+    testImplementation(platform("org.junit:junit-bom:5.7.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
