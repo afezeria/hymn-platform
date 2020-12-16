@@ -28,6 +28,28 @@ WHERE a.attnum > 0
   and pn.nspname = 'hymn'
 ORDER BY c.relname, a.attnum;
 SQL
+  QUERY_INDEX = <<SQL
+select pc2.relname as table_name,
+       pc.relname  as name,
+       case pi.indisprimary
+           when true then true
+           else false
+           end     as is_pk,
+       case pi.indisunique
+           when true then true
+           else false
+           end     as is_uk,
+       pa.attname  as column_name,
+       pa.attnum   as ord
+from pg_class pc
+         left join pg_namespace pn on pn.oid = pc.relnamespace
+         left join pg_attribute pa on pa.attrelid = pc.oid
+         left join pg_index pi on pi.indexrelid = pc.oid
+         left join pg_class pc2 on pc2.oid = pi.indrelid
+where pc.relkind = 'i'
+  and pn.nspname = 'hymn'
+  and pi.indisprimary = false;
+SQL
 
   STANDARD_FIELD = %w[create_by_id create_by modify_by_id modify_by create_date modify_date id]
 
@@ -39,5 +61,15 @@ SQL
     "bool" => "Boolean",
     "timestamp" => "LocalDateTime",
     "timestamptz" => "LocalDateTime",
+  }
+
+  KTORM_TYPE = {
+    "uuid" => "uuid",
+    "text" => "varchar",
+    "int4" => "int",
+    "int8" => "long",
+    "bool" => "boolean",
+    "timestamp" => "datetime",
+    "timestamptz" => "datetime",
   }
 end

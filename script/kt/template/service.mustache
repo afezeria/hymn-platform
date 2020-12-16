@@ -1,6 +1,7 @@
 package {{package}}
 
 import {{entity_package}}.{{entity_class}}
+import {{dto_package}}.{{dto_class}}
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
 import org.springframework.stereotype.Component
@@ -8,17 +9,26 @@ import java.time.LocalDateTime
 import java.util.*
 
 /**
-* @author afezeria
-*/
+ * @author afezeria
+ */
 interface {{name}} {
 
     fun removeById(id: String): Int
 
-    fun update(e: {{entity_class}}): Int
+    fun update(id: String, dto: {{dto_class}}): Int
 
-    fun create(e: {{entity_class}}): Int
+    fun create(dto: {{dto_class}}): String
 
-    override fun findAll(): List<{{entity_class}}>
+    fun findAll(): List<{{entity_class}}>
 
-    override fun findById(id: String): {{entity_class}}?
+    fun findById(id: String): {{entity_class}}?
+
+{{#table.index_arr}}
+    fun findBy{{fun_name}}(
+{{#column_arr}}        {{field_name}}: {{java_type}},
+{{/column_arr}}
+    ): {{#is_uk}}{{entity_class}}?{{/is_uk}}{{^is_uk}}List<{{entity_class}}>{{/is_uk}}
+
+{{/table.index_arr}}
+
 }

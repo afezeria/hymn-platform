@@ -14,7 +14,7 @@ import java.util.*
 
 
 /**
-* @author afezeria
+ * @author afezeria
  */
 @RestController
 @RequestMapping("{{router}}")
@@ -44,9 +44,8 @@ class {{name}}(
     @ApiOperation(value = "新建", notes = "")
     @PostMapping
     fun create(@RequestBody dto: {{dto_class}}): RestResp<String> {
-        val entity = dto.toEntity()
-        {{service_name}}.create(entity)
-        return successRestResp(entity.id)
+        val id = {{service_name}}.create(dto)
+        return successRestResp(id)
     }
 
 
@@ -54,10 +53,7 @@ class {{name}}(
     @PutMapping("/{id}")
     fun update(@PathVariable("id") id: String,
                @RequestBody dto: {{dto_class}}): RestResp<Int> {
-        val entity = {{service_name}}.findById(id)
-            ?: throw DataNotFoundException("CoreAccount".msgById(id))
-        dto.update(entity)
-        val count = {{service_name}}.update(entity)
+        val count = {{service_name}}.update(id, dto)
         return successRestResp(count)
     }
 

@@ -1,0 +1,42 @@
+package {{package}}
+
+import {{entity_package}}.{{entity_class}}
+import java.time.LocalDateTime
+import io.swagger.annotations.*
+import java.util.*
+
+/**
+ * @author afezeria
+ */
+class {{name}}(
+{{#table.fields}}
+    @ApiModelProperty(value = "{{comment}}"{{^not_null}}, required = true{{/not_null}})
+    var {{field_name}}: {{java_type}}{{^not_null}}? = null{{/not_null}},
+{{/table.fields}}
+){
+    fun toEntity(): {{entity_class}} {
+        return {{entity_class}}(
+      {{#table.fields}}
+            {{field_name}} = {{field_name}},
+      {{/table.fields}}
+        )
+    }
+
+    fun fromEntity(entity: {{entity_class}}): {{dto_class}} {
+        return entity.run {
+            {{dto_class}}(
+            {{#table.fields}}
+                {{field_name}} = {{field_name}},
+            {{/table.fields}}
+          )
+        }
+    }
+
+    fun update(entity: {{entity_class}}) {
+        entity.also {
+      {{#table.fields}}
+            it.{{field_name}} = {{field_name}}
+      {{/table.fields}}
+        }
+    }
+}

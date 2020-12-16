@@ -1,0 +1,94 @@
+package {{package}}
+
+import {{entity_package}}.{{entity_class}}
+import {{table_package}}.{{table_class}}
+import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.SessionService
+import org.springframework.stereotype.Component
+import org.ktorm.dsl.*
+import java.time.LocalDateTime
+import java.util.*
+
+/**
+* @author afezeria
+*/
+@Component
+class {{name}}(
+    private val dbService: DataBaseService,
+    private val sessionService:SessionService,
+) {
+
+    val table = {{table_class}}()
+
+
+    fun deleteById(id: String): Int {
+        return dbService.db().delete(table) { it.id eq id }
+    }
+
+    fun update(e: {{entity_class}}): Int {
+        requireNotNull(e.id) { "missing id, unable to update data" }
+        val session = sessionService.getSession()
+        val accountId = session.accountId
+        val accountName = session.accountName
+        return dbService.db().update(table) {
+{{#table.fields}}
+            set(it.{{field_name}}, e.{{field_name}})
+{{/table.fields}}
+            set(it.modifyById, accountId)
+            set(it.modifyBy, accountName)
+            set(it.modifyDate, LocalDateTime.now())
+            where {
+                it.id eq e.id
+            }
+        }
+    }
+
+    fun insert(e: {{entity_class}}): String {
+        val now = LocalDateTime.now()
+        val session = sessionService.getSession()
+        val accountId = session.accountId
+        val accountName = session.accountName
+        e.createDate = now
+        e.modifyDate = now
+        e.createById = accountId
+        e.modifyById = accountId
+        e.createBy = accountName
+        e.modifyBy = accountName
+        return dbService.db().insertAndGenerateKey(table) {
+{{#table.fields}}
+            set(it.{{field_name}}, e.{{field_name}})
+{{/table.fields}}
+        } as String
+    }
+
+    fun selectAll(): List<{{entity_class}}> {
+        return dbService.db().from(table)
+            .select(table.columns)
+            .map { table.createEntity(it) }
+    }
+
+    fun selectById(id: String): {{entity_class}}? {
+        return dbService.db().from(table)
+            .select(table.columns)
+            .limit(0, 1)
+            .map { table.createEntity(it) }
+            .firstOrNull()
+    }
+
+{{#table.index_arr}}
+    fun selectBy{{fun_name}}(
+{{#column_arr}}        {{field_name}}: {{java_type}},
+{{/column_arr}}
+    ): {{#is_uk}}{{entity_class}}?{{/is_uk}}{{^is_uk}}List<{{entity_class}}>{{/is_uk}} {
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+{{#column_arr}}                table.{{field_name}} eq {{field_name}}
+{{/column_arr}}
+            }.map { table.createEntity(it) }{{#is_uk}}
+            .firstOrNull(){{/is_uk}}
+    }
+
+{{/table.index_arr}}
+
+}

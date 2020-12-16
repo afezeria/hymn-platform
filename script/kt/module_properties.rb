@@ -104,10 +104,9 @@ end
 
 module Db
   class Table < FromHash
-    attr_accessor :schema, :name, :comment, :column_arr
+    attr_accessor :schema, :name, :comment, :column_arr, :index_arr
 
     def comment_lines
-      p 'abc'
       comment&.split(/\n/)
     end
 
@@ -128,6 +127,38 @@ module Db
     end
   end
 
+  class Index < FromHash
+    attr_accessor :table_name, :name, :is_pk, :is_uk, :column_arr
+
+    def fun_name
+      @column_arr.map { |c| c.column_name.camelize }
+                 .join('And')
+    end
+
+    def is_pk=(i)
+      case i
+      when 't'
+        @is_pk = true
+      when 'f'
+        @is_pk = false
+      else
+        @is_pk = nil
+      end
+    end
+
+    def is_uk=(i)
+      case i
+      when 't'
+        @is_uk = true
+      when 'f'
+        @is_uk = false
+      else
+        @is_uk = nil
+      end
+    end
+
+  end
+
   class Column < FromHash
     attr_accessor :column_name, :sql_type, :not_null, :comment
 
@@ -137,6 +168,10 @@ module Db
 
     def java_type
       Constant::JAVA_TYPE[@sql_type]
+    end
+
+    def ktorm_type
+      Constant::KTORM_TYPE[@sql_type]
     end
 
     def not_null=(i)
