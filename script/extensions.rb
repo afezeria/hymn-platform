@@ -1,6 +1,6 @@
 class String
   def camelize
-    self.gsub(/(.?(?<![a-zA-Z])\w)/) { |c| c[-1].upcase }
+    self.gsub(/(.?(?<![a-zA-Z0-9])\w)/) { |c| c[-1].upcase }
   end
 
   def l_camelize
