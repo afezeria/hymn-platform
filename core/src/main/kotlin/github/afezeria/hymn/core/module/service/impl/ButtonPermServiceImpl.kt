@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class ButtonPermServiceImpl : ButtonPermService {
 
     @Autowired
-    lateinit var buttonPermDao: ButtonPermDao
+    private lateinit var buttonPermDao: ButtonPermDao
 
 
     override fun removeById(id: String): Int {

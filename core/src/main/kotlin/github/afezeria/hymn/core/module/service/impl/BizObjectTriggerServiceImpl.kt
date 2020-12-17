@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class BizObjectTriggerServiceImpl : BizObjectTriggerService {
 
     @Autowired
-    lateinit var bizObjectTriggerDao: BizObjectTriggerDao
+    private lateinit var bizObjectTriggerDao: BizObjectTriggerDao
 
 
     override fun removeById(id: String): Int {

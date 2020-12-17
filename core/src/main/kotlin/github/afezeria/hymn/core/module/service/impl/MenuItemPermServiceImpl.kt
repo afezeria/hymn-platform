@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class MenuItemPermServiceImpl : MenuItemPermService {
 
     @Autowired
-    lateinit var menuItemPermDao: MenuItemPermDao
+    private lateinit var menuItemPermDao: MenuItemPermDao
 
 
     override fun removeById(id: String): Int {

@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class BizObjectTypeOptionsServiceImpl : BizObjectTypeOptionsService {
 
     @Autowired
-    lateinit var bizObjectTypeOptionsDao: BizObjectTypeOptionsDao
+    private lateinit var bizObjectTypeOptionsDao: BizObjectTypeOptionsDao
 
 
     override fun removeById(id: String): Int {

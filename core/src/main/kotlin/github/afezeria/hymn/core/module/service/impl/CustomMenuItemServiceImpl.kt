@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class CustomMenuItemServiceImpl : CustomMenuItemService {
 
     @Autowired
-    lateinit var customMenuItemDao: CustomMenuItemDao
+    private lateinit var customMenuItemDao: CustomMenuItemDao
 
 
     override fun removeById(id: String): Int {

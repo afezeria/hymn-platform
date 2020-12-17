@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class OrgServiceImpl : OrgService {
 
     @Autowired
-    lateinit var orgDao: OrgDao
+    private lateinit var orgDao: OrgDao
 
 
     override fun removeById(id: String): Int {

@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class AccountMenuLayoutServiceImpl : AccountMenuLayoutService {
 
     @Autowired
-    lateinit var accountMenuLayoutDao: AccountMenuLayoutDao
+    private lateinit var accountMenuLayoutDao: AccountMenuLayoutDao
 
 
     override fun removeById(id: String): Int {

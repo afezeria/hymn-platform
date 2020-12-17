@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class CronJobServiceImpl : CronJobService {
 
     @Autowired
-    lateinit var cronJobDao: CronJobDao
+    private lateinit var cronJobDao: CronJobDao
 
 
     override fun removeById(id: String): Int {

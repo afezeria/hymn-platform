@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class CustomPageServiceImpl : CustomPageService {
 
     @Autowired
-    lateinit var customPageDao: CustomPageDao
+    private lateinit var customPageDao: CustomPageDao
 
 
     override fun removeById(id: String): Int {

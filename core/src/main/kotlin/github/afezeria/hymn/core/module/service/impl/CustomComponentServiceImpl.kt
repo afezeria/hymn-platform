@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class CustomComponentServiceImpl : CustomComponentService {
 
     @Autowired
-    lateinit var customComponentDao: CustomComponentDao
+    private lateinit var customComponentDao: CustomComponentDao
 
 
     override fun removeById(id: String): Int {

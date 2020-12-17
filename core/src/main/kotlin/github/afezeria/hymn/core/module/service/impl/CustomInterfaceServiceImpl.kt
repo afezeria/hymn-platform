@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class CustomInterfaceServiceImpl : CustomInterfaceService {
 
     @Autowired
-    lateinit var customInterfaceDao: CustomInterfaceDao
+    private lateinit var customInterfaceDao: CustomInterfaceDao
 
 
     override fun removeById(id: String): Int {

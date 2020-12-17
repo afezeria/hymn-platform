@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class BizObjectPermServiceImpl : BizObjectPermService {
 
     @Autowired
-    lateinit var bizObjectPermDao: BizObjectPermDao
+    private lateinit var bizObjectPermDao: BizObjectPermDao
 
 
     override fun removeById(id: String): Int {

@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
 
     @Autowired
-    lateinit var moduleFunctionPermDao: ModuleFunctionPermDao
+    private lateinit var moduleFunctionPermDao: ModuleFunctionPermDao
 
 
     override fun removeById(id: String): Int {

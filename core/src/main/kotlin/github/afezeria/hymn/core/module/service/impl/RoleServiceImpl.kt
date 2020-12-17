@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class RoleServiceImpl : RoleService {
 
     @Autowired
-    lateinit var roleDao: RoleDao
+    private lateinit var roleDao: RoleDao
 
 
     override fun removeById(id: String): Int {

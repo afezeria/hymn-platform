@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class BizObjectTypeLayoutServiceImpl : BizObjectTypeLayoutService {
 
     @Autowired
-    lateinit var bizObjectTypeLayoutDao: BizObjectTypeLayoutDao
+    private lateinit var bizObjectTypeLayoutDao: BizObjectTypeLayoutDao
 
 
     override fun removeById(id: String): Int {

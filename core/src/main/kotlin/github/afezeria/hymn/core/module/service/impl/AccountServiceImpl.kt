@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class AccountServiceImpl : AccountService {
 
     @Autowired
-    lateinit var accountDao: AccountDao
+    private lateinit var accountDao: AccountDao
 
 
     override fun removeById(id: String): Int {

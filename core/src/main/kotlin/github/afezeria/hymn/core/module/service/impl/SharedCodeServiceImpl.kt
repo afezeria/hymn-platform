@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class SharedCodeServiceImpl : SharedCodeService {
 
     @Autowired
-    lateinit var sharedCodeDao: SharedCodeDao
+    private lateinit var sharedCodeDao: SharedCodeDao
 
 
     override fun removeById(id: String): Int {

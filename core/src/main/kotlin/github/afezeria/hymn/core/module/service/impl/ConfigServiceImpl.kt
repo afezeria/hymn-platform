@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class ConfigServiceImpl : ConfigService {
 
     @Autowired
-    lateinit var configDao: ConfigDao
+    private lateinit var configDao: ConfigDao
 
 
     override fun removeById(id: String): Int {

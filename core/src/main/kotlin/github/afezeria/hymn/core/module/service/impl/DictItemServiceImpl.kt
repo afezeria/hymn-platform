@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class DictItemServiceImpl : DictItemService {
 
     @Autowired
-    lateinit var dictItemDao: DictItemDao
+    private lateinit var dictItemDao: DictItemDao
 
 
     override fun removeById(id: String): Int {

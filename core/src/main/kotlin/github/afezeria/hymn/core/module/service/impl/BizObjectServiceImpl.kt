@@ -16,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired
 class BizObjectServiceImpl : BizObjectService {
 
     @Autowired
-    lateinit var bizObjectDao: BizObjectDao
+    private lateinit var bizObjectDao: BizObjectDao
+
+    @Autowired
+    private lateinit var fieldService: BizObjectFieldService
 
 
     override fun removeById(id: String): Int {

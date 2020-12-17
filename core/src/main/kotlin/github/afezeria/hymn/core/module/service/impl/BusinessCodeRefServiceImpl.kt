@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class BusinessCodeRefServiceImpl : BusinessCodeRefService {
 
     @Autowired
-    lateinit var businessCodeRefDao: BusinessCodeRefDao
+    private lateinit var businessCodeRefDao: BusinessCodeRefDao
 
 
     override fun removeById(id: String): Int {

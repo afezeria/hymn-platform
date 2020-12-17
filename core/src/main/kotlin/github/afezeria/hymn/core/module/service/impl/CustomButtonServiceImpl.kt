@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 class CustomButtonServiceImpl : CustomButtonService {
 
     @Autowired
-    lateinit var customButtonDao: CustomButtonDao
+    private lateinit var customButtonDao: CustomButtonDao
 
 
     override fun removeById(id: String): Int {
