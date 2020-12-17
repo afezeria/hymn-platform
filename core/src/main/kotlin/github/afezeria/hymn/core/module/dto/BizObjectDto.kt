@@ -51,25 +51,6 @@ class BizObjectDto(
         )
     }
 
-    fun fromEntity(entity: BizObject): BizObjectDto {
-        return entity.run {
-            BizObjectDto(
-                name = name,
-                api = api,
-                sourceTable = sourceTable,
-                active = active,
-                type = type,
-                remoteUrl = remoteUrl,
-                remoteToken = remoteToken,
-                moduleApi = moduleApi,
-                remark = remark,
-                canInsert = canInsert,
-                canUpdate = canUpdate,
-                canDelete = canDelete,
-          )
-        }
-    }
-
     fun update(entity: BizObject) {
         entity.also {
             it.name = name

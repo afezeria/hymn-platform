@@ -21,15 +21,6 @@ class ConfigDto(
         )
     }
 
-    fun fromEntity(entity: Config): ConfigDto {
-        return entity.run {
-            ConfigDto(
-                key = key,
-                value = value,
-          )
-        }
-    }
-
     fun update(entity: Config) {
         entity.also {
             it.key = key

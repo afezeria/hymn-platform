@@ -76,10 +76,10 @@ class BizObjectLayoutDao {
         } as String
     }
 
-    fun selectAll(): List<BizObjectLayout> {
+    fun selectAll(): MutableList<BizObjectLayout> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): BizObjectLayout? {
@@ -88,6 +88,14 @@ class BizObjectLayoutDao {
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
+    }
+
+    fun selectByIds(ids: List<String>): MutableList<BizObjectLayout>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByBizObjectIdAndName(
@@ -99,7 +107,7 @@ class BizObjectLayoutDao {
             .where {
                 table.bizObjectId eq bizObjectId
                 table.name eq name
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 

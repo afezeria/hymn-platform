@@ -72,10 +72,10 @@ class CustomButtonDao {
         } as String
     }
 
-    fun selectAll(): List<CustomButton> {
+    fun selectAll(): MutableList<CustomButton> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): CustomButton? {
@@ -86,6 +86,14 @@ class CustomButtonDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<CustomButton>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByApi(
         api: String,
     ): CustomButton? {
@@ -93,7 +101,7 @@ class CustomButtonDao {
             .select(table.columns)
             .where {
                 table.api eq api
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 

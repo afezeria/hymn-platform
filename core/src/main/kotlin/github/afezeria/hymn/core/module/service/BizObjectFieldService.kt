@@ -19,9 +19,11 @@ interface BizObjectFieldService {
 
     fun create(dto: BizObjectFieldDto): String
 
-    fun findAll(): List<BizObjectField>
+    fun findAll(): MutableList<BizObjectField>
 
     fun findById(id: String): BizObjectField?
+
+    fun findByIds(ids: List<String>): MutableList<BizObjectField>
 
     fun findByBizObjectIdAndApi(
         bizObjectId: String,
@@ -30,7 +32,7 @@ interface BizObjectFieldService {
 
     fun findByBizObjectId(
         bizObjectId: String,
-    ): List<BizObjectField>
+    ): MutableList<BizObjectField>
 
 
 }

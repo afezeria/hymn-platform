@@ -64,10 +64,10 @@ class MenuItemPermDao {
         } as String
     }
 
-    fun selectAll(): List<MenuItemPerm> {
+    fun selectAll(): MutableList<MenuItemPerm> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): MenuItemPerm? {
@@ -78,24 +78,32 @@ class MenuItemPermDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<MenuItemPerm>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByRoleId(
         roleId: String,
-    ): List<MenuItemPerm> {
+    ): MutableList<MenuItemPerm> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.roleId eq roleId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByMenuItemId(
         menuItemId: String,
-    ): List<MenuItemPerm> {
+    ): MutableList<MenuItemPerm> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.menuItemId eq menuItemId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

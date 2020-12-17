@@ -24,16 +24,6 @@ class MenuItemPermDto(
         )
     }
 
-    fun fromEntity(entity: MenuItemPerm): MenuItemPermDto {
-        return entity.run {
-            MenuItemPermDto(
-                roleId = roleId,
-                menuItemId = menuItemId,
-                visible = visible,
-          )
-        }
-    }
-
     fun update(entity: MenuItemPerm) {
         entity.also {
             it.roleId = roleId

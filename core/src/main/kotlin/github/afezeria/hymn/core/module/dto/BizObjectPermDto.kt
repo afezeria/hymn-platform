@@ -48,24 +48,6 @@ class BizObjectPermDto(
         )
     }
 
-    fun fromEntity(entity: BizObjectPerm): BizObjectPermDto {
-        return entity.run {
-            BizObjectPermDto(
-                roleId = roleId,
-                bizObjectId = bizObjectId,
-                ins = ins,
-                upd = upd,
-                del = del,
-                que = que,
-                queryWithAccountTree = queryWithAccountTree,
-                queryWithDept = queryWithDept,
-                queryWithDeptTree = queryWithDeptTree,
-                queryAll = queryAll,
-                editAll = editAll,
-          )
-        }
-    }
-
     fun update(entity: BizObjectPerm) {
         entity.also {
             it.roleId = roleId

@@ -27,17 +27,6 @@ class BizObjectTypeOptionsDto(
         )
     }
 
-    fun fromEntity(entity: BizObjectTypeOptions): BizObjectTypeOptionsDto {
-        return entity.run {
-            BizObjectTypeOptionsDto(
-                bizObjectId = bizObjectId,
-                typeId = typeId,
-                fieldId = fieldId,
-                dictItemId = dictItemId,
-          )
-        }
-    }
-
     fun update(entity: BizObjectTypeOptions) {
         entity.also {
             it.bizObjectId = bizObjectId

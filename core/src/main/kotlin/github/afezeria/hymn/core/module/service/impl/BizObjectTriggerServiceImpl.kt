@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectTrigger
 import github.afezeria.hymn.core.module.dao.BizObjectTriggerDao
 import github.afezeria.hymn.core.module.dto.BizObjectTriggerDto
 import github.afezeria.hymn.core.module.service.BizObjectTriggerService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class BizObjectTriggerServiceImpl : BizObjectTriggerService {
 
     @Autowired
     private lateinit var bizObjectTriggerDao: BizObjectTriggerDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class BizObjectTriggerServiceImpl : BizObjectTriggerService {
         return id
     }
 
-    override fun findAll(): List<BizObjectTrigger> {
+    override fun findAll(): MutableList<BizObjectTrigger> {
         return bizObjectTriggerDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class BizObjectTriggerServiceImpl : BizObjectTriggerService {
     override fun findById(id: String): BizObjectTrigger? {
         return bizObjectTriggerDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<BizObjectTrigger> {
+        return bizObjectTriggerDao.selectByIds(ids)
+    }
+
 
     override fun findByBizObjectIdAndApi(
         bizObjectId: String,

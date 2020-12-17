@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.Org
 import github.afezeria.hymn.core.module.dao.OrgDao
 import github.afezeria.hymn.core.module.dto.OrgDto
 import github.afezeria.hymn.core.module.service.OrgService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class OrgServiceImpl : OrgService {
 
     @Autowired
     private lateinit var orgDao: OrgDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class OrgServiceImpl : OrgService {
         return id
     }
 
-    override fun findAll(): List<Org> {
+    override fun findAll(): MutableList<Org> {
         return orgDao.selectAll()
     }
 
@@ -49,9 +53,14 @@ class OrgServiceImpl : OrgService {
         return orgDao.selectById(id)
     }
 
+    override fun findByIds(ids: List<String>): MutableList<Org> {
+        return orgDao.selectByIds(ids)
+    }
+
+
     override fun findByParentId(
         parentId: String,
-    ): List<Org> {
+    ): MutableList<Org> {
         return orgDao.selectByParentId(parentId,)
     }
 

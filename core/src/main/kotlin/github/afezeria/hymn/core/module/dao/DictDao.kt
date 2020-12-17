@@ -68,10 +68,10 @@ class DictDao {
         } as String
     }
 
-    fun selectAll(): List<Dict> {
+    fun selectAll(): MutableList<Dict> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): Dict? {
@@ -82,6 +82,14 @@ class DictDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<Dict>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByApi(
         api: String,
     ): Dict? {
@@ -89,7 +97,7 @@ class DictDao {
             .select(table.columns)
             .where {
                 table.api eq api
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 

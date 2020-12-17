@@ -72,10 +72,10 @@ class CustomInterfaceDao {
         } as String
     }
 
-    fun selectAll(): List<CustomInterface> {
+    fun selectAll(): MutableList<CustomInterface> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): CustomInterface? {
@@ -86,6 +86,14 @@ class CustomInterfaceDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<CustomInterface>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByApi(
         api: String,
     ): CustomInterface? {
@@ -93,7 +101,7 @@ class CustomInterfaceDao {
             .select(table.columns)
             .where {
                 table.api eq api
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 

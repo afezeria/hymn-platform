@@ -30,18 +30,6 @@ class SharedCodeDto(
         )
     }
 
-    fun fromEntity(entity: SharedCode): SharedCodeDto {
-        return entity.run {
-            SharedCodeDto(
-                api = api,
-                type = type,
-                code = code,
-                lang = lang,
-                optionText = optionText,
-          )
-        }
-    }
-
     fun update(entity: SharedCode) {
         entity.also {
             it.api = api

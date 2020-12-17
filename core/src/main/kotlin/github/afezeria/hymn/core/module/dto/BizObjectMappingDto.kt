@@ -27,17 +27,6 @@ class BizObjectMappingDto(
         )
     }
 
-    fun fromEntity(entity: BizObjectMapping): BizObjectMappingDto {
-        return entity.run {
-            BizObjectMappingDto(
-                sourceBizObjectId = sourceBizObjectId,
-                sourceTypeId = sourceTypeId,
-                targetBizObjectId = targetBizObjectId,
-                targetTypeId = targetTypeId,
-          )
-        }
-    }
-
     fun update(entity: BizObjectMapping) {
         entity.also {
             it.sourceBizObjectId = sourceBizObjectId

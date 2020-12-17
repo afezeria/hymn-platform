@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.CustomComponent
 import github.afezeria.hymn.core.module.dao.CustomComponentDao
 import github.afezeria.hymn.core.module.dto.CustomComponentDto
 import github.afezeria.hymn.core.module.service.CustomComponentService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class CustomComponentServiceImpl : CustomComponentService {
 
     @Autowired
     private lateinit var customComponentDao: CustomComponentDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class CustomComponentServiceImpl : CustomComponentService {
         return id
     }
 
-    override fun findAll(): List<CustomComponent> {
+    override fun findAll(): MutableList<CustomComponent> {
         return customComponentDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class CustomComponentServiceImpl : CustomComponentService {
     override fun findById(id: String): CustomComponent? {
         return customComponentDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<CustomComponent> {
+        return customComponentDao.selectByIds(ids)
+    }
+
 
     override fun findByApi(
         api: String,

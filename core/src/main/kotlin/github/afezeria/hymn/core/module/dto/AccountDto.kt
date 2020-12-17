@@ -48,24 +48,6 @@ class AccountDto(
         )
     }
 
-    fun fromEntity(entity: Account): AccountDto {
-        return entity.run {
-            AccountDto(
-                lockTime = lockTime,
-                name = name,
-                username = username,
-                password = password,
-                onlineRule = onlineRule,
-                active = active,
-                admin = admin,
-                root = root,
-                leaderId = leaderId,
-                orgId = orgId,
-                roleId = roleId,
-          )
-        }
-    }
-
     fun update(entity: Account) {
         entity.also {
             it.lockTime = lockTime

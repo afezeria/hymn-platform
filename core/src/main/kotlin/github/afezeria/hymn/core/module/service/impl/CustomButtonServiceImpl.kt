@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.CustomButton
 import github.afezeria.hymn.core.module.dao.CustomButtonDao
 import github.afezeria.hymn.core.module.dto.CustomButtonDto
 import github.afezeria.hymn.core.module.service.CustomButtonService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class CustomButtonServiceImpl : CustomButtonService {
 
     @Autowired
     private lateinit var customButtonDao: CustomButtonDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class CustomButtonServiceImpl : CustomButtonService {
         return id
     }
 
-    override fun findAll(): List<CustomButton> {
+    override fun findAll(): MutableList<CustomButton> {
         return customButtonDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class CustomButtonServiceImpl : CustomButtonService {
     override fun findById(id: String): CustomButton? {
         return customButtonDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<CustomButton> {
+        return customButtonDao.selectByIds(ids)
+    }
+
 
     override fun findByApi(
         api: String,

@@ -64,10 +64,10 @@ class CustomComponentDao {
         } as String
     }
 
-    fun selectAll(): List<CustomComponent> {
+    fun selectAll(): MutableList<CustomComponent> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): CustomComponent? {
@@ -78,6 +78,14 @@ class CustomComponentDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<CustomComponent>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByApi(
         api: String,
     ): CustomComponent? {
@@ -85,7 +93,7 @@ class CustomComponentDao {
             .select(table.columns)
             .where {
                 table.api eq api
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 

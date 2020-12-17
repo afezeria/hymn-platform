@@ -42,22 +42,6 @@ class BizObjectLayoutDto(
         )
     }
 
-    fun fromEntity(entity: BizObjectLayout): BizObjectLayoutDto {
-        return entity.run {
-            BizObjectLayoutDto(
-                bizObjectId = bizObjectId,
-                name = name,
-                remark = remark,
-                relFieldJsonArr = relFieldJsonArr,
-                pcReadLayoutJson = pcReadLayoutJson,
-                pcEditLayoutJson = pcEditLayoutJson,
-                mobileReadLayoutJson = mobileReadLayoutJson,
-                mobileEditLayoutJson = mobileEditLayoutJson,
-                previewLayoutJson = previewLayoutJson,
-          )
-        }
-    }
-
     fun update(entity: BizObjectLayout) {
         entity.also {
             it.bizObjectId = bizObjectId

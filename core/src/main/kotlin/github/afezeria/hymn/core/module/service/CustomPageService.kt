@@ -19,9 +19,11 @@ interface CustomPageService {
 
     fun create(dto: CustomPageDto): String
 
-    fun findAll(): List<CustomPage>
+    fun findAll(): MutableList<CustomPage>
 
     fun findById(id: String): CustomPage?
+
+    fun findByIds(ids: List<String>): MutableList<CustomPage>
 
     fun findByApi(
         api: String,

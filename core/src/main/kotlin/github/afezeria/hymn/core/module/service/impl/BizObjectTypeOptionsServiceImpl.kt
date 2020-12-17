@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectTypeOptions
 import github.afezeria.hymn.core.module.dao.BizObjectTypeOptionsDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypeOptionsDto
 import github.afezeria.hymn.core.module.service.BizObjectTypeOptionsService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class BizObjectTypeOptionsServiceImpl : BizObjectTypeOptionsService {
 
     @Autowired
     private lateinit var bizObjectTypeOptionsDao: BizObjectTypeOptionsDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class BizObjectTypeOptionsServiceImpl : BizObjectTypeOptionsService {
         return id
     }
 
-    override fun findAll(): List<BizObjectTypeOptions> {
+    override fun findAll(): MutableList<BizObjectTypeOptions> {
         return bizObjectTypeOptionsDao.selectAll()
     }
 
@@ -49,15 +53,20 @@ class BizObjectTypeOptionsServiceImpl : BizObjectTypeOptionsService {
         return bizObjectTypeOptionsDao.selectById(id)
     }
 
+    override fun findByIds(ids: List<String>): MutableList<BizObjectTypeOptions> {
+        return bizObjectTypeOptionsDao.selectByIds(ids)
+    }
+
+
     override fun findByBizObjectId(
         bizObjectId: String,
-    ): List<BizObjectTypeOptions> {
+    ): MutableList<BizObjectTypeOptions> {
         return bizObjectTypeOptionsDao.selectByBizObjectId(bizObjectId,)
     }
 
     override fun findByTypeId(
         typeId: String,
-    ): List<BizObjectTypeOptions> {
+    ): MutableList<BizObjectTypeOptions> {
         return bizObjectTypeOptionsDao.selectByTypeId(typeId,)
     }
 

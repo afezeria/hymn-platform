@@ -24,16 +24,6 @@ class AccountMenuLayoutDto(
         )
     }
 
-    fun fromEntity(entity: AccountMenuLayout): AccountMenuLayoutDto {
-        return entity.run {
-            AccountMenuLayoutDto(
-                accountId = accountId,
-                clientType = clientType,
-                layoutJson = layoutJson,
-          )
-        }
-    }
-
     fun update(entity: AccountMenuLayout) {
         entity.also {
             it.accountId = accountId

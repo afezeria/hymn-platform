@@ -27,17 +27,6 @@ class OrgDto(
         )
     }
 
-    fun fromEntity(entity: Org): OrgDto {
-        return entity.run {
-            OrgDto(
-                name = name,
-                directorId = directorId,
-                deputyDirectorId = deputyDirectorId,
-                parentId = parentId,
-          )
-        }
-    }
-
     fun update(entity: Org) {
         entity.also {
             it.name = name

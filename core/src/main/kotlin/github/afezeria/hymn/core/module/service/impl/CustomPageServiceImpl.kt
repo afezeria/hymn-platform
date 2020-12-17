@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.CustomPage
 import github.afezeria.hymn.core.module.dao.CustomPageDao
 import github.afezeria.hymn.core.module.dto.CustomPageDto
 import github.afezeria.hymn.core.module.service.CustomPageService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class CustomPageServiceImpl : CustomPageService {
 
     @Autowired
     private lateinit var customPageDao: CustomPageDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class CustomPageServiceImpl : CustomPageService {
         return id
     }
 
-    override fun findAll(): List<CustomPage> {
+    override fun findAll(): MutableList<CustomPage> {
         return customPageDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class CustomPageServiceImpl : CustomPageService {
     override fun findById(id: String): CustomPage? {
         return customPageDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<CustomPage> {
+        return customPageDao.selectByIds(ids)
+    }
+
 
     override fun findByApi(
         api: String,

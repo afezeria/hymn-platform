@@ -62,10 +62,10 @@ class RoleDao {
         } as String
     }
 
-    fun selectAll(): List<Role> {
+    fun selectAll(): MutableList<Role> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): Role? {
@@ -74,6 +74,14 @@ class RoleDao {
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
+    }
+
+    fun selectByIds(ids: List<String>): MutableList<Role>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

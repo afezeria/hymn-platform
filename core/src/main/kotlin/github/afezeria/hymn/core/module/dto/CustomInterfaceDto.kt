@@ -36,20 +36,6 @@ class CustomInterfaceDto(
         )
     }
 
-    fun fromEntity(entity: CustomInterface): CustomInterfaceDto {
-        return entity.run {
-            CustomInterfaceDto(
-                api = api,
-                name = name,
-                code = code,
-                active = active,
-                lang = lang,
-                optionText = optionText,
-                remark = remark,
-          )
-        }
-    }
-
     fun update(entity: CustomInterface) {
         entity.also {
             it.api = api

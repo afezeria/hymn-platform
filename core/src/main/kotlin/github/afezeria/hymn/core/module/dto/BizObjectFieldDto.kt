@@ -102,42 +102,6 @@ class BizObjectFieldDto(
         )
     }
 
-    fun fromEntity(entity: BizObjectField): BizObjectFieldDto {
-        return entity.run {
-            BizObjectFieldDto(
-                sourceColumn = sourceColumn,
-                bizObjectId = bizObjectId,
-                name = name,
-                api = api,
-                type = type,
-                active = active,
-                history = history,
-                defaultValue = defaultValue,
-                formula = formula,
-                maxLength = maxLength,
-                minLength = minLength,
-                visibleRow = visibleRow,
-                dictId = dictId,
-                masterFieldId = masterFieldId,
-                optionalNumber = optionalNumber,
-                refId = refId,
-                refListLabel = refListLabel,
-                refDeletePolicy = refDeletePolicy,
-                queryFilter = queryFilter,
-                sId = sId,
-                sFieldId = sFieldId,
-                sType = sType,
-                genRule = genRule,
-                remark = remark,
-                help = help,
-                tmp = tmp,
-                joinViewName = joinViewName,
-                standardType = standardType,
-                isPredefined = isPredefined,
-          )
-        }
-    }
-
     fun update(entity: BizObjectField) {
         entity.also {
             it.sourceColumn = sourceColumn

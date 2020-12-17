@@ -27,17 +27,6 @@ class BizObjectTypeLayoutDto(
         )
     }
 
-    fun fromEntity(entity: BizObjectTypeLayout): BizObjectTypeLayoutDto {
-        return entity.run {
-            BizObjectTypeLayoutDto(
-                roleId = roleId,
-                bizObjectId = bizObjectId,
-                typeId = typeId,
-                layoutId = layoutId,
-          )
-        }
-    }
-
     fun update(entity: BizObjectTypeLayout) {
         entity.also {
             it.roleId = roleId

@@ -39,21 +39,6 @@ class AccountObjectViewDto(
         )
     }
 
-    fun fromEntity(entity: AccountObjectView): AccountObjectViewDto {
-        return entity.run {
-            AccountObjectViewDto(
-                copyId = copyId,
-                remark = remark,
-                globalView = globalView,
-                defaultView = defaultView,
-                accountId = accountId,
-                bizObjectId = bizObjectId,
-                name = name,
-                viewJson = viewJson,
-          )
-        }
-    }
-
     fun update(entity: AccountObjectView) {
         entity.also {
             it.copyId = copyId

@@ -19,9 +19,11 @@ interface DictItemService {
 
     fun create(dto: DictItemDto): String
 
-    fun findAll(): List<DictItem>
+    fun findAll(): MutableList<DictItem>
 
     fun findById(id: String): DictItem?
+
+    fun findByIds(ids: List<String>): MutableList<DictItem>
 
     fun findByDictIdAndCode(
         dictId: String,
@@ -30,7 +32,7 @@ interface DictItemService {
 
     fun findByDictId(
         dictId: String,
-    ): List<DictItem>
+    ): MutableList<DictItem>
 
 
 }

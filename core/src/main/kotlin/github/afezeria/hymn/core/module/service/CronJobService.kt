@@ -19,13 +19,15 @@ interface CronJobService {
 
     fun create(dto: CronJobDto): String
 
-    fun findAll(): List<CronJob>
+    fun findAll(): MutableList<CronJob>
 
     fun findById(id: String): CronJob?
 
+    fun findByIds(ids: List<String>): MutableList<CronJob>
+
     fun findBySharedCodeId(
         sharedCodeId: String,
-    ): List<CronJob>
+    ): MutableList<CronJob>
 
 
 }

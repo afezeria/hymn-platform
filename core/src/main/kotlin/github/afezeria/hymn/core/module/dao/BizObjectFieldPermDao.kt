@@ -68,10 +68,10 @@ class BizObjectFieldPermDao {
         } as String
     }
 
-    fun selectAll(): List<BizObjectFieldPerm> {
+    fun selectAll(): MutableList<BizObjectFieldPerm> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): BizObjectFieldPerm? {
@@ -80,6 +80,14 @@ class BizObjectFieldPermDao {
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
+    }
+
+    fun selectByIds(ids: List<String>): MutableList<BizObjectFieldPerm>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByRoleIdAndFieldId(
@@ -91,28 +99,28 @@ class BizObjectFieldPermDao {
             .where {
                 table.roleId eq roleId
                 table.fieldId eq fieldId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 
     fun selectByRoleId(
         roleId: String,
-    ): List<BizObjectFieldPerm> {
+    ): MutableList<BizObjectFieldPerm> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.roleId eq roleId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByFieldId(
         fieldId: String,
-    ): List<BizObjectFieldPerm> {
+    ): MutableList<BizObjectFieldPerm> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.fieldId eq fieldId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

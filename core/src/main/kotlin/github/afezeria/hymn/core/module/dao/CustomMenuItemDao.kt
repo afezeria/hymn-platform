@@ -70,10 +70,10 @@ class CustomMenuItemDao {
         } as String
     }
 
-    fun selectAll(): List<CustomMenuItem> {
+    fun selectAll(): MutableList<CustomMenuItem> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): CustomMenuItem? {
@@ -82,6 +82,14 @@ class CustomMenuItemDao {
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
+    }
+
+    fun selectByIds(ids: List<String>): MutableList<CustomMenuItem>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

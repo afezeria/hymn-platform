@@ -27,17 +27,6 @@ class DictItemDto(
         )
     }
 
-    fun fromEntity(entity: DictItem): DictItemDto {
-        return entity.run {
-            DictItemDto(
-                dictId = dictId,
-                name = name,
-                code = code,
-                parentCode = parentCode,
-          )
-        }
-    }
-
     fun update(entity: DictItem) {
         entity.also {
             it.dictId = dictId

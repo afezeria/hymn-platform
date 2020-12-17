@@ -19,13 +19,15 @@ interface OrgService {
 
     fun create(dto: OrgDto): String
 
-    fun findAll(): List<Org>
+    fun findAll(): MutableList<Org>
 
     fun findById(id: String): Org?
 
+    fun findByIds(ids: List<String>): MutableList<Org>
+
     fun findByParentId(
         parentId: String,
-    ): List<Org>
+    ): MutableList<Org>
 
 
 }

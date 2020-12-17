@@ -66,10 +66,10 @@ class BizObjectTypeDao {
         } as String
     }
 
-    fun selectAll(): List<BizObjectType> {
+    fun selectAll(): MutableList<BizObjectType> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): BizObjectType? {
@@ -78,6 +78,14 @@ class BizObjectTypeDao {
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
+    }
+
+    fun selectByIds(ids: List<String>): MutableList<BizObjectType>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByBizObjectIdAndName(
@@ -89,7 +97,7 @@ class BizObjectTypeDao {
             .where {
                 table.bizObjectId eq bizObjectId
                 table.name eq name
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 

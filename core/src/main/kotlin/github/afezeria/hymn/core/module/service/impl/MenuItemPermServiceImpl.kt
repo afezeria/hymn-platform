@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.MenuItemPerm
 import github.afezeria.hymn.core.module.dao.MenuItemPermDao
 import github.afezeria.hymn.core.module.dto.MenuItemPermDto
 import github.afezeria.hymn.core.module.service.MenuItemPermService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class MenuItemPermServiceImpl : MenuItemPermService {
 
     @Autowired
     private lateinit var menuItemPermDao: MenuItemPermDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class MenuItemPermServiceImpl : MenuItemPermService {
         return id
     }
 
-    override fun findAll(): List<MenuItemPerm> {
+    override fun findAll(): MutableList<MenuItemPerm> {
         return menuItemPermDao.selectAll()
     }
 
@@ -49,15 +53,20 @@ class MenuItemPermServiceImpl : MenuItemPermService {
         return menuItemPermDao.selectById(id)
     }
 
+    override fun findByIds(ids: List<String>): MutableList<MenuItemPerm> {
+        return menuItemPermDao.selectByIds(ids)
+    }
+
+
     override fun findByRoleId(
         roleId: String,
-    ): List<MenuItemPerm> {
+    ): MutableList<MenuItemPerm> {
         return menuItemPermDao.selectByRoleId(roleId,)
     }
 
     override fun findByMenuItemId(
         menuItemId: String,
-    ): List<MenuItemPerm> {
+    ): MutableList<MenuItemPerm> {
         return menuItemPermDao.selectByMenuItemId(menuItemId,)
     }
 

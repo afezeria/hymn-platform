@@ -19,21 +19,23 @@ interface AccountService {
 
     fun create(dto: AccountDto): String
 
-    fun findAll(): List<Account>
+    fun findAll(): MutableList<Account>
 
     fun findById(id: String): Account?
 
+    fun findByIds(ids: List<String>): MutableList<Account>
+
     fun findByLeaderId(
         leaderId: String,
-    ): List<Account>
+    ): MutableList<Account>
 
     fun findByOrgId(
         orgId: String,
-    ): List<Account>
+    ): MutableList<Account>
 
     fun findByRoleId(
         roleId: String,
-    ): List<Account>
+    ): MutableList<Account>
 
 
 }

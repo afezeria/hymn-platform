@@ -64,10 +64,10 @@ class AccountMenuLayoutDao {
         } as String
     }
 
-    fun selectAll(): List<AccountMenuLayout> {
+    fun selectAll(): MutableList<AccountMenuLayout> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): AccountMenuLayout? {
@@ -78,14 +78,22 @@ class AccountMenuLayoutDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<AccountMenuLayout>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByAccountId(
         accountId: String,
-    ): List<AccountMenuLayout> {
+    ): MutableList<AccountMenuLayout> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.accountId eq accountId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

@@ -30,18 +30,6 @@ class CustomPageDto(
         )
     }
 
-    fun fromEntity(entity: CustomPage): CustomPageDto {
-        return entity.run {
-            CustomPageDto(
-                api = api,
-                name = name,
-                template = template,
-                static = static,
-                remark = remark,
-          )
-        }
-    }
-
     fun update(entity: CustomPage) {
         entity.also {
             it.api = api

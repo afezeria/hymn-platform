@@ -19,9 +19,11 @@ interface CustomInterfaceService {
 
     fun create(dto: CustomInterfaceDto): String
 
-    fun findAll(): List<CustomInterface>
+    fun findAll(): MutableList<CustomInterface>
 
     fun findById(id: String): CustomInterface?
+
+    fun findByIds(ids: List<String>): MutableList<CustomInterface>
 
     fun findByApi(
         api: String,

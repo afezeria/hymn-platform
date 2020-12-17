@@ -66,10 +66,10 @@ class ModuleFunctionPermDao {
         } as String
     }
 
-    fun selectAll(): List<ModuleFunctionPerm> {
+    fun selectAll(): MutableList<ModuleFunctionPerm> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): ModuleFunctionPerm? {
@@ -78,6 +78,14 @@ class ModuleFunctionPermDao {
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
+    }
+
+    fun selectByIds(ids: List<String>): MutableList<ModuleFunctionPerm>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByRoleIdAndModuleApiAndFunctionApi(
@@ -91,18 +99,18 @@ class ModuleFunctionPermDao {
                 table.roleId eq roleId
                 table.moduleApi eq moduleApi
                 table.functionApi eq functionApi
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 
     fun selectByRoleId(
         roleId: String,
-    ): List<ModuleFunctionPerm> {
+    ): MutableList<ModuleFunctionPerm> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.roleId eq roleId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

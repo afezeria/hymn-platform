@@ -5,6 +5,7 @@ import github.afezeria.hymn.core.module.table.CoreDictItems
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
 import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
 import org.ktorm.dsl.*
 import java.time.LocalDateTime
 import java.util.*
@@ -13,10 +14,12 @@ import java.util.*
 * @author afezeria
 */
 @Component
-class DictItemDao(
-    private val dbService: DataBaseService,
-    private val sessionService:SessionService,
-) {
+class DictItemDao {
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
+    @Autowired
+    private lateinit var sessionService:SessionService
 
     val table = CoreDictItems()
 
@@ -63,10 +66,10 @@ class DictItemDao(
         } as String
     }
 
-    fun selectAll(): List<DictItem> {
+    fun selectAll(): MutableList<DictItem> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): DictItem? {
@@ -75,6 +78,14 @@ class DictItemDao(
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
+    }
+
+    fun selectByIds(ids: List<String>): MutableList<DictItem>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByDictIdAndCode(
@@ -86,18 +97,18 @@ class DictItemDao(
             .where {
                 table.dictId eq dictId
                 table.code eq code
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 
     fun selectByDictId(
         dictId: String,
-    ): List<DictItem> {
+    ): MutableList<DictItem> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.dictId eq dictId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.CronJob
 import github.afezeria.hymn.core.module.dao.CronJobDao
 import github.afezeria.hymn.core.module.dto.CronJobDto
 import github.afezeria.hymn.core.module.service.CronJobService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class CronJobServiceImpl : CronJobService {
 
     @Autowired
     private lateinit var cronJobDao: CronJobDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class CronJobServiceImpl : CronJobService {
         return id
     }
 
-    override fun findAll(): List<CronJob> {
+    override fun findAll(): MutableList<CronJob> {
         return cronJobDao.selectAll()
     }
 
@@ -49,9 +53,14 @@ class CronJobServiceImpl : CronJobService {
         return cronJobDao.selectById(id)
     }
 
+    override fun findByIds(ids: List<String>): MutableList<CronJob> {
+        return cronJobDao.selectByIds(ids)
+    }
+
+
     override fun findBySharedCodeId(
         sharedCodeId: String,
-    ): List<CronJob> {
+    ): MutableList<CronJob> {
         return cronJobDao.selectBySharedCodeId(sharedCodeId,)
     }
 

@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.Account
 import github.afezeria.hymn.core.module.dao.AccountDao
 import github.afezeria.hymn.core.module.dto.AccountDto
 import github.afezeria.hymn.core.module.service.AccountService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class AccountServiceImpl : AccountService {
 
     @Autowired
     private lateinit var accountDao: AccountDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class AccountServiceImpl : AccountService {
         return id
     }
 
-    override fun findAll(): List<Account> {
+    override fun findAll(): MutableList<Account> {
         return accountDao.selectAll()
     }
 
@@ -49,21 +53,26 @@ class AccountServiceImpl : AccountService {
         return accountDao.selectById(id)
     }
 
+    override fun findByIds(ids: List<String>): MutableList<Account> {
+        return accountDao.selectByIds(ids)
+    }
+
+
     override fun findByLeaderId(
         leaderId: String,
-    ): List<Account> {
+    ): MutableList<Account> {
         return accountDao.selectByLeaderId(leaderId,)
     }
 
     override fun findByOrgId(
         orgId: String,
-    ): List<Account> {
+    ): MutableList<Account> {
         return accountDao.selectByOrgId(orgId,)
     }
 
     override fun findByRoleId(
         roleId: String,
-    ): List<Account> {
+    ): MutableList<Account> {
         return accountDao.selectByRoleId(roleId,)
     }
 

@@ -19,13 +19,15 @@ interface ConfigService {
 
     fun create(dto: ConfigDto): String
 
-    fun findAll(): List<Config>
+    fun findAll(): MutableList<Config>
 
     fun findById(id: String): Config?
 
+    fun findByIds(ids: List<String>): MutableList<Config>
+
     fun findByKey(
         key: String,
-    ): List<Config>
+    ): MutableList<Config>
 
 
 }

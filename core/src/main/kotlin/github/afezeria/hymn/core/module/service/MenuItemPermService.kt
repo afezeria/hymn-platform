@@ -19,17 +19,19 @@ interface MenuItemPermService {
 
     fun create(dto: MenuItemPermDto): String
 
-    fun findAll(): List<MenuItemPerm>
+    fun findAll(): MutableList<MenuItemPerm>
 
     fun findById(id: String): MenuItemPerm?
 
+    fun findByIds(ids: List<String>): MutableList<MenuItemPerm>
+
     fun findByRoleId(
         roleId: String,
-    ): List<MenuItemPerm>
+    ): MutableList<MenuItemPerm>
 
     fun findByMenuItemId(
         menuItemId: String,
-    ): List<MenuItemPerm>
+    ): MutableList<MenuItemPerm>
 
 
 }

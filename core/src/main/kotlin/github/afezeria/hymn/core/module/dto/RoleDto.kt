@@ -21,15 +21,6 @@ class RoleDto(
         )
     }
 
-    fun fromEntity(entity: Role): RoleDto {
-        return entity.run {
-            RoleDto(
-                name = name,
-                remark = remark,
-          )
-        }
-    }
-
     fun update(entity: Role) {
         entity.also {
             it.name = name

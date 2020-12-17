@@ -19,9 +19,11 @@ interface DictService {
 
     fun create(dto: DictDto): String
 
-    fun findAll(): List<Dict>
+    fun findAll(): MutableList<Dict>
 
     fun findById(id: String): Dict?
+
+    fun findByIds(ids: List<String>): MutableList<Dict>
 
     fun findByApi(
         api: String,

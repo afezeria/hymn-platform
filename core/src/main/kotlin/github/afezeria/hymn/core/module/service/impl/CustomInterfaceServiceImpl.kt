@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.CustomInterface
 import github.afezeria.hymn.core.module.dao.CustomInterfaceDao
 import github.afezeria.hymn.core.module.dto.CustomInterfaceDto
 import github.afezeria.hymn.core.module.service.CustomInterfaceService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class CustomInterfaceServiceImpl : CustomInterfaceService {
 
     @Autowired
     private lateinit var customInterfaceDao: CustomInterfaceDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class CustomInterfaceServiceImpl : CustomInterfaceService {
         return id
     }
 
-    override fun findAll(): List<CustomInterface> {
+    override fun findAll(): MutableList<CustomInterface> {
         return customInterfaceDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class CustomInterfaceServiceImpl : CustomInterfaceService {
     override fun findById(id: String): CustomInterface? {
         return customInterfaceDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<CustomInterface> {
+        return customInterfaceDao.selectByIds(ids)
+    }
+
 
     override fun findByApi(
         api: String,

@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.Role
 import github.afezeria.hymn.core.module.dao.RoleDao
 import github.afezeria.hymn.core.module.dto.RoleDto
 import github.afezeria.hymn.core.module.service.RoleService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class RoleServiceImpl : RoleService {
 
     @Autowired
     private lateinit var roleDao: RoleDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class RoleServiceImpl : RoleService {
         return id
     }
 
-    override fun findAll(): List<Role> {
+    override fun findAll(): MutableList<Role> {
         return roleDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class RoleServiceImpl : RoleService {
     override fun findById(id: String): Role? {
         return roleDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<Role> {
+        return roleDao.selectByIds(ids)
+    }
+
 
 
 }

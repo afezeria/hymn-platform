@@ -19,9 +19,11 @@ interface CustomMenuItemService {
 
     fun create(dto: CustomMenuItemDto): String
 
-    fun findAll(): List<CustomMenuItem>
+    fun findAll(): MutableList<CustomMenuItem>
 
     fun findById(id: String): CustomMenuItem?
+
+    fun findByIds(ids: List<String>): MutableList<CustomMenuItem>
 
 
 }

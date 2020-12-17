@@ -68,10 +68,10 @@ class CronJobDao {
         } as String
     }
 
-    fun selectAll(): List<CronJob> {
+    fun selectAll(): MutableList<CronJob> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): CronJob? {
@@ -82,14 +82,22 @@ class CronJobDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<CronJob>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectBySharedCodeId(
         sharedCodeId: String,
-    ): List<CronJob> {
+    ): MutableList<CronJob> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.sharedCodeId eq sharedCodeId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

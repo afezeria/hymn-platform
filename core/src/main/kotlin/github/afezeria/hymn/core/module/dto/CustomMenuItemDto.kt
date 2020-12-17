@@ -33,19 +33,6 @@ class CustomMenuItemDto(
         )
     }
 
-    fun fromEntity(entity: CustomMenuItem): CustomMenuItemDto {
-        return entity.run {
-            CustomMenuItemDto(
-                name = name,
-                path = path,
-                pathType = pathType,
-                action = action,
-                clientType = clientType,
-                icon = icon,
-          )
-        }
-    }
-
     fun update(entity: CustomMenuItem) {
         entity.also {
             it.name = name

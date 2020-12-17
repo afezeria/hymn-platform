@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectMapping
 import github.afezeria.hymn.core.module.dao.BizObjectMappingDao
 import github.afezeria.hymn.core.module.dto.BizObjectMappingDto
 import github.afezeria.hymn.core.module.service.BizObjectMappingService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class BizObjectMappingServiceImpl : BizObjectMappingService {
 
     @Autowired
     private lateinit var bizObjectMappingDao: BizObjectMappingDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class BizObjectMappingServiceImpl : BizObjectMappingService {
         return id
     }
 
-    override fun findAll(): List<BizObjectMapping> {
+    override fun findAll(): MutableList<BizObjectMapping> {
         return bizObjectMappingDao.selectAll()
     }
 
@@ -49,9 +53,14 @@ class BizObjectMappingServiceImpl : BizObjectMappingService {
         return bizObjectMappingDao.selectById(id)
     }
 
+    override fun findByIds(ids: List<String>): MutableList<BizObjectMapping> {
+        return bizObjectMappingDao.selectByIds(ids)
+    }
+
+
     override fun findBySourceBizObjectId(
         sourceBizObjectId: String,
-    ): List<BizObjectMapping> {
+    ): MutableList<BizObjectMapping> {
         return bizObjectMappingDao.selectBySourceBizObjectId(sourceBizObjectId,)
     }
 

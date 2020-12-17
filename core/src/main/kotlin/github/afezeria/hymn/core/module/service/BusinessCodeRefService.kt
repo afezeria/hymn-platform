@@ -19,21 +19,23 @@ interface BusinessCodeRefService {
 
     fun create(dto: BusinessCodeRefDto): String
 
-    fun findAll(): List<BusinessCodeRef>
+    fun findAll(): MutableList<BusinessCodeRef>
 
     fun findById(id: String): BusinessCodeRef?
 
+    fun findByIds(ids: List<String>): MutableList<BusinessCodeRef>
+
     fun findByFieldId(
         fieldId: String,
-    ): List<BusinessCodeRef>
+    ): MutableList<BusinessCodeRef>
 
     fun findByOrgId(
         orgId: String,
-    ): List<BusinessCodeRef>
+    ): MutableList<BusinessCodeRef>
 
     fun findByRoleId(
         roleId: String,
-    ): List<BusinessCodeRef>
+    ): MutableList<BusinessCodeRef>
 
 
 }

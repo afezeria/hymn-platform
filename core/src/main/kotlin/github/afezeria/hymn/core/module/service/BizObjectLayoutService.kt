@@ -19,9 +19,11 @@ interface BizObjectLayoutService {
 
     fun create(dto: BizObjectLayoutDto): String
 
-    fun findAll(): List<BizObjectLayout>
+    fun findAll(): MutableList<BizObjectLayout>
 
     fun findById(id: String): BizObjectLayout?
+
+    fun findByIds(ids: List<String>): MutableList<BizObjectLayout>
 
     fun findByBizObjectIdAndName(
         bizObjectId: String,

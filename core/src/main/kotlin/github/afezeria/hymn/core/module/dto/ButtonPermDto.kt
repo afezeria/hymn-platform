@@ -24,16 +24,6 @@ class ButtonPermDto(
         )
     }
 
-    fun fromEntity(entity: ButtonPerm): ButtonPermDto {
-        return entity.run {
-            ButtonPermDto(
-                roleId = roleId,
-                buttonId = buttonId,
-                visible = visible,
-          )
-        }
-    }
-
     fun update(entity: ButtonPerm) {
         entity.also {
             it.roleId = roleId

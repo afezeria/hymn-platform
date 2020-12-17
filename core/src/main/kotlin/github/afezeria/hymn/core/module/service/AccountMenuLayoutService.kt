@@ -19,13 +19,15 @@ interface AccountMenuLayoutService {
 
     fun create(dto: AccountMenuLayoutDto): String
 
-    fun findAll(): List<AccountMenuLayout>
+    fun findAll(): MutableList<AccountMenuLayout>
 
     fun findById(id: String): AccountMenuLayout?
 
+    fun findByIds(ids: List<String>): MutableList<AccountMenuLayout>
+
     fun findByAccountId(
         accountId: String,
-    ): List<AccountMenuLayout>
+    ): MutableList<AccountMenuLayout>
 
 
 }

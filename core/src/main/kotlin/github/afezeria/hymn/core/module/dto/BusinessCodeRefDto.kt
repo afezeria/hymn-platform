@@ -36,20 +36,6 @@ class BusinessCodeRefDto(
         )
     }
 
-    fun fromEntity(entity: BusinessCodeRef): BusinessCodeRefDto {
-        return entity.run {
-            BusinessCodeRefDto(
-                triggerId = triggerId,
-                interfaceId = interfaceId,
-                sharedCodeId = sharedCodeId,
-                bizObjectId = bizObjectId,
-                fieldId = fieldId,
-                orgId = orgId,
-                roleId = roleId,
-          )
-        }
-    }
-
     fun update(entity: BusinessCodeRef) {
         entity.also {
             it.triggerId = triggerId

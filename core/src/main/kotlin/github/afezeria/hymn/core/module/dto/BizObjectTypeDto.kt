@@ -27,17 +27,6 @@ class BizObjectTypeDto(
         )
     }
 
-    fun fromEntity(entity: BizObjectType): BizObjectTypeDto {
-        return entity.run {
-            BizObjectTypeDto(
-                bizObjectId = bizObjectId,
-                name = name,
-                active = active,
-                remark = remark,
-          )
-        }
-    }
-
     fun update(entity: BizObjectType) {
         entity.also {
             it.bizObjectId = bizObjectId

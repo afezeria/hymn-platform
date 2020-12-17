@@ -30,18 +30,6 @@ class DictDto(
         )
     }
 
-    fun fromEntity(entity: Dict): DictDto {
-        return entity.run {
-            DictDto(
-                fieldId = fieldId,
-                parentDictId = parentDictId,
-                name = name,
-                api = api,
-                remark = remark,
-          )
-        }
-    }
-
     fun update(entity: Dict) {
         entity.also {
             it.fieldId = fieldId

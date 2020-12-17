@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectPerm
 import github.afezeria.hymn.core.module.dao.BizObjectPermDao
 import github.afezeria.hymn.core.module.dto.BizObjectPermDto
 import github.afezeria.hymn.core.module.service.BizObjectPermService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class BizObjectPermServiceImpl : BizObjectPermService {
 
     @Autowired
     private lateinit var bizObjectPermDao: BizObjectPermDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class BizObjectPermServiceImpl : BizObjectPermService {
         return id
     }
 
-    override fun findAll(): List<BizObjectPerm> {
+    override fun findAll(): MutableList<BizObjectPerm> {
         return bizObjectPermDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class BizObjectPermServiceImpl : BizObjectPermService {
     override fun findById(id: String): BizObjectPerm? {
         return bizObjectPermDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<BizObjectPerm> {
+        return bizObjectPermDao.selectByIds(ids)
+    }
+
 
     override fun findByRoleIdAndBizObjectId(
         roleId: String,
@@ -58,13 +67,13 @@ class BizObjectPermServiceImpl : BizObjectPermService {
 
     override fun findByRoleId(
         roleId: String,
-    ): List<BizObjectPerm> {
+    ): MutableList<BizObjectPerm> {
         return bizObjectPermDao.selectByRoleId(roleId,)
     }
 
     override fun findByBizObjectId(
         bizObjectId: String,
-    ): List<BizObjectPerm> {
+    ): MutableList<BizObjectPerm> {
         return bizObjectPermDao.selectByBizObjectId(bizObjectId,)
     }
 

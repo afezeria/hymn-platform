@@ -30,18 +30,6 @@ class CronJobDto(
         )
     }
 
-    fun fromEntity(entity: CronJob): CronJobDto {
-        return entity.run {
-            CronJobDto(
-                active = active,
-                sharedCodeId = sharedCodeId,
-                cron = cron,
-                startDateTime = startDateTime,
-                endDateTime = endDateTime,
-          )
-        }
-    }
-
     fun update(entity: CronJob) {
         entity.also {
             it.active = active

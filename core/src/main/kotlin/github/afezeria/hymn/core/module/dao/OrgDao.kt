@@ -5,6 +5,7 @@ import github.afezeria.hymn.core.module.table.CoreOrgs
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
 import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
 import org.ktorm.dsl.*
 import java.time.LocalDateTime
 import java.util.*
@@ -13,10 +14,12 @@ import java.util.*
 * @author afezeria
 */
 @Component
-class OrgDao(
-    private val dbService: DataBaseService,
-    private val sessionService:SessionService,
-) {
+class OrgDao {
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
+    @Autowired
+    private lateinit var sessionService:SessionService
 
     val table = CoreOrgs()
 
@@ -63,10 +66,10 @@ class OrgDao(
         } as String
     }
 
-    fun selectAll(): List<Org> {
+    fun selectAll(): MutableList<Org> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): Org? {
@@ -77,14 +80,22 @@ class OrgDao(
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<Org>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByParentId(
         parentId: String,
-    ): List<Org> {
+    ): MutableList<Org> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.parentId eq parentId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

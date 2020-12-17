@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.ButtonPerm
 import github.afezeria.hymn.core.module.dao.ButtonPermDao
 import github.afezeria.hymn.core.module.dto.ButtonPermDto
 import github.afezeria.hymn.core.module.service.ButtonPermService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class ButtonPermServiceImpl : ButtonPermService {
 
     @Autowired
     private lateinit var buttonPermDao: ButtonPermDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class ButtonPermServiceImpl : ButtonPermService {
         return id
     }
 
-    override fun findAll(): List<ButtonPerm> {
+    override fun findAll(): MutableList<ButtonPerm> {
         return buttonPermDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class ButtonPermServiceImpl : ButtonPermService {
     override fun findById(id: String): ButtonPerm? {
         return buttonPermDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<ButtonPerm> {
+        return buttonPermDao.selectByIds(ids)
+    }
+
 
     override fun findByRoleIdAndButtonId(
         roleId: String,
@@ -58,13 +67,13 @@ class ButtonPermServiceImpl : ButtonPermService {
 
     override fun findByRoleId(
         roleId: String,
-    ): List<ButtonPerm> {
+    ): MutableList<ButtonPerm> {
         return buttonPermDao.selectByRoleId(roleId,)
     }
 
     override fun findByButtonId(
         buttonId: String,
-    ): List<ButtonPerm> {
+    ): MutableList<ButtonPerm> {
         return buttonPermDao.selectByButtonId(buttonId,)
     }
 

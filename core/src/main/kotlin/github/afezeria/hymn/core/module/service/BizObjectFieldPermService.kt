@@ -19,9 +19,11 @@ interface BizObjectFieldPermService {
 
     fun create(dto: BizObjectFieldPermDto): String
 
-    fun findAll(): List<BizObjectFieldPerm>
+    fun findAll(): MutableList<BizObjectFieldPerm>
 
     fun findById(id: String): BizObjectFieldPerm?
+
+    fun findByIds(ids: List<String>): MutableList<BizObjectFieldPerm>
 
     fun findByRoleIdAndFieldId(
         roleId: String,
@@ -30,11 +32,11 @@ interface BizObjectFieldPermService {
 
     fun findByRoleId(
         roleId: String,
-    ): List<BizObjectFieldPerm>
+    ): MutableList<BizObjectFieldPerm>
 
     fun findByFieldId(
         fieldId: String,
-    ): List<BizObjectFieldPerm>
+    ): MutableList<BizObjectFieldPerm>
 
 
 }

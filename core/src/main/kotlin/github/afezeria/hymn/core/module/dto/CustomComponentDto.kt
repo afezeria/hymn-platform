@@ -24,16 +24,6 @@ class CustomComponentDto(
         )
     }
 
-    fun fromEntity(entity: CustomComponent): CustomComponentDto {
-        return entity.run {
-            CustomComponentDto(
-                api = api,
-                name = name,
-                code = code,
-          )
-        }
-    }
-
     fun update(entity: CustomComponent) {
         entity.also {
             it.api = api

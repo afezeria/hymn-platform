@@ -19,9 +19,11 @@ interface SharedCodeService {
 
     fun create(dto: SharedCodeDto): String
 
-    fun findAll(): List<SharedCode>
+    fun findAll(): MutableList<SharedCode>
 
     fun findById(id: String): SharedCode?
+
+    fun findByIds(ids: List<String>): MutableList<SharedCode>
 
     fun findByApi(
         api: String,

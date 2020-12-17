@@ -19,9 +19,11 @@ interface CustomButtonService {
 
     fun create(dto: CustomButtonDto): String
 
-    fun findAll(): List<CustomButton>
+    fun findAll(): MutableList<CustomButton>
 
     fun findById(id: String): CustomButton?
+
+    fun findByIds(ids: List<String>): MutableList<CustomButton>
 
     fun findByApi(
         api: String,

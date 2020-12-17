@@ -48,24 +48,6 @@ class BizObjectMappingItemDto(
         )
     }
 
-    fun fromEntity(entity: BizObjectMappingItem): BizObjectMappingItemDto {
-        return entity.run {
-            BizObjectMappingItemDto(
-                mappingId = mappingId,
-                sourceFieldId = sourceFieldId,
-                targetFieldId = targetFieldId,
-                refField1Id = refField1Id,
-                refField1BizObjectId = refField1BizObjectId,
-                refField2Id = refField2Id,
-                refField2BizObjectId = refField2BizObjectId,
-                refField3Id = refField3Id,
-                refField3BizObjectId = refField3BizObjectId,
-                refField4Id = refField4Id,
-                refField4BizObjectId = refField4BizObjectId,
-          )
-        }
-    }
-
     fun update(entity: BizObjectMappingItem) {
         entity.also {
             it.mappingId = mappingId

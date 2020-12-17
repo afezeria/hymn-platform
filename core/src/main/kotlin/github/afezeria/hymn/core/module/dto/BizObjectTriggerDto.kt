@@ -45,23 +45,6 @@ class BizObjectTriggerDto(
         )
     }
 
-    fun fromEntity(entity: BizObjectTrigger): BizObjectTriggerDto {
-        return entity.run {
-            BizObjectTriggerDto(
-                active = active,
-                remark = remark,
-                bizObjectId = bizObjectId,
-                name = name,
-                api = api,
-                lang = lang,
-                optionText = optionText,
-                ord = ord,
-                event = event,
-                code = code,
-          )
-        }
-    }
-
     fun update(entity: BizObjectTrigger) {
         entity.also {
             it.active = active

@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.SharedCode
 import github.afezeria.hymn.core.module.dao.SharedCodeDao
 import github.afezeria.hymn.core.module.dto.SharedCodeDto
 import github.afezeria.hymn.core.module.service.SharedCodeService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class SharedCodeServiceImpl : SharedCodeService {
 
     @Autowired
     private lateinit var sharedCodeDao: SharedCodeDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class SharedCodeServiceImpl : SharedCodeService {
         return id
     }
 
-    override fun findAll(): List<SharedCode> {
+    override fun findAll(): MutableList<SharedCode> {
         return sharedCodeDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class SharedCodeServiceImpl : SharedCodeService {
     override fun findById(id: String): SharedCode? {
         return sharedCodeDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<SharedCode> {
+        return sharedCodeDao.selectByIds(ids)
+    }
+
 
     override fun findByApi(
         api: String,

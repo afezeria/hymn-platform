@@ -19,17 +19,19 @@ interface AccountObjectViewService {
 
     fun create(dto: AccountObjectViewDto): String
 
-    fun findAll(): List<AccountObjectView>
+    fun findAll(): MutableList<AccountObjectView>
 
     fun findById(id: String): AccountObjectView?
 
+    fun findByIds(ids: List<String>): MutableList<AccountObjectView>
+
     fun findByAccountId(
         accountId: String,
-    ): List<AccountObjectView>
+    ): MutableList<AccountObjectView>
 
     fun findByBizObjectId(
         bizObjectId: String,
-    ): List<AccountObjectView>
+    ): MutableList<AccountObjectView>
 
 
 }

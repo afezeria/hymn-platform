@@ -27,17 +27,6 @@ class ModuleFunctionPermDto(
         )
     }
 
-    fun fromEntity(entity: ModuleFunctionPerm): ModuleFunctionPermDto {
-        return entity.run {
-            ModuleFunctionPermDto(
-                roleId = roleId,
-                moduleApi = moduleApi,
-                functionApi = functionApi,
-                perm = perm,
-          )
-        }
-    }
-
     fun update(entity: ModuleFunctionPerm) {
         entity.also {
             it.roleId = roleId

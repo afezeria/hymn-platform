@@ -78,10 +78,10 @@ class BizObjectTriggerDao {
         } as String
     }
 
-    fun selectAll(): List<BizObjectTrigger> {
+    fun selectAll(): MutableList<BizObjectTrigger> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): BizObjectTrigger? {
@@ -90,6 +90,14 @@ class BizObjectTriggerDao {
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
+    }
+
+    fun selectByIds(ids: List<String>): MutableList<BizObjectTrigger>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByBizObjectIdAndApi(
@@ -101,7 +109,7 @@ class BizObjectTriggerDao {
             .where {
                 table.bizObjectId eq bizObjectId
                 table.api eq api
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 

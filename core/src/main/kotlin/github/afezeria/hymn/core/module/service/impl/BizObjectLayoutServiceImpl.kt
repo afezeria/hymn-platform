@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectLayout
 import github.afezeria.hymn.core.module.dao.BizObjectLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
 import github.afezeria.hymn.core.module.service.BizObjectLayoutService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class BizObjectLayoutServiceImpl : BizObjectLayoutService {
 
     @Autowired
     private lateinit var bizObjectLayoutDao: BizObjectLayoutDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class BizObjectLayoutServiceImpl : BizObjectLayoutService {
         return id
     }
 
-    override fun findAll(): List<BizObjectLayout> {
+    override fun findAll(): MutableList<BizObjectLayout> {
         return bizObjectLayoutDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class BizObjectLayoutServiceImpl : BizObjectLayoutService {
     override fun findById(id: String): BizObjectLayout? {
         return bizObjectLayoutDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<BizObjectLayout> {
+        return bizObjectLayoutDao.selectByIds(ids)
+    }
+
 
     override fun findByBizObjectIdAndName(
         bizObjectId: String,

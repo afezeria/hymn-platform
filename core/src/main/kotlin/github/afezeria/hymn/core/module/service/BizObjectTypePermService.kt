@@ -19,9 +19,11 @@ interface BizObjectTypePermService {
 
     fun create(dto: BizObjectTypePermDto): String
 
-    fun findAll(): List<BizObjectTypePerm>
+    fun findAll(): MutableList<BizObjectTypePerm>
 
     fun findById(id: String): BizObjectTypePerm?
+
+    fun findByIds(ids: List<String>): MutableList<BizObjectTypePerm>
 
     fun findByRoleIdAndTypeId(
         roleId: String,
@@ -30,7 +32,7 @@ interface BizObjectTypePermService {
 
     fun findByTypeId(
         typeId: String,
-    ): List<BizObjectTypePerm>
+    ): MutableList<BizObjectTypePerm>
 
 
 }

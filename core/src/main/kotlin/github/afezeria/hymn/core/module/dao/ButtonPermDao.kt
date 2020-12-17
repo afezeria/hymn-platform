@@ -5,6 +5,7 @@ import github.afezeria.hymn.core.module.table.CoreButtonPerms
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
 import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
 import org.ktorm.dsl.*
 import java.time.LocalDateTime
 import java.util.*
@@ -13,10 +14,12 @@ import java.util.*
 * @author afezeria
 */
 @Component
-class ButtonPermDao(
-    private val dbService: DataBaseService,
-    private val sessionService:SessionService,
-) {
+class ButtonPermDao {
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
+    @Autowired
+    private lateinit var sessionService:SessionService
 
     val table = CoreButtonPerms()
 
@@ -61,10 +64,10 @@ class ButtonPermDao(
         } as String
     }
 
-    fun selectAll(): List<ButtonPerm> {
+    fun selectAll(): MutableList<ButtonPerm> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): ButtonPerm? {
@@ -73,6 +76,14 @@ class ButtonPermDao(
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
+    }
+
+    fun selectByIds(ids: List<String>): MutableList<ButtonPerm>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByRoleIdAndButtonId(
@@ -84,28 +95,28 @@ class ButtonPermDao(
             .where {
                 table.roleId eq roleId
                 table.buttonId eq buttonId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 
     fun selectByRoleId(
         roleId: String,
-    ): List<ButtonPerm> {
+    ): MutableList<ButtonPerm> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.roleId eq roleId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByButtonId(
         buttonId: String,
-    ): List<ButtonPerm> {
+    ): MutableList<ButtonPerm> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.buttonId eq buttonId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

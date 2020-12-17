@@ -68,10 +68,10 @@ class CustomPageDao {
         } as String
     }
 
-    fun selectAll(): List<CustomPage> {
+    fun selectAll(): MutableList<CustomPage> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): CustomPage? {
@@ -82,6 +82,14 @@ class CustomPageDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<CustomPage>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByApi(
         api: String,
     ): CustomPage? {
@@ -89,7 +97,7 @@ class CustomPageDao {
             .select(table.columns)
             .where {
                 table.api eq api
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 

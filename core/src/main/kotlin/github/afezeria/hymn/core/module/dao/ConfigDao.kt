@@ -62,10 +62,10 @@ class ConfigDao {
         } as String
     }
 
-    fun selectAll(): List<Config> {
+    fun selectAll(): MutableList<Config> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): Config? {
@@ -76,14 +76,22 @@ class ConfigDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<Config>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByKey(
         key: String,
-    ): List<Config> {
+    ): MutableList<Config> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.key eq key
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

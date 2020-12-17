@@ -19,9 +19,11 @@ interface BizObjectTriggerService {
 
     fun create(dto: BizObjectTriggerDto): String
 
-    fun findAll(): List<BizObjectTrigger>
+    fun findAll(): MutableList<BizObjectTrigger>
 
     fun findById(id: String): BizObjectTrigger?
+
+    fun findByIds(ids: List<String>): MutableList<BizObjectTrigger>
 
     fun findByBizObjectIdAndApi(
         bizObjectId: String,

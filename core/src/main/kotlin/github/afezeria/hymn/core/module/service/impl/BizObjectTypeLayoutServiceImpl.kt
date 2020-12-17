@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectTypeLayout
 import github.afezeria.hymn.core.module.dao.BizObjectTypeLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
 import github.afezeria.hymn.core.module.service.BizObjectTypeLayoutService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class BizObjectTypeLayoutServiceImpl : BizObjectTypeLayoutService {
 
     @Autowired
     private lateinit var bizObjectTypeLayoutDao: BizObjectTypeLayoutDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class BizObjectTypeLayoutServiceImpl : BizObjectTypeLayoutService {
         return id
     }
 
-    override fun findAll(): List<BizObjectTypeLayout> {
+    override fun findAll(): MutableList<BizObjectTypeLayout> {
         return bizObjectTypeLayoutDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class BizObjectTypeLayoutServiceImpl : BizObjectTypeLayoutService {
     override fun findById(id: String): BizObjectTypeLayout? {
         return bizObjectTypeLayoutDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<BizObjectTypeLayout> {
+        return bizObjectTypeLayoutDao.selectByIds(ids)
+    }
+
 
     override fun findByRoleIdAndTypeIdAndLayoutId(
         roleId: String,
@@ -59,13 +68,13 @@ class BizObjectTypeLayoutServiceImpl : BizObjectTypeLayoutService {
 
     override fun findByRoleId(
         roleId: String,
-    ): List<BizObjectTypeLayout> {
+    ): MutableList<BizObjectTypeLayout> {
         return bizObjectTypeLayoutDao.selectByRoleId(roleId,)
     }
 
     override fun findByBizObjectId(
         bizObjectId: String,
-    ): List<BizObjectTypeLayout> {
+    ): MutableList<BizObjectTypeLayout> {
         return bizObjectTypeLayoutDao.selectByBizObjectId(bizObjectId,)
     }
 

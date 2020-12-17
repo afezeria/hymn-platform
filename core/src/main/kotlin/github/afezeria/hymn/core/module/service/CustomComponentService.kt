@@ -19,9 +19,11 @@ interface CustomComponentService {
 
     fun create(dto: CustomComponentDto): String
 
-    fun findAll(): List<CustomComponent>
+    fun findAll(): MutableList<CustomComponent>
 
     fun findById(id: String): CustomComponent?
+
+    fun findByIds(ids: List<String>): MutableList<CustomComponent>
 
     fun findByApi(
         api: String,

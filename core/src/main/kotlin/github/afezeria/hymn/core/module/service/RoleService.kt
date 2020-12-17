@@ -19,9 +19,11 @@ interface RoleService {
 
     fun create(dto: RoleDto): String
 
-    fun findAll(): List<Role>
+    fun findAll(): MutableList<Role>
 
     fun findById(id: String): Role?
+
+    fun findByIds(ids: List<String>): MutableList<Role>
 
 
 }

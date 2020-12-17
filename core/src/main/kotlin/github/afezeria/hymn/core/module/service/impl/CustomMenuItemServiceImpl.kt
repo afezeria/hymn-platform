@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.CustomMenuItem
 import github.afezeria.hymn.core.module.dao.CustomMenuItemDao
 import github.afezeria.hymn.core.module.dto.CustomMenuItemDto
 import github.afezeria.hymn.core.module.service.CustomMenuItemService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class CustomMenuItemServiceImpl : CustomMenuItemService {
 
     @Autowired
     private lateinit var customMenuItemDao: CustomMenuItemDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class CustomMenuItemServiceImpl : CustomMenuItemService {
         return id
     }
 
-    override fun findAll(): List<CustomMenuItem> {
+    override fun findAll(): MutableList<CustomMenuItem> {
         return customMenuItemDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class CustomMenuItemServiceImpl : CustomMenuItemService {
     override fun findById(id: String): CustomMenuItem? {
         return customMenuItemDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<CustomMenuItem> {
+        return customMenuItemDao.selectByIds(ids)
+    }
+
 
 
 }

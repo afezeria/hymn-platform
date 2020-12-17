@@ -19,9 +19,11 @@ interface ModuleFunctionPermService {
 
     fun create(dto: ModuleFunctionPermDto): String
 
-    fun findAll(): List<ModuleFunctionPerm>
+    fun findAll(): MutableList<ModuleFunctionPerm>
 
     fun findById(id: String): ModuleFunctionPerm?
+
+    fun findByIds(ids: List<String>): MutableList<ModuleFunctionPerm>
 
     fun findByRoleIdAndModuleApiAndFunctionApi(
         roleId: String,
@@ -31,7 +33,7 @@ interface ModuleFunctionPermService {
 
     fun findByRoleId(
         roleId: String,
-    ): List<ModuleFunctionPerm>
+    ): MutableList<ModuleFunctionPerm>
 
 
 }

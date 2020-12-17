@@ -19,9 +19,11 @@ interface ButtonPermService {
 
     fun create(dto: ButtonPermDto): String
 
-    fun findAll(): List<ButtonPerm>
+    fun findAll(): MutableList<ButtonPerm>
 
     fun findById(id: String): ButtonPerm?
+
+    fun findByIds(ids: List<String>): MutableList<ButtonPerm>
 
     fun findByRoleIdAndButtonId(
         roleId: String,
@@ -30,11 +32,11 @@ interface ButtonPermService {
 
     fun findByRoleId(
         roleId: String,
-    ): List<ButtonPerm>
+    ): MutableList<ButtonPerm>
 
     fun findByButtonId(
         buttonId: String,
-    ): List<ButtonPerm>
+    ): MutableList<ButtonPerm>
 
 
 }

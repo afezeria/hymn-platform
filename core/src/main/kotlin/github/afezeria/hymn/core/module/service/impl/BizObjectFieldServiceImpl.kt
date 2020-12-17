@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectField
 import github.afezeria.hymn.core.module.dao.BizObjectFieldDao
 import github.afezeria.hymn.core.module.dto.BizObjectFieldDto
 import github.afezeria.hymn.core.module.service.BizObjectFieldService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
 
     @Autowired
     private lateinit var bizObjectFieldDao: BizObjectFieldDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
         return id
     }
 
-    override fun findAll(): List<BizObjectField> {
+    override fun findAll(): MutableList<BizObjectField> {
         return bizObjectFieldDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
     override fun findById(id: String): BizObjectField? {
         return bizObjectFieldDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<BizObjectField> {
+        return bizObjectFieldDao.selectByIds(ids)
+    }
+
 
     override fun findByBizObjectIdAndApi(
         bizObjectId: String,
@@ -58,7 +67,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
 
     override fun findByBizObjectId(
         bizObjectId: String,
-    ): List<BizObjectField> {
+    ): MutableList<BizObjectField> {
         return bizObjectFieldDao.selectByBizObjectId(bizObjectId,)
     }
 

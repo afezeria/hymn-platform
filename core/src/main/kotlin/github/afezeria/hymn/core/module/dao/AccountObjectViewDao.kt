@@ -5,6 +5,7 @@ import github.afezeria.hymn.core.module.table.CoreAccountObjectViews
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
 import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
 import org.ktorm.dsl.*
 import java.time.LocalDateTime
 import java.util.*
@@ -13,10 +14,12 @@ import java.util.*
 * @author afezeria
 */
 @Component
-class AccountObjectViewDao(
-    private val dbService: DataBaseService,
-    private val sessionService:SessionService,
-) {
+class AccountObjectViewDao {
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
+    @Autowired
+    private lateinit var sessionService:SessionService
 
     val table = CoreAccountObjectViews()
 
@@ -71,10 +74,10 @@ class AccountObjectViewDao(
         } as String
     }
 
-    fun selectAll(): List<AccountObjectView> {
+    fun selectAll(): MutableList<AccountObjectView> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): AccountObjectView? {
@@ -85,24 +88,32 @@ class AccountObjectViewDao(
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<AccountObjectView>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByAccountId(
         accountId: String,
-    ): List<AccountObjectView> {
+    ): MutableList<AccountObjectView> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.accountId eq accountId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByBizObjectId(
         bizObjectId: String,
-    ): List<AccountObjectView> {
+    ): MutableList<AccountObjectView> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.bizObjectId eq bizObjectId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

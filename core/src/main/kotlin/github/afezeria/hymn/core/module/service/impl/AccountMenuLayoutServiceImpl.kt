@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.AccountMenuLayout
 import github.afezeria.hymn.core.module.dao.AccountMenuLayoutDao
 import github.afezeria.hymn.core.module.dto.AccountMenuLayoutDto
 import github.afezeria.hymn.core.module.service.AccountMenuLayoutService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class AccountMenuLayoutServiceImpl : AccountMenuLayoutService {
 
     @Autowired
     private lateinit var accountMenuLayoutDao: AccountMenuLayoutDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class AccountMenuLayoutServiceImpl : AccountMenuLayoutService {
         return id
     }
 
-    override fun findAll(): List<AccountMenuLayout> {
+    override fun findAll(): MutableList<AccountMenuLayout> {
         return accountMenuLayoutDao.selectAll()
     }
 
@@ -49,9 +53,14 @@ class AccountMenuLayoutServiceImpl : AccountMenuLayoutService {
         return accountMenuLayoutDao.selectById(id)
     }
 
+    override fun findByIds(ids: List<String>): MutableList<AccountMenuLayout> {
+        return accountMenuLayoutDao.selectByIds(ids)
+    }
+
+
     override fun findByAccountId(
         accountId: String,
-    ): List<AccountMenuLayout> {
+    ): MutableList<AccountMenuLayout> {
         return accountMenuLayoutDao.selectByAccountId(accountId,)
     }
 

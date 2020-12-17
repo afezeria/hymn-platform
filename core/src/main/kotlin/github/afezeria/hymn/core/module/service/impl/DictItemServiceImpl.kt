@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.DictItem
 import github.afezeria.hymn.core.module.dao.DictItemDao
 import github.afezeria.hymn.core.module.dto.DictItemDto
 import github.afezeria.hymn.core.module.service.DictItemService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class DictItemServiceImpl : DictItemService {
 
     @Autowired
     private lateinit var dictItemDao: DictItemDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class DictItemServiceImpl : DictItemService {
         return id
     }
 
-    override fun findAll(): List<DictItem> {
+    override fun findAll(): MutableList<DictItem> {
         return dictItemDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class DictItemServiceImpl : DictItemService {
     override fun findById(id: String): DictItem? {
         return dictItemDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<DictItem> {
+        return dictItemDao.selectByIds(ids)
+    }
+
 
     override fun findByDictIdAndCode(
         dictId: String,
@@ -58,7 +67,7 @@ class DictItemServiceImpl : DictItemService {
 
     override fun findByDictId(
         dictId: String,
-    ): List<DictItem> {
+    ): MutableList<DictItem> {
         return dictItemDao.selectByDictId(dictId,)
     }
 

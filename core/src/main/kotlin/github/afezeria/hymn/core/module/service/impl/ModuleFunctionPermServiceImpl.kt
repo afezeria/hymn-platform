@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.ModuleFunctionPerm
 import github.afezeria.hymn.core.module.dao.ModuleFunctionPermDao
 import github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
 import github.afezeria.hymn.core.module.service.ModuleFunctionPermService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
 
     @Autowired
     private lateinit var moduleFunctionPermDao: ModuleFunctionPermDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
         return id
     }
 
-    override fun findAll(): List<ModuleFunctionPerm> {
+    override fun findAll(): MutableList<ModuleFunctionPerm> {
         return moduleFunctionPermDao.selectAll()
     }
 
@@ -48,6 +52,11 @@ class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
     override fun findById(id: String): ModuleFunctionPerm? {
         return moduleFunctionPermDao.selectById(id)
     }
+
+    override fun findByIds(ids: List<String>): MutableList<ModuleFunctionPerm> {
+        return moduleFunctionPermDao.selectByIds(ids)
+    }
+
 
     override fun findByRoleIdAndModuleApiAndFunctionApi(
         roleId: String,
@@ -59,7 +68,7 @@ class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
 
     override fun findByRoleId(
         roleId: String,
-    ): List<ModuleFunctionPerm> {
+    ): MutableList<ModuleFunctionPerm> {
         return moduleFunctionPermDao.selectByRoleId(roleId,)
     }
 

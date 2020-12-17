@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.BusinessCodeRef
 import github.afezeria.hymn.core.module.dao.BusinessCodeRefDao
 import github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
 import github.afezeria.hymn.core.module.service.BusinessCodeRefService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class BusinessCodeRefServiceImpl : BusinessCodeRefService {
 
     @Autowired
     private lateinit var businessCodeRefDao: BusinessCodeRefDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class BusinessCodeRefServiceImpl : BusinessCodeRefService {
         return id
     }
 
-    override fun findAll(): List<BusinessCodeRef> {
+    override fun findAll(): MutableList<BusinessCodeRef> {
         return businessCodeRefDao.selectAll()
     }
 
@@ -49,21 +53,26 @@ class BusinessCodeRefServiceImpl : BusinessCodeRefService {
         return businessCodeRefDao.selectById(id)
     }
 
+    override fun findByIds(ids: List<String>): MutableList<BusinessCodeRef> {
+        return businessCodeRefDao.selectByIds(ids)
+    }
+
+
     override fun findByFieldId(
         fieldId: String,
-    ): List<BusinessCodeRef> {
+    ): MutableList<BusinessCodeRef> {
         return businessCodeRefDao.selectByFieldId(fieldId,)
     }
 
     override fun findByOrgId(
         orgId: String,
-    ): List<BusinessCodeRef> {
+    ): MutableList<BusinessCodeRef> {
         return businessCodeRefDao.selectByOrgId(orgId,)
     }
 
     override fun findByRoleId(
         roleId: String,
-    ): List<BusinessCodeRef> {
+    ): MutableList<BusinessCodeRef> {
         return businessCodeRefDao.selectByRoleId(roleId,)
     }
 

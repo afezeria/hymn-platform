@@ -36,20 +36,6 @@ class CustomButtonDto(
         )
     }
 
-    fun fromEntity(entity: CustomButton): CustomButtonDto {
-        return entity.run {
-            CustomButtonDto(
-                remark = remark,
-                bizObjectId = bizObjectId,
-                name = name,
-                api = api,
-                clientType = clientType,
-                action = action,
-                content = content,
-          )
-        }
-    }
-
     fun update(entity: CustomButton) {
         entity.also {
             it.remark = remark

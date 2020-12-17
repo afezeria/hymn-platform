@@ -72,10 +72,10 @@ class BusinessCodeRefDao {
         } as String
     }
 
-    fun selectAll(): List<BusinessCodeRef> {
+    fun selectAll(): MutableList<BusinessCodeRef> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): BusinessCodeRef? {
@@ -86,34 +86,42 @@ class BusinessCodeRefDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<BusinessCodeRef>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByFieldId(
         fieldId: String,
-    ): List<BusinessCodeRef> {
+    ): MutableList<BusinessCodeRef> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.fieldId eq fieldId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByOrgId(
         orgId: String,
-    ): List<BusinessCodeRef> {
+    ): MutableList<BusinessCodeRef> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.orgId eq orgId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByRoleId(
         roleId: String,
-    ): List<BusinessCodeRef> {
+    ): MutableList<BusinessCodeRef> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.roleId eq roleId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

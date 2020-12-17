@@ -5,6 +5,7 @@ import github.afezeria.hymn.core.module.table.CoreAccounts
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
 import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Autowired
 import org.ktorm.dsl.*
 import java.time.LocalDateTime
 import java.util.*
@@ -13,10 +14,12 @@ import java.util.*
 * @author afezeria
 */
 @Component
-class AccountDao(
-    private val dbService: DataBaseService,
-    private val sessionService:SessionService,
-) {
+class AccountDao {
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
+    @Autowired
+    private lateinit var sessionService:SessionService
 
     val table = CoreAccounts()
 
@@ -77,10 +80,10 @@ class AccountDao(
         } as String
     }
 
-    fun selectAll(): List<Account> {
+    fun selectAll(): MutableList<Account> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): Account? {
@@ -91,34 +94,42 @@ class AccountDao(
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<Account>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByLeaderId(
         leaderId: String,
-    ): List<Account> {
+    ): MutableList<Account> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.leaderId eq leaderId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByOrgId(
         orgId: String,
-    ): List<Account> {
+    ): MutableList<Account> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.orgId eq orgId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectByRoleId(
         roleId: String,
-    ): List<Account> {
+    ): MutableList<Account> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.roleId eq roleId
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
 

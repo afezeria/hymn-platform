@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.Config
 import github.afezeria.hymn.core.module.dao.ConfigDao
 import github.afezeria.hymn.core.module.dto.ConfigDto
 import github.afezeria.hymn.core.module.service.ConfigService
+import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -17,6 +18,9 @@ class ConfigServiceImpl : ConfigService {
 
     @Autowired
     private lateinit var configDao: ConfigDao
+
+    @Autowired
+    private lateinit var dbService: DataBaseService
 
 
     override fun removeById(id: String): Int {
@@ -40,7 +44,7 @@ class ConfigServiceImpl : ConfigService {
         return id
     }
 
-    override fun findAll(): List<Config> {
+    override fun findAll(): MutableList<Config> {
         return configDao.selectAll()
     }
 
@@ -49,9 +53,14 @@ class ConfigServiceImpl : ConfigService {
         return configDao.selectById(id)
     }
 
+    override fun findByIds(ids: List<String>): MutableList<Config> {
+        return configDao.selectByIds(ids)
+    }
+
+
     override fun findByKey(
         key: String,
-    ): List<Config> {
+    ): MutableList<Config> {
         return configDao.selectByKey(key,)
     }
 

@@ -68,10 +68,10 @@ class SharedCodeDao {
         } as String
     }
 
-    fun selectAll(): List<SharedCode> {
+    fun selectAll(): MutableList<SharedCode> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): SharedCode? {
@@ -82,6 +82,14 @@ class SharedCodeDao {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<SharedCode>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectByApi(
         api: String,
     ): SharedCode? {
@@ -89,7 +97,7 @@ class SharedCodeDao {
             .select(table.columns)
             .where {
                 table.api eq api
-            }.map { table.createEntity(it) }
+            }.mapTo(ArrayList()) { table.createEntity(it) }
             .firstOrNull()
     }
 

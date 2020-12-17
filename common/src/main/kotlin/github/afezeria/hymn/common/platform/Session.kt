@@ -5,13 +5,13 @@ import java.util.*
 
 
 class Session(
-    var id: UUID,
-    var accountId: UUID,
+    var id: String,
+    var accountId: String,
     var accountName: String,
     var clientType: ClientType,
-    var roleId: UUID,
+    var roleId: String,
     var roleName: String,
-    var orgId: UUID,
+    var orgId: String,
     var orgName: String,
 ) {
 

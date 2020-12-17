@@ -19,9 +19,11 @@ interface BizObjectMappingItemService {
 
     fun create(dto: BizObjectMappingItemDto): String
 
-    fun findAll(): List<BizObjectMappingItem>
+    fun findAll(): MutableList<BizObjectMappingItem>
 
     fun findById(id: String): BizObjectMappingItem?
+
+    fun findByIds(ids: List<String>): MutableList<BizObjectMappingItem>
 
 
 }
