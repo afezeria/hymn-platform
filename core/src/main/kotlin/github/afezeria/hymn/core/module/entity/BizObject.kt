@@ -27,8 +27,8 @@ data class BizObject(
     var remoteUrl: String? = null,
     @ApiModelProperty(value = "远程rest验证信息", required = true)
     var remoteToken: String? = null,
-    @ApiModelProperty(value = "模块id，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]", required = true)
-    var moduleId: String? = null,
+    @ApiModelProperty(value = "模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]", required = true)
+    var moduleApi: String? = null,
     @ApiModelProperty(value = "")
     var remark: String,
     @ApiModelProperty(value = "模块对象及远程对象是否可以新增数据", required = true)

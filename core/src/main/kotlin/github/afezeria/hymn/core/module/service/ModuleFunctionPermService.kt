@@ -23,17 +23,14 @@ interface ModuleFunctionPermService {
 
     fun findById(id: String): ModuleFunctionPerm?
 
-    fun findByRoleIdAndModuleFunctionId(
+    fun findByRoleIdAndModuleApiAndFunctionApi(
         roleId: String,
-        moduleFunctionId: String,
+        moduleApi: String,
+        functionApi: String,
     ): ModuleFunctionPerm?
 
     fun findByRoleId(
         roleId: String,
-    ): List<ModuleFunctionPerm>
-
-    fun findByModuleFunctionId(
-        moduleFunctionId: String,
     ): List<ModuleFunctionPerm>
 
 

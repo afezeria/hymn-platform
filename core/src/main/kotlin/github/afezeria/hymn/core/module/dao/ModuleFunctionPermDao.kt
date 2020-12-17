@@ -32,7 +32,8 @@ class ModuleFunctionPermDao(
         val accountName = session.accountName
         return dbService.db().update(table) {
             set(it.roleId, e.roleId)
-            set(it.moduleFunctionId, e.moduleFunctionId)
+            set(it.moduleApi, e.moduleApi)
+            set(it.functionApi, e.functionApi)
             set(it.perm, e.perm)
             set(it.modifyById, accountId)
             set(it.modifyBy, accountName)
@@ -56,7 +57,8 @@ class ModuleFunctionPermDao(
         e.modifyBy = accountName
         return dbService.db().insertAndGenerateKey(table) {
             set(it.roleId, e.roleId)
-            set(it.moduleFunctionId, e.moduleFunctionId)
+            set(it.moduleApi, e.moduleApi)
+            set(it.functionApi, e.functionApi)
             set(it.perm, e.perm)
         } as String
     }
@@ -75,15 +77,17 @@ class ModuleFunctionPermDao(
             .firstOrNull()
     }
 
-    fun selectByRoleIdAndModuleFunctionId(
+    fun selectByRoleIdAndModuleApiAndFunctionApi(
         roleId: String,
-        moduleFunctionId: String,
+        moduleApi: String,
+        functionApi: String,
     ): ModuleFunctionPerm? {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.roleId eq roleId
-                table.moduleFunctionId eq moduleFunctionId
+                table.moduleApi eq moduleApi
+                table.functionApi eq functionApi
             }.map { table.createEntity(it) }
             .firstOrNull()
     }
@@ -95,16 +99,6 @@ class ModuleFunctionPermDao(
             .select(table.columns)
             .where {
                 table.roleId eq roleId
-            }.map { table.createEntity(it) }
-    }
-
-    fun selectByModuleFunctionId(
-        moduleFunctionId: String,
-    ): List<ModuleFunctionPerm> {
-        return dbService.db().from(table)
-            .select(table.columns)
-            .where {
-                table.moduleFunctionId eq moduleFunctionId
             }.map { table.createEntity(it) }
     }
 

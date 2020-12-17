@@ -11,15 +11,18 @@ import java.util.*
 class ModuleFunctionPermDto(
     @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx")
     var roleId: String,
-    @ApiModelProperty(value = "功能id ;;fk:[core_module_function cascade];idx")
-    var moduleFunctionId: String,
+    @ApiModelProperty(value = "模块api ;;fk:[core_module cascade]")
+    var moduleApi: String,
+    @ApiModelProperty(value = "功能api ;;fk:[core_module_function cascade]")
+    var functionApi: String,
     @ApiModelProperty(value = "是否有访问权限", required = true)
     var perm: Boolean? = null,
 ){
     fun toEntity(): ModuleFunctionPerm {
         return ModuleFunctionPerm(
             roleId = roleId,
-            moduleFunctionId = moduleFunctionId,
+            moduleApi = moduleApi,
+            functionApi = functionApi,
             perm = perm,
         )
     }
@@ -28,7 +31,8 @@ class ModuleFunctionPermDto(
         return entity.run {
             ModuleFunctionPermDto(
                 roleId = roleId,
-                moduleFunctionId = moduleFunctionId,
+                moduleApi = moduleApi,
+                functionApi = functionApi,
                 perm = perm,
           )
         }
@@ -37,7 +41,8 @@ class ModuleFunctionPermDto(
     fun update(entity: ModuleFunctionPerm) {
         entity.also {
             it.roleId = roleId
-            it.moduleFunctionId = moduleFunctionId
+            it.moduleApi = moduleApi
+            it.functionApi = functionApi
             it.perm = perm
         }
     }

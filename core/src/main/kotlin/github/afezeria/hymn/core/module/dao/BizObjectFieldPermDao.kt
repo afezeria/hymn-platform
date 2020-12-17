@@ -79,6 +79,19 @@ class BizObjectFieldPermDao(
             .firstOrNull()
     }
 
+    fun selectByRoleIdAndFieldId(
+        roleId: String,
+        fieldId: String,
+    ): BizObjectFieldPerm? {
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.roleId eq roleId
+                table.fieldId eq fieldId
+            }.map { table.createEntity(it) }
+            .firstOrNull()
+    }
+
     fun selectByRoleId(
         roleId: String,
     ): List<BizObjectFieldPerm> {
@@ -97,19 +110,6 @@ class BizObjectFieldPermDao(
             .where {
                 table.fieldId eq fieldId
             }.map { table.createEntity(it) }
-    }
-
-    fun selectByRoleIdAndFieldId(
-        roleId: String,
-        fieldId: String,
-    ): BizObjectFieldPerm? {
-        return dbService.db().from(table)
-            .select(table.columns)
-            .where {
-                table.roleId eq roleId
-                table.fieldId eq fieldId
-            }.map { table.createEntity(it) }
-            .firstOrNull()
     }
 
 

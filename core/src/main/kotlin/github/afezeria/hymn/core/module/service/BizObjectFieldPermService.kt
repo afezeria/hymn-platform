@@ -23,6 +23,11 @@ interface BizObjectFieldPermService {
 
     fun findById(id: String): BizObjectFieldPerm?
 
+    fun findByRoleIdAndFieldId(
+        roleId: String,
+        fieldId: String,
+    ): BizObjectFieldPerm?
+
     fun findByRoleId(
         roleId: String,
     ): List<BizObjectFieldPerm>
@@ -30,11 +35,6 @@ interface BizObjectFieldPermService {
     fun findByFieldId(
         fieldId: String,
     ): List<BizObjectFieldPerm>
-
-    fun findByRoleIdAndFieldId(
-        roleId: String,
-        fieldId: String,
-    ): BizObjectFieldPerm?
 
 
 }

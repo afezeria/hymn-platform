@@ -45,6 +45,13 @@ class BizObjectFieldPermServiceImpl(
         return bizObjectFieldPermDao.selectById(id)
     }
 
+    override fun findByRoleIdAndFieldId(
+        roleId: String,
+        fieldId: String,
+    ): BizObjectFieldPerm? {
+        return bizObjectFieldPermDao.selectByRoleIdAndFieldId(roleId,fieldId,)
+    }
+
     override fun findByRoleId(
         roleId: String,
     ): List<BizObjectFieldPerm> {
@@ -55,13 +62,6 @@ class BizObjectFieldPermServiceImpl(
         fieldId: String,
     ): List<BizObjectFieldPerm> {
         return bizObjectFieldPermDao.selectByFieldId(fieldId,)
-    }
-
-    override fun findByRoleIdAndFieldId(
-        roleId: String,
-        fieldId: String,
-    ): BizObjectFieldPerm? {
-        return bizObjectFieldPermDao.selectByRoleIdAndFieldId(roleId,fieldId,)
     }
 
 

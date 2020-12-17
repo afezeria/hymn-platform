@@ -45,23 +45,18 @@ class ModuleFunctionPermServiceImpl(
         return moduleFunctionPermDao.selectById(id)
     }
 
-    override fun findByRoleIdAndModuleFunctionId(
+    override fun findByRoleIdAndModuleApiAndFunctionApi(
         roleId: String,
-        moduleFunctionId: String,
+        moduleApi: String,
+        functionApi: String,
     ): ModuleFunctionPerm? {
-        return moduleFunctionPermDao.selectByRoleIdAndModuleFunctionId(roleId,moduleFunctionId,)
+        return moduleFunctionPermDao.selectByRoleIdAndModuleApiAndFunctionApi(roleId,moduleApi,functionApi,)
     }
 
     override fun findByRoleId(
         roleId: String,
     ): List<ModuleFunctionPerm> {
         return moduleFunctionPermDao.selectByRoleId(roleId,)
-    }
-
-    override fun findByModuleFunctionId(
-        moduleFunctionId: String,
-    ): List<ModuleFunctionPerm> {
-        return moduleFunctionPermDao.selectByModuleFunctionId(moduleFunctionId,)
     }
 
 

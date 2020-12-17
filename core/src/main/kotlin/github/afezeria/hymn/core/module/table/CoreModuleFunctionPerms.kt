@@ -11,7 +11,8 @@ class CoreModuleFunctionPerms(alias: String? = null) :
     BaseTable<ModuleFunctionPerm>("core_module_function_perm", schema = "hymn", alias = alias) {
 
     val roleId = varchar("role_id")
-    val moduleFunctionId = varchar("module_function_id")
+    val moduleApi = varchar("module_api")
+    val functionApi = varchar("function_api")
     val perm = boolean("perm")
     val id = varchar("id")
     val createById = varchar("create_by_id")
@@ -23,7 +24,8 @@ class CoreModuleFunctionPerms(alias: String? = null) :
 
     override fun doCreateEntity(row: QueryRowSet, withReferences: Boolean) = ModuleFunctionPerm(
         roleId = requireNotNull(row[this.roleId]) { "field ModuleFunctionPerm.roleId should not be null" },
-        moduleFunctionId = requireNotNull(row[this.moduleFunctionId]) { "field ModuleFunctionPerm.moduleFunctionId should not be null" },
+        moduleApi = requireNotNull(row[this.moduleApi]) { "field ModuleFunctionPerm.moduleApi should not be null" },
+        functionApi = requireNotNull(row[this.functionApi]) { "field ModuleFunctionPerm.functionApi should not be null" },
         perm = row[this.perm],
     ).also {
         it.id = requireNotNull(row[this.id]) { "field ModuleFunctionPerm.id should not be null" }
