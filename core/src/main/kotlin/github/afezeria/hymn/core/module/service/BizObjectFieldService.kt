@@ -1,12 +1,7 @@
 package github.afezeria.hymn.core.module.service
 
-import github.afezeria.hymn.core.module.entity.BizObjectField
 import github.afezeria.hymn.core.module.dto.BizObjectFieldDto
-import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import java.time.LocalDateTime
-import java.util.*
+import github.afezeria.hymn.core.module.entity.BizObjectField
 
 /**
  * @author afezeria
@@ -33,6 +28,14 @@ interface BizObjectFieldService {
     fun findByBizObjectId(
         bizObjectId: String,
     ): MutableList<BizObjectField>
+
+    /**
+     * 创建默认字段，[objId] 表示的对象已存在字段时抛出 [github.afezeria.hymn.common.util.InnerException]
+     * @param objId 新建的对象的id
+     * @param fieldName name字段的名称
+     * @param autoRule 自动编号规则，name字段类型为text时为空
+     */
+    fun createDefaultField(objId: String, fieldName: String, autoRule: String?)
 
 
 }

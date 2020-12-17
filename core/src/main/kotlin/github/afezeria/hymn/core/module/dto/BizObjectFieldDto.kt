@@ -9,8 +9,6 @@ import java.util.*
  * @author afezeria
  */
 class BizObjectFieldDto(
-    @ApiModelProperty(value = "字段对应的实际表中的列名,对象为远程对象时该字段填充空字符串")
-    var sourceColumn: String,
     @ApiModelProperty(value = "所属业务对象id ;;fk:[core_biz_object cascade];idx")
     var bizObjectId: String,
     @ApiModelProperty(value = "名称，用于页面显示")
@@ -59,8 +57,6 @@ class BizObjectFieldDto(
     var remark: String? = null,
     @ApiModelProperty(value = "说明，显示在页面上的帮助信息", required = true)
     var help: String? = null,
-    @ApiModelProperty(value = "辅助列，新建与字典相关的字段时存储字典项数据", required = true)
-    var tmp: String? = null,
     @ApiModelProperty(value = "多选字段中间表视图名，中间表名为视图名加上前缀 core_ ，表结构为（s_id,t_id)，s_id 为当前数据id， t_id为关联数据id", required = true)
     var joinViewName: String? = null,
     @ApiModelProperty(value = "标准类型 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型 ;; optional_value:[create_by_id(创建人id), create_by(创建人), modify_by_id(修改人id), modify_by(修改人), create_date(创建时间), modify_date(修改时间), org_id(组织id), lock_state(锁定状态), name(名称), type_id(业务类型), owner_id(所有人)]", required = true)
@@ -70,7 +66,6 @@ class BizObjectFieldDto(
 ){
     fun toEntity(): BizObjectField {
         return BizObjectField(
-            sourceColumn = sourceColumn,
             bizObjectId = bizObjectId,
             name = name,
             api = api,
@@ -95,7 +90,6 @@ class BizObjectFieldDto(
             genRule = genRule,
             remark = remark,
             help = help,
-            tmp = tmp,
             joinViewName = joinViewName,
             standardType = standardType,
             isPredefined = isPredefined,
@@ -104,7 +98,6 @@ class BizObjectFieldDto(
 
     fun update(entity: BizObjectField) {
         entity.also {
-            it.sourceColumn = sourceColumn
             it.bizObjectId = bizObjectId
             it.name = name
             it.api = api
@@ -129,7 +122,6 @@ class BizObjectFieldDto(
             it.genRule = genRule
             it.remark = remark
             it.help = help
-            it.tmp = tmp
             it.joinViewName = joinViewName
             it.standardType = standardType
             it.isPredefined = isPredefined

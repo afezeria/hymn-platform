@@ -1,25 +1,26 @@
 package github.afezeria.hymn.core.module.dao
 
-import github.afezeria.hymn.core.module.entity.BizObjectTypeLayout
-import github.afezeria.hymn.core.module.table.CoreBizObjectTypeLayouts
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
+import github.afezeria.hymn.core.module.entity.BizObjectTypeLayout
+import github.afezeria.hymn.core.module.table.CoreBizObjectTypeLayouts
 import org.ktorm.dsl.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
 
 /**
-* @author afezeria
-*/
+ * @author afezeria
+ */
 @Component
 class BizObjectTypeLayoutDao {
 
     @Autowired
     private lateinit var dbService: DataBaseService
+
     @Autowired
-    private lateinit var sessionService:SessionService
+    private lateinit var sessionService: SessionService
 
     val table = CoreBizObjectTypeLayouts()
 
@@ -63,6 +64,12 @@ class BizObjectTypeLayoutDao {
             set(it.bizObjectId, e.bizObjectId)
             set(it.typeId, e.typeId)
             set(it.layoutId, e.layoutId)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 
@@ -80,7 +87,7 @@ class BizObjectTypeLayoutDao {
             .firstOrNull()
     }
 
-    fun selectByIds(ids: List<String>): MutableList<BizObjectTypeLayout>{
+    fun selectByIds(ids: List<String>): MutableList<BizObjectTypeLayout> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
@@ -121,6 +128,36 @@ class BizObjectTypeLayoutDao {
             .where {
                 table.bizObjectId eq bizObjectId
             }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
+    fun batchInsert(es: List<BizObjectTypeLayout>): MutableList<Int> {
+        val now = LocalDateTime.now()
+        val session = sessionService.getSession()
+        val accountId = session.accountId
+        val accountName = session.accountName
+        return dbService.db().batchInsert(table) {
+            es.forEach { e ->
+                item {
+                    e.createDate = now
+                    e.modifyDate = now
+                    e.createById = accountId
+                    e.modifyById = accountId
+                    e.createBy = accountName
+                    e.modifyBy = accountName
+
+                    set(it.roleId, e.roleId)
+                    set(it.bizObjectId, e.bizObjectId)
+                    set(it.typeId, e.typeId)
+                    set(it.layoutId, e.layoutId)
+                    set(it.createDate, e.createBy)
+                    set(it.modifyDate, e.modifyDate)
+                    set(it.createById, e.createById)
+                    set(it.modifyById, e.modifyById)
+                    set(it.createBy, e.createBy)
+                    set(it.modifyBy, e.modifyBy)
+                }
+            }
+        }.toMutableList()
     }
 
 

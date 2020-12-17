@@ -1,25 +1,25 @@
 package github.afezeria.hymn.core.module.dao
 
-import github.afezeria.hymn.core.module.entity.Role
-import github.afezeria.hymn.core.module.table.CoreRoles
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
+import github.afezeria.hymn.core.module.entity.Role
+import github.afezeria.hymn.core.module.table.CoreRoles
 import org.ktorm.dsl.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
-import java.util.*
 
 /**
-* @author afezeria
-*/
+ * @author afezeria
+ */
 @Component
 class RoleDao {
 
     @Autowired
     private lateinit var dbService: DataBaseService
+
     @Autowired
-    private lateinit var sessionService:SessionService
+    private lateinit var sessionService: SessionService
 
     val table = CoreRoles()
 
@@ -59,6 +59,12 @@ class RoleDao {
         return dbService.db().insertAndGenerateKey(table) {
             set(it.name, e.name)
             set(it.remark, e.remark)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 
@@ -76,12 +82,19 @@ class RoleDao {
             .firstOrNull()
     }
 
-    fun selectByIds(ids: List<String>): MutableList<Role>{
+    fun selectByIds(ids: List<String>): MutableList<Role> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
                 table.id inList ids
             }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
+    fun selectIds(ids: List<String> = emptyList()): MutableList<String> {
+        val select = dbService.db().from(table)
+            .select(table.id)
+        val query = if (ids.isEmpty()) select else select.where { table.id inList ids }
+        return query.mapTo(ArrayList()) { it[table.id]!! }
     }
 
 

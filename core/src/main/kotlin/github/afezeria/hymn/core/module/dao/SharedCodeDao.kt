@@ -65,6 +65,12 @@ class SharedCodeDao {
             set(it.code, e.code)
             set(it.lang, e.lang)
             set(it.optionText, e.optionText)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 

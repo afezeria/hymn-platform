@@ -65,6 +65,12 @@ class DictDao {
             set(it.name, e.name)
             set(it.api, e.api)
             set(it.remark, e.remark)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 

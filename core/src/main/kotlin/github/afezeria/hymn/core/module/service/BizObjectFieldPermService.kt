@@ -38,5 +38,7 @@ interface BizObjectFieldPermService {
         fieldId: String,
     ): MutableList<BizObjectFieldPerm>
 
+    fun batchCreate(permList: MutableList<BizObjectFieldPermDto>): MutableList<Int>
+
 
 }

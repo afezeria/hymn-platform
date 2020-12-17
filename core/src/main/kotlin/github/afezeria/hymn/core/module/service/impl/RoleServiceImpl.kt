@@ -57,6 +57,9 @@ class RoleServiceImpl : RoleService {
         return roleDao.selectByIds(ids)
     }
 
+    override fun findIdList(ids: List<String>): MutableList<String> {
+        return roleDao.selectIds(ids)
+    }
 
 
 }

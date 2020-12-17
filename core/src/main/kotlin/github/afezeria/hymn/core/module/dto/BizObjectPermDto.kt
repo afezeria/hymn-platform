@@ -11,7 +11,7 @@ import java.util.*
 class BizObjectPermDto(
     @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx")
     var roleId: String,
-    @ApiModelProperty(value = "对象id ;;fk:[core_biz_object cascade];idx")
+    @ApiModelProperty(value = "对象id，新建对象时该字段用空字符串占位 ;;fk:[core_biz_object cascade];idx")
     var bizObjectId: String,
     @ApiModelProperty(value = "创建")
     var ins: Boolean,

@@ -1,12 +1,7 @@
 package github.afezeria.hymn.core.module.service
 
-import github.afezeria.hymn.core.module.entity.BizObjectTypeLayout
 import github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
-import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import java.time.LocalDateTime
-import java.util.*
+import github.afezeria.hymn.core.module.entity.BizObjectTypeLayout
 
 /**
  * @author afezeria
@@ -38,6 +33,8 @@ interface BizObjectTypeLayoutService {
     fun findByBizObjectId(
         bizObjectId: String,
     ): MutableList<BizObjectTypeLayout>
+
+    fun batchCreate(dtoList: List<BizObjectTypeLayoutDto>): MutableList<Int>
 
 
 }

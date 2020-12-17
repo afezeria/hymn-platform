@@ -69,6 +69,12 @@ class CustomButtonDao {
             set(it.clientType, e.clientType)
             set(it.action, e.action)
             set(it.content, e.content)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 

@@ -1,25 +1,26 @@
 package github.afezeria.hymn.core.module.dao
 
-import github.afezeria.hymn.core.module.entity.BizObjectPerm
-import github.afezeria.hymn.core.module.table.CoreBizObjectPerms
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
+import github.afezeria.hymn.core.module.entity.BizObjectPerm
+import github.afezeria.hymn.core.module.table.CoreBizObjectPerms
 import org.ktorm.dsl.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
 
 /**
-* @author afezeria
-*/
+ * @author afezeria
+ */
 @Component
 class BizObjectPermDao {
 
     @Autowired
     private lateinit var dbService: DataBaseService
+
     @Autowired
-    private lateinit var sessionService:SessionService
+    private lateinit var sessionService: SessionService
 
     val table = CoreBizObjectPerms()
 
@@ -77,7 +78,50 @@ class BizObjectPermDao {
             set(it.queryWithDeptTree, e.queryWithDeptTree)
             set(it.queryAll, e.queryAll)
             set(it.editAll, e.editAll)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
+    }
+
+    fun batchInsert(es: List<BizObjectPerm>): MutableList<Int> {
+        val now = LocalDateTime.now()
+        val session = sessionService.getSession()
+        val accountId = session.accountId
+        val accountName = session.accountName
+        return dbService.db().batchInsert(table) {
+            es.forEach { e ->
+                item {
+                    e.createDate = now
+                    e.modifyDate = now
+                    e.createById = accountId
+                    e.modifyById = accountId
+                    e.createBy = accountName
+                    e.modifyBy = accountName
+
+                    set(it.roleId, e.roleId)
+                    set(it.bizObjectId, e.bizObjectId)
+                    set(it.ins, e.ins)
+                    set(it.upd, e.upd)
+                    set(it.del, e.del)
+                    set(it.que, e.que)
+                    set(it.queryWithAccountTree, e.queryWithAccountTree)
+                    set(it.queryWithDept, e.queryWithDept)
+                    set(it.queryWithDeptTree, e.queryWithDeptTree)
+                    set(it.queryAll, e.queryAll)
+                    set(it.editAll, e.editAll)
+                    set(it.createDate, e.createBy)
+                    set(it.modifyDate, e.modifyDate)
+                    set(it.createById, e.createById)
+                    set(it.modifyById, e.modifyById)
+                    set(it.createBy, e.createBy)
+                    set(it.modifyBy, e.modifyBy)
+                }
+            }
+        }.toMutableList()
     }
 
     fun selectAll(): MutableList<BizObjectPerm> {
@@ -94,7 +138,7 @@ class BizObjectPermDao {
             .firstOrNull()
     }
 
-    fun selectByIds(ids: List<String>): MutableList<BizObjectPerm>{
+    fun selectByIds(ids: List<String>): MutableList<BizObjectPerm> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {

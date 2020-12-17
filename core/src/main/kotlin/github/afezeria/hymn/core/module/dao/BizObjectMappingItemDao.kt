@@ -77,6 +77,12 @@ class BizObjectMappingItemDao {
             set(it.refField3BizObjectId, e.refField3BizObjectId)
             set(it.refField4Id, e.refField4Id)
             set(it.refField4BizObjectId, e.refField4BizObjectId)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 

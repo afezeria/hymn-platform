@@ -59,6 +59,12 @@ class ConfigDao {
         return dbService.db().insertAndGenerateKey(table) {
             set(it.key, e.key)
             set(it.value, e.value)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 

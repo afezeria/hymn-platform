@@ -1,14 +1,13 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.BizObjectTypeLayout
+import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.util.*
 import github.afezeria.hymn.core.module.dao.BizObjectTypeLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
+import github.afezeria.hymn.core.module.entity.BizObjectTypeLayout
 import github.afezeria.hymn.core.module.service.BizObjectTypeLayoutService
-import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -63,19 +62,23 @@ class BizObjectTypeLayoutServiceImpl : BizObjectTypeLayoutService {
         typeId: String,
         layoutId: String,
     ): BizObjectTypeLayout? {
-        return bizObjectTypeLayoutDao.selectByRoleIdAndTypeIdAndLayoutId(roleId,typeId,layoutId,)
+        return bizObjectTypeLayoutDao.selectByRoleIdAndTypeIdAndLayoutId(roleId, typeId, layoutId)
     }
 
     override fun findByRoleId(
         roleId: String,
     ): MutableList<BizObjectTypeLayout> {
-        return bizObjectTypeLayoutDao.selectByRoleId(roleId,)
+        return bizObjectTypeLayoutDao.selectByRoleId(roleId)
     }
 
     override fun findByBizObjectId(
         bizObjectId: String,
     ): MutableList<BizObjectTypeLayout> {
-        return bizObjectTypeLayoutDao.selectByBizObjectId(bizObjectId,)
+        return bizObjectTypeLayoutDao.selectByBizObjectId(bizObjectId)
+    }
+
+    override fun batchCreate(dtoList: List<BizObjectTypeLayoutDto>): MutableList<Int> {
+        return bizObjectTypeLayoutDao.batchInsert(dtoList.map { it.toEntity() })
     }
 
 

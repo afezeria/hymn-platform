@@ -1,25 +1,26 @@
 package github.afezeria.hymn.core.module.dao
 
-import github.afezeria.hymn.core.module.entity.BizObjectFieldPerm
-import github.afezeria.hymn.core.module.table.CoreBizObjectFieldPerms
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
+import github.afezeria.hymn.core.module.entity.BizObjectFieldPerm
+import github.afezeria.hymn.core.module.table.CoreBizObjectFieldPerms
 import org.ktorm.dsl.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
 
 /**
-* @author afezeria
-*/
+ * @author afezeria
+ */
 @Component
 class BizObjectFieldPermDao {
 
     @Autowired
     private lateinit var dbService: DataBaseService
+
     @Autowired
-    private lateinit var sessionService:SessionService
+    private lateinit var sessionService: SessionService
 
     val table = CoreBizObjectFieldPerms()
 
@@ -65,6 +66,12 @@ class BizObjectFieldPermDao {
             set(it.fieldId, e.fieldId)
             set(it.pRead, e.pRead)
             set(it.pEdit, e.pEdit)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 
@@ -82,7 +89,7 @@ class BizObjectFieldPermDao {
             .firstOrNull()
     }
 
-    fun selectByIds(ids: List<String>): MutableList<BizObjectFieldPerm>{
+    fun selectByIds(ids: List<String>): MutableList<BizObjectFieldPerm> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
@@ -121,6 +128,37 @@ class BizObjectFieldPermDao {
             .where {
                 table.fieldId eq fieldId
             }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
+    fun batchInsert(es: List<BizObjectFieldPerm>): MutableList<Int> {
+        val now = LocalDateTime.now()
+        val session = sessionService.getSession()
+        val accountId = session.accountId
+        val accountName = session.accountName
+        return dbService.db().batchInsert(table) {
+            es.forEach { e ->
+                item {
+                    e.createDate = now
+                    e.modifyDate = now
+                    e.createById = accountId
+                    e.modifyById = accountId
+                    e.createBy = accountName
+                    e.modifyBy = accountName
+
+                    set(it.roleId, e.roleId)
+                    set(it.bizObjectId, e.bizObjectId)
+                    set(it.fieldId, e.fieldId)
+                    set(it.pRead, e.pRead)
+                    set(it.pEdit, e.pEdit)
+                    set(it.createDate, e.createBy)
+                    set(it.modifyDate, e.modifyDate)
+                    set(it.createById, e.createById)
+                    set(it.modifyById, e.modifyById)
+                    set(it.createBy, e.createBy)
+                    set(it.modifyBy, e.modifyBy)
+                }
+            }
+        }.toMutableList()
     }
 
 

@@ -63,6 +63,12 @@ class BizObjectTypeOptionsDao {
             set(it.typeId, e.typeId)
             set(it.fieldId, e.fieldId)
             set(it.dictItemId, e.dictItemId)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 

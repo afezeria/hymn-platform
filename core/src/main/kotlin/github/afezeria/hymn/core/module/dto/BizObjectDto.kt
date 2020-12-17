@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.BizObject
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -23,7 +21,10 @@ class BizObjectDto(
     var remoteUrl: String? = null,
     @ApiModelProperty(value = "远程rest验证信息", required = true)
     var remoteToken: String? = null,
-    @ApiModelProperty(value = "模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]", required = true)
+    @ApiModelProperty(
+        value = "模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]",
+        required = true
+    )
     var moduleApi: String? = null,
     @ApiModelProperty(value = "")
     var remark: String,
@@ -33,7 +34,13 @@ class BizObjectDto(
     var canUpdate: Boolean? = null,
     @ApiModelProperty(value = "", required = true)
     var canDelete: Boolean? = null,
-){
+    @ApiModelProperty(value = "name字段名称", required = true)
+    var fieldName: String,
+    @ApiModelProperty(value = "对象权限")
+    var permList: List<BizObjectPermDto> = emptyList(),
+    @ApiModelProperty(value = "自动编号规则，name字段为文本类型时为空", required = true)
+    var autoRule: String? = null
+) {
     fun toEntity(): BizObject {
         return BizObject(
             name = name,

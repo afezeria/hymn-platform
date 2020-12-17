@@ -77,5 +77,9 @@ class BizObjectFieldPermServiceImpl : BizObjectFieldPermService {
         return bizObjectFieldPermDao.selectByFieldId(fieldId,)
     }
 
+    override fun batchCreate(permList: MutableList<BizObjectFieldPermDto>): MutableList<Int> {
+        return bizObjectFieldPermDao.batchInsert(permList.map { it.toEntity() })
+    }
+
 
 }

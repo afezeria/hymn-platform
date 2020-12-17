@@ -73,6 +73,12 @@ class BizObjectLayoutDao {
             set(it.mobileReadLayoutJson, e.mobileReadLayoutJson)
             set(it.mobileEditLayoutJson, e.mobileEditLayoutJson)
             set(it.previewLayoutJson, e.previewLayoutJson)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 

@@ -44,6 +44,10 @@ class BizObjectPermServiceImpl : BizObjectPermService {
         return id
     }
 
+    override fun batchCreate(dto: List<BizObjectPermDto>): MutableList<Int> {
+        return bizObjectPermDao.batchInsert(dto.map { it.toEntity() })
+    }
+
     override fun findAll(): MutableList<BizObjectPerm> {
         return bizObjectPermDao.selectAll()
     }
