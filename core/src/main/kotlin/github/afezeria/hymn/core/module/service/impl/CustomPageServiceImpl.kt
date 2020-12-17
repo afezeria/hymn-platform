@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.CustomPageDto
 import github.afezeria.hymn.core.module.service.CustomPageService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class CustomPageServiceImpl(
-    private val customPageDao: CustomPageDao,
-) : CustomPageService {
+@Service
+class CustomPageServiceImpl : CustomPageService {
+
+    @Autowired
+    lateinit var customPageDao: CustomPageDao
+
+
     override fun removeById(id: String): Int {
         customPageDao.selectById(id)
             ?: throw DataNotFoundException("CustomPage".msgById(id))

@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.DictDto
 import github.afezeria.hymn.core.module.service.DictService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class DictServiceImpl(
-    private val dictDao: DictDao,
-) : DictService {
+@Service
+class DictServiceImpl : DictService {
+
+    @Autowired
+    lateinit var dictDao: DictDao
+
+
     override fun removeById(id: String): Int {
         dictDao.selectById(id)
             ?: throw DataNotFoundException("Dict".msgById(id))

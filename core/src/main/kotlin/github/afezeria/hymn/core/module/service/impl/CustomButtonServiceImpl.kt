@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.CustomButtonDto
 import github.afezeria.hymn.core.module.service.CustomButtonService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class CustomButtonServiceImpl(
-    private val customButtonDao: CustomButtonDao,
-) : CustomButtonService {
+@Service
+class CustomButtonServiceImpl : CustomButtonService {
+
+    @Autowired
+    lateinit var customButtonDao: CustomButtonDao
+
+
     override fun removeById(id: String): Int {
         customButtonDao.selectById(id)
             ?: throw DataNotFoundException("CustomButton".msgById(id))

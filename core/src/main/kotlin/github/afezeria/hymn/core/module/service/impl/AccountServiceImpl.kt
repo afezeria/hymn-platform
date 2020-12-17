@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.AccountDto
 import github.afezeria.hymn.core.module.service.AccountService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class AccountServiceImpl(
-    private val accountDao: AccountDao,
-) : AccountService {
+@Service
+class AccountServiceImpl : AccountService {
+
+    @Autowired
+    lateinit var accountDao: AccountDao
+
+
     override fun removeById(id: String): Int {
         accountDao.selectById(id)
             ?: throw DataNotFoundException("Account".msgById(id))

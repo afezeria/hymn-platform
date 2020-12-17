@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.BizObjectPermDto
 import github.afezeria.hymn.core.module.service.BizObjectPermService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class BizObjectPermServiceImpl(
-    private val bizObjectPermDao: BizObjectPermDao,
-) : BizObjectPermService {
+@Service
+class BizObjectPermServiceImpl : BizObjectPermService {
+
+    @Autowired
+    lateinit var bizObjectPermDao: BizObjectPermDao
+
+
     override fun removeById(id: String): Int {
         bizObjectPermDao.selectById(id)
             ?: throw DataNotFoundException("BizObjectPerm".msgById(id))

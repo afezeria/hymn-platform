@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.ConfigDto
 import github.afezeria.hymn.core.module.service.ConfigService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class ConfigServiceImpl(
-    private val configDao: ConfigDao,
-) : ConfigService {
+@Service
+class ConfigServiceImpl : ConfigService {
+
+    @Autowired
+    lateinit var configDao: ConfigDao
+
+
     override fun removeById(id: String): Int {
         configDao.selectById(id)
             ?: throw DataNotFoundException("Config".msgById(id))

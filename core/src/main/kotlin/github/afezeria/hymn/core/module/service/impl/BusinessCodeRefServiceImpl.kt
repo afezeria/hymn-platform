@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
 import github.afezeria.hymn.core.module.service.BusinessCodeRefService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class BusinessCodeRefServiceImpl(
-    private val businessCodeRefDao: BusinessCodeRefDao,
-) : BusinessCodeRefService {
+@Service
+class BusinessCodeRefServiceImpl : BusinessCodeRefService {
+
+    @Autowired
+    lateinit var businessCodeRefDao: BusinessCodeRefDao
+
+
     override fun removeById(id: String): Int {
         businessCodeRefDao.selectById(id)
             ?: throw DataNotFoundException("BusinessCodeRef".msgById(id))

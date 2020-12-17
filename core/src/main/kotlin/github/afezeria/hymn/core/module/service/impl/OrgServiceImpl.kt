@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.OrgDto
 import github.afezeria.hymn.core.module.service.OrgService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class OrgServiceImpl(
-    private val orgDao: OrgDao,
-) : OrgService {
+@Service
+class OrgServiceImpl : OrgService {
+
+    @Autowired
+    lateinit var orgDao: OrgDao
+
+
     override fun removeById(id: String): Int {
         orgDao.selectById(id)
             ?: throw DataNotFoundException("Org".msgById(id))

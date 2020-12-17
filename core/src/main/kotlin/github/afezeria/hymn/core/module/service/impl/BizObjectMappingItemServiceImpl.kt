@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.BizObjectMappingItemDto
 import github.afezeria.hymn.core.module.service.BizObjectMappingItemService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class BizObjectMappingItemServiceImpl(
-    private val bizObjectMappingItemDao: BizObjectMappingItemDao,
-) : BizObjectMappingItemService {
+@Service
+class BizObjectMappingItemServiceImpl : BizObjectMappingItemService {
+
+    @Autowired
+    lateinit var bizObjectMappingItemDao: BizObjectMappingItemDao
+
+
     override fun removeById(id: String): Int {
         bizObjectMappingItemDao.selectById(id)
             ?: throw DataNotFoundException("BizObjectMappingItem".msgById(id))

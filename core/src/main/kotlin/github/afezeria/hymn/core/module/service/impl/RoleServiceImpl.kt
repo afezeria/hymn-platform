@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.RoleDto
 import github.afezeria.hymn.core.module.service.RoleService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class RoleServiceImpl(
-    private val roleDao: RoleDao,
-) : RoleService {
+@Service
+class RoleServiceImpl : RoleService {
+
+    @Autowired
+    lateinit var roleDao: RoleDao
+
+
     override fun removeById(id: String): Int {
         roleDao.selectById(id)
             ?: throw DataNotFoundException("Role".msgById(id))

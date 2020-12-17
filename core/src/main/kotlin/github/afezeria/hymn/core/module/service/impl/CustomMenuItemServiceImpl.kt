@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.CustomMenuItemDto
 import github.afezeria.hymn.core.module.service.CustomMenuItemService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class CustomMenuItemServiceImpl(
-    private val customMenuItemDao: CustomMenuItemDao,
-) : CustomMenuItemService {
+@Service
+class CustomMenuItemServiceImpl : CustomMenuItemService {
+
+    @Autowired
+    lateinit var customMenuItemDao: CustomMenuItemDao
+
+
     override fun removeById(id: String): Int {
         customMenuItemDao.selectById(id)
             ?: throw DataNotFoundException("CustomMenuItem".msgById(id))

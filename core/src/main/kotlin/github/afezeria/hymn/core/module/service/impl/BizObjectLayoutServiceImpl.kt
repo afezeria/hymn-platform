@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
 import github.afezeria.hymn.core.module.service.BizObjectLayoutService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class BizObjectLayoutServiceImpl(
-    private val bizObjectLayoutDao: BizObjectLayoutDao,
-) : BizObjectLayoutService {
+@Service
+class BizObjectLayoutServiceImpl : BizObjectLayoutService {
+
+    @Autowired
+    lateinit var bizObjectLayoutDao: BizObjectLayoutDao
+
+
     override fun removeById(id: String): Int {
         bizObjectLayoutDao.selectById(id)
             ?: throw DataNotFoundException("BizObjectLayout".msgById(id))

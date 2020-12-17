@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.CustomInterfaceDto
 import github.afezeria.hymn.core.module.service.CustomInterfaceService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class CustomInterfaceServiceImpl(
-    private val customInterfaceDao: CustomInterfaceDao,
-) : CustomInterfaceService {
+@Service
+class CustomInterfaceServiceImpl : CustomInterfaceService {
+
+    @Autowired
+    lateinit var customInterfaceDao: CustomInterfaceDao
+
+
     override fun removeById(id: String): Int {
         customInterfaceDao.selectById(id)
             ?: throw DataNotFoundException("CustomInterface".msgById(id))

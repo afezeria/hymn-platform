@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.AccountMenuLayoutDto
 import github.afezeria.hymn.core.module.service.AccountMenuLayoutService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class AccountMenuLayoutServiceImpl(
-    private val accountMenuLayoutDao: AccountMenuLayoutDao,
-) : AccountMenuLayoutService {
+@Service
+class AccountMenuLayoutServiceImpl : AccountMenuLayoutService {
+
+    @Autowired
+    lateinit var accountMenuLayoutDao: AccountMenuLayoutDao
+
+
     override fun removeById(id: String): Int {
         accountMenuLayoutDao.selectById(id)
             ?: throw DataNotFoundException("AccountMenuLayout".msgById(id))

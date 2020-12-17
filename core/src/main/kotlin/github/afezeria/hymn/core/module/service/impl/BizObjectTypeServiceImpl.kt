@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.BizObjectTypeDto
 import github.afezeria.hymn.core.module.service.BizObjectTypeService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class BizObjectTypeServiceImpl(
-    private val bizObjectTypeDao: BizObjectTypeDao,
-) : BizObjectTypeService {
+@Service
+class BizObjectTypeServiceImpl : BizObjectTypeService {
+
+    @Autowired
+    lateinit var bizObjectTypeDao: BizObjectTypeDao
+
+
     override fun removeById(id: String): Int {
         bizObjectTypeDao.selectById(id)
             ?: throw DataNotFoundException("BizObjectType".msgById(id))

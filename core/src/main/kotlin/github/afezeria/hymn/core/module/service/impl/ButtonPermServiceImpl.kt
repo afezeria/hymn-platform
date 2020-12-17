@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.ButtonPermDto
 import github.afezeria.hymn.core.module.service.ButtonPermService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class ButtonPermServiceImpl(
-    private val buttonPermDao: ButtonPermDao,
-) : ButtonPermService {
+@Service
+class ButtonPermServiceImpl : ButtonPermService {
+
+    @Autowired
+    lateinit var buttonPermDao: ButtonPermDao
+
+
     override fun removeById(id: String): Int {
         buttonPermDao.selectById(id)
             ?: throw DataNotFoundException("ButtonPerm".msgById(id))

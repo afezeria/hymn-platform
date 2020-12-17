@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.CustomComponentDto
 import github.afezeria.hymn.core.module.service.CustomComponentService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class CustomComponentServiceImpl(
-    private val customComponentDao: CustomComponentDao,
-) : CustomComponentService {
+@Service
+class CustomComponentServiceImpl : CustomComponentService {
+
+    @Autowired
+    lateinit var customComponentDao: CustomComponentDao
+
+
     override fun removeById(id: String): Int {
         customComponentDao.selectById(id)
             ?: throw DataNotFoundException("CustomComponent".msgById(id))

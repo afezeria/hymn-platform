@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
 import github.afezeria.hymn.core.module.service.ModuleFunctionPermService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class ModuleFunctionPermServiceImpl(
-    private val moduleFunctionPermDao: ModuleFunctionPermDao,
-) : ModuleFunctionPermService {
+@Service
+class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
+
+    @Autowired
+    lateinit var moduleFunctionPermDao: ModuleFunctionPermDao
+
+
     override fun removeById(id: String): Int {
         moduleFunctionPermDao.selectById(id)
             ?: throw DataNotFoundException("ModuleFunctionPerm".msgById(id))

@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.CronJobDto
 import github.afezeria.hymn.core.module.service.CronJobService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class CronJobServiceImpl(
-    private val cronJobDao: CronJobDao,
-) : CronJobService {
+@Service
+class CronJobServiceImpl : CronJobService {
+
+    @Autowired
+    lateinit var cronJobDao: CronJobDao
+
+
     override fun removeById(id: String): Int {
         cronJobDao.selectById(id)
             ?: throw DataNotFoundException("CronJob".msgById(id))

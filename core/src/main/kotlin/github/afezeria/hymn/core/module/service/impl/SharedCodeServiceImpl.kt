@@ -6,15 +6,19 @@ import github.afezeria.hymn.core.module.dto.SharedCodeDto
 import github.afezeria.hymn.core.module.service.SharedCodeService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
 /**
  * @author afezeria
  */
-@Component
-class SharedCodeServiceImpl(
-    private val sharedCodeDao: SharedCodeDao,
-) : SharedCodeService {
+@Service
+class SharedCodeServiceImpl : SharedCodeService {
+
+    @Autowired
+    lateinit var sharedCodeDao: SharedCodeDao
+
+
     override fun removeById(id: String): Int {
         sharedCodeDao.selectById(id)
             ?: throw DataNotFoundException("SharedCode".msgById(id))
