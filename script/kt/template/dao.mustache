@@ -64,10 +64,10 @@ class {{name}} {
         } as String
     }
 
-    fun selectAll(): List<{{entity_class}}> {
+    fun selectAll(): MutableList<{{entity_class}}> {
         return dbService.db().from(table)
             .select(table.columns)
-            .map { table.createEntity(it) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectById(id: String): {{entity_class}}? {
@@ -78,17 +78,25 @@ class {{name}} {
             .firstOrNull()
     }
 
+    fun selectByIds(ids: List<String>): MutableList<{{entity_class}}>{
+        return dbService.db().from(table)
+            .select(table.columns)
+            .where {
+                table.id inList ids
+            }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
 {{#table.index_arr}}
     fun selectBy{{fun_name}}(
 {{#column_arr}}        {{field_name}}: {{java_type}},
 {{/column_arr}}
-    ): {{#is_uk}}{{entity_class}}?{{/is_uk}}{{^is_uk}}List<{{entity_class}}>{{/is_uk}} {
+    ): {{#is_uk}}{{entity_class}}?{{/is_uk}}{{^is_uk}}MutableList<{{entity_class}}>{{/is_uk}} {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
 {{#column_arr}}                table.{{field_name}} eq {{field_name}}
 {{/column_arr}}
-            }.map { table.createEntity(it) }{{#is_uk}}
+            }.mapTo(ArrayList()) { table.createEntity(it) }{{#is_uk}}
             .firstOrNull(){{/is_uk}}
     }
 

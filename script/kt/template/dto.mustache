@@ -22,16 +22,6 @@ class {{name}}(
         )
     }
 
-    fun fromEntity(entity: {{entity_class}}): {{dto_class}} {
-        return entity.run {
-            {{dto_class}}(
-            {{#table.fields}}
-                {{field_name}} = {{field_name}},
-            {{/table.fields}}
-          )
-        }
-    }
-
     fun update(entity: {{entity_class}}) {
         entity.also {
       {{#table.fields}}

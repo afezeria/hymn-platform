@@ -19,15 +19,17 @@ interface {{name}} {
 
     fun create(dto: {{dto_class}}): String
 
-    fun findAll(): List<{{entity_class}}>
+    fun findAll(): MutableList<{{entity_class}}>
 
     fun findById(id: String): {{entity_class}}?
+
+    fun findByIds(ids: List<String>): MutableList<{{entity_class}}>
 
 {{#table.index_arr}}
     fun findBy{{fun_name}}(
 {{#column_arr}}        {{field_name}}: {{java_type}},
 {{/column_arr}}
-    ): {{#is_uk}}{{entity_class}}?{{/is_uk}}{{^is_uk}}List<{{entity_class}}>{{/is_uk}}
+    ): {{#is_uk}}{{entity_class}}?{{/is_uk}}{{^is_uk}}MutableList<{{entity_class}}>{{/is_uk}}
 
 {{/table.index_arr}}
 
