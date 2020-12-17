@@ -11,12 +11,12 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 
 /**
  * @author afezeria
@@ -41,7 +41,11 @@ class ClassicLocalDateTimeSerializer : StdSerializer<LocalDateTime>(LocalDateTim
     }
 
     @Throws(IOException::class, JsonProcessingException::class)
-    override fun serialize(value: LocalDateTime?, gen: JsonGenerator?, provider: SerializerProvider?) {
+    override fun serialize(
+        value: LocalDateTime?,
+        gen: JsonGenerator?,
+        provider: SerializerProvider?
+    ) {
         gen?.writeString(value?.format(yyyyMMddHHmmss))
     }
 }
@@ -61,9 +65,14 @@ val mapper = ObjectMapper()
     .registerModule(KotlinModule())
     .registerModule(ClassicLocalDateTimeModule)
 
+val formatMapper = mapper.writerWithDefaultPrettyPrinter()
 
 fun Any.toJson(): String {
     return mapper.writeValueAsString(this)
+}
+
+fun Any.toFormatJson(): String {
+    return formatMapper.writeValueAsString(this)
 }
 
 

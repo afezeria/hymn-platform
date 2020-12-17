@@ -1,4 +1,3 @@
 rootProject.name = 'hymn-platform'
 include 'common'
 include 'core'
-include 'compiler-js'
