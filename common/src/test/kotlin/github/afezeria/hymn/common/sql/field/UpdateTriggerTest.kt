@@ -180,7 +180,7 @@ class UpdateTriggerTest : BaseDbTest() {
                     """,
                     objId, *COMMON_INFO
                 )[0]["id"]
-                val relField = it.execute(
+                it.execute(
                     """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
@@ -189,7 +189,7 @@ class UpdateTriggerTest : BaseDbTest() {
                     objId, masterId, *COMMON_INFO
                 )[0]
 
-                val summary = it.execute(
+                it.execute(
                     """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 

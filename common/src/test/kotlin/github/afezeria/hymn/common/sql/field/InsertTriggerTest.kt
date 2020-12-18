@@ -128,7 +128,7 @@ class InsertTriggerTest : BaseDbTest() {
         val master = createBObject()
         try {
             adminConn.use {
-                val field1 = it.execute(
+                it.execute(
                     """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
