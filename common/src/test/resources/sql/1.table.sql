@@ -10,7 +10,7 @@ drop table if exists hymn.core_account cascade;
 create table hymn.core_account
 (
     id           text primary key   default replace(public.uuid_generate_v4()::text, '-', ''),
-    lock_time    timestamp not null default make_timestamp(1970, 1, 1, 0, 0, 0),
+    lock_time    timestamptz not null default make_timestamp(1970, 1, 1, 0, 0, 0),
     name         text      not null,
     username     text      not null,
     password     text      not null,
@@ -25,8 +25,8 @@ create table hymn.core_account
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null,
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null,
     text001      text,
     text002      text,
     text003      text,
@@ -112,8 +112,8 @@ create table hymn.core_org
     create_by          text      not null,
     modify_by_id       text      not null,
     modify_by          text      not null,
-    create_date        timestamp not null,
-    modify_date        timestamp not null,
+    create_date        timestamptz not null,
+    modify_date        timestamptz not null,
     text001            text,
     text002            text,
     text003            text,
@@ -152,8 +152,8 @@ create table hymn.core_role
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_role is '角色';
 comment on column hymn.core_role.name is '角色名称';
@@ -168,8 +168,8 @@ create table hymn.core_config
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_config is '系统配置表';
 comment on column hymn.core_config.key is '键 ;; idx';
@@ -185,8 +185,8 @@ create table hymn.core_account_menu_layout
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_account_menu_layout is '用户侧边栏菜单布局';
 comment on column hymn.core_account_menu_layout.account_id is '用户id ;; fk:[core_account cascade];idx';
@@ -211,8 +211,8 @@ create table hymn.core_account_object_view
     create_by     text      not null,
     modify_by_id  text      not null,
     modify_by     text      not null,
-    create_date   timestamp not null,
-    modify_date   timestamp not null
+    create_date   timestamptz not null,
+    modify_date   timestamptz not null
 );
 comment on table hymn.core_account_object_view is '用户业务对象列表视图';
 comment on column hymn.core_account_object_view.copy_id is '源数据id，修改视图后该字段置空;idx';
@@ -240,8 +240,8 @@ create table hymn.core_custom_button
     create_by     text      not null,
     modify_by_id  text      not null,
     modify_by     text      not null,
-    create_date   timestamp not null,
-    modify_date   timestamp not null
+    create_date   timestamptz not null,
+    modify_date   timestamptz not null
 );
 comment on table hymn.core_custom_button is '自定义按钮';
 comment on column hymn.core_custom_button.biz_object_id is '业务对象id，不为空时表示该按钮只能在该对象相关页面中使用;idx';
@@ -263,8 +263,8 @@ create table hymn.core_custom_component
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_custom_component is '自定义组件';
 comment on column hymn.core_custom_component.api is 'api名称，唯一标识 ;; uk';
@@ -288,8 +288,8 @@ create table hymn.core_custom_interface
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_custom_interface is '自定义接口';
 comment on column hymn.core_custom_interface.api is '接口api名称，唯一标识 ;; uk';
@@ -315,8 +315,8 @@ create table hymn.core_custom_menu_item
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_custom_menu_item is '菜单项';
 comment on column hymn.core_custom_menu_item.name is '菜单项名称';
@@ -342,8 +342,8 @@ create table hymn.core_custom_page
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_custom_page is '自定义页面';
 comment on column hymn.core_custom_page.api is 'api名称，唯一标识 ;;uk';
@@ -366,8 +366,8 @@ create table hymn.core_dict
     create_by      text      not null,
     modify_by_id   text      not null,
     modify_by      text      not null,
-    create_date    timestamp not null,
-    modify_date    timestamp not null
+    create_date    timestamptz not null,
+    modify_date    timestamptz not null
 );
 comment on table hymn.core_dict is '数据字典';
 comment on column hymn.core_dict.field_id is '表明当前字典是指定字段的字典，不能通用，通用字典可以被任意多选字段使用;idx';
@@ -389,8 +389,8 @@ create table hymn.core_dict_item
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_dict_item is '字典项 ;;uk:[[dict_id code]]';
 comment on column hymn.core_dict_item.dict_id is '所属字典id ;;fk:[core_dict cascade];idx';
@@ -411,7 +411,7 @@ create table hymn.core_biz_object
     type         text      not null default 'custom',
     remote_url   text,
     remote_token text,
-    module_id   text,
+    module_api   text,
     remark       text      not null default '',
     can_insert   bool,
     can_update   bool,
@@ -420,15 +420,15 @@ create table hymn.core_biz_object
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_biz_object is '业务对象';
 comment on column hymn.core_biz_object.name is '业务对象名称，用于页面显示';
 comment on column hymn.core_biz_object.api is '业务对象api，唯一标识 ;;uk';
 comment on column hymn.core_biz_object.active is '是否启用，停用后无法进行增删改查等操作';
 comment on column hymn.core_biz_object.source_table is '实际表名，例： core_data_table_500';
-comment on column hymn.core_biz_object.module_id is '模块id，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]';
+comment on column hymn.core_biz_object.module_api is '模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]';
 comment on column hymn.core_biz_object.can_insert is '模块对象及远程对象是否可以新增数据';
 comment on column hymn.core_biz_object.can_update is '模块对象是及远程对象否可以更新数据';
 comment on column hymn.core_biz_object.can_update is '模块对象是及远程对象否可以删除数据';
@@ -475,8 +475,8 @@ create table hymn.core_biz_object_field
     create_by         text      not null,
     modify_by_id      text      not null,
     modify_by         text      not null,
-    create_date       timestamp not null,
-    modify_date       timestamp not null
+    create_date       timestamptz not null,
+    modify_date       timestamptz not null
 );
 comment on table hymn.core_biz_object_field is '业务对象字段
 
@@ -606,8 +606,8 @@ create table hymn.core_biz_object_layout
     create_by               text      not null,
     modify_by_id            text      not null,
     modify_by               text      not null,
-    create_date             timestamp not null,
-    modify_date             timestamp not null
+    create_date             timestamptz not null,
+    modify_date             timestamptz not null
 );
 comment on table hymn.core_biz_object_layout is '业务对象详情页面布局 ;;uk:[[biz_object_id name]]';
 comment on column hymn.core_biz_object_layout.name is '布局名称';
@@ -633,8 +633,8 @@ create table hymn.core_biz_object_type
     create_by     text                           not null,
     modify_by_id  text                           not null,
     modify_by     text                           not null,
-    create_date   timestamp                      not null,
-    modify_date   timestamp                      not null
+    create_date   timestamptz                      not null,
+    modify_date   timestamptz                      not null
 );
 comment on table hymn.core_biz_object_type is '业务对象记录类型 ;; uk:[[biz_object_id name]]';
 comment on column hymn.core_biz_object_type.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade]';
@@ -653,8 +653,8 @@ create table hymn.core_biz_object_type_options
     create_by     text      not null,
     modify_by_id  text      not null,
     modify_by     text      not null,
-    create_date   timestamp not null,
-    modify_date   timestamp not null
+    create_date   timestamptz not null,
+    modify_date   timestamptz not null
 );
 comment on table hymn.core_biz_object_type_options is '业务对象记录类型可选项限制
 限制指定记录类型时指定字段 （多选/单选）的可用选项';
@@ -676,8 +676,8 @@ create table hymn.core_biz_object_type_layout
     create_by     text      not null,
     modify_by_id  text      not null,
     modify_by     text      not null,
-    create_date   timestamp not null,
-    modify_date   timestamp not null
+    create_date   timestamptz not null,
+    modify_date   timestamptz not null
 );
 comment on table hymn.core_biz_object_type_layout is '业务对象记录类型、角色和页面布局关联表 ;;uk:[[role_id type_id layout_id]]';
 comment on column hymn.core_biz_object_type_layout.role_id is '角色id ;;fk:[core_role cascade];idx';
@@ -705,8 +705,8 @@ create table hymn.core_biz_object_trigger
     create_by     text      not null,
     modify_by_id  text      not null,
     modify_by     text      not null,
-    create_date   timestamp not null,
-    modify_date   timestamp not null
+    create_date   timestamptz not null,
+    modify_date   timestamptz not null
 );
 comment on table hymn.core_biz_object_trigger is '触发器 ;;uk:[[biz_object_id api]]';
 comment on column hymn.core_biz_object_trigger.active is '是否启用';
@@ -733,8 +733,8 @@ create table hymn.core_biz_object_mapping
     create_by            text      not null,
     modify_by_id         text      not null,
     modify_by            text      not null,
-    create_date          timestamp not null,
-    modify_date          timestamp not null
+    create_date          timestamptz not null,
+    modify_date          timestamptz not null
 );
 comment on table hymn.core_biz_object_mapping is '对象映射关系 描述以一个对象的数据为基础新建其他对象的数据时字段间的映射关系，比如根据订单创建发货单时将订单中的字段映射到发货单中 ;;uk[[source_biz_object_id source_type_id target_biz_object_id target_type_id]]';
 comment on column hymn.core_biz_object_mapping.source_biz_object_id is '源对象id ;;fk:[core_biz_object cascade];idx';
@@ -762,8 +762,8 @@ create table hymn.core_biz_object_mapping_item
     create_by                text      not null,
     modify_by_id             text      not null,
     modify_by                text      not null,
-    create_date              timestamp not null,
-    modify_date              timestamp not null
+    create_date              timestamptz not null,
+    modify_date              timestamptz not null
 );
 comment on table hymn.core_biz_object_mapping_item is '对象映射关系表明细 描述映射规则';
 comment on column hymn.core_biz_object_mapping_item.source_field_id is '源字段id，如果直接从源字段映射到目标字段则 ref_field 和 ref_field_biz_object_id 都为空 ;;fk:[core_biz_object_field cascade]';
@@ -780,18 +780,11 @@ comment on column hymn.core_biz_object_mapping_item.ref_field4_biz_object_id is 
 drop table if exists hymn.core_module;
 create table hymn.core_module
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    api          text,
+    api          text primary key ,
     name         text      not null,
     remark       text      not null,
     version      text      not null,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
-
+    create_date  timestamptz default now()
 );
 comment on table hymn.core_module is '模块列表';
 comment on column hymn.core_module.api is '模块api ;;uk';
@@ -801,21 +794,14 @@ comment on column hymn.core_module.name is '模块名称';
 drop table if exists hymn.core_module_function;
 create table hymn.core_module_function
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    module_id    text      not null,
-    api          text      not null,
-    name         text      not null,
-    remark       text,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
-
+    api        text primary key,
+    module_api text not null,
+    name       text not null,
+    remark     text,
+    create_date timestamptz default now()
 );
-comment on table hymn.core_module_function is '模块功能表，模块中的功能需要根据角色进行权限控制时在该表中添加相关数据 ;;uk:[[module_id api]]';
-comment on column hymn.core_module_function.module_id is '关联模块 ;;fk:[core_module cascade];idx';
+comment on table hymn.core_module_function is '模块功能表，模块中的功能需要根据角色进行权限控制时在该表中添加相关数据 ;;uk:[[module_api api]]';
+comment on column hymn.core_module_function.module_api is '关联模块 ;;fk:[core_module cascade];idx';
 comment on column hymn.core_module_function.api is '功能api名称，格式为模块名+功能名，例：wechat.approval ;;uk';
 comment on column hymn.core_module_function.name is '功能名称';
 
@@ -824,20 +810,22 @@ comment on column hymn.core_module_function.name is '功能名称';
 drop table if exists hymn.core_module_function_perm;
 create table hymn.core_module_function_perm
 (
-    id                 text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id            text      not null,
-    module_function_id text      not null,
-    perm               bool,
-    create_by_id       text      not null,
-    create_by          text      not null,
-    modify_by_id       text      not null,
-    modify_by          text      not null,
-    create_date        timestamp not null,
-    modify_date        timestamp not null
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    role_id      text      not null,
+    module_api   text      not null,
+    function_api text      not null,
+    perm         bool,
+    create_by_id text      not null,
+    create_by    text      not null,
+    modify_by_id text      not null,
+    modify_by    text      not null,
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
-comment on table hymn.core_module_function_perm is '模块功能权限表 ;;uk:[[role_id module_function_id]]';
+comment on table hymn.core_module_function_perm is '模块功能权限表 ;;uk:[[role_id module_api function_api]]';
 comment on column hymn.core_module_function_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
-comment on column hymn.core_module_function_perm.module_function_id is '功能id ;;fk:[core_module_function cascade];idx';
+comment on column hymn.core_module_function_perm.module_api is '模块api ;;fk:[core_module_function cascade];idx';
+comment on column hymn.core_module_function_perm.function_api is '功能api ;;fk:[core_module_function cascade];idx';
 comment on column hymn.core_module_function_perm.perm is '是否有访问权限';
 
 drop table if exists hymn.core_button_perm cascade;
@@ -851,8 +839,8 @@ create table hymn.core_button_perm
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_button_perm is '按钮权限 ;;uk:[[role_id button_id]]';
 comment on column hymn.core_button_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
@@ -872,8 +860,8 @@ create table hymn.core_menu_item_perm
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_menu_item_perm is '菜单项权限';
 comment on column hymn.core_menu_item_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
@@ -900,8 +888,8 @@ create table hymn.core_biz_object_perm
     create_by               text      not null,
     modify_by_id            text      not null,
     modify_by               text      not null,
-    create_date             timestamp not null,
-    modify_date             timestamp not null
+    create_date             timestamptz not null,
+    modify_date             timestamptz not null
 );
 comment on table hymn.core_biz_object_perm is '对象权限 ;;uk:[[role_id biz_object_id]]';
 comment on column hymn.core_biz_object_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
@@ -931,8 +919,8 @@ create table hymn.core_biz_object_field_perm
     create_by     text      not null,
     modify_by_id  text      not null,
     modify_by     text      not null,
-    create_date   timestamp not null,
-    modify_date   timestamp not null
+    create_date   timestamptz not null,
+    modify_date   timestamptz not null
 );
 comment on table hymn.core_biz_object_field_perm is '字段权限 ;;uk:[[role_id field_id]]';
 comment on column hymn.core_biz_object_field_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
@@ -955,8 +943,8 @@ create table hymn.core_biz_object_type_perm
     create_by     text      not null,
     modify_by_id  text      not null,
     modify_by     text      not null,
-    create_date   timestamp not null,
-    modify_date   timestamp not null
+    create_date   timestamptz not null,
+    modify_date   timestamptz not null
 );
 comment on table hymn.core_biz_object_type_perm is '记录类型权限 ;;uk:[[role_id type_id]]';
 comment on column hymn.core_biz_object_type_perm.role_id is '角色id ;;fk:[core_role cascade]';
@@ -1024,8 +1012,8 @@ create table hymn.core_shared_code
     create_by    text      not null,
     modify_by_id text      not null,
     modify_by    text      not null,
-    create_date  timestamp not null,
-    modify_date  timestamp not null
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_shared_code is '共享代码 可以在接口、触发器中调用或使用在定时任务中';
 comment on column hymn.core_shared_code.api is 'api名称,也是代码中的函数名称 ;;uk';
@@ -1050,8 +1038,8 @@ create table hymn.core_business_code_ref
     create_by      text      not null,
     modify_by_id   text      not null,
     modify_by      text      not null,
-    create_date    timestamp not null,
-    modify_date    timestamp not null
+    create_date    timestamptz not null,
+    modify_date    timestamptz not null
 );
 comment on table hymn.core_business_code_ref is '业务代码引用关系表';
 comment on column hymn.core_business_code_ref.trigger_id is '触发器id ;;fk:[core_biz_object_trigger cascade]';
@@ -1069,14 +1057,14 @@ create table hymn.core_cron_job
     active          bool      not null,
     shared_code_id  text      not null,
     cron            text      not null,
-    start_date_time timestamp not null,
-    end_date_time   timestamp not null,
+    start_date_time timestamptz not null,
+    end_date_time   timestamptz not null,
     create_by_id    text      not null,
     create_by       text      not null,
     modify_by_id    text      not null,
     modify_by       text      not null,
-    create_date     timestamp not null,
-    modify_date     timestamp not null
+    create_date     timestamptz not null,
+    modify_date     timestamptz not null
 );
 comment on table hymn.core_cron_job is '定时任务';
 comment on column hymn.core_cron_job.start_date_time is '任务开始时间';

@@ -4,7 +4,7 @@ create table hymn.core_account_history
     operation text,
     stamp timestamp,
     id text,
-    lock_time timestamp,
+    lock_time timestamptz,
     name text,
     username text,
     password text,
@@ -19,8 +19,8 @@ create table hymn.core_account_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp,
+    create_date timestamptz,
+    modify_date timestamptz,
     text001 text,
     text002 text,
     text003 text,
@@ -107,8 +107,8 @@ create table hymn.core_account_menu_layout_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_account_menu_layout_history_ins() returns trigger
     language plpgsql as
@@ -170,8 +170,8 @@ create table hymn.core_account_object_view_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_account_object_view_history_ins() returns trigger
     language plpgsql as
@@ -228,7 +228,7 @@ create table hymn.core_biz_object_history
     type text,
     remote_url text,
     remote_token text,
-    module_id text,
+    module_api text,
     remark text,
     can_insert bool,
     can_update bool,
@@ -237,8 +237,8 @@ create table hymn.core_biz_object_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_history_ins() returns trigger
     language plpgsql as
@@ -321,8 +321,8 @@ create table hymn.core_biz_object_field_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_field_history_ins() returns trigger
     language plpgsql as
@@ -381,8 +381,8 @@ create table hymn.core_biz_object_field_perm_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_field_perm_history_ins() returns trigger
     language plpgsql as
@@ -445,8 +445,8 @@ create table hymn.core_biz_object_layout_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_layout_history_ins() returns trigger
     language plpgsql as
@@ -504,8 +504,8 @@ create table hymn.core_biz_object_mapping_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_mapping_history_ins() returns trigger
     language plpgsql as
@@ -570,8 +570,8 @@ create table hymn.core_biz_object_mapping_item_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_mapping_item_history_ins() returns trigger
     language plpgsql as
@@ -636,8 +636,8 @@ create table hymn.core_biz_object_perm_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_perm_history_ins() returns trigger
     language plpgsql as
@@ -701,8 +701,8 @@ create table hymn.core_biz_object_trigger_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_trigger_history_ins() returns trigger
     language plpgsql as
@@ -760,8 +760,8 @@ create table hymn.core_biz_object_type_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_type_history_ins() returns trigger
     language plpgsql as
@@ -819,8 +819,8 @@ create table hymn.core_biz_object_type_layout_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_type_layout_history_ins() returns trigger
     language plpgsql as
@@ -878,8 +878,8 @@ create table hymn.core_biz_object_type_options_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_type_options_history_ins() returns trigger
     language plpgsql as
@@ -937,8 +937,8 @@ create table hymn.core_biz_object_type_perm_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_biz_object_type_perm_history_ins() returns trigger
     language plpgsql as
@@ -999,8 +999,8 @@ create table hymn.core_business_code_ref_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_business_code_ref_history_ins() returns trigger
     language plpgsql as
@@ -1057,8 +1057,8 @@ create table hymn.core_button_perm_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_button_perm_history_ins() returns trigger
     language plpgsql as
@@ -1165,8 +1165,8 @@ create table hymn.core_config_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_config_history_ins() returns trigger
     language plpgsql as
@@ -1219,14 +1219,14 @@ create table hymn.core_cron_job_history
     active bool,
     shared_code_id text,
     cron text,
-    start_date_time timestamp,
-    end_date_time timestamp,
+    start_date_time timestamptz,
+    end_date_time timestamptz,
     create_by_id text,
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_cron_job_history_ins() returns trigger
     language plpgsql as
@@ -1287,8 +1287,8 @@ create table hymn.core_custom_button_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_custom_button_history_ins() returns trigger
     language plpgsql as
@@ -1345,8 +1345,8 @@ create table hymn.core_custom_component_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_custom_component_history_ins() returns trigger
     language plpgsql as
@@ -1407,8 +1407,8 @@ create table hymn.core_custom_interface_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_custom_interface_history_ins() returns trigger
     language plpgsql as
@@ -1468,8 +1468,8 @@ create table hymn.core_custom_menu_item_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_custom_menu_item_history_ins() returns trigger
     language plpgsql as
@@ -1528,8 +1528,8 @@ create table hymn.core_custom_page_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_custom_page_history_ins() returns trigger
     language plpgsql as
@@ -1588,8 +1588,8 @@ create table hymn.core_dict_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_dict_history_ins() returns trigger
     language plpgsql as
@@ -1647,8 +1647,8 @@ create table hymn.core_dict_item_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_dict_item_history_ins() returns trigger
     language plpgsql as
@@ -1705,8 +1705,8 @@ create table hymn.core_menu_item_perm_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_menu_item_perm_history_ins() returns trigger
     language plpgsql as
@@ -1755,17 +1755,11 @@ create table hymn.core_module_history
 (
     operation text,
     stamp timestamp,
-    id text,
     api text,
     name text,
     remark text,
     version text,
-    create_by_id text,
-    create_by text,
-    modify_by_id text,
-    modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz
 );
 create or replace function hymn.core_module_history_ins() returns trigger
     language plpgsql as
@@ -1814,17 +1808,11 @@ create table hymn.core_module_function_history
 (
     operation text,
     stamp timestamp,
-    id text,
-    module_id text,
     api text,
+    module_api text,
     name text,
     remark text,
-    create_by_id text,
-    create_by text,
-    modify_by_id text,
-    modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz
 );
 create or replace function hymn.core_module_function_history_ins() returns trigger
     language plpgsql as
@@ -1875,14 +1863,15 @@ create table hymn.core_module_function_perm_history
     stamp timestamp,
     id text,
     role_id text,
-    module_function_id text,
+    module_api text,
+    function_api text,
     perm bool,
     create_by_id text,
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_module_function_perm_history_ins() returns trigger
     language plpgsql as
@@ -1940,8 +1929,8 @@ create table hymn.core_org_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp,
+    create_date timestamptz,
+    modify_date timestamptz,
     text001 text,
     text002 text,
     text003 text,
@@ -2007,8 +1996,8 @@ create table hymn.core_role_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_role_history_ins() returns trigger
     language plpgsql as
@@ -2067,8 +2056,8 @@ create table hymn.core_shared_code_history
     create_by text,
     modify_by_id text,
     modify_by text,
-    create_date timestamp,
-    modify_date timestamp
+    create_date timestamptz,
+    modify_date timestamptz
 );
 create or replace function hymn.core_shared_code_history_ins() returns trigger
     language plpgsql as

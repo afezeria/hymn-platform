@@ -20,9 +20,9 @@ alter table hymn.core_button_perm
 alter table hymn.core_dict_item
     add unique (dict_id,code);
 alter table hymn.core_module_function
-    add unique (module_id,api);
+    add unique (module_api,api);
 alter table hymn.core_module_function_perm
-    add unique (role_id,module_function_id);
+    add unique (role_id,module_api,function_api);
 
 
 -- column constraint
@@ -55,7 +55,7 @@ alter table hymn.core_biz_object
 alter table hymn.core_biz_object
     add check ( type in ('custom', 'module', 'remote') );
 alter table hymn.core_biz_object
-    add foreign key (module_id) references hymn.core_module on delete cascade;
+    add foreign key (module_api) references hymn.core_module on delete cascade;
 alter table hymn.core_biz_object_field
     add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
 create index core_biz_object_field_biz_object_id_idx
@@ -221,19 +221,23 @@ create index core_menu_item_perm_menu_item_id_idx
 alter table hymn.core_module
     add constraint core_module_api_uk unique (api);
 alter table hymn.core_module_function
-    add foreign key (module_id) references hymn.core_module on delete cascade;
-create index core_module_function_module_id_idx
-    on hymn.core_module_function (module_id);
-alter table hymn.core_module_function
     add constraint core_module_function_api_uk unique (api);
+alter table hymn.core_module_function
+    add foreign key (module_api) references hymn.core_module on delete cascade;
+create index core_module_function_module_api_idx
+    on hymn.core_module_function (module_api);
 alter table hymn.core_module_function_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
 create index core_module_function_perm_role_id_idx
     on hymn.core_module_function_perm (role_id);
 alter table hymn.core_module_function_perm
-    add foreign key (module_function_id) references hymn.core_module_function on delete cascade;
-create index core_module_function_perm_module_function_id_idx
-    on hymn.core_module_function_perm (module_function_id);
+    add foreign key (module_api) references hymn.core_module_function on delete cascade;
+create index core_module_function_perm_module_api_idx
+    on hymn.core_module_function_perm (module_api);
+alter table hymn.core_module_function_perm
+    add foreign key (function_api) references hymn.core_module_function on delete cascade;
+create index core_module_function_perm_function_api_idx
+    on hymn.core_module_function_perm (function_api);
 create index core_org_parent_id_idx
     on hymn.core_org (parent_id);
 alter table hymn.core_shared_code

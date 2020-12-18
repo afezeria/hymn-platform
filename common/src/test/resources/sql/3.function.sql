@@ -1139,8 +1139,8 @@ begin
     perform hymn.check_field_properties(record_new);
     record_new.active = true;
     select * into obj from hymn.core_biz_object where id = record_new.biz_object_id;
-    --     只有模块对象和自定义对象能创建自定义字段
     if obj.type = 'remote' then
+        --     远程对象不需要数据表中的列
         record_new.source_column = '';
     end if;
 --     预定义字段不需要申请列

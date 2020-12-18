@@ -5,6 +5,7 @@ import github.afezeria.hymn.common.sql.BaseDbTest
 import github.afezeria.hymn.common.sql.COMMON_INFO
 import github.afezeria.hymn.common.sql.clearBObject
 import github.afezeria.hymn.common.util.execute
+import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -16,7 +17,7 @@ import org.postgresql.util.PSQLException
 /**
  * @author afezeria
  */
-class InsertTriggerTest :BaseDbTest(){
+class InsertTriggerTest : BaseDbTest() {
     @AfterEach
     fun deleteObject() {
         clearBObject()
@@ -117,8 +118,11 @@ class InsertTriggerTest :BaseDbTest(){
                     *COMMON_INFO
                 )
             }
-            e.sqlState shouldBe "P0001"
-            e.message shouldContain "创建模块对象必须指定数据表"
+            assertSoftly {
+
+                e.sqlState shouldBe "P0001"
+                e.message shouldContain "创建模块对象必须指定数据表"
+            }
         }
     }
 
@@ -136,8 +140,10 @@ class InsertTriggerTest :BaseDbTest(){
                     *COMMON_INFO
                 )
             }
-            e.sqlState shouldBe "P0001"
-            e.message shouldContain "表 .*? 不存在".toRegex()
+            assertSoftly {
+                e.sqlState shouldBe "P0001"
+                e.message shouldContain "表 .*? 不存在".toRegex()
+            }
         }
     }
 
@@ -210,7 +216,7 @@ class InsertTriggerTest :BaseDbTest(){
     }
 
     @Test
-    fun `create view if type in (custom,module)`(){
+    fun `create view if type in (custom,module)`() {
         adminConn.use {
             var data = it.execute(
                 """

@@ -17,29 +17,27 @@ values ('301c35c23be449abb5bdf6c80b6878af', '管理员权限', '', '911c60ea5d62
         'system admin', '911c60ea5d62420794d86eeecfddce7c', 'system admin', '2020-01-01 00:00:00',
         '2020-01-01 00:00:00');
 
-insert into hymn.core_module (id, api, name, remark, version, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date)
-values ('d11d3883819a4588979252b5f9c67d40','core','基础','','0.0.1','911c60ea5d62420794d86eeecfddce7c',
-        'system admin', '911c60ea5d62420794d86eeecfddce7c', 'system admin', '2020-01-01 00:00:00',
-        '2020-01-01 00:00:00');
+insert into hymn.core_module (api, name, remark, version)
+values ('core','基础','','0.0.1');
 
-insert into hymn.core_biz_object (id, name, api, source_table, active, type, module_id, can_insert,
+insert into hymn.core_biz_object (id, name, api, source_table, active, type, module_api, can_insert,
                                 can_update, remark,
                                 create_by_id, create_by, modify_by_id, modify_by, create_date,
                                 modify_date)
-values ('bcf5f00c2e6c494ea2318912a639031a', '用户', 'account', 'core_account', true, 'module', 'd11d3883819a4588979252b5f9c67d40',
+values ('bcf5f00c2e6c494ea2318912a639031a', '用户', 'account', 'core_account', true, 'module', 'core',
         false, true, '用户表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
-       ('53e9c36723dc4e3db1faf396fdb3f1d2', '角色', 'role', 'core_role', true, 'module', 'd11d3883819a4588979252b5f9c67d40',
+       ('53e9c36723dc4e3db1faf396fdb3f1d2', '角色', 'role', 'core_role', true, 'module', 'core',
         false, false, '角色表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
-       ('c9c6cc327c614c96b8d6f5af1fee6442', '组织', 'org', 'core_org', true, 'module', 'd11d3883819a4588979252b5f9c67d40',
+       ('c9c6cc327c614c96b8d6f5af1fee6442', '组织', 'org', 'core_org', true, 'module', 'core',
         false, false, '组织表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
        ('09da56a7de514895aea5c596820d0ced', '业务类型', 'object_type', 'core_biz_object_type',
-        true, 'module', 'd11d3883819a4588979252b5f9c67d40', false, false, '自定义对象业务类型表',
+        true, 'module', 'core', false, false, '自定义对象业务类型表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00')
 ;
