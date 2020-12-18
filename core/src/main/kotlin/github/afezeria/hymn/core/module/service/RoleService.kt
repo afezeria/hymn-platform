@@ -20,6 +20,12 @@ interface RoleService {
 
     fun findByIds(ids: List<String>): MutableList<Role>
 
-    fun findIdList(ids:List<String> = emptyList()): MutableList<String>
+    /**
+     * 查询id
+     * 查询[ids]中实际存在的id，[ids]为null时返回所有id，为空列表时返回空列表
+     * @param ids id列表
+     * @return id列表
+     */
+    fun findIdList(ids: List<String>? = null): MutableList<String>
 
 }

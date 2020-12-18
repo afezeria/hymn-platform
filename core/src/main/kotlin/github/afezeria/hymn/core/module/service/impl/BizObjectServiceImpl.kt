@@ -5,10 +5,7 @@ import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.InnerException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectDao
-import github.afezeria.hymn.core.module.dto.BizObjectDto
-import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
-import github.afezeria.hymn.core.module.dto.BizObjectTypeDto
-import github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
+import github.afezeria.hymn.core.module.dto.*
 import github.afezeria.hymn.core.module.entity.BizObject
 import github.afezeria.hymn.core.module.service.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,8 +43,10 @@ class BizObjectServiceImpl : BizObjectService {
 
 
     override fun removeById(id: String): Int {
-        bizObjectDao.selectById(id)
+        val bizObject = bizObjectDao.selectById(id)
             ?: throw DataNotFoundException("BizObject".msgById(id))
+        if (bizObject.type == "remote")
+            throw InnerException("不能删除模块对象")
         val i = bizObjectDao.deleteById(id)
         return i
     }
@@ -75,17 +74,23 @@ class BizObjectServiceImpl : BizObjectService {
                 layoutService.create(BizObjectLayoutDto(id, "默认布局", "", "", "", "", "", ""))
 
 //            创建对象权限数据
-            val objPermDtoList = dto.permList
-            val roleIdList = objPermDtoList.map { it.roleId }
-            val roleIdSet = roleService.findIdList(roleIdList).toSet()
-            objectPermService.batchCreate(
-                objPermDtoList.filter { roleIdSet.contains(it.roleId) }
-                    .onEach { it.roleId = id }
-            )
+            val allRoleId = roleService.findIdList()
+            val roleIdSet = allRoleId.toMutableSet()
+            val objPermDtoList = mutableListOf<BizObjectPermDto>()
+            dto.permList.forEach {
+                if (roleIdSet.remove(it.roleId)) {
+                    it.bizObjectId = id
+                    objPermDtoList.add(it)
+                }
+            }
+            roleIdSet.forEach {
+                objPermDtoList.add(BizObjectPermDto(it, id))
+            }
+            objectPermService.batchCreate(objPermDtoList)
 
 
 //            创建角色、记录类型对应到布局的映射数据
-            typeLayoutService.batchCreate(roleIdSet.map {
+            typeLayoutService.batchCreate(allRoleId.map {
                 BizObjectTypeLayoutDto(it, id, typeId, layoutId)
             })
 
@@ -114,5 +119,29 @@ class BizObjectServiceImpl : BizObjectService {
         return bizObjectDao.selectByApi(api)
     }
 
+    override fun inactivateObjectById(id: String): Int {
+        val bizObject = bizObjectDao.selectById(id)
+            ?: throw DataNotFoundException("BizObject".msgById(id))
+        if (bizObject.type == "module") {
+            throw InnerException("不能修改模块对象启用状态")
+        }
+        if (bizObject.active) {
+            bizObject.active = false
+            return bizObjectDao.update(bizObject)
+        }
+        return 0
+    }
 
+    override fun activateObjectById(id: String): Int {
+        val bizObject = bizObjectDao.selectById(id)
+            ?: throw DataNotFoundException("BizObject".msgById(id))
+        if (bizObject.type == "module") {
+            throw InnerException("不能修改模块对象启用状态")
+        }
+        if (bizObject.active) {
+            bizObject.active = true
+            return bizObjectDao.update(bizObject)
+        }
+        return 0
+    }
 }

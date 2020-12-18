@@ -90,10 +90,10 @@ class RoleDao {
             }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
-    fun selectIds(ids: List<String> = emptyList()): MutableList<String> {
+    fun selectIds(ids: List<String>?): MutableList<String> {
         val select = dbService.db().from(table)
             .select(table.id)
-        val query = if (ids.isEmpty()) select else select.where { table.id inList ids }
+        val query = if (ids == null) select else select.where { table.id inList ids }
         return query.mapTo(ArrayList()) { it[table.id]!! }
     }
 

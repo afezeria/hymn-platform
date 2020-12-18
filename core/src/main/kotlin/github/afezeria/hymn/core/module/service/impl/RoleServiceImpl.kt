@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.Role
-import github.afezeria.hymn.core.module.dao.RoleDao
-import github.afezeria.hymn.core.module.dto.RoleDto
-import github.afezeria.hymn.core.module.service.RoleService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.RoleDao
+import github.afezeria.hymn.core.module.dto.RoleDto
+import github.afezeria.hymn.core.module.entity.Role
+import github.afezeria.hymn.core.module.service.RoleService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -57,7 +57,8 @@ class RoleServiceImpl : RoleService {
         return roleDao.selectByIds(ids)
     }
 
-    override fun findIdList(ids: List<String>): MutableList<String> {
+    override fun findIdList(ids: List<String>?): MutableList<String> {
+        if (ids != null && ids.isEmpty()) return ArrayList()
         return roleDao.selectIds(ids)
     }
 

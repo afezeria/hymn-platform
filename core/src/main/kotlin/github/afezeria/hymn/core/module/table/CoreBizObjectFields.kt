@@ -73,7 +73,6 @@ class CoreBizObjectFields(alias: String? = null) :
         genRule = row[this.genRule],
         remark = row[this.remark],
         help = row[this.help],
-        tmp = row[this.tmp],
         joinViewName = row[this.joinViewName],
         standardType = row[this.standardType],
         isPredefined = requireNotNull(row[this.isPredefined]) { "field BizObjectField.isPredefined should not be null" },

@@ -1,12 +1,7 @@
 package github.afezeria.hymn.core.module.service
 
-import github.afezeria.hymn.core.module.entity.BizObject
 import github.afezeria.hymn.core.module.dto.BizObjectDto
-import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import java.time.LocalDateTime
-import java.util.*
+import github.afezeria.hymn.core.module.entity.BizObject
 
 /**
  * @author afezeria
@@ -29,5 +24,15 @@ interface BizObjectService {
         api: String,
     ): BizObject?
 
+    /**
+     * 停用对象
+     * @param id 对象id
+     */
+    fun inactivateObjectById(id: String): Int
+
+    /**
+     * 启用对象
+     */
+    fun activateObjectById(id: String): Int
 
 }
