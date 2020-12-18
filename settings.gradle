@@ -1,3 +1,6 @@
 rootProject.name = 'hymn-platform'
 include 'common'
 include 'core'
+
+//project(":common").projectDir = "common" as File
+//project(":core").projectDir = "core" as File
