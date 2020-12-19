@@ -4,6 +4,7 @@ import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.sql.*
 import github.afezeria.hymn.common.userConn
 import github.afezeria.hymn.common.util.execute
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldMatch
@@ -368,6 +369,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
         val refObj = createBObject()
         val refId = refObj["id"] as String
         val field: MutableMap<String, Any?>
+        val fieldApi: String
         try {
             adminConn.use {
                 field = it.execute(
@@ -378,7 +380,8 @@ class FieldInsertSuccessTest : BaseDbTest() {
                     """,
                     objId, refId, *COMMON_INFO
                 )[0]
-                (field["source_column"] as String) shouldStartWith "pl"
+                (field["source_column"] as String) shouldStartWith "mref"
+                fieldApi = field["api"] as String
                 it.execute(
                     """
                     select *
@@ -401,11 +404,40 @@ class FieldInsertSuccessTest : BaseDbTest() {
                 ).size shouldBe 1
             }
             userConn.use {
+                val uuids = (1..5).map { randomUUIDStr() }
+                val refDataIds = uuids.joinToString(";")
+                val insData = it.execute(
+                    """
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
+                            modify_by_id,type_id,${fieldApi}) 
+                        values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
+                    *STANDARD_FIELD, refDataIds
+                )
+                insData.size shouldBe 1
+                val dataId = insData[0]["id"] as String
+                var data = it.execute(
+                    """
+                        select * from hymn_view.join_${objApi}_${fieldApi};
+                    """
+                )
+//                多选关联字段的值为以分号分割的5个uuid的字符串时会在中间表生成5条关联数据
+                data.size shouldBe 5
+                data[0]["s_id"] shouldBe dataId
+                data.map { it["t_id"] } shouldContainAll uuids
                 it.execute(
                     """
-                    insert into hymn_view.join_${objApi}_${field["api"]} (s_id,t_id) values (?,?) returning *;
-                """, randomUUIDStr(), randomUUIDStr()
-                ).size shouldBe 1
+                        update hymn_view.$objApi set $fieldApi = ? where id = ?
+                    """, uuids[0], dataId
+                )
+//                字段值变为1个uuid的文本后关联表中的4条数据自动被删除
+                data = it.execute(
+                    """
+                        select * from hymn_view.join_${objApi}_${fieldApi};
+                    """
+                )
+                data.size shouldBe 1
+                data[0]["s_id"] shouldBe dataId
+                data[0]["t_id"] shouldBe uuids[0]
             }
         } finally {
             deleteBObject(refId)

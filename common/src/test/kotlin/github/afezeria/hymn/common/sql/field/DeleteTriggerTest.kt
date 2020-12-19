@@ -16,7 +16,7 @@ import org.postgresql.util.PSQLException
 /**
  * @author afezeria
  */
-class DeleteTriggerTest :BaseDbTest(){
+class DeleteTriggerTest : BaseDbTest() {
     companion object : KLogging() {
         lateinit var objId: String
         lateinit var objSourceTable: String
@@ -125,6 +125,7 @@ class DeleteTriggerTest :BaseDbTest(){
                     """,
                     objId, refId, *COMMON_INFO
                 )[0]
+//                存在中间表
                 it.execute(
                     """
                         select * from pg_class pc left join pg_namespace pn on pc.relnamespace = pn.oid
@@ -133,12 +134,35 @@ class DeleteTriggerTest :BaseDbTest(){
                         and pc.relname='core_${field["join_view_name"]}'
                     """
                 ).size shouldBe 1
+//                存在中间表视图
                 it.execute(
                     """
                         select * from pg_class pc left join pg_namespace pn on pc.relnamespace = pn.oid
                         where pn.nspname='hymn_view'
                         and pc.relkind='v'
                         and pc.relname='${field["join_view_name"]}'
+                    """
+                ).size shouldBe 1
+//                存在多选关联字段触发器
+                it.execute(
+                    """
+                    select *
+                    from pg_trigger pt
+                             left join pg_class pc on pt.tgrelid = pc.oid
+                             left join pg_namespace pn on pn.oid = pc.relnamespace
+                    where pc.relname = '${objSourceTable}'
+                      and pn.nspname = 'hymn'
+                      and pt.tgname = 'a20_' || '${objSourceTable}' || '_mref_trigger';
+                    """
+                ).size shouldBe 1
+//                存在函数
+                it.execute(
+                    """
+                        select * 
+                        from pg_proc pp
+                        left join pg_namespace pn on pn.oid = pp.pronamespace
+                        where pn.nspname = 'hymn'
+                        and pp.proname = '${objSourceTable}' || '_mref_trigger_function'
                     """
                 ).size shouldBe 1
                 it.execute(
@@ -149,6 +173,7 @@ class DeleteTriggerTest :BaseDbTest(){
                     "delete from hymn.core_biz_object_field where id=?",
                     field["id"]
                 )
+//                中间表已删除
                 it.execute(
                     """
                         select * from pg_class pc left join pg_namespace pn on pc.relnamespace = pn.oid
@@ -157,6 +182,7 @@ class DeleteTriggerTest :BaseDbTest(){
                         and pc.relname='core_${field["join_view_name"]}'
                     """
                 ).size shouldBe 0
+//                中间视图已删除
                 it.execute(
                     """
                         select * from pg_class pc left join pg_namespace pn on pc.relnamespace = pn.oid
@@ -165,9 +191,34 @@ class DeleteTriggerTest :BaseDbTest(){
                         and pc.relname='${field["join_view_name"]}'
                     """
                 ).size shouldBe 0
+//                多选关联触发器已删除
+                it.execute(
+                    """
+                    select *
+                    from pg_trigger pt
+                             left join pg_class pc on pt.tgrelid = pc.oid
+                             left join pg_namespace pn on pn.oid = pc.relnamespace
+                    where pc.relname = '${objSourceTable}'
+                      and pn.nspname = 'hymn'
+                      and pt.tgname = 'a20_' || '${objSourceTable}' || '_mref_trigger';
+                    """
+                ).size shouldBe 0
+//                函数已删除
+                it.execute(
+                    """
+                        select * 
+                        from pg_proc pp
+                        left join pg_namespace pn on pn.oid = pp.pronamespace
+                        where pn.nspname = 'hymn'
+                        and pp.proname = '${objSourceTable}' || '_mref_trigger_function'
+                    """
+                ).size shouldBe 0
+
+
             }
         } finally {
             deleteBObject(refId)
         }
     }
+
 }

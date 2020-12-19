@@ -174,7 +174,7 @@ class InsertTriggerTest : BaseDbTest() {
                    left join pg_trigger pt on pt.tgrelid=pc.oid
                    where pn.nspname='hymn'
                    and pc.relname='${data["source_table"]}'
-                   and pt.tgname='${data["source_table"]}_history'
+                   and pt.tgname='a99_${data["source_table"]}_history'
                 """
             ).size shouldBe 1
 

@@ -320,7 +320,7 @@ begin
         for field in select *
                      from hymn.core_biz_object_field
                      where active = true
-                       and source_column not similar to 'pl%'
+                       and source_column not similar to 'pl_%'
                        and biz_object_id = obj_id
             loop
                 columns := format(' %I as %I,', field.source_column, field.api) || columns;
@@ -349,7 +349,7 @@ begin
         when 'money' then return 'decimal';
         when 'datetime','date' then return 'datetime' ;
         when 'summary' then return 'pl_summary';
-        when 'mreference' then return 'pl_mref';
+        when 'mreference' then return 'mref';
         else raise exception '未知的字段类型: %',field_type;
     end case;
 end ;
@@ -369,7 +369,7 @@ begin
         when 'decimal' then return '金额';
         when 'datetime' then return '日期/日期时间';
         when 'master' then return '主从';
-        when 'pl_mref' then return '多选关联';
+        when 'mref' then return '多选关联';
         when 'pl_summary' then return '汇总';
         else raise exception '未知的列名前缀: %',prefix;
     end case;
@@ -437,7 +437,9 @@ comment on function hymn.get_remaining_available_field_info(object_api text, out
 
 
 create or replace function hymn.get_join_table_name(view_name text) returns text
-    language plpgsql as
+    language plpgsql
+    immutable as
+
 $$
 begin
     return 'core_' || view_name;
@@ -446,13 +448,163 @@ $$;
 comment on function hymn.get_join_table_name(view_name text) is '获取业务对象多选关联字段对应的中间表表名';
 
 create or replace function hymn.get_join_view_name(t_api text, f_api text) returns text
-    language plpgsql as
+    language plpgsql
+    immutable as
 $$
 begin
     return 'join_' || t_api || '_' || f_api;
 end;
 $$;
 comment on function hymn.get_join_view_name(t_api text, f_api text) is '获取业务对象多选关联字段对应的中间表视图名';
+
+
+create or replace function hymn.delete_multiple_reference_field(record_old hymn.core_biz_object_field) returns void
+    language plpgsql as
+$$
+declare
+    sql_str text;
+begin
+    if record_old.type = 'mreference' then
+        perform hymn.rebuild_multiple_refernece_trigger_function(record_old.biz_object_id);
+        sql_str := format('drop table if exists hymn.%I cascade;',
+                          hymn.get_join_table_name(record_old.join_view_name));
+        execute sql_str;
+        return;
+    end if;
+end;
+$$;
+comment on function hymn.delete_multiple_reference_field(record_old hymn.core_biz_object_field) is '删除多选字段';
+create or replace function hymn.rebuild_multiple_refernece_trigger_function(obj_id text) returns void
+    language plpgsql as
+$BODY$
+declare
+    obj              hymn.core_biz_object;
+    field            hymn.core_biz_object_field;
+    fun_header       text;
+    fun_body         text := '';
+    fun_tail         text := E'    return new;\nend;\n$$;\n';
+    trigger_name     text;
+    trigger_fun_name text;
+    join_view_name  text;
+    sql_str          text;
+begin
+    select * into obj from hymn.core_biz_object where id = obj_id;
+    if not FOUND then
+        raise exception '对象 [id:%] 不存在',obj_id;
+    end if;
+    if obj.active = false then
+        raise exception '对象 [id:%] 未启用',obj_id;
+    end if;
+    if obj.type <> 'custom' then
+        raise notice '对象 % 不是自定义业对象，不支持创建自动编号字段',obj.api;
+        return;
+    end if;
+    trigger_fun_name := obj.source_table || '_mref_trigger_function';
+    trigger_name := 'a20_' || obj.source_table || '_mref_trigger';
+    fun_header :=
+            format(E'create or replace function hymn.%I() returns trigger\n'
+                       '    language plpgsql as\n'
+                       '$$\n'
+                       'declare\n'
+                       '    old_v           text;\n'
+                       '    new_v           text;\n'
+                       '    old_mref_arr    text[];\n'
+                       '    new_mref_arr    text[];\n'
+                       '    add_arr         text[];\n'
+                       '    remove_arr      text[];\n'
+                       '    i               text;\n'
+                       '    join_table_name text;\n'
+                       '    sql_str         text;\n'
+                       'begin\n', trigger_fun_name);
+    for field in select *
+                 from hymn.core_biz_object_field cbof
+                          left join hymn.core_biz_object cbo on cbof.ref_id = cbo.id
+                 where cbof.active = true
+                   and cbo.active = true
+                   and cbof.type = 'mreference'
+                   and cbof.biz_object_id = obj_id
+        loop
+            join_view_name :=field.join_view_name;
+            fun_body := fun_body ||
+                        format(
+                                E'    if new.%I is null then\n'
+                                    '        new_v = '''';\n'
+                                    '    else\n'
+                                    '        new_v = new.%I;\n'
+                                    '    end if;\n'
+                                    '    if old.%I is null then\n'
+                                    '        old_v = '''';\n'
+                                    '    else\n'
+                                    '        old_v = old.%I;\n'
+                                    '    end if;\n'
+                                    '    if old_v <> new_v then\n'
+                                    '        old_mref_arr := array_remove(regexp_split_to_array(old_v, '';''), '''');\n'
+                                    '        new_mref_arr := array_remove(regexp_split_to_array(new_v, '';''), '''');\n'
+                                    '        if old_v = '' then\n'
+                                    '            add_arr = new_mref_arr;\n'
+                                    '            remove_arr = null;\n'
+                                    '        elsif new_v = '' then\n'
+                                    '            remove_arr = old_mref_arr;\n'
+                                    '            add_arr = null;\n'
+                                    '        else\n'
+                                    '            select array_agg(el)\n'
+                                    '            into remove_arr\n'
+                                    '            from unnest(old_mref_arr) el\n'
+                                    '            where el <> all (new_mref_arr);\n'
+                                    '            select array_agg(el)\n'
+                                    '            into add_arr\n'
+                                    '            from unnest(new_mref_arr) el\n'
+                                    '            where el <> all (old_mref_arr);\n'
+                                    '        end if;\n'
+                                    '        if remove_arr is not null then\n'
+                                    '            sql_str := ''delete from hymn_view.%I where s_id=$1 and t_id = any ($2)'';\n'
+                                    '            execute sql_str using new.id,remove_arr;\n'
+                                    '        end if;\n'
+                                    '        if add_arr is not null then\n'
+                                    '            sql_str := ''insert into hymn_view.%I (s_id,t_id) values ($1,$2)'';\n'
+                                    '            foreach i in array add_arr\n'
+                                    '                loop\n'
+                                    '                    execute sql_str using new.id,i;\n'
+                                    '                end loop;\n'
+                                    '        end if;\n'
+                                    '    end if;\n'
+                            , field.source_column, field.source_column,
+                                field.source_column, field.source_column,
+                                join_view_name, join_view_name);
+        end loop;
+--     没有符合条件的字段时尝试删除原触发器和函数
+    if fun_body = '' then
+        sql_str := format('drop trigger if exists %I on hymn.%I', trigger_name, obj.source_table);
+        execute sql_str;
+        sql_str := format('drop function if exists hymn.%I()', trigger_fun_name);
+        execute sql_str;
+        return;
+    end if;
+    sql_str := fun_header || fun_body || fun_tail;
+    execute sql_str;
+
+
+    --     如果触发器不存在则创建触发器，如果触发器已存在则跳过
+    perform *
+    from pg_trigger pt
+             left join pg_class pc on pt.tgrelid = pc.oid
+             left join pg_namespace pn on pn.oid = pc.relnamespace
+    where pc.relname = obj.source_table
+      and pn.nspname = 'hymn'
+      and pt.tgname = trigger_name;
+    if not FOUND then
+        execute format(E'create trigger %s\n'
+                           'before insert or update\n'
+                           'on hymn.%s\n'
+                           'for each row\n'
+                           'execute function hymn.%s();\n',
+                       trigger_name, obj.source_table, trigger_fun_name);
+    end if;
+    return;
+end ;
+$BODY$;
+comment on function hymn.rebuild_multiple_refernece_trigger_function(obj_id text) is '重建多选字段触发器，触发器在多选字段值变更时自动修改中间表的数据';
+
 
 create or replace function hymn.rebuild_auto_numbering_trigger(obj_id text) returns void
     language plpgsql as
@@ -475,7 +627,7 @@ begin
         raise exception '对象 [id:%] 不存在',obj_id;
     end if;
     if obj.active = false then
-        raise exception '对象未启用';
+        raise exception '对象 [id:%] 未启用',obj_id;
     end if;
     if obj.type <> 'custom' then
         raise notice '对象 % 不是自定义业对象，不支持创建自动编号字段',obj.api;
@@ -485,7 +637,7 @@ begin
 
     data_table_name := obj.source_table;
     trigger_fun_name := obj.api || '_auto_number_trigger_fun';
-    trigger_name := obj.api || '_auto_number';
+    trigger_name := 'a10_' || obj.api || '_auto_number';
     auto_number_seq_name := obj.api || '_auto_number_seq';
 
     perform *
@@ -521,6 +673,7 @@ begin
     for field in select *
                  from hymn.core_biz_object_field
                  where biz_object_id = obj_id
+                   and active = true
                    and type = 'auto'
         loop
             template_name := field.source_column || '_template';
@@ -591,7 +744,7 @@ begin
         raise exception '对象 [id:%] 不存在',obj_id;
     end if;
     if obj.active = false then
-        raise exception '对象未启用';
+        raise exception '对象 [id:%] 未启用',obj_id;
     end if;
     if obj.type <> 'custom' then
         raise notice '对象 % 不是自定义业对象，不执行创建历史记录触发器相关动作',obj.api;
@@ -599,7 +752,7 @@ begin
     end if;
     data_table_name := obj.source_table;
     trigger_fun_name := data_table_name || '_history_trigger_fun';
-    trigger_name := data_table_name || '_history';
+    trigger_name := 'a99_' || data_table_name || '_history';
     history_table_name := obj.api || '_history';
 --     创建历史记录表及索引
     perform *
@@ -643,6 +796,7 @@ begin
     for field in select *
                  from hymn.core_biz_object_field cbof
                  where cbof.biz_object_id = obj_id
+                   and cbof.active = true
                    and cbof.history = true
         loop
             field_api := field.api;
@@ -691,7 +845,7 @@ begin
                            'execute function hymn.%s();\n',
                        trigger_name, data_table_name, trigger_fun_name);
     end if;
-end ;
+end;
 $BODY$;
 comment on function hymn.rebuild_data_table_history_trigger(obj_id text) is '重建数据表的历史记录触发器，生成触发器函数';
 
@@ -700,6 +854,7 @@ create or replace function hymn.check_field_properties(record_new hymn.core_biz_
 $$
 declare
     ref_obj   hymn.core_biz_object;
+    obj       hymn.core_biz_object;
     count     int;
     ref_field hymn.core_biz_object_field;
 begin
@@ -806,12 +961,19 @@ begin
         if record_new.ref_id is null or record_new.ref_delete_policy is null then
             raise exception '关联对象/关联对象删除策略不能为空';
         end if;
+        if record_new.is_predefined = true then
+            raise exception '多选关联字段不能是预定义字段';
+        end if;
         select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
         if not FOUND then
             raise exception '引用对象 [id:%] 不存在',record_new.ref_id;
         end if;
         if ref_obj.active = false then
-            raise exception '引用对象未启用';
+            raise exception '引用对象 [id:%] 未启用',ref_obj.id;
+        end if;
+        select * into obj from hymn.core_biz_object where id = record_new.biz_object_id;
+        if obj.type = 'remote' or ref_obj.type = 'remote' then
+            raise exception '远程对象不能创建多选关联字段或被多选关联字段引用';
         end if;
     elseif record_new.type = 'reference' then
 --         关联关系
@@ -823,7 +985,7 @@ begin
             raise exception '引用对象 [id:%] 不存在',record_new.ref_id;
         end if;
         if ref_obj.active = false then
-            raise exception '引用对象未启用';
+            raise exception '引用对象 [id:%] 未启用',ref_obj.id;
         end if;
     elseif record_new.type = 'master_slave' then
 --         主详关系
@@ -835,7 +997,7 @@ begin
             raise exception '引用对象 [id:%] 不存在',record_new.ref_id;
         end if;
         if ref_obj.active = false then
-            raise exception '引用对象未启用';
+            raise exception '引用对象 [id:%] 未启用',ref_obj.id;
         end if;
     elseif record_new.type = 'auto' then
 --         自动编号
@@ -865,7 +1027,7 @@ begin
             raise exception '汇总对象 [id:%] 不存在',record_new.s_id;
         end if;
         if ref_obj.active = false then
-            raise exception '汇总对象未启用';
+            raise exception '汇总对象 [id:%] 未启用',ref_obj.id;
         end if;
         perform *
         from hymn.core_biz_object_field
@@ -1121,7 +1283,6 @@ create trigger c00_object_after_delete
     for each row
 execute function hymn.object_trigger_fun_after_delete();
 
-
 -- flag:field 业务对象字段触发器
 create or replace function hymn.field_trigger_fun_before_insert() returns trigger
     language plpgsql as
@@ -1209,6 +1370,11 @@ begin
         if record_new.source_column not like 'pl_%' then
 --     构建视图
             perform hymn.rebuild_object_view(record_new.biz_object_id);
+        end if;
+--         创建多选关联字段的表、视图及触发器
+        if record_new.type = 'mreference' then
+            --     创建触发器
+            perform hymn.rebuild_multiple_refernece_trigger_function(obj.id);
         end if;
 --     如果是自动编号字段则重建触发器
         if obj.type = 'custom' and record_new.type = 'auto' then
@@ -1371,13 +1537,20 @@ begin
         if record_new.active <> record_old.active then
             perform hymn.rebuild_object_view(record_new.biz_object_id);
         end if;
+--             字段为多选关联时重置触发器
+        if (record_old.type = 'mreference' and record_new.active <> record_old.active) then
+            perform hymn.rebuild_multiple_refernece_trigger_function(record_old.biz_object_id);
+        end if;
 --         历史记录状态变更时重置历史记录触发器
-        if record_new.history <> record_old.history then
+        if record_new.history <> record_old.history or
+           (record_new.history = true and record_old.active <> record_new.active) then
             perform hymn.rebuild_data_table_history_trigger(record_new.biz_object_id);
         end if;
+
+--          自动编号字段规则改变或者启用状态改变时重置触发器
         if obj_type = 'custom' and record_new.type = 'auto' and
-           record_old.gen_rule != record_new.gen_rule then
---          如果是自动编号字段则重建触发器
+           (record_old.gen_rule != record_new.gen_rule or
+            record_new.active <> record_old.active) then
             perform hymn.rebuild_auto_numbering_trigger(record_new.biz_object_id);
         end if;
         if record_old.type = 'mreference' then
@@ -1425,10 +1598,14 @@ begin
     if record_old.is_predefined = false then
         if obj.type <> 'remote' then
             if record_old.type = 'mreference' then
-                sql_str := format('drop table if exists hymn.%I cascade;',
-                                  hymn.get_join_table_name(record_old.join_view_name));
-                execute sql_str;
+                perform hymn.delete_multiple_reference_field(record_old);
             end if;
+            --             if record_old.type = 'mreference' then
+--
+--                 sql_str := format('drop table if exists hymn.%I cascade;',
+--                                   hymn.get_join_table_name(record_old.join_view_name));
+--                 execute sql_str;
+--             end if;
             --     如果found为true说明只删除了字段，需要执行数据清理和归还字段资源
 --     如果为false说明执行的是删除对象的流程，相关的操作由对象触发器处理
             if FOUND then

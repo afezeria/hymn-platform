@@ -755,7 +755,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                     """,
                         objId, refId, *COMMON_INFO
                     )
-                }.message shouldContain "引用对象未启用"
+                }.message shouldContain "引用对象 \\[id:.*?\\] 未启用".toRegex()
             }
         }
     }
@@ -790,7 +790,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                     """,
                         objId, refId, *COMMON_INFO
                     )
-                }.message shouldContain "引用对象未启用"
+                }.message shouldContain "引用对象 \\[id:.*?\\] 未启用".toRegex()
             }
         }
     }
@@ -825,7 +825,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                     """,
                         objId, refId, *COMMON_INFO
                     )
-                }.message shouldContain "引用对象未启用"
+                }.message shouldContain "引用对象 \\[id:.*?\\] 未启用".toRegex()
             }
         }
     }
@@ -901,7 +901,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                         refId,
                         randomUUIDStr(), *COMMON_INFO
                     )
-                }.message shouldContain "汇总对象未启用"
+                }.message shouldContain "汇总对象 \\[id:.*?\\] 未启用".toRegex()
             }
         }
 
