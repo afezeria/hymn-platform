@@ -26,10 +26,12 @@ dependencies {
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'   
 
 
     compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+
 
 
     implementation(group: "org.ktorm", name: "ktorm-core", version: "$ktormVersion") {
