@@ -5,16 +5,15 @@ package github.afezeria.hymn.common.constant
  */
 
 enum class ResultCode(val code: Int, val msg: String) {
-    /* 成功状态码 */
     SUCCESS(0, "ok"),
-
     UNAUTHORIZED(1001, "unauthorized"),
     NOT_LOGGED_IN(1002, "not logged in"),
     DATA_NOT_FOUND(2001, "data does not exist"),
     INNER_ERROR(3001, "internal error, please contact administrators"),
     BAD_REQUEST(4001, "bad request"),
     ROUTE_NOT_FOUND(5001, "route not found"),
-    BUSINESS_FAILED(6001, "business failed")
+    BUSINESS_FAILED(6001, "business failed"),
+    NO_ACCESS(7001, "no access")
 
 
 //    /* 参数错误：10001-19999 */

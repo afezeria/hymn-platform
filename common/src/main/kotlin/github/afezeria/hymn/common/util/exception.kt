@@ -6,7 +6,11 @@ import github.afezeria.hymn.common.constant.ResultCode
 /**
  * @author afezeria
  */
-sealed class PlatformException(val code: ResultCode, override val message: String = code.msg) : RuntimeException(message)
+sealed class PlatformException(val code: ResultCode, override val message: String = code.msg) :
+    RuntimeException(message)
+
+class NoAccessException(msg: String = ResultCode.NO_ACCESS.msg) :
+    PlatformException(ResultCode.NO_ACCESS, msg)
 
 class UnauthorizedException(msg: String = ResultCode.UNAUTHORIZED.msg) :
     PlatformException(ResultCode.UNAUTHORIZED, msg)

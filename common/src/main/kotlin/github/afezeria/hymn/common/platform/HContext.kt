@@ -1,7 +1,7 @@
 package github.afezeria.hymn.common.platform
 
 import github.afezeria.hymn.common.constant.ClientType
-import github.afezeria.hymn.common.constant.Role
+import github.afezeria.hymn.common.perm.Role
 
 /**
  * @author afezeria
