@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.ButtonPerm
-import github.afezeria.hymn.core.module.dao.ButtonPermDao
-import github.afezeria.hymn.core.module.dto.ButtonPermDto
-import github.afezeria.hymn.core.module.service.ButtonPermService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.ButtonPermDao
+import github.afezeria.hymn.core.module.dto.ButtonPermDto
+import github.afezeria.hymn.core.module.entity.ButtonPerm
+import github.afezeria.hymn.core.module.service.ButtonPermService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -62,19 +62,27 @@ class ButtonPermServiceImpl : ButtonPermService {
         roleId: String,
         buttonId: String,
     ): ButtonPerm? {
-        return buttonPermDao.selectByRoleIdAndButtonId(roleId,buttonId,)
+        return buttonPermDao.selectByRoleIdAndButtonId(roleId, buttonId)
     }
 
     override fun findByRoleId(
         roleId: String,
     ): MutableList<ButtonPerm> {
-        return buttonPermDao.selectByRoleId(roleId,)
+        return buttonPermDao.selectByRoleId(roleId)
     }
 
     override fun findByButtonId(
         buttonId: String,
     ): MutableList<ButtonPerm> {
-        return buttonPermDao.selectByButtonId(buttonId,)
+        return buttonPermDao.selectByButtonId(buttonId)
+    }
+
+    override fun batchCreate(dtoList: List<ButtonPermDto>): MutableList<Int> {
+        return buttonPermDao.batchInsert(dtoList.map { it.toEntity() })
+    }
+
+    override fun batchSave(dtoList: List<ButtonPermDto>): MutableList<Int> {
+        return buttonPermDao.batchInsertOrUpdate(dtoList.map { it.toEntity() })
     }
 
 

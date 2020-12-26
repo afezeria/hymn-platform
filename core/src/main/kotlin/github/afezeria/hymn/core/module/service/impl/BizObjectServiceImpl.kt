@@ -56,6 +56,22 @@ class BizObjectServiceImpl : BizObjectService {
             ?: throw DataNotFoundException("BizObject".msgById(id))
         dto.update(e)
         val i = bizObjectDao.update(e)
+
+//        更新对象权限
+        val allRoleId = roleService.findIdList()
+        val roleIdSet = allRoleId.toMutableSet()
+        val objPermDtoList = mutableListOf<BizObjectPermDto>()
+        dto.permList.forEach {
+            if (roleIdSet.remove(it.roleId)) {
+                it.bizObjectId = id
+                objPermDtoList.add(it)
+            }
+        }
+        roleIdSet.forEach {
+            objPermDtoList.add(BizObjectPermDto(it, id))
+        }
+        objectPermService.batchSave(objPermDtoList)
+
         return i
     }
 

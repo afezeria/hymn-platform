@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectFieldPerm
 import github.afezeria.hymn.core.module.dto.BizObjectFieldPermDto
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
+import github.afezeria.hymn.core.module.dto.BizObjectPermDto
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
@@ -38,7 +39,8 @@ interface BizObjectFieldPermService {
         fieldId: String,
     ): MutableList<BizObjectFieldPerm>
 
-    fun batchCreate(permList: MutableList<BizObjectFieldPermDto>): MutableList<Int>
+    fun batchCreate(dtoList: List<BizObjectFieldPermDto>): MutableList<Int>
 
+    fun batchSave(dtoList: List<BizObjectFieldPermDto>): MutableList<Int>
 
 }

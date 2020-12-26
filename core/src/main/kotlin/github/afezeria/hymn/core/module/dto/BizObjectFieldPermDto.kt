@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.BizObjectFieldPerm
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -13,13 +11,13 @@ class BizObjectFieldPermDto(
     var roleId: String,
     @ApiModelProperty(value = "对象id ;;fk:[core_biz_object cascade]")
     var bizObjectId: String,
-    @ApiModelProperty(value = "字段id ;;fk:[core_biz_object_field cascade];idx")
+    @ApiModelProperty(value = "字段id，新建自定义字段时该字段用空字符串占位 ;;fk:[core_biz_object_field cascade];idx")
     var fieldId: String,
     @ApiModelProperty(value = "可读")
-    var pRead: Boolean,
+    var pRead: Boolean = false,
     @ApiModelProperty(value = "可编辑")
-    var pEdit: Boolean,
-){
+    var pEdit: Boolean = false,
+) {
     fun toEntity(): BizObjectFieldPerm {
         return BizObjectFieldPerm(
             roleId = roleId,

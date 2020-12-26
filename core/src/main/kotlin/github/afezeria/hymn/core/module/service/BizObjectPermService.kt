@@ -14,7 +14,12 @@ interface BizObjectPermService {
 
     fun create(dto: BizObjectPermDto): String
 
-    fun batchCreate(dto: List<BizObjectPermDto>): MutableList<Int>
+    fun batchCreate(dtoList: List<BizObjectPermDto>): MutableList<Int>
+
+    /**
+     * insert or update on conflict (roleId,bizObjectId)
+     */
+    fun batchSave(dtoList: List<BizObjectPermDto>): MutableList<Int>
 
     fun findAll(): MutableList<BizObjectPerm>
 

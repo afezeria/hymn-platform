@@ -1,14 +1,17 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.CustomButton
-import github.afezeria.hymn.core.module.dao.CustomButtonDao
-import github.afezeria.hymn.core.module.dto.CustomButtonDto
-import github.afezeria.hymn.core.module.service.CustomButtonService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.CustomButtonDao
+import github.afezeria.hymn.core.module.dto.ButtonPermDto
+import github.afezeria.hymn.core.module.dto.CustomButtonDto
+import github.afezeria.hymn.core.module.entity.CustomButton
+import github.afezeria.hymn.core.module.service.ButtonPermService
+import github.afezeria.hymn.core.module.service.CustomButtonService
+import github.afezeria.hymn.core.module.service.RoleService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -18,6 +21,12 @@ class CustomButtonServiceImpl : CustomButtonService {
 
     @Autowired
     private lateinit var customButtonDao: CustomButtonDao
+
+    @Autowired
+    private lateinit var roleService: RoleService
+
+    @Autowired
+    private lateinit var buttonPermService: ButtonPermService
 
     @Autowired
     private lateinit var dbService: DataBaseService
@@ -35,12 +44,44 @@ class CustomButtonServiceImpl : CustomButtonService {
             ?: throw DataNotFoundException("CustomButton".msgById(id))
         dto.update(e)
         val i = customButtonDao.update(e)
+
+//        更新按钮权限数据
+        val allRoleId = roleService.findIdList()
+        val roleIdSet = allRoleId.toMutableSet()
+        val buttonPermDtoList = mutableListOf<ButtonPermDto>()
+        dto.permList.forEach {
+            if (roleIdSet.remove(it.roleId)) {
+                it.buttonId = id
+                buttonPermDtoList.add(it)
+            }
+        }
+        roleIdSet.forEach {
+            buttonPermDtoList.add(ButtonPermDto(it, id))
+        }
+        buttonPermService.batchSave(buttonPermDtoList)
+
         return i
     }
 
     override fun create(dto: CustomButtonDto): String {
         val e = dto.toEntity()
         val id = customButtonDao.insert(e)
+
+//        创建按钮权限数据
+        val allRoleId = roleService.findIdList()
+        val roleIdSet = allRoleId.toMutableSet()
+        val buttonPermDtoList = mutableListOf<ButtonPermDto>()
+        dto.permList.forEach {
+            if (roleIdSet.remove(it.roleId)) {
+                it.buttonId = id
+                buttonPermDtoList.add(it)
+            }
+        }
+        roleIdSet.forEach {
+            buttonPermDtoList.add(ButtonPermDto(it, id))
+        }
+        buttonPermService.batchCreate(buttonPermDtoList)
+
         return id
     }
 
@@ -61,7 +102,7 @@ class CustomButtonServiceImpl : CustomButtonService {
     override fun findByApi(
         api: String,
     ): CustomButton? {
-        return customButtonDao.selectByApi(api,)
+        return customButtonDao.selectByApi(api)
     }
 
 

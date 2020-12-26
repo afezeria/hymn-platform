@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.CustomButton
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -23,7 +21,9 @@ class CustomButtonDto(
     var action: String,
     @ApiModelProperty(value = "按钮内容，当action为eval时为js代码，其他情况为url")
     var content: String,
-){
+    @ApiModelProperty(value = "字段权限")
+    var permList: List<ButtonPermDto> = emptyList()
+) {
     fun toEntity(): CustomButton {
         return CustomButton(
             remark = remark,

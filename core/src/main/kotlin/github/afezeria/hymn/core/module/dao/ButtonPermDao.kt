@@ -1,25 +1,27 @@
 package github.afezeria.hymn.core.module.dao
 
-import github.afezeria.hymn.core.module.entity.ButtonPerm
-import github.afezeria.hymn.core.module.table.CoreButtonPerms
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
+import github.afezeria.hymn.core.module.entity.ButtonPerm
+import github.afezeria.hymn.core.module.table.CoreButtonPerms
 import org.ktorm.dsl.*
+import org.ktorm.support.postgresql.insertOrUpdate
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
 
 /**
-* @author afezeria
-*/
+ * @author afezeria
+ */
 @Component
 class ButtonPermDao {
 
     @Autowired
     private lateinit var dbService: DataBaseService
+
     @Autowired
-    private lateinit var sessionService:SessionService
+    private lateinit var sessionService: SessionService
 
     val table = CoreButtonPerms()
 
@@ -84,7 +86,7 @@ class ButtonPermDao {
             .firstOrNull()
     }
 
-    fun selectByIds(ids: List<String>): MutableList<ButtonPerm>{
+    fun selectByIds(ids: List<String>): MutableList<ButtonPerm> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {
@@ -123,6 +125,71 @@ class ButtonPermDao {
             .where {
                 table.buttonId eq buttonId
             }.mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
+    fun batchInsertOrUpdate(es: List<ButtonPerm>): MutableList<Int> {
+        dbService.db().useTransaction {
+            return es.mapTo(ArrayList()) { insertOrUpdate(it) }
+        }
+    }
+
+    fun insertOrUpdate(e: ButtonPerm): Int {
+        val now = LocalDateTime.now()
+        val session = sessionService.getSession()
+        val accountId = session.accountId
+        val accountName = session.accountName
+        e.createDate = now
+        e.modifyDate = now
+        e.createById = accountId
+        e.modifyById = accountId
+        e.createBy = accountName
+        e.modifyBy = accountName
+        return dbService.db().insertOrUpdate(table) {
+            set(it.roleId, e.roleId)
+            set(it.buttonId, e.buttonId)
+            set(it.visible, e.visible)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
+            onDuplicateKey(table.roleId, table.roleId) {
+                set(it.visible, e.visible)
+                set(it.modifyDate, e.modifyDate)
+                set(it.modifyById, e.modifyById)
+                set(it.modifyBy, e.modifyBy)
+            }
+        }
+    }
+
+    fun batchInsert(es: List<ButtonPerm>): MutableList<Int> {
+        val now = LocalDateTime.now()
+        val session = sessionService.getSession()
+        val accountId = session.accountId
+        val accountName = session.accountName
+        return dbService.db().batchInsert(table) {
+            es.forEach { e ->
+                item {
+                    e.createDate = now
+                    e.modifyDate = now
+                    e.createById = accountId
+                    e.modifyById = accountId
+                    e.createBy = accountName
+                    e.modifyBy = accountName
+
+                    set(it.roleId, e.roleId)
+                    set(it.buttonId, e.buttonId)
+                    set(it.visible, e.visible)
+                    set(it.createDate, e.createBy)
+                    set(it.modifyDate, e.modifyDate)
+                    set(it.createById, e.createById)
+                    set(it.modifyById, e.modifyById)
+                    set(it.createBy, e.createBy)
+                    set(it.modifyBy, e.modifyBy)
+                }
+            }
+        }.toMutableList()
     }
 
 

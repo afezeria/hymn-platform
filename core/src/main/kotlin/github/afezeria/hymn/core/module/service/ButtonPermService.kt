@@ -1,12 +1,7 @@
 package github.afezeria.hymn.core.module.service
 
-import github.afezeria.hymn.core.module.entity.ButtonPerm
 import github.afezeria.hymn.core.module.dto.ButtonPermDto
-import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import java.time.LocalDateTime
-import java.util.*
+import github.afezeria.hymn.core.module.entity.ButtonPerm
 
 /**
  * @author afezeria
@@ -37,6 +32,10 @@ interface ButtonPermService {
     fun findByButtonId(
         buttonId: String,
     ): MutableList<ButtonPerm>
+
+    fun batchCreate(dtoList: List<ButtonPermDto>): MutableList<Int>
+
+    fun batchSave(dtoList: List<ButtonPermDto>): MutableList<Int>
 
 
 }

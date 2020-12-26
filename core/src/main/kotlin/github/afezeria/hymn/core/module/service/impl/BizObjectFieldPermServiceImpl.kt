@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.BizObjectFieldPerm
-import github.afezeria.hymn.core.module.dao.BizObjectFieldPermDao
-import github.afezeria.hymn.core.module.dto.BizObjectFieldPermDto
-import github.afezeria.hymn.core.module.service.BizObjectFieldPermService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.BizObjectFieldPermDao
+import github.afezeria.hymn.core.module.dto.BizObjectFieldPermDto
+import github.afezeria.hymn.core.module.entity.BizObjectFieldPerm
+import github.afezeria.hymn.core.module.service.BizObjectFieldPermService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -62,23 +62,27 @@ class BizObjectFieldPermServiceImpl : BizObjectFieldPermService {
         roleId: String,
         fieldId: String,
     ): BizObjectFieldPerm? {
-        return bizObjectFieldPermDao.selectByRoleIdAndFieldId(roleId,fieldId,)
+        return bizObjectFieldPermDao.selectByRoleIdAndFieldId(roleId, fieldId)
     }
 
     override fun findByRoleId(
         roleId: String,
     ): MutableList<BizObjectFieldPerm> {
-        return bizObjectFieldPermDao.selectByRoleId(roleId,)
+        return bizObjectFieldPermDao.selectByRoleId(roleId)
     }
 
     override fun findByFieldId(
         fieldId: String,
     ): MutableList<BizObjectFieldPerm> {
-        return bizObjectFieldPermDao.selectByFieldId(fieldId,)
+        return bizObjectFieldPermDao.selectByFieldId(fieldId)
     }
 
-    override fun batchCreate(permList: MutableList<BizObjectFieldPermDto>): MutableList<Int> {
-        return bizObjectFieldPermDao.batchInsert(permList.map { it.toEntity() })
+    override fun batchCreate(dtoList: List<BizObjectFieldPermDto>): MutableList<Int> {
+        return bizObjectFieldPermDao.batchInsert(dtoList.map { it.toEntity() })
+    }
+
+    override fun batchSave(dtoList: List<BizObjectFieldPermDto>): MutableList<Int> {
+        return bizObjectFieldPermDao.batchInsertOrUpdate(dtoList.map { it.toEntity() })
     }
 
 

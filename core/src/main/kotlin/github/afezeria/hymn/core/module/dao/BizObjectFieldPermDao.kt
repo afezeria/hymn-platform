@@ -5,6 +5,7 @@ import github.afezeria.hymn.common.platform.SessionService
 import github.afezeria.hymn.core.module.entity.BizObjectFieldPerm
 import github.afezeria.hymn.core.module.table.CoreBizObjectFieldPerms
 import org.ktorm.dsl.*
+import org.ktorm.support.postgresql.insertOrUpdate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -159,6 +160,45 @@ class BizObjectFieldPermDao {
                 }
             }
         }.toMutableList()
+    }
+
+    fun batchInsertOrUpdate(es: List<BizObjectFieldPerm>): MutableList<Int> {
+        dbService.db().useTransaction {
+            return es.mapTo(ArrayList()) { insertOrUpdate(it) }
+        }
+    }
+
+    fun insertOrUpdate(e: BizObjectFieldPerm): Int {
+        val now = LocalDateTime.now()
+        val session = sessionService.getSession()
+        val accountId = session.accountId
+        val accountName = session.accountName
+        e.createDate = now
+        e.modifyDate = now
+        e.createById = accountId
+        e.modifyById = accountId
+        e.createBy = accountName
+        e.modifyBy = accountName
+        return dbService.db().insertOrUpdate(table) {
+            set(it.roleId, e.roleId)
+            set(it.bizObjectId, e.bizObjectId)
+            set(it.fieldId, e.fieldId)
+            set(it.pRead, e.pRead)
+            set(it.pEdit, e.pEdit)
+            set(it.createDate, e.createBy)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
+            onDuplicateKey(table.roleId, table.fieldId) {
+                set(it.pRead, e.pRead)
+                set(it.pEdit, e.pEdit)
+                set(it.modifyDate, e.modifyDate)
+                set(it.modifyById, e.modifyById)
+                set(it.modifyBy, e.modifyBy)
+            }
+        }
     }
 
 

@@ -45,12 +45,44 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
             ?: throw DataNotFoundException("BizObjectField".msgById(id))
         dto.update(e)
         val i = bizObjectFieldDao.update(e)
+
+//        创建字段权限数据
+        val allRoleId = roleService.findIdList()
+        val roleIdSet = allRoleId.toMutableSet()
+        val fieldPermDtoList = mutableListOf<BizObjectFieldPermDto>()
+        dto.permList.forEach {
+            if (roleIdSet.remove(it.roleId)) {
+                it.fieldId = id
+                fieldPermDtoList.add(it)
+            }
+        }
+        roleIdSet.forEach {
+            fieldPermDtoList.add(BizObjectFieldPermDto(it, dto.bizObjectId, id))
+        }
+        fieldPermService.batchSave(fieldPermDtoList)
+
         return i
     }
 
     override fun create(dto: BizObjectFieldDto): String {
         val e = dto.toEntity()
         val id = bizObjectFieldDao.insert(e)
+
+//        创建字段权限数据
+        val allRoleId = roleService.findIdList()
+        val roleIdSet = allRoleId.toMutableSet()
+        val fieldPermDtoList = mutableListOf<BizObjectFieldPermDto>()
+        dto.permList.forEach {
+            if (roleIdSet.remove(it.roleId)) {
+                it.fieldId = id
+                fieldPermDtoList.add(it)
+            }
+        }
+        roleIdSet.forEach {
+            fieldPermDtoList.add(BizObjectFieldPermDto(it, dto.bizObjectId, id))
+        }
+        fieldPermService.batchCreate(fieldPermDtoList)
+
         return id
     }
 
