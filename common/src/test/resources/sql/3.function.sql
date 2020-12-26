@@ -311,9 +311,9 @@ create or replace function hymn.rebuild_object_view(obj_id text) returns void
     language plpgsql as
 $$
 declare
-    obj     hymn.core_biz_object;
-    field   hymn.core_biz_object_field;
-    columns text := ' id as id ';
+    obj        hymn.core_biz_object;
+    field      hymn.core_biz_object_field;
+    column_arr text[] := ARRAY [' id as id '];
 begin
     select * into obj from hymn.core_biz_object where id = obj_id;
     if FOUND then
@@ -322,11 +322,14 @@ begin
                      where active = true
                        and source_column not similar to 'pl_%'
                        and biz_object_id = obj_id
+                     order by create_date
             loop
-                columns := format(' %I as %I,', field.source_column, field.api) || columns;
+                column_arr := array_append(column_arr,
+                                           format(' %I as %I ', field.source_column, field.api));
             end loop;
         execute format('drop view if exists hymn_view.%I', obj.api);
-        execute format('create view hymn_view.%I as select %s from hymn.%I', obj.api, columns,
+        execute format('create view hymn_view.%I as select %s from hymn.%I', obj.api,
+                       array_to_string(column_arr, ','),
                        obj.source_table);
         perform hymn.grant_object_view_permission(obj.id);
     end if;

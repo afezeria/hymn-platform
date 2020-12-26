@@ -92,6 +92,35 @@ fun createBObject(): Map<String, Any?> {
 //        生成默认字段
         it.execute(
             """
+            insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, gen_rule, 
+                standard_type, is_predefined, create_by_id, create_by, modify_by_id, modify_by, 
+                create_date, modify_date) 
+            values ('name', ?, '编号', 'name', 'auto', '{yyyy}{mm}{000}', 'name', true, ?, ?, ?, ?,
+                now(),now());
+            """,
+            objId, *COMMON_INFO
+        )
+        it.execute(
+            """
+            insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, ref_id, 
+                ref_delete_policy, standard_type, is_predefined, create_by_id, create_by, modify_by_id, 
+                modify_by, create_date, modify_date) 
+            values ('type_id', ?, '业务类型','type_id', 'reference', '09da56a7de514895aea5c596820d0ced', 
+                'null', 'type_id', true, ?,?,?,?,now(),now());
+        """,
+            objId, *COMMON_INFO
+        )
+        it.execute(
+            """
+            insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, standard_type, 
+                is_predefined, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+            values ('lock_state', ?, '锁定状态', 'lock_state', 'check_box', 'lock_state', true, 
+                ?, ?, ?, ?, now(), now());
+        """,
+            objId, *COMMON_INFO
+        )
+        it.execute(
+            """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, ref_id, 
                 ref_delete_policy, standard_type, is_predefined, create_by_id, create_by, modify_by_id, 
                 modify_by, create_date, modify_date) 
@@ -122,16 +151,6 @@ fun createBObject(): Map<String, Any?> {
         )
         it.execute(
             """
-            insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, ref_id, 
-                ref_delete_policy, standard_type, is_predefined, create_by_id, create_by, modify_by_id, 
-                modify_by, create_date, modify_date) 
-            values ('type_id', ?, '业务类型','type_id', 'reference', '09da56a7de514895aea5c596820d0ced', 
-                'null', 'type_id', true, ?,?,?,?,now(),now());
-        """,
-            objId, *COMMON_INFO
-        )
-        it.execute(
-            """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, standard_type, 
                 is_predefined, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
             values ('create_date', ?, '创建时间', 'create_date', 'datetime', 'create_date', true, 
@@ -146,25 +165,6 @@ fun createBObject(): Map<String, Any?> {
             values ('modify_date', ?, '修改时间', 'modify_date', 'datetime', 'modify_date', true, 
                 ?, ?, ?, ?, now(), now());
         """,
-            objId, *COMMON_INFO
-        )
-        it.execute(
-            """
-            insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, standard_type, 
-                is_predefined, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
-            values ('lock_state', ?, '锁定状态', 'lock_state', 'check_box', 'lock_state', true, 
-                ?, ?, ?, ?, now(), now());
-        """,
-            objId, *COMMON_INFO
-        )
-        it.execute(
-            """
-            insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, gen_rule, 
-                standard_type, is_predefined, create_by_id, create_by, modify_by_id, modify_by, 
-                create_date, modify_date) 
-            values ('name', ?, '编号', 'name', 'auto', '{yyyy}{mm}{000}', 'name', true, ?, ?, ?, ?,
-                now(),now());
-            """,
             objId, *COMMON_INFO
         )
         obj["type_id"] = type["id"]
