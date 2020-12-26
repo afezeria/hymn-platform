@@ -57,7 +57,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
             }
         }
         roleIdSet.forEach {
-            fieldPermDtoList.add(BizObjectFieldPermDto(it, dto.bizObjectId, id))
+            fieldPermDtoList.add(BizObjectFieldPermDto(it, id))
         }
         fieldPermService.batchSave(fieldPermDtoList)
 
@@ -79,7 +79,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
             }
         }
         roleIdSet.forEach {
-            fieldPermDtoList.add(BizObjectFieldPermDto(it, dto.bizObjectId, id))
+            fieldPermDtoList.add(BizObjectFieldPermDto(it, id))
         }
         fieldPermService.batchCreate(fieldPermDtoList)
 
@@ -224,17 +224,17 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
             roleIds.forEach {
                 permList.add(
                     BizObjectFieldPermDto(
-                        it, objId, namefid, pRead = true,
+                        it, namefid, pRead = true,
                         pEdit = autoRule == null
                     )
                 )
-                permList.add(BizObjectFieldPermDto(it, objId, typefid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, objId, ownerfid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, objId, cfid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, objId, mfid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, objId, cdatefid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, objId, mdatefid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, objId, lockfid, true, pEdit = false))
+                permList.add(BizObjectFieldPermDto(it, typefid, true, pEdit = false))
+                permList.add(BizObjectFieldPermDto(it, ownerfid, true, pEdit = false))
+                permList.add(BizObjectFieldPermDto(it, cfid, true, pEdit = false))
+                permList.add(BizObjectFieldPermDto(it, mfid, true, pEdit = false))
+                permList.add(BizObjectFieldPermDto(it, cdatefid, true, pEdit = false))
+                permList.add(BizObjectFieldPermDto(it, mdatefid, true, pEdit = false))
+                permList.add(BizObjectFieldPermDto(it, lockfid, true, pEdit = false))
             }
             fieldPermService.batchCreate(permList)
         }

@@ -15,8 +15,6 @@ data class BizObjectTypePerm(
 
     @ApiModelProperty(value = "角色id ;;fk:[core_role cascade]")
     var roleId: String,
-    @ApiModelProperty(value = "对象id ;;fk:[core_biz_object cascade]")
-    var bizObjectId: String,
     @ApiModelProperty(value = "类型id ;;fk:[core_biz_object_type cascade];idx")
     var typeId: String,
     @ApiModelProperty(value = "创建数据时选择特定记录类型的权限")

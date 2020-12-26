@@ -14,7 +14,6 @@ class CoreBizObjectFieldPerms(alias: String? = null) :
     BaseTable<BizObjectFieldPerm>("core_biz_object_field_perm", schema = "hymn", alias = alias) {
 
     val roleId = varchar("role_id")
-    val bizObjectId = varchar("biz_object_id")
     val fieldId = varchar("field_id")
     val pRead = boolean("p_read")
     val pEdit = boolean("p_edit")
@@ -28,7 +27,6 @@ class CoreBizObjectFieldPerms(alias: String? = null) :
 
     override fun doCreateEntity(row: QueryRowSet, withReferences: Boolean) = BizObjectFieldPerm(
         roleId = requireNotNull(row[this.roleId]) { "field BizObjectFieldPerm.roleId should not be null" },
-        bizObjectId = requireNotNull(row[this.bizObjectId]) { "field BizObjectFieldPerm.bizObjectId should not be null" },
         fieldId = requireNotNull(row[this.fieldId]) { "field BizObjectFieldPerm.fieldId should not be null" },
         pRead = requireNotNull(row[this.pRead]) { "field BizObjectFieldPerm.pRead should not be null" },
         pEdit = requireNotNull(row[this.pEdit]) { "field BizObjectFieldPerm.pEdit should not be null" },

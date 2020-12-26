@@ -36,7 +36,6 @@ class BizObjectTypePermDao {
         val accountName = session.accountName
         return dbService.db().update(table) {
             set(it.roleId, e.roleId)
-            set(it.bizObjectId, e.bizObjectId)
             set(it.typeId, e.typeId)
             set(it.visible, e.visible)
             set(it.modifyById, accountId)
@@ -61,7 +60,6 @@ class BizObjectTypePermDao {
         e.modifyBy = accountName
         return dbService.db().insertAndGenerateKey(table) {
             set(it.roleId, e.roleId)
-            set(it.bizObjectId, e.bizObjectId)
             set(it.typeId, e.typeId)
             set(it.visible, e.visible)
             set(it.createDate, e.createBy)

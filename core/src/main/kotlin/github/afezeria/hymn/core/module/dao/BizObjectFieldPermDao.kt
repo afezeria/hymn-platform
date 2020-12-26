@@ -37,7 +37,6 @@ class BizObjectFieldPermDao {
         val accountName = session.accountName
         return dbService.db().update(table) {
             set(it.roleId, e.roleId)
-            set(it.bizObjectId, e.bizObjectId)
             set(it.fieldId, e.fieldId)
             set(it.pRead, e.pRead)
             set(it.pEdit, e.pEdit)
@@ -63,7 +62,6 @@ class BizObjectFieldPermDao {
         e.modifyBy = accountName
         return dbService.db().insertAndGenerateKey(table) {
             set(it.roleId, e.roleId)
-            set(it.bizObjectId, e.bizObjectId)
             set(it.fieldId, e.fieldId)
             set(it.pRead, e.pRead)
             set(it.pEdit, e.pEdit)
@@ -147,7 +145,6 @@ class BizObjectFieldPermDao {
                     e.modifyBy = accountName
 
                     set(it.roleId, e.roleId)
-                    set(it.bizObjectId, e.bizObjectId)
                     set(it.fieldId, e.fieldId)
                     set(it.pRead, e.pRead)
                     set(it.pEdit, e.pEdit)
@@ -181,7 +178,6 @@ class BizObjectFieldPermDao {
         e.modifyBy = accountName
         return dbService.db().insertOrUpdate(table) {
             set(it.roleId, e.roleId)
-            set(it.bizObjectId, e.bizObjectId)
             set(it.fieldId, e.fieldId)
             set(it.pRead, e.pRead)
             set(it.pEdit, e.pEdit)
