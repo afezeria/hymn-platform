@@ -1,25 +1,26 @@
 package github.afezeria.hymn.core.module.dao
 
-import github.afezeria.hymn.core.module.entity.BizObjectTypeOptions
-import github.afezeria.hymn.core.module.table.CoreBizObjectTypeOptionss
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
+import github.afezeria.hymn.core.module.entity.BizObjectTypeOptions
+import github.afezeria.hymn.core.module.table.CoreBizObjectTypeOptionss
 import org.ktorm.dsl.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
 
 /**
-* @author afezeria
-*/
+ * @author afezeria
+ */
 @Component
 class BizObjectTypeOptionsDao {
 
     @Autowired
     private lateinit var dbService: DataBaseService
+
     @Autowired
-    private lateinit var sessionService:SessionService
+    private lateinit var sessionService: SessionService
 
     val table = CoreBizObjectTypeOptionss()
 
@@ -86,7 +87,7 @@ class BizObjectTypeOptionsDao {
             .firstOrNull()
     }
 
-    fun selectByIds(ids: List<String>): MutableList<BizObjectTypeOptions>{
+    fun selectByIds(ids: List<String>): MutableList<BizObjectTypeOptions> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {

@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.BizObjectTypeOptions
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -17,7 +15,7 @@ class BizObjectTypeOptionsDto(
     var fieldId: String,
     @ApiModelProperty(value = "字段关联的字典项id ;;fk:[core_dict_item cascade]")
     var dictItemId: String,
-){
+) {
     fun toEntity(): BizObjectTypeOptions {
         return BizObjectTypeOptions(
             bizObjectId = bizObjectId,

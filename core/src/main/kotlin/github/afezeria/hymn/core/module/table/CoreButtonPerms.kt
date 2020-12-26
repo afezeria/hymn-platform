@@ -1,8 +1,11 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.ButtonPerm
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.boolean
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -27,11 +30,17 @@ class CoreButtonPerms(alias: String? = null) :
         visible = requireNotNull(row[this.visible]) { "field ButtonPerm.visible should not be null" },
     ).also {
         it.id = requireNotNull(row[this.id]) { "field ButtonPerm.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field ButtonPerm.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field ButtonPerm.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field ButtonPerm.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field ButtonPerm.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field ButtonPerm.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field ButtonPerm.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field ButtonPerm.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field ButtonPerm.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field ButtonPerm.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field ButtonPerm.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field ButtonPerm.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field ButtonPerm.modifyDate should not be null" }
     }
 }

@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 业务对象
  * @author afezeria
  */
-@ApiModel(value="业务对象",description = """业务对象""")
+@ApiModel(value = "业务对象", description = """业务对象""")
 data class BizObject(
 
     @ApiModelProperty(value = "业务对象名称，用于页面显示")
@@ -27,7 +26,10 @@ data class BizObject(
     var remoteUrl: String? = null,
     @ApiModelProperty(value = "远程rest验证信息", required = true)
     var remoteToken: String? = null,
-    @ApiModelProperty(value = "模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]", required = true)
+    @ApiModelProperty(
+        value = "模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]",
+        required = true
+    )
     var moduleApi: String? = null,
     @ApiModelProperty(value = "")
     var remark: String,

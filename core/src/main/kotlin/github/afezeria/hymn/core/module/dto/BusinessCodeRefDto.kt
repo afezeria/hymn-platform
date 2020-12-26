@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.BusinessCodeRef
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -23,7 +21,7 @@ class BusinessCodeRefDto(
     var orgId: String? = null,
     @ApiModelProperty(value = "被引用角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String? = null,
-){
+) {
     fun toEntity(): BusinessCodeRef {
         return BusinessCodeRef(
             triggerId = triggerId,

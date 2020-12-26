@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -17,7 +15,7 @@ class BizObjectTypePermDto(
     var typeId: String,
     @ApiModelProperty(value = "创建数据时选择特定记录类型的权限")
     var visible: Boolean,
-){
+) {
     fun toEntity(): BizObjectTypePerm {
         return BizObjectTypePerm(
             roleId = roleId,

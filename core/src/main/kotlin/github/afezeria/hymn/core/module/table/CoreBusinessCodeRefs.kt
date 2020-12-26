@@ -1,8 +1,10 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.BusinessCodeRef
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -35,11 +37,17 @@ class CoreBusinessCodeRefs(alias: String? = null) :
         roleId = row[this.roleId],
     ).also {
         it.id = requireNotNull(row[this.id]) { "field BusinessCodeRef.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field BusinessCodeRef.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field BusinessCodeRef.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field BusinessCodeRef.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field BusinessCodeRef.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field BusinessCodeRef.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field BusinessCodeRef.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field BusinessCodeRef.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field BusinessCodeRef.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field BusinessCodeRef.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field BusinessCodeRef.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field BusinessCodeRef.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field BusinessCodeRef.modifyDate should not be null" }
     }
 }

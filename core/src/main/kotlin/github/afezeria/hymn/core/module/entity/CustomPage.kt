@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 自定义页面
  * @author afezeria
  */
-@ApiModel(value="自定义页面",description = """自定义页面""")
+@ApiModel(value = "自定义页面", description = """自定义页面""")
 data class CustomPage(
 
     @ApiModelProperty(value = "api名称，唯一标识 ;;uk")

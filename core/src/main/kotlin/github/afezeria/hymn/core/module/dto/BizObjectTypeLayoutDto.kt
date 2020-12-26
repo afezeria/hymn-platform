@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.BizObjectTypeLayout
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -17,7 +15,7 @@ class BizObjectTypeLayoutDto(
     var typeId: String,
     @ApiModelProperty(value = "页面布局id ;;fk:[core_biz_object_layout cascade]")
     var layoutId: String,
-){
+) {
     fun toEntity(): BizObjectTypeLayout {
         return BizObjectTypeLayout(
             roleId = roleId,

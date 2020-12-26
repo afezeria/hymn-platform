@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 字典项 ;;uk:[[dict_id code]]
  * @author afezeria
  */
-@ApiModel(value="字典项",description = """字典项 ;;uk:[[dict_id code]]""")
+@ApiModel(value = "字典项", description = """字典项 ;;uk:[[dict_id code]]""")
 data class DictItem(
 
     @ApiModelProperty(value = "所属字典id ;;fk:[core_dict cascade];idx")

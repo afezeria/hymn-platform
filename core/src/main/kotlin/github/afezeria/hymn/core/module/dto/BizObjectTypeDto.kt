@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.BizObjectType
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -17,7 +15,7 @@ class BizObjectTypeDto(
     var active: Boolean,
     @ApiModelProperty(value = "", required = true)
     var remark: String? = null,
-){
+) {
     fun toEntity(): BizObjectType {
         return BizObjectType(
             bizObjectId = bizObjectId,

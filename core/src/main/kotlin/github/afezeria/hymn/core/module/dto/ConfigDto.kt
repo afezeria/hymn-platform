@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.Config
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -13,7 +11,7 @@ class ConfigDto(
     var key: String,
     @ApiModelProperty(value = "")
     var value: String,
-){
+) {
     fun toEntity(): Config {
         return Config(
             key = key,

@@ -1,8 +1,10 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.Org
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -29,11 +31,15 @@ class CoreOrgs(alias: String? = null) :
         parentId = row[this.parentId],
     ).also {
         it.id = requireNotNull(row[this.id]) { "field Org.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field Org.createById should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field Org.createById should not be null" }
         it.createBy = requireNotNull(row[this.createBy]) { "field Org.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field Org.modifyById should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field Org.modifyById should not be null" }
         it.modifyBy = requireNotNull(row[this.modifyBy]) { "field Org.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field Org.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field Org.modifyDate should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field Org.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field Org.modifyDate should not be null" }
     }
 }

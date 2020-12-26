@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 菜单项
  * @author afezeria
  */
-@ApiModel(value="菜单项",description = """菜单项""")
+@ApiModel(value = "菜单项", description = """菜单项""")
 data class CustomMenuItem(
 
     @ApiModelProperty(value = "菜单项名称")

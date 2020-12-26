@@ -1,8 +1,11 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.Account
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.boolean
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -43,11 +46,17 @@ class CoreAccounts(alias: String? = null) :
         roleId = requireNotNull(row[this.roleId]) { "field Account.roleId should not be null" },
     ).also {
         it.id = requireNotNull(row[this.id]) { "field Account.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field Account.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field Account.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field Account.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field Account.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field Account.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field Account.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field Account.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field Account.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field Account.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field Account.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field Account.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field Account.modifyDate should not be null" }
     }
 }

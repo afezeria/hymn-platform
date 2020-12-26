@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.AccountObjectView
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -25,7 +23,7 @@ class AccountObjectViewDto(
     var name: String,
     @ApiModelProperty(value = "视图结构")
     var viewJson: String,
-){
+) {
     fun toEntity(): AccountObjectView {
         return AccountObjectView(
             copyId = copyId,

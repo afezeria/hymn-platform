@@ -1,25 +1,26 @@
 package github.afezeria.hymn.core.module.dao
 
-import github.afezeria.hymn.core.module.entity.CustomButton
-import github.afezeria.hymn.core.module.table.CoreCustomButtons
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
-import org.springframework.beans.factory.annotation.Autowired
+import github.afezeria.hymn.core.module.entity.CustomButton
+import github.afezeria.hymn.core.module.table.CoreCustomButtons
 import org.ktorm.dsl.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
 
 /**
-* @author afezeria
-*/
+ * @author afezeria
+ */
 @Component
 class CustomButtonDao {
 
     @Autowired
     private lateinit var dbService: DataBaseService
+
     @Autowired
-    private lateinit var sessionService:SessionService
+    private lateinit var sessionService: SessionService
 
     val table = CoreCustomButtons()
 
@@ -92,7 +93,7 @@ class CustomButtonDao {
             .firstOrNull()
     }
 
-    fun selectByIds(ids: List<String>): MutableList<CustomButton>{
+    fun selectByIds(ids: List<String>): MutableList<CustomButton> {
         return dbService.db().from(table)
             .select(table.columns)
             .where {

@@ -1,8 +1,11 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.ModuleFunctionPerm
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.boolean
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -29,11 +32,17 @@ class CoreModuleFunctionPerms(alias: String? = null) :
         perm = row[this.perm],
     ).also {
         it.id = requireNotNull(row[this.id]) { "field ModuleFunctionPerm.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field ModuleFunctionPerm.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field ModuleFunctionPerm.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field ModuleFunctionPerm.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field ModuleFunctionPerm.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field ModuleFunctionPerm.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field ModuleFunctionPerm.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field ModuleFunctionPerm.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field ModuleFunctionPerm.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field ModuleFunctionPerm.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field ModuleFunctionPerm.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field ModuleFunctionPerm.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field ModuleFunctionPerm.modifyDate should not be null" }
     }
 }

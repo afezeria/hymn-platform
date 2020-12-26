@@ -1,8 +1,8 @@
 package github.afezeria.hymn.core.module.table
 
+import github.afezeria.hymn.core.module.entity.BizObjectTrigger
 import org.ktorm.dsl.QueryRowSet
 import org.ktorm.schema.*
-import github.afezeria.hymn.core.module.entity.BizObjectTrigger
 
 /**
  * @author afezeria
@@ -41,11 +41,17 @@ class CoreBizObjectTriggers(alias: String? = null) :
         code = requireNotNull(row[this.code]) { "field BizObjectTrigger.code should not be null" },
     ).also {
         it.id = requireNotNull(row[this.id]) { "field BizObjectTrigger.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field BizObjectTrigger.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field BizObjectTrigger.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field BizObjectTrigger.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field BizObjectTrigger.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field BizObjectTrigger.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field BizObjectTrigger.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field BizObjectTrigger.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field BizObjectTrigger.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field BizObjectTrigger.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field BizObjectTrigger.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field BizObjectTrigger.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field BizObjectTrigger.modifyDate should not be null" }
     }
 }

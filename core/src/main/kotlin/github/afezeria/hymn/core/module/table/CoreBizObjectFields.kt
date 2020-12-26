@@ -1,8 +1,8 @@
 package github.afezeria.hymn.core.module.table
 
+import github.afezeria.hymn.core.module.entity.BizObjectField
 import org.ktorm.dsl.QueryRowSet
 import org.ktorm.schema.*
-import github.afezeria.hymn.core.module.entity.BizObjectField
 
 /**
  * @author afezeria
@@ -78,11 +78,17 @@ class CoreBizObjectFields(alias: String? = null) :
         isPredefined = requireNotNull(row[this.isPredefined]) { "field BizObjectField.isPredefined should not be null" },
     ).also {
         it.id = requireNotNull(row[this.id]) { "field BizObjectField.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field BizObjectField.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field BizObjectField.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field BizObjectField.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field BizObjectField.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field BizObjectField.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field BizObjectField.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field BizObjectField.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field BizObjectField.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field BizObjectField.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field BizObjectField.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field BizObjectField.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field BizObjectField.modifyDate should not be null" }
     }
 }

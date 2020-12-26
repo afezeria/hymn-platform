@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.MenuItemPerm
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -15,7 +13,7 @@ class MenuItemPermDto(
     var menuItemId: String,
     @ApiModelProperty(value = "")
     var visible: Boolean,
-){
+) {
     fun toEntity(): MenuItemPerm {
         return MenuItemPerm(
             roleId = roleId,

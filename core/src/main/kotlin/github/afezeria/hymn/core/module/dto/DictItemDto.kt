@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.DictItem
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -17,7 +15,7 @@ class DictItemDto(
     var code: String,
     @ApiModelProperty(value = "父字典中的字典项编码，用于表示多个选项列表的级联关系", required = true)
     var parentCode: String? = null,
-){
+) {
     fun toEntity(): DictItem {
         return DictItem(
             dictId = dictId,

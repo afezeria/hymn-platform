@@ -1,8 +1,11 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.CustomInterface
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.boolean
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -35,11 +38,17 @@ class CoreCustomInterfaces(alias: String? = null) :
         remark = row[this.remark],
     ).also {
         it.id = requireNotNull(row[this.id]) { "field CustomInterface.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field CustomInterface.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field CustomInterface.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field CustomInterface.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field CustomInterface.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field CustomInterface.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field CustomInterface.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field CustomInterface.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field CustomInterface.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field CustomInterface.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field CustomInterface.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field CustomInterface.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field CustomInterface.modifyDate should not be null" }
     }
 }

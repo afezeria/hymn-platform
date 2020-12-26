@@ -1,8 +1,11 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.boolean
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -29,11 +32,17 @@ class CoreBizObjectTypePerms(alias: String? = null) :
         visible = requireNotNull(row[this.visible]) { "field BizObjectTypePerm.visible should not be null" },
     ).also {
         it.id = requireNotNull(row[this.id]) { "field BizObjectTypePerm.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field BizObjectTypePerm.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field BizObjectTypePerm.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field BizObjectTypePerm.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field BizObjectTypePerm.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field BizObjectTypePerm.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field BizObjectTypePerm.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field BizObjectTypePerm.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field BizObjectTypePerm.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field BizObjectTypePerm.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field BizObjectTypePerm.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field BizObjectTypePerm.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field BizObjectTypePerm.modifyDate should not be null" }
     }
 }

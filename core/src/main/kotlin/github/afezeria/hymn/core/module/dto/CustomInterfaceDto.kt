@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.CustomInterface
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -23,7 +21,7 @@ class CustomInterfaceDto(
     var optionText: String? = null,
     @ApiModelProperty(value = "", required = true)
     var remark: String? = null,
-){
+) {
     fun toEntity(): CustomInterface {
         return CustomInterface(
             api = api,

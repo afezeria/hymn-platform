@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.CustomMenuItem
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -21,7 +19,7 @@ class CustomMenuItemDto(
     var clientType: String,
     @ApiModelProperty(value = "图标")
     var icon: String,
-){
+) {
     fun toEntity(): CustomMenuItem {
         return CustomMenuItem(
             name = name,

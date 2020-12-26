@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 定时任务
  * @author afezeria
  */
-@ApiModel(value="定时任务",description = """定时任务""")
+@ApiModel(value = "定时任务", description = """定时任务""")
 data class CronJob(
 
     @ApiModelProperty(value = "是否启用")

@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 组织
  * @author afezeria
  */
-@ApiModel(value="组织",description = """组织""")
+@ApiModel(value = "组织", description = """组织""")
 data class Org(
 
     @ApiModelProperty(value = "")

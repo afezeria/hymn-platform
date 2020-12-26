@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.Org
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -17,7 +15,7 @@ class OrgDto(
     var deputyDirectorId: String? = null,
     @ApiModelProperty(value = "上级组织id ;; idx", required = true)
     var parentId: String? = null,
-){
+) {
     fun toEntity(): Org {
         return Org(
             name = name,

@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 共享代码 可以在接口、触发器中调用或使用在定时任务中
  * @author afezeria
  */
-@ApiModel(value="共享代码",description = """共享代码 可以在接口、触发器中调用或使用在定时任务中""")
+@ApiModel(value = "共享代码", description = """共享代码 可以在接口、触发器中调用或使用在定时任务中""")
 data class SharedCode(
 
     @ApiModelProperty(value = "api名称,也是代码中的函数名称 ;;uk")

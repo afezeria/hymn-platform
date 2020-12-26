@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.CustomComponent
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -15,7 +13,7 @@ class CustomComponentDto(
     var name: String,
     @ApiModelProperty(value = "组件html代码")
     var code: String,
-){
+) {
     fun toEntity(): CustomComponent {
         return CustomComponent(
             api = api,

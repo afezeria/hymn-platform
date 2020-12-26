@@ -10,7 +10,7 @@ import java.util.*
  * 业务对象详情页面布局 ;;uk:[[biz_object_id name]]
  * @author afezeria
  */
-@ApiModel(value="业务对象详情页面布局",description = """业务对象详情页面布局 ;;uk:[[biz_object_id name]]""")
+@ApiModel(value = "业务对象详情页面布局", description = """业务对象详情页面布局 ;;uk:[[biz_object_id name]]""")
 data class BizObjectLayout(
 
     @ApiModelProperty(value = "引用对象 ;;fk:[core_biz_object cascade]")

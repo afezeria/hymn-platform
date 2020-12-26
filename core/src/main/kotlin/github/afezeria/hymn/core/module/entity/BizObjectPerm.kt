@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 对象权限 ;;uk:[[role_id biz_object_id]]
  * @author afezeria
  */
-@ApiModel(value="对象权限",description = """对象权限 ;;uk:[[role_id biz_object_id]]""")
+@ApiModel(value = "对象权限", description = """对象权限 ;;uk:[[role_id biz_object_id]]""")
 data class BizObjectPerm(
 
     @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx")

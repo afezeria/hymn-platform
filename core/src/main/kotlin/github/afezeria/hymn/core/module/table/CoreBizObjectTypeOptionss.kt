@@ -1,14 +1,20 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.BizObjectTypeOptions
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
  */
 class CoreBizObjectTypeOptionss(alias: String? = null) :
-    BaseTable<BizObjectTypeOptions>("core_biz_object_type_options", schema = "hymn", alias = alias) {
+    BaseTable<BizObjectTypeOptions>(
+        "core_biz_object_type_options",
+        schema = "hymn",
+        alias = alias
+    ) {
 
     val bizObjectId = varchar("biz_object_id")
     val typeId = varchar("type_id")
@@ -29,11 +35,17 @@ class CoreBizObjectTypeOptionss(alias: String? = null) :
         dictItemId = requireNotNull(row[this.dictItemId]) { "field BizObjectTypeOptions.dictItemId should not be null" },
     ).also {
         it.id = requireNotNull(row[this.id]) { "field BizObjectTypeOptions.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field BizObjectTypeOptions.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field BizObjectTypeOptions.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field BizObjectTypeOptions.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field BizObjectTypeOptions.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field BizObjectTypeOptions.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field BizObjectTypeOptions.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field BizObjectTypeOptions.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field BizObjectTypeOptions.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field BizObjectTypeOptions.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field BizObjectTypeOptions.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field BizObjectTypeOptions.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field BizObjectTypeOptions.modifyDate should not be null" }
     }
 }

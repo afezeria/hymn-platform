@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.AccountMenuLayout
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -15,7 +13,7 @@ class AccountMenuLayoutDto(
     var clientType: String,
     @ApiModelProperty(value = "布局json字符串")
     var layoutJson: String,
-){
+) {
     fun toEntity(): AccountMenuLayout {
         return AccountMenuLayout(
             accountId = accountId,

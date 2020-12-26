@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.BizObjectMapping
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -17,7 +15,7 @@ class BizObjectMappingDto(
     var targetBizObjectId: String,
     @ApiModelProperty(value = "目标对象记录类型id ;;fk:[core_biz_object_type cascade]")
     var targetTypeId: String,
-){
+) {
     fun toEntity(): BizObjectMapping {
         return BizObjectMapping(
             sourceBizObjectId = sourceBizObjectId,

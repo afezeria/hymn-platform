@@ -1,9 +1,8 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.CronJob
+import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
 
 /**
  * @author afezeria
@@ -19,7 +18,7 @@ class CronJobDto(
     var startDateTime: LocalDateTime,
     @ApiModelProperty(value = "任务结束时间")
     var endDateTime: LocalDateTime,
-){
+) {
     fun toEntity(): CronJob {
         return CronJob(
             active = active,

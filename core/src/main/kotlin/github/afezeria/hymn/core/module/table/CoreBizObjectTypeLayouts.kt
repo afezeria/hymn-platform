@@ -1,8 +1,10 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.BizObjectTypeLayout
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -29,11 +31,17 @@ class CoreBizObjectTypeLayouts(alias: String? = null) :
         layoutId = requireNotNull(row[this.layoutId]) { "field BizObjectTypeLayout.layoutId should not be null" },
     ).also {
         it.id = requireNotNull(row[this.id]) { "field BizObjectTypeLayout.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field BizObjectTypeLayout.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field BizObjectTypeLayout.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field BizObjectTypeLayout.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field BizObjectTypeLayout.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field BizObjectTypeLayout.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field BizObjectTypeLayout.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field BizObjectTypeLayout.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field BizObjectTypeLayout.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field BizObjectTypeLayout.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field BizObjectTypeLayout.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field BizObjectTypeLayout.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field BizObjectTypeLayout.modifyDate should not be null" }
     }
 }

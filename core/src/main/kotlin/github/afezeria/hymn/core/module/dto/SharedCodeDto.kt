@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.SharedCode
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -19,7 +17,7 @@ class SharedCodeDto(
     var lang: String,
     @ApiModelProperty(value = "用于给编译器或其他组件设置参数(格式参照具体实现）", required = true)
     var optionText: String? = null,
-){
+) {
     fun toEntity(): SharedCode {
         return SharedCode(
             api = api,

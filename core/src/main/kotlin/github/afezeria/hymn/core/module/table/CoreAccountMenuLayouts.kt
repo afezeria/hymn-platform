@@ -1,8 +1,10 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.AccountMenuLayout
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -27,11 +29,17 @@ class CoreAccountMenuLayouts(alias: String? = null) :
         layoutJson = requireNotNull(row[this.layoutJson]) { "field AccountMenuLayout.layoutJson should not be null" },
     ).also {
         it.id = requireNotNull(row[this.id]) { "field AccountMenuLayout.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field AccountMenuLayout.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field AccountMenuLayout.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field AccountMenuLayout.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field AccountMenuLayout.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field AccountMenuLayout.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field AccountMenuLayout.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field AccountMenuLayout.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field AccountMenuLayout.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field AccountMenuLayout.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field AccountMenuLayout.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field AccountMenuLayout.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field AccountMenuLayout.modifyDate should not be null" }
     }
 }

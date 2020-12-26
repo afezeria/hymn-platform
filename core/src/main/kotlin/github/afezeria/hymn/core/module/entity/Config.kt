@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 系统配置表
  * @author afezeria
  */
-@ApiModel(value="系统配置表",description = """系统配置表""")
+@ApiModel(value = "系统配置表", description = """系统配置表""")
 data class Config(
 
     @ApiModelProperty(value = "键 ;; idx")

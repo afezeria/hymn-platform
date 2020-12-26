@@ -1,8 +1,10 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.SharedCode
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -31,11 +33,17 @@ class CoreSharedCodes(alias: String? = null) :
         optionText = row[this.optionText],
     ).also {
         it.id = requireNotNull(row[this.id]) { "field SharedCode.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field SharedCode.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field SharedCode.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field SharedCode.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field SharedCode.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field SharedCode.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field SharedCode.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field SharedCode.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field SharedCode.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field SharedCode.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field SharedCode.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field SharedCode.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field SharedCode.modifyDate should not be null" }
     }
 }

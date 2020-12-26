@@ -1,9 +1,8 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.Account
+import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
 
 /**
  * @author afezeria
@@ -31,7 +30,7 @@ class AccountDto(
     var orgId: String,
     @ApiModelProperty(value = "所属角色id ;; fk:[core_role restrict];idx")
     var roleId: String,
-){
+) {
     fun toEntity(): Account {
         return Account(
             lockTime = lockTime,

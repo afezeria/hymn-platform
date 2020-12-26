@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 自定义按钮
  * @author afezeria
  */
-@ApiModel(value="自定义按钮",description = """自定义按钮""")
+@ApiModel(value = "自定义按钮", description = """自定义按钮""")
 data class CustomButton(
 
     @ApiModelProperty(value = "", required = true)

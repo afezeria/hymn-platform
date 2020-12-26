@@ -1,8 +1,10 @@
 package github.afezeria.hymn.core.module.table
 
-import org.ktorm.dsl.QueryRowSet
-import org.ktorm.schema.*
 import github.afezeria.hymn.core.module.entity.CustomButton
+import org.ktorm.dsl.QueryRowSet
+import org.ktorm.schema.BaseTable
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
@@ -35,11 +37,17 @@ class CoreCustomButtons(alias: String? = null) :
         content = requireNotNull(row[this.content]) { "field CustomButton.content should not be null" },
     ).also {
         it.id = requireNotNull(row[this.id]) { "field CustomButton.id should not be null" }
-        it.createById = requireNotNull(row[this.createById]) { "field CustomButton.createById should not be null" }
-        it.createBy = requireNotNull(row[this.createBy]) { "field CustomButton.createBy should not be null" }
-        it.modifyById = requireNotNull(row[this.modifyById]) { "field CustomButton.modifyById should not be null" }
-        it.modifyBy = requireNotNull(row[this.modifyBy]) { "field CustomButton.modifyBy should not be null" }
-        it.createDate = requireNotNull(row[this.createDate]) { "field CustomButton.createDate should not be null" }
-        it.modifyDate = requireNotNull(row[this.modifyDate]) { "field CustomButton.modifyDate should not be null" }
+        it.createById =
+            requireNotNull(row[this.createById]) { "field CustomButton.createById should not be null" }
+        it.createBy =
+            requireNotNull(row[this.createBy]) { "field CustomButton.createBy should not be null" }
+        it.modifyById =
+            requireNotNull(row[this.modifyById]) { "field CustomButton.modifyById should not be null" }
+        it.modifyBy =
+            requireNotNull(row[this.modifyBy]) { "field CustomButton.modifyBy should not be null" }
+        it.createDate =
+            requireNotNull(row[this.createDate]) { "field CustomButton.createDate should not be null" }
+        it.modifyDate =
+            requireNotNull(row[this.modifyDate]) { "field CustomButton.modifyDate should not be null" }
     }
 }

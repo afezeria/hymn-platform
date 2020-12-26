@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 用户
  * @author afezeria
  */
-@ApiModel(value="用户",description = """用户""")
+@ApiModel(value = "用户", description = """用户""")
 data class Account(
 
     @ApiModelProperty(value = "锁定时间，当前时间小于等于lock_time表示帐号被锁定")

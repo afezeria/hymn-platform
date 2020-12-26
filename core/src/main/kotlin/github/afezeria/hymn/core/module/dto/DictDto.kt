@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.Dict
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -19,7 +17,7 @@ class DictDto(
     var api: String,
     @ApiModelProperty(value = "", required = true)
     var remark: String? = null,
-){
+) {
     fun toEntity(): Dict {
         return Dict(
             fieldId = fieldId,

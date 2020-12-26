@@ -1,9 +1,7 @@
 package github.afezeria.hymn.core.module.dto
 
 import github.afezeria.hymn.core.module.entity.BizObjectTrigger
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -29,7 +27,7 @@ class BizObjectTriggerDto(
     var event: String,
     @ApiModelProperty(value = "触发器代码")
     var code: String,
-){
+) {
     fun toEntity(): BizObjectTrigger {
         return BizObjectTrigger(
             active = active,
