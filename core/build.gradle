@@ -14,6 +14,7 @@ dependencies {
 
 
     compile group: "org.ktorm", name: "ktorm-core", version: "$ktormVersion"
+    compile group: "org.ktorm", name: "ktorm-support-postgresql", version: "$ktormVersion"
 
     testCompile "org.postgresql:postgresql:42.2.10"
     testCompile group: "com.zaxxer", name: "HikariCP", version: "3.4.5"
