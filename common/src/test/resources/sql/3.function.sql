@@ -315,8 +315,10 @@ declare
     field      hymn.core_biz_object_field;
     column_arr text[] := ARRAY [' id as id '];
 begin
+    raise notice 'rebuild_object_view';
     select * into obj from hymn.core_biz_object where id = obj_id;
     if FOUND then
+        raise notice 'rebuild_object_view loop';
         for field in select *
                      from hymn.core_biz_object_field
                      where active = true
@@ -488,7 +490,7 @@ declare
     fun_tail         text := E'    return new;\nend;\n$$;\n';
     trigger_name     text;
     trigger_fun_name text;
-    join_view_name  text;
+    join_view_name   text;
     sql_str          text;
 begin
     select * into obj from hymn.core_biz_object where id = obj_id;
@@ -527,7 +529,7 @@ begin
                    and cbof.type = 'mreference'
                    and cbof.biz_object_id = obj_id
         loop
-            join_view_name :=field.join_view_name;
+            join_view_name := field.join_view_name;
             fun_body := fun_body ||
                         format(
                                 E'    if new.%I is null then\n'
@@ -1076,42 +1078,43 @@ begin
 
     record_new.active = true;
 
-    --     如果当前新增对象是业务对象则申请可用的数据表
-    if record_new.type = 'custom' then
---         业务对象自动在api后面添加 __co 的后缀
-        record_new.api := record_new.api || '__co';
-        update hymn.core_table_obj_mapping sctom
-        set obj_api= record_new.api
-        where table_name = (
-            select s.table_name
-            from hymn.core_table_obj_mapping s
-            where s.obj_api is null
-              and s.table_name like 'core_data_table_%'
-            limit 1 for update skip locked)
-        returning table_name into record_new.source_table;
-        if not FOUND then
-            raise exception '自定义对象的数量已达到上限';
-        end if;
-    elseif record_new.type = 'module' then
-        if record_new.source_table is null then
-            raise exception '创建模块对象必须指定数据表';
-        end if;
-        perform pn.nspname, pc.relname
-        from pg_class pc
-                 left join pg_namespace pn on pn.oid = pc.relnamespace
-        where pc.relkind = 'r'
-          and pn.nspname = 'hymn'
-          and pc.relname = record_new.source_table;
-        if not FOUND then
-            raise exception '表 %.% 不存在','hymn',record_new.source_table;
-        end if;
-    elseif record_new.type = 'remote' then
-        record_new.api = record_new.api || '__cr';
-    end if;
+    --     --     如果当前新增对象是业务对象则申请可用的数据表
+--     if record_new.type = 'custom' then
+-- --         业务对象自动在api后面添加 __co 的后缀
+--         record_new.api := record_new.api || '__co';
+--         update hymn.core_table_obj_mapping sctom
+--         set obj_api= record_new.api
+--         where table_name = (
+--             select s.table_name
+--             from hymn.core_table_obj_mapping s
+--             where s.obj_api is null
+--               and s.table_name like 'core_data_table_%'
+--             limit 1 for update skip locked)
+--         returning table_name into record_new.source_table;
+--         if not FOUND then
+--             raise exception '自定义对象的数量已达到上限';
+--         end if;
+--     elseif record_new.type = 'module' then
+--         if record_new.source_table is null then
+--             raise exception '创建模块对象必须指定数据表';
+--         end if;
+--         perform pn.nspname, pc.relname
+--         from pg_class pc
+--                  left join pg_namespace pn on pn.oid = pc.relnamespace
+--         where pc.relkind = 'r'
+--           and pn.nspname = 'hymn'
+--           and pc.relname = record_new.source_table;
+--         if not FOUND then
+--             raise exception '表 %.% 不存在','hymn',record_new.source_table;
+--         end if;
+--     elseif record_new.type = 'remote' then
+--         record_new.api = record_new.api || '__cr';
+--     end if;
     return record_new;
 end;
 $$;
 comment on function hymn.object_trigger_fun_before_insert() is '业务对象 before insert 触发器函数, 申请数据表';
+-- c00开头为通用逻辑触发器
 drop trigger if exists c00_object_before_insert on hymn.core_biz_object;
 create trigger c00_object_before_insert
     before insert
@@ -1119,38 +1122,264 @@ create trigger c00_object_before_insert
     for each row
 execute function hymn.object_trigger_fun_before_insert();
 
-create or replace function hymn.object_trigger_fun_after_insert() returns trigger
+create or replace function hymn.custom_object_trigger_fun() returns trigger
     language plpgsql as
 $$
 declare
-    record_new hymn.core_biz_object := new;
+    record_new       hymn.core_biz_object := new;
+    record_old       hymn.core_biz_object := old;
+    ref_field_arr    text;
+    sql_str          text;
+    trigger_fun_name text;
+    trigger_name     text;
 begin
-    if record_new.type = 'custom' then
---     创建历史记录触发器
-        perform hymn.rebuild_data_table_history_trigger(record_new.id);
+    if record_old.type = 'custom' or record_new.type = 'custom' then
+        if tg_when = 'BEFORE' then
+            if tg_op = 'INSERT' then
+--                 业务对象自动在api后面添加 __co 的后缀
+                record_new.api := record_new.api || '__co';
+--                 申请数据表
+                update hymn.core_table_obj_mapping sctom
+                set obj_api= record_new.api
+                where table_name = (
+                    select s.table_name
+                    from hymn.core_table_obj_mapping s
+                    where s.obj_api is null
+                      and s.table_name like 'core_data_table_%'
+                    limit 1 for update skip locked)
+                returning table_name into record_new.source_table;
+                if not FOUND then
+                    raise exception '自定义对象的数量已达到上限';
+                end if;
+            end if;
+            if tg_op = 'UPDATE' then
+                if record_old.active = true and record_new.active = false then
+                    --                      停用对象时删除视图
+--                      停用对象时不能有其他对象引用当前对象
+                    select array_agg(scbo.api || '.' || scbof.api)::text
+                    into ref_field_arr
+                    from hymn.core_biz_object scbo
+                             inner join hymn.core_biz_object_field scbof
+                                        on scbof.biz_object_id = scbo.id
+                    where scbof.type in ('mreference', 'reference', 'master_slave')
+                      and scbof.active = true
+                      and scbo.active = true
+                      and scbof.ref_id = record_new.id;
+                    if ref_field_arr is not null then
+                        raise exception '不能停用当前对象，以下字段引用了当前对象：%',ref_field_arr;
+                    end if;
+                    sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
+                    execute sql_str;
+                end if;
+--                  启用时重建视图
+                if record_old.active = false and record_new.active = true then
+                    perform hymn.rebuild_object_view(record_old.id);
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+            if tg_op = 'INSERT' then
+--                 创建历史记录触发器
+                perform hymn.rebuild_data_table_history_trigger(record_new.id);
+--                 创建视图
+                perform hymn.rebuild_object_view(record_new.id);
+
+            end if;
+            if tg_op = 'DELETE' then
+                -- 删除数据
+                sql_str := format('truncate hymn.%I', record_old.source_table);
+                execute sql_str;
+                -- 删除历史记录
+                sql_str := format('drop table hymn_view.%s_history cascade', record_old.api);
+                execute sql_str;
+--             删除序列
+                sql_str := format('drop sequence if exists hymn_view.%s_auto_number_seq cascade',
+                                  record_old.api);
+                execute sql_str;
+--             删除引用当前对象的多选关联字段
+                delete
+                from hymn.core_biz_object_field
+                where type = 'mreference'
+                  and ref_id = record_old.id;
+
+                --     删除触发器及触发器函数
+                for trigger_fun_name,trigger_name in select pp.proname, pt.tgname
+                                                     from pg_trigger pt
+                                                              left join pg_class pc on pt.tgrelid = pc.oid
+                                                              left join pg_namespace pn on pn.oid = pc.relnamespace
+                                                              left join pg_proc pp on pt.tgfoid = pp.oid
+                                                     where pc.relname = record_old.source_table
+                                                       and pn.nspname = 'hymn'
+                    loop
+                        sql_str := format('drop trigger if exists %I on hymn.%I cascade;',
+                                          trigger_name,
+                                          old.source_table);
+                        execute sql_str;
+                        sql_str := format('drop function if exists %I;', trigger_fun_name);
+                        execute sql_str;
+                    end loop;
+                --     归还字段和表资源
+                update hymn.core_table_obj_mapping
+                set obj_api=null
+                where table_name = record_old.source_table;
+                update hymn.core_column_field_mapping
+                set field_api=null
+                where table_name = record_old.source_table;
+            end if;
+        end if;
     end if;
-    if record_new.type in ('custom', 'module') then
-        perform hymn.rebuild_object_view(record_new.id);
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
     end if;
-    return null;
 end;
 $$;
-comment on function hymn.object_trigger_fun_after_insert() is '业务对象 after insert 触发器函数, 重置自动编号字段的递增序列，向 core_biz_object_field 表中插入系统默认字段数据';
-drop trigger if exists c00_object_after_insert on hymn.core_biz_object;
-create trigger c00_object_after_insert
-    after insert
+comment on function hymn.custom_object_trigger_fun() is '业务对象对象类型为custom的自定义对象的触发器';
+-- c10开头为根据type字段区分逻辑的触发器
+drop trigger if exists c10_custom_object_before on hymn.core_biz_object;
+create trigger c10_custom_object_before
+    before insert or update
     on hymn.core_biz_object
     for each row
-execute function hymn.object_trigger_fun_after_insert();
+execute function hymn.custom_object_trigger_fun();
+drop trigger if exists c10_custom_object_after on hymn.core_biz_object;
+create trigger c10_custom_object_after
+    after insert or delete
+    on hymn.core_biz_object
+    for each row
+execute function hymn.custom_object_trigger_fun();
 
-create or replace function hymn.object_trigger_fun_before_update() returns trigger
+create or replace function hymn.module_object_trigger_fun() returns trigger
     language plpgsql as
 $$
 declare
     record_new    hymn.core_biz_object := new;
     record_old    hymn.core_biz_object := old;
-    sql_str       text;
     ref_field_arr text;
+    sql_str       text;
+begin
+    if record_old.type = 'module' or record_new.type = 'module' then
+        if tg_when = 'BEFORE' then
+            if tg_op = 'INSERT' then
+                raise notice 'module trigger before insert';
+
+                if record_new.source_table is null then
+                    raise exception '创建模块对象必须指定数据表';
+                end if;
+                perform pn.nspname, pc.relname
+                from pg_class pc
+                         left join pg_namespace pn on pn.oid = pc.relnamespace
+                where pc.relkind = 'r'
+                  and pn.nspname = 'hymn'
+                  and pc.relname = record_new.source_table;
+                if not FOUND then
+                    raise exception '表 %.% 不存在','hymn',record_new.source_table;
+                end if;
+            end if;
+            if tg_op = 'UPDATE' then
+                raise notice 'module trigger before update';
+                if record_old.active = true and record_new.active = false then
+                    --                      停用对象时删除视图
+--                      停用对象时不能有其他对象引用当前对象
+                    select array_agg(scbo.api || '.' || scbof.api)::text
+                    into ref_field_arr
+                    from hymn.core_biz_object scbo
+                             inner join hymn.core_biz_object_field scbof
+                                        on scbof.biz_object_id = scbo.id
+                    where scbof.type in ('mreference', 'reference', 'master_slave')
+                      and scbof.active = true
+                      and scbo.active = true
+                      and scbof.ref_id = record_new.id;
+                    if ref_field_arr is not null then
+                        raise exception '不能停用当前对象，以下字段引用了当前对象：%',ref_field_arr;
+                    end if;
+                    sql_str :=
+                            format('drop view if exists hymn_view.%I cascade', record_old.api);
+                    execute sql_str;
+                end if;
+--                  启用时重建视图
+                if record_old.active = false and record_new.active = true then
+                    perform hymn.rebuild_object_view(record_old.id);
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+            if tg_op = 'INSERT' then
+                raise notice 'module trigger after insert';
+--                 创建视图
+                perform hymn.rebuild_object_view(record_new.id);
+            end if;
+            --             模块对象删除时清理数据等操作需要手动执行
+--             if tg_op = 'DELETE' then
+--
+--             end if;
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end ;
+$$;
+comment on function hymn.module_object_trigger_fun() is '业务对象对象类型为module的自定义对象的触发器';
+drop trigger if exists c10_module_object_before on hymn.core_biz_object;
+create trigger c10_module_object_before
+    before insert or update
+    on hymn.core_biz_object
+    for each row
+execute function hymn.module_object_trigger_fun();
+drop trigger if exists c10_module_object_after on hymn.core_biz_object;
+create trigger c10_module_object_after
+    after insert or delete
+    on hymn.core_biz_object
+    for each row
+execute function hymn.module_object_trigger_fun();
+
+create or replace function hymn.remote_object_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_new hymn.core_biz_object := new;
+    record_old hymn.core_biz_object := old;
+begin
+    if record_old.type = 'remote' or record_new.type = 'remote' then
+        if tg_when = 'BEFORE' then
+            if tg_op = 'INSERT' then
+                record_new.api = record_new.api || '__cr';
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.remote_object_trigger_fun() is '业务对象对象类型为remote的自定义对象的触发器';
+drop trigger if exists c10_remote_object_before on hymn.core_biz_object;
+create trigger c10_remote_object_before
+    before insert
+    on hymn.core_biz_object
+    for each row
+execute function hymn.remote_object_trigger_fun();
+-- drop trigger if exists c10_remote_object_after on hymn.core_biz_object;
+-- create trigger c10_remote_object_after
+--     after insert
+--     on hymn.core_biz_object
+--     for each row
+-- execute function hymn.remote_object_trigger_fun();
+
+create or replace function hymn.object_trigger_fun_before_update() returns trigger
+    language plpgsql as
+$$
+declare
+    record_new hymn.core_biz_object := new;
+    record_old hymn.core_biz_object := old;
 begin
     --     停用对对象停用状态未改变时不能更新其他状态
     if record_new.active = false and record_old.active = false then
@@ -1160,26 +1389,8 @@ begin
     if record_new.source_table <> record_old.source_table then
         raise exception '不能修改source_table';
     end if;
---     停用对象时删除视图
-    if record_old.active = true and record_new.active = false then
---         停用对象时不能有其他对象引用当前对象
-        select array_agg(scbo.api || '.' || scbof.api)::text
-        into ref_field_arr
-        from hymn.core_biz_object scbo
-                 inner join hymn.core_biz_object_field scbof on scbof.biz_object_id = scbo.id
-        where scbof.type in ('mreference', 'reference', 'master_slave')
-          and scbof.active = true
-          and scbo.active = true
-          and scbof.ref_id = record_new.id;
-        if ref_field_arr is not null then
-            raise exception '不能停用当前对象，以下字段引用了当前对象：%',ref_field_arr;
-        end if;
-        sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
-        execute sql_str;
-    end if;
---     启用时重建视图
-    if record_old.active = false and record_new.active = true then
-        perform hymn.rebuild_object_view(record_old.id);
+    if record_new.type <> record_old.type then
+        raise exception '不能修改对象类型';
     end if;
 
     -- 停用/启用是独立操作，不能同时修改其他数据
@@ -1221,70 +1432,6 @@ create trigger c00_object_before_delete
     for each row
 execute function hymn.object_trigger_fun_before_delete();
 
-create or replace function hymn.object_trigger_fun_after_delete() returns trigger
-    language plpgsql as
-$$
-declare
-    record_old       hymn.core_biz_object := old;
-    sql_str          text;
-    trigger_name     text;
-    trigger_fun_name text;
-begin
-    if record_old.type <> 'remote' then
-        --     删除视图
---         sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
---         execute sql_str;
-        if record_old.type = 'custom' then
-            -- 删除数据
-            sql_str := format('truncate hymn.%I', record_old.source_table);
-            execute sql_str;
-            -- 删除历史记录
-            sql_str := format('drop table hymn_view.%s_history cascade', record_old.api);
-            execute sql_str;
---             删除序列
-            sql_str := format('drop sequence if exists hymn_view.%s_auto_number_seq cascade',
-                              record_old.api);
-            execute sql_str;
---             删除引用当前对象的多选关联字段
-            delete
-            from hymn.core_biz_object_field
-            where type = 'mreference'
-              and ref_id = record_old.id;
-
-            --     删除触发器及触发器函数
-            for trigger_fun_name,trigger_name in select pp.proname, pt.tgname
-                                                 from pg_trigger pt
-                                                          left join pg_class pc on pt.tgrelid = pc.oid
-                                                          left join pg_namespace pn on pn.oid = pc.relnamespace
-                                                          left join pg_proc pp on pt.tgfoid = pp.oid
-                                                 where pc.relname = record_old.source_table
-                                                   and pn.nspname = 'hymn'
-                loop
-                    sql_str := format('drop trigger if exists %I on hymn.%I cascade;', trigger_name,
-                                      old.source_table);
-                    execute sql_str;
-                    sql_str := format('drop function if exists %I;', trigger_fun_name);
-                    execute sql_str;
-                end loop;
-            --     归还字段和表资源
-            update hymn.core_table_obj_mapping
-            set obj_api=null
-            where table_name = record_old.source_table;
-            update hymn.core_column_field_mapping
-            set field_api=null
-            where table_name = record_old.source_table;
-        end if;
-    end if;
-    return record_old;
-end;
-$$;
-comment on function hymn.object_trigger_fun_after_delete() is '业务对象 after delete 触发器函数，删除数据、历史记录和视图';
-drop trigger if exists c00_object_after_delete on hymn.core_biz_object;
-create trigger c00_object_after_delete
-    after delete
-    on hymn.core_biz_object
-    for each row
-execute function hymn.object_trigger_fun_after_delete();
 
 -- flag:field 业务对象字段触发器
 create or replace function hymn.field_trigger_fun_before_insert() returns trigger
