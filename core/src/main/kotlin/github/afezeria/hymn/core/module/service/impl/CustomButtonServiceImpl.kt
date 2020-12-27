@@ -46,18 +46,10 @@ class CustomButtonServiceImpl : CustomButtonService {
         val i = customButtonDao.update(e)
 
 //        更新按钮权限数据
-        val allRoleId = roleService.findIdList()
-        val roleIdSet = allRoleId.toMutableSet()
-        val buttonPermDtoList = mutableListOf<ButtonPermDto>()
-        dto.permList.forEach {
-            if (roleIdSet.remove(it.roleId)) {
-                it.buttonId = id
-                buttonPermDtoList.add(it)
-            }
-        }
-        roleIdSet.forEach {
-            buttonPermDtoList.add(ButtonPermDto(it, id))
-        }
+        val roleIdSet = roleService.findIdList().toMutableSet()
+        val buttonPermDtoList = dto.permList
+            .filter { roleIdSet.contains(it.roleId) }
+            .onEach { it.buttonId=id }
         buttonPermService.batchSave(buttonPermDtoList)
 
         return i

@@ -15,6 +15,8 @@ class BizObjectTypeDto(
     var active: Boolean,
     @ApiModelProperty(value = "", required = true)
     var remark: String? = null,
+    @ApiModelProperty(value = "类型权限")
+    var permList: List<BizObjectTypePermDto> = emptyList(),
 ) {
     fun toEntity(): BizObjectType {
         return BizObjectType(

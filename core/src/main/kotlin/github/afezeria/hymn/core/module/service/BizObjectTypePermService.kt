@@ -4,6 +4,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
 import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.SessionService
+import github.afezeria.hymn.core.module.dto.BizObjectPermDto
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
@@ -34,5 +35,12 @@ interface BizObjectTypePermService {
         typeId: String,
     ): MutableList<BizObjectTypePerm>
 
+
+    fun batchCreate(dtoList: List<BizObjectTypePermDto>): MutableList<Int>
+
+    /**
+     * insert or update on conflict (roleId,typeId)
+     */
+    fun batchSave(dtoList: List<BizObjectTypePermDto>): MutableList<Int>
 
 }

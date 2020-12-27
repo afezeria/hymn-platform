@@ -58,18 +58,10 @@ class BizObjectServiceImpl : BizObjectService {
         val i = bizObjectDao.update(e)
 
 //        更新对象权限
-        val allRoleId = roleService.findIdList()
-        val roleIdSet = allRoleId.toMutableSet()
-        val objPermDtoList = mutableListOf<BizObjectPermDto>()
-        dto.permList.forEach {
-            if (roleIdSet.remove(it.roleId)) {
-                it.bizObjectId = id
-                objPermDtoList.add(it)
-            }
-        }
-        roleIdSet.forEach {
-            objPermDtoList.add(BizObjectPermDto(it, id))
-        }
+        val roleIdSet = roleService.findIdList().toMutableSet()
+        val objPermDtoList = dto.permList
+            .filter { roleIdSet.contains(it.roleId) }
+            .onEach { it.bizObjectId=id }
         objectPermService.batchSave(objPermDtoList)
 
         return i

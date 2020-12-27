@@ -1,14 +1,17 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.BizObjectType
-import github.afezeria.hymn.core.module.dao.BizObjectTypeDao
-import github.afezeria.hymn.core.module.dto.BizObjectTypeDto
-import github.afezeria.hymn.core.module.service.BizObjectTypeService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.BizObjectTypeDao
+import github.afezeria.hymn.core.module.dto.BizObjectTypeDto
+import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
+import github.afezeria.hymn.core.module.entity.BizObjectType
+import github.afezeria.hymn.core.module.service.BizObjectTypePermService
+import github.afezeria.hymn.core.module.service.BizObjectTypeService
+import github.afezeria.hymn.core.module.service.RoleService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -18,6 +21,12 @@ class BizObjectTypeServiceImpl : BizObjectTypeService {
 
     @Autowired
     private lateinit var bizObjectTypeDao: BizObjectTypeDao
+
+    @Autowired
+    private lateinit var roleService: RoleService
+
+    @Autowired
+    private lateinit var typePermService: BizObjectTypePermService
 
     @Autowired
     private lateinit var dbService: DataBaseService
@@ -35,12 +44,35 @@ class BizObjectTypeServiceImpl : BizObjectTypeService {
             ?: throw DataNotFoundException("BizObjectType".msgById(id))
         dto.update(e)
         val i = bizObjectTypeDao.update(e)
+        //            更新类型权限数据
+        val roleIdSet = roleService.findIdList().toSet()
+        val typePermDtoList = dto.permList
+            .filter { roleIdSet.contains(it.roleId) }
+            .onEach { it.typeId = id }
+        typePermService.batchSave(typePermDtoList)
+
         return i
     }
 
     override fun create(dto: BizObjectTypeDto): String {
         val e = dto.toEntity()
         val id = bizObjectTypeDao.insert(e)
+
+        //            创建类型权限数据
+        val allRoleId = roleService.findIdList()
+        val roleIdSet = allRoleId.toMutableSet()
+        val typePermDtoList = mutableListOf<BizObjectTypePermDto>()
+        dto.permList.forEach {
+            if (roleIdSet.remove(it.roleId)) {
+                it.typeId = id
+                typePermDtoList.add(it)
+            }
+        }
+        roleIdSet.forEach {
+            typePermDtoList.add(BizObjectTypePermDto(it, id))
+        }
+        typePermService.batchCreate(typePermDtoList)
+
         return id
     }
 
@@ -62,7 +94,7 @@ class BizObjectTypeServiceImpl : BizObjectTypeService {
         bizObjectId: String,
         name: String,
     ): BizObjectType? {
-        return bizObjectTypeDao.selectByBizObjectIdAndName(bizObjectId,name,)
+        return bizObjectTypeDao.selectByBizObjectIdAndName(bizObjectId, name)
     }
 
 

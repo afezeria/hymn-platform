@@ -47,18 +47,10 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
         val i = bizObjectFieldDao.update(e)
 
 //        创建字段权限数据
-        val allRoleId = roleService.findIdList()
-        val roleIdSet = allRoleId.toMutableSet()
-        val fieldPermDtoList = mutableListOf<BizObjectFieldPermDto>()
-        dto.permList.forEach {
-            if (roleIdSet.remove(it.roleId)) {
-                it.fieldId = id
-                fieldPermDtoList.add(it)
-            }
-        }
-        roleIdSet.forEach {
-            fieldPermDtoList.add(BizObjectFieldPermDto(it, id))
-        }
+        val roleIdSet = roleService.findIdList().toMutableSet()
+        val fieldPermDtoList = dto.permList
+            .filter { roleIdSet.contains(it.roleId) }
+            .onEach { it.fieldId = id }
         fieldPermService.batchSave(fieldPermDtoList)
 
         return i

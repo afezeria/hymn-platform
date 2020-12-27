@@ -7,6 +7,7 @@ import github.afezeria.hymn.core.module.service.MenuItemPermService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
+import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -70,5 +71,12 @@ class MenuItemPermServiceImpl : MenuItemPermService {
         return menuItemPermDao.selectByMenuItemId(menuItemId,)
     }
 
+    override fun batchCreate(dtoList: List<MenuItemPermDto>): MutableList<Int> {
+        return menuItemPermDao.batchInsert(dtoList.map { it.toEntity() })
+    }
+
+    override fun batchSave(dtoList: List<MenuItemPermDto>): MutableList<Int> {
+        return menuItemPermDao.batchInsertOrUpdate(dtoList.map{it.toEntity()})
+    }
 
 }

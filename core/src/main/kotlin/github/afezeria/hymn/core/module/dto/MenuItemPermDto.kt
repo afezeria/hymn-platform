@@ -12,7 +12,7 @@ class MenuItemPermDto(
     @ApiModelProperty(value = "菜单项id ;;fk:[core_custom_menu_item cascade];idx")
     var menuItemId: String,
     @ApiModelProperty(value = "")
-    var visible: Boolean,
+    var visible: Boolean = false,
 ) {
     fun toEntity(): MenuItemPerm {
         return MenuItemPerm(

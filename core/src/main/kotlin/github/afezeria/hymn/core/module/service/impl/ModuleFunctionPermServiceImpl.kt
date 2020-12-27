@@ -7,6 +7,7 @@ import github.afezeria.hymn.core.module.service.ModuleFunctionPermService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
+import github.afezeria.hymn.core.module.dto.MenuItemPermDto
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -73,4 +74,11 @@ class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
     }
 
 
+    override fun batchCreate(dtoList: List<ModuleFunctionPermDto>): MutableList<Int> {
+        return moduleFunctionPermDao.batchInsert(dtoList.map { it.toEntity() })
+    }
+
+    override fun batchSave(dtoList: List<ModuleFunctionPermDto>): MutableList<Int> {
+        return moduleFunctionPermDao.batchInsertOrUpdate(dtoList.map{it.toEntity()})
+    }
 }
