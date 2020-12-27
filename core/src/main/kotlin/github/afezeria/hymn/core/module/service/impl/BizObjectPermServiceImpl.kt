@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.BizObjectPerm
-import github.afezeria.hymn.core.module.dao.BizObjectPermDao
-import github.afezeria.hymn.core.module.dto.BizObjectPermDto
-import github.afezeria.hymn.core.module.service.BizObjectPermService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.BizObjectPermDao
+import github.afezeria.hymn.core.module.dto.BizObjectPermDto
+import github.afezeria.hymn.core.module.entity.BizObjectPerm
+import github.afezeria.hymn.core.module.service.BizObjectPermService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -49,7 +49,7 @@ class BizObjectPermServiceImpl : BizObjectPermService {
     }
 
     override fun batchSave(dtoList: List<BizObjectPermDto>): MutableList<Int> {
-        return bizObjectPermDao.batchInsertOrUpdate(dtoList.map{it.toEntity()})
+        return bizObjectPermDao.batchInsertOrUpdate(dtoList.map { it.toEntity() })
     }
 
     override fun findAll(): MutableList<BizObjectPerm> {
@@ -70,19 +70,19 @@ class BizObjectPermServiceImpl : BizObjectPermService {
         roleId: String,
         bizObjectId: String,
     ): BizObjectPerm? {
-        return bizObjectPermDao.selectByRoleIdAndBizObjectId(roleId,bizObjectId,)
+        return bizObjectPermDao.selectByRoleIdAndBizObjectId(roleId, bizObjectId)
     }
 
     override fun findByRoleId(
         roleId: String,
     ): MutableList<BizObjectPerm> {
-        return bizObjectPermDao.selectByRoleId(roleId,)
+        return bizObjectPermDao.selectByRoleId(roleId)
     }
 
     override fun findByBizObjectId(
         bizObjectId: String,
     ): MutableList<BizObjectPerm> {
-        return bizObjectPermDao.selectByBizObjectId(bizObjectId,)
+        return bizObjectPermDao.selectByBizObjectId(bizObjectId)
     }
 
 

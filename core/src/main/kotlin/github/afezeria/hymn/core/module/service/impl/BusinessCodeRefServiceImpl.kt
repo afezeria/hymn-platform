@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.BusinessCodeRef
-import github.afezeria.hymn.core.module.dao.BusinessCodeRefDao
-import github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
-import github.afezeria.hymn.core.module.service.BusinessCodeRefService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.BusinessCodeRefDao
+import github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
+import github.afezeria.hymn.core.module.entity.BusinessCodeRef
+import github.afezeria.hymn.core.module.service.BusinessCodeRefService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -61,19 +61,19 @@ class BusinessCodeRefServiceImpl : BusinessCodeRefService {
     override fun findByFieldId(
         fieldId: String,
     ): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.selectByFieldId(fieldId,)
+        return businessCodeRefDao.selectByFieldId(fieldId)
     }
 
     override fun findByOrgId(
         orgId: String,
     ): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.selectByOrgId(orgId,)
+        return businessCodeRefDao.selectByOrgId(orgId)
     }
 
     override fun findByRoleId(
         roleId: String,
     ): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.selectByRoleId(roleId,)
+        return businessCodeRefDao.selectByRoleId(roleId)
     }
 
 

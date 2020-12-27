@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.Org
-import github.afezeria.hymn.core.module.dao.OrgDao
-import github.afezeria.hymn.core.module.dto.OrgDto
-import github.afezeria.hymn.core.module.service.OrgService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.OrgDao
+import github.afezeria.hymn.core.module.dto.OrgDto
+import github.afezeria.hymn.core.module.entity.Org
+import github.afezeria.hymn.core.module.service.OrgService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -61,7 +61,7 @@ class OrgServiceImpl : OrgService {
     override fun findByParentId(
         parentId: String,
     ): MutableList<Org> {
-        return orgDao.selectByParentId(parentId,)
+        return orgDao.selectByParentId(parentId)
     }
 
 

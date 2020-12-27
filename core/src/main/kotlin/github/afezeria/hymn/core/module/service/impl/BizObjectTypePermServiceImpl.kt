@@ -1,13 +1,12 @@
 package github.afezeria.hymn.core.module.service.impl
 
 import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.util.*
+import github.afezeria.hymn.common.util.DataNotFoundException
+import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectTypePermDao
-import github.afezeria.hymn.core.module.dto.BizObjectPermDto
 import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
 import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
 import github.afezeria.hymn.core.module.service.BizObjectTypePermService
-import github.afezeria.hymn.core.module.service.RoleService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -80,9 +79,8 @@ class BizObjectTypePermServiceImpl : BizObjectTypePermService {
     }
 
     override fun batchSave(dtoList: List<BizObjectTypePermDto>): MutableList<Int> {
-        return bizObjectTypePermDao.batchInsertOrUpdate(dtoList.map{it.toEntity()})
+        return bizObjectTypePermDao.batchInsertOrUpdate(dtoList.map { it.toEntity() })
     }
-
 
 
 }

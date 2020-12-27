@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.AccountObjectView
-import github.afezeria.hymn.core.module.dao.AccountObjectViewDao
-import github.afezeria.hymn.core.module.dto.AccountObjectViewDto
-import github.afezeria.hymn.core.module.service.AccountObjectViewService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.AccountObjectViewDao
+import github.afezeria.hymn.core.module.dto.AccountObjectViewDto
+import github.afezeria.hymn.core.module.entity.AccountObjectView
+import github.afezeria.hymn.core.module.service.AccountObjectViewService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -61,13 +61,13 @@ class AccountObjectViewServiceImpl : AccountObjectViewService {
     override fun findByAccountId(
         accountId: String,
     ): MutableList<AccountObjectView> {
-        return accountObjectViewDao.selectByAccountId(accountId,)
+        return accountObjectViewDao.selectByAccountId(accountId)
     }
 
     override fun findByBizObjectId(
         bizObjectId: String,
     ): MutableList<AccountObjectView> {
-        return accountObjectViewDao.selectByBizObjectId(bizObjectId,)
+        return accountObjectViewDao.selectByBizObjectId(bizObjectId)
     }
 
 

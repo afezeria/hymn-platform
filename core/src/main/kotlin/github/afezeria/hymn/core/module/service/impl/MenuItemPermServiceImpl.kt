@@ -1,15 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.MenuItemPerm
-import github.afezeria.hymn.core.module.dao.MenuItemPermDao
-import github.afezeria.hymn.core.module.dto.MenuItemPermDto
-import github.afezeria.hymn.core.module.service.MenuItemPermService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.MenuItemPermDao
+import github.afezeria.hymn.core.module.dto.MenuItemPermDto
+import github.afezeria.hymn.core.module.entity.MenuItemPerm
+import github.afezeria.hymn.core.module.service.MenuItemPermService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -62,13 +61,13 @@ class MenuItemPermServiceImpl : MenuItemPermService {
     override fun findByRoleId(
         roleId: String,
     ): MutableList<MenuItemPerm> {
-        return menuItemPermDao.selectByRoleId(roleId,)
+        return menuItemPermDao.selectByRoleId(roleId)
     }
 
     override fun findByMenuItemId(
         menuItemId: String,
     ): MutableList<MenuItemPerm> {
-        return menuItemPermDao.selectByMenuItemId(menuItemId,)
+        return menuItemPermDao.selectByMenuItemId(menuItemId)
     }
 
     override fun batchCreate(dtoList: List<MenuItemPermDto>): MutableList<Int> {
@@ -76,7 +75,7 @@ class MenuItemPermServiceImpl : MenuItemPermService {
     }
 
     override fun batchSave(dtoList: List<MenuItemPermDto>): MutableList<Int> {
-        return menuItemPermDao.batchInsertOrUpdate(dtoList.map{it.toEntity()})
+        return menuItemPermDao.batchInsertOrUpdate(dtoList.map { it.toEntity() })
     }
 
 }

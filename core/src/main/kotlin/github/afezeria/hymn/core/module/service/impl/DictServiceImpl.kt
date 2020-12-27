@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.Dict
-import github.afezeria.hymn.core.module.dao.DictDao
-import github.afezeria.hymn.core.module.dto.DictDto
-import github.afezeria.hymn.core.module.service.DictService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.DictDao
+import github.afezeria.hymn.core.module.dto.DictDto
+import github.afezeria.hymn.core.module.entity.Dict
+import github.afezeria.hymn.core.module.service.DictService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -61,7 +61,7 @@ class DictServiceImpl : DictService {
     override fun findByApi(
         api: String,
     ): Dict? {
-        return dictDao.selectByApi(api,)
+        return dictDao.selectByApi(api)
     }
 
 

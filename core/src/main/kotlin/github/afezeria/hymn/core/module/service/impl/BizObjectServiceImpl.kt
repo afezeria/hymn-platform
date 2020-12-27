@@ -61,7 +61,7 @@ class BizObjectServiceImpl : BizObjectService {
         val roleIdSet = roleService.findIdList().toMutableSet()
         val objPermDtoList = dto.permList
             .filter { roleIdSet.contains(it.roleId) }
-            .onEach { it.bizObjectId=id }
+            .onEach { it.bizObjectId = id }
         objectPermService.batchSave(objPermDtoList)
 
         return i

@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.SharedCode
-import github.afezeria.hymn.core.module.dao.SharedCodeDao
-import github.afezeria.hymn.core.module.dto.SharedCodeDto
-import github.afezeria.hymn.core.module.service.SharedCodeService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.SharedCodeDao
+import github.afezeria.hymn.core.module.dto.SharedCodeDto
+import github.afezeria.hymn.core.module.entity.SharedCode
+import github.afezeria.hymn.core.module.service.SharedCodeService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -61,7 +61,7 @@ class SharedCodeServiceImpl : SharedCodeService {
     override fun findByApi(
         api: String,
     ): SharedCode? {
-        return sharedCodeDao.selectByApi(api,)
+        return sharedCodeDao.selectByApi(api)
     }
 
 

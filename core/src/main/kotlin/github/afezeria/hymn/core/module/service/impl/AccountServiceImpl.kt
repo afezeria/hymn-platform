@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.Account
-import github.afezeria.hymn.core.module.dao.AccountDao
-import github.afezeria.hymn.core.module.dto.AccountDto
-import github.afezeria.hymn.core.module.service.AccountService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.AccountDao
+import github.afezeria.hymn.core.module.dto.AccountDto
+import github.afezeria.hymn.core.module.entity.Account
+import github.afezeria.hymn.core.module.service.AccountService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -61,19 +61,19 @@ class AccountServiceImpl : AccountService {
     override fun findByLeaderId(
         leaderId: String,
     ): MutableList<Account> {
-        return accountDao.selectByLeaderId(leaderId,)
+        return accountDao.selectByLeaderId(leaderId)
     }
 
     override fun findByOrgId(
         orgId: String,
     ): MutableList<Account> {
-        return accountDao.selectByOrgId(orgId,)
+        return accountDao.selectByOrgId(orgId)
     }
 
     override fun findByRoleId(
         roleId: String,
     ): MutableList<Account> {
-        return accountDao.selectByRoleId(roleId,)
+        return accountDao.selectByRoleId(roleId)
     }
 
 

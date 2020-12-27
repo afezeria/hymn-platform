@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.AccountMenuLayout
-import github.afezeria.hymn.core.module.dao.AccountMenuLayoutDao
-import github.afezeria.hymn.core.module.dto.AccountMenuLayoutDto
-import github.afezeria.hymn.core.module.service.AccountMenuLayoutService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.AccountMenuLayoutDao
+import github.afezeria.hymn.core.module.dto.AccountMenuLayoutDto
+import github.afezeria.hymn.core.module.entity.AccountMenuLayout
+import github.afezeria.hymn.core.module.service.AccountMenuLayoutService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -61,7 +61,7 @@ class AccountMenuLayoutServiceImpl : AccountMenuLayoutService {
     override fun findByAccountId(
         accountId: String,
     ): MutableList<AccountMenuLayout> {
-        return accountMenuLayoutDao.selectByAccountId(accountId,)
+        return accountMenuLayoutDao.selectByAccountId(accountId)
     }
 
 

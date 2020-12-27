@@ -49,7 +49,7 @@ class CustomButtonServiceImpl : CustomButtonService {
         val roleIdSet = roleService.findIdList().toMutableSet()
         val buttonPermDtoList = dto.permList
             .filter { roleIdSet.contains(it.roleId) }
-            .onEach { it.buttonId=id }
+            .onEach { it.buttonId = id }
         buttonPermService.batchSave(buttonPermDtoList)
 
         return i

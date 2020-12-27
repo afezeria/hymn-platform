@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.BizObjectLayout
-import github.afezeria.hymn.core.module.dao.BizObjectLayoutDao
-import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
-import github.afezeria.hymn.core.module.service.BizObjectLayoutService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.BizObjectLayoutDao
+import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
+import github.afezeria.hymn.core.module.entity.BizObjectLayout
+import github.afezeria.hymn.core.module.service.BizObjectLayoutService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -62,7 +62,7 @@ class BizObjectLayoutServiceImpl : BizObjectLayoutService {
         bizObjectId: String,
         name: String,
     ): BizObjectLayout? {
-        return bizObjectLayoutDao.selectByBizObjectIdAndName(bizObjectId,name,)
+        return bizObjectLayoutDao.selectByBizObjectIdAndName(bizObjectId, name)
     }
 
 

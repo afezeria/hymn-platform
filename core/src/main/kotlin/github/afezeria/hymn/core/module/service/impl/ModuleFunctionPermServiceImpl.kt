@@ -1,15 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.ModuleFunctionPerm
-import github.afezeria.hymn.core.module.dao.ModuleFunctionPermDao
-import github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
-import github.afezeria.hymn.core.module.service.ModuleFunctionPermService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import github.afezeria.hymn.core.module.dto.MenuItemPermDto
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.ModuleFunctionPermDao
+import github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
+import github.afezeria.hymn.core.module.entity.ModuleFunctionPerm
+import github.afezeria.hymn.core.module.service.ModuleFunctionPermService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -64,13 +63,17 @@ class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
         moduleApi: String,
         functionApi: String,
     ): ModuleFunctionPerm? {
-        return moduleFunctionPermDao.selectByRoleIdAndModuleApiAndFunctionApi(roleId,moduleApi,functionApi,)
+        return moduleFunctionPermDao.selectByRoleIdAndModuleApiAndFunctionApi(
+            roleId,
+            moduleApi,
+            functionApi,
+        )
     }
 
     override fun findByRoleId(
         roleId: String,
     ): MutableList<ModuleFunctionPerm> {
-        return moduleFunctionPermDao.selectByRoleId(roleId,)
+        return moduleFunctionPermDao.selectByRoleId(roleId)
     }
 
 
@@ -79,6 +82,6 @@ class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
     }
 
     override fun batchSave(dtoList: List<ModuleFunctionPermDto>): MutableList<Int> {
-        return moduleFunctionPermDao.batchInsertOrUpdate(dtoList.map{it.toEntity()})
+        return moduleFunctionPermDao.batchInsertOrUpdate(dtoList.map { it.toEntity() })
     }
 }

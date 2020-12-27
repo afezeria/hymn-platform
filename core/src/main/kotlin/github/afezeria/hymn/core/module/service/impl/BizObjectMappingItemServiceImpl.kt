@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.BizObjectMappingItem
-import github.afezeria.hymn.core.module.dao.BizObjectMappingItemDao
-import github.afezeria.hymn.core.module.dto.BizObjectMappingItemDto
-import github.afezeria.hymn.core.module.service.BizObjectMappingItemService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.BizObjectMappingItemDao
+import github.afezeria.hymn.core.module.dto.BizObjectMappingItemDto
+import github.afezeria.hymn.core.module.entity.BizObjectMappingItem
+import github.afezeria.hymn.core.module.service.BizObjectMappingItemService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -56,7 +56,6 @@ class BizObjectMappingItemServiceImpl : BizObjectMappingItemService {
     override fun findByIds(ids: List<String>): MutableList<BizObjectMappingItem> {
         return bizObjectMappingItemDao.selectByIds(ids)
     }
-
 
 
 }

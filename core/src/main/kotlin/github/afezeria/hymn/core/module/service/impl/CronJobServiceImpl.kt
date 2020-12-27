@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.CronJob
-import github.afezeria.hymn.core.module.dao.CronJobDao
-import github.afezeria.hymn.core.module.dto.CronJobDto
-import github.afezeria.hymn.core.module.service.CronJobService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.CronJobDao
+import github.afezeria.hymn.core.module.dto.CronJobDto
+import github.afezeria.hymn.core.module.entity.CronJob
+import github.afezeria.hymn.core.module.service.CronJobService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -61,7 +61,7 @@ class CronJobServiceImpl : CronJobService {
     override fun findBySharedCodeId(
         sharedCodeId: String,
     ): MutableList<CronJob> {
-        return cronJobDao.selectBySharedCodeId(sharedCodeId,)
+        return cronJobDao.selectBySharedCodeId(sharedCodeId)
     }
 
 

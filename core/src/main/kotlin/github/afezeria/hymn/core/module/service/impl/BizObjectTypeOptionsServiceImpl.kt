@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.BizObjectTypeOptions
-import github.afezeria.hymn.core.module.dao.BizObjectTypeOptionsDao
-import github.afezeria.hymn.core.module.dto.BizObjectTypeOptionsDto
-import github.afezeria.hymn.core.module.service.BizObjectTypeOptionsService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.BizObjectTypeOptionsDao
+import github.afezeria.hymn.core.module.dto.BizObjectTypeOptionsDto
+import github.afezeria.hymn.core.module.entity.BizObjectTypeOptions
+import github.afezeria.hymn.core.module.service.BizObjectTypeOptionsService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -61,13 +61,13 @@ class BizObjectTypeOptionsServiceImpl : BizObjectTypeOptionsService {
     override fun findByBizObjectId(
         bizObjectId: String,
     ): MutableList<BizObjectTypeOptions> {
-        return bizObjectTypeOptionsDao.selectByBizObjectId(bizObjectId,)
+        return bizObjectTypeOptionsDao.selectByBizObjectId(bizObjectId)
     }
 
     override fun findByTypeId(
         typeId: String,
     ): MutableList<BizObjectTypeOptions> {
-        return bizObjectTypeOptionsDao.selectByTypeId(typeId,)
+        return bizObjectTypeOptionsDao.selectByTypeId(typeId)
     }
 
 

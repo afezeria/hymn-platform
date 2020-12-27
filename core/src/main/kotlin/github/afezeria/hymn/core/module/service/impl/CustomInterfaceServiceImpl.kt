@@ -1,14 +1,14 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.core.module.entity.CustomInterface
-import github.afezeria.hymn.core.module.dao.CustomInterfaceDao
-import github.afezeria.hymn.core.module.dto.CustomInterfaceDto
-import github.afezeria.hymn.core.module.service.CustomInterfaceService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.CustomInterfaceDao
+import github.afezeria.hymn.core.module.dto.CustomInterfaceDto
+import github.afezeria.hymn.core.module.entity.CustomInterface
+import github.afezeria.hymn.core.module.service.CustomInterfaceService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -61,7 +61,7 @@ class CustomInterfaceServiceImpl : CustomInterfaceService {
     override fun findByApi(
         api: String,
     ): CustomInterface? {
-        return customInterfaceDao.selectByApi(api,)
+        return customInterfaceDao.selectByApi(api)
     }
 
 
