@@ -126,8 +126,7 @@ create table hymn.core_org
     bigint005          bigint
 );
 comment on table hymn.core_org is '组织';
--- comment on column hymn.core_org.code is '组织代码，数字加小写字母的字符串，父组织的代码为子组织前缀，每个组织最多36个子组织，eg： 总公司：1a 子公司1：1a0 子公司2：1a1';
-comment on column hymn.core_org.parent_id is '上级组织id ;; idx';
+comment on column hymn.core_org.parent_id is '上级组织id ;; fk:[core_org restrict];idx';
 comment on column hymn.core_org.director_id is '部门领导id';
 comment on column hymn.core_org.deputy_director_id is '部门副领导id';
 comment on column hymn.core_org.text001 is '##ignore 预留字段';
@@ -431,7 +430,7 @@ comment on column hymn.core_biz_object.source_table is '实际表名，例： co
 comment on column hymn.core_biz_object.module_api is '模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]';
 comment on column hymn.core_biz_object.can_insert is '模块对象及远程对象是否可以新增数据';
 comment on column hymn.core_biz_object.can_update is '模块对象是及远程对象否可以更新数据';
-comment on column hymn.core_biz_object.can_update is '模块对象是及远程对象否可以删除数据';
+comment on column hymn.core_biz_object.can_delete is '模块对象是及远程对象否可以删除数据';
 comment on column hymn.core_biz_object.type is '对象类型, 模块对象不能在系统后台进行新增删除，底层表单和相关数据需要手动创建，外部对象没有底层表，通过url调用外部接口，只能在应用层脚本中使用 ;; optional_value:[custom(自定义对象),module(模块对象),remote(远程对象)]';
 comment on column hymn.core_biz_object.remote_url is '远程rest接口地址，系统通过该地址调用远程数据';
 comment on column hymn.core_biz_object.remote_token is '远程rest验证信息';
@@ -766,6 +765,7 @@ create table hymn.core_biz_object_mapping_item
     modify_date              timestamptz not null
 );
 comment on table hymn.core_biz_object_mapping_item is '对象映射关系表明细 描述映射规则';
+comment on column hymn.core_biz_object_mapping_item.mapping_id is '对象映射关系表id ;;fk:[core_biz_object_mapping cascade]';
 comment on column hymn.core_biz_object_mapping_item.source_field_id is '源字段id，如果直接从源字段映射到目标字段则 ref_field 和 ref_field_biz_object_id 都为空 ;;fk:[core_biz_object_field cascade]';
 comment on column hymn.core_biz_object_mapping_item.target_field_id is '目标字段id ;;fk:[core_biz_object_field cascade]';
 comment on column hymn.core_biz_object_mapping_item.ref_field1_id is '引用字段1 ;;fk:[core_biz_object_field cascade]';
@@ -866,6 +866,7 @@ create table hymn.core_menu_item_perm
 comment on table hymn.core_menu_item_perm is '菜单项权限';
 comment on column hymn.core_menu_item_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
 comment on column hymn.core_menu_item_perm.menu_item_id is '菜单项id ;;fk:[core_custom_menu_item cascade];idx';
+comment on column hymn.core_menu_item_perm.visible is '是否可见';
 
 
 

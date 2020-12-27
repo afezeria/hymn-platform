@@ -993,6 +993,7 @@ create table hymn.core_business_code_ref_history
     field_id text,
     org_id text,
     role_id text,
+    ref_shared_code_id text,
     create_by_id text,
     create_by text,
     modify_by_id text,

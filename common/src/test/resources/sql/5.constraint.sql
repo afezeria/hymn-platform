@@ -85,6 +85,8 @@ alter table hymn.core_biz_object_mapping
 alter table hymn.core_biz_object_mapping
     add foreign key (target_type_id) references hymn.core_biz_object_type on delete cascade;
 alter table hymn.core_biz_object_mapping_item
+    add foreign key (mapping_id) references hymn.core_biz_object_mapping on delete cascade;
+alter table hymn.core_biz_object_mapping_item
     add foreign key (source_field_id) references hymn.core_biz_object_field on delete cascade;
 alter table hymn.core_biz_object_mapping_item
     add foreign key (target_field_id) references hymn.core_biz_object_field on delete cascade;
@@ -166,6 +168,8 @@ alter table hymn.core_business_code_ref
     add foreign key (role_id) references hymn.core_role on delete cascade;
 create index core_business_code_ref_role_id_idx
     on hymn.core_business_code_ref (role_id);
+alter table hymn.core_business_code_ref
+    add foreign key (ref_shared_code_id) references hymn.core_shared_code on delete cascade;
 alter table hymn.core_button_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
 create index core_button_perm_role_id_idx
@@ -234,6 +238,8 @@ alter table hymn.core_module_function_perm
     add foreign key (function_api) references hymn.core_module_function on delete cascade;
 create index core_module_function_perm_function_api_idx
     on hymn.core_module_function_perm (function_api);
+alter table hymn.core_org
+    add foreign key (parent_id) references hymn.core_org on delete restrict;
 create index core_org_parent_id_idx
     on hymn.core_org (parent_id);
 alter table hymn.core_shared_code
