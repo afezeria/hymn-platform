@@ -16,7 +16,7 @@ import java.util.*
 data class {{name}}(
 
 {{#table.fields}}
-    @ApiModelProperty(value = "{{comment}}"{{^not_null}}, required = true{{/not_null}})
+    @ApiModelProperty(value = "{{comment}}"{{#not_null}}, required = true{{/not_null}})
     var {{field_name}}: {{java_type}}{{^not_null}}? = null{{/not_null}},
 {{/table.fields}}
 ) {
