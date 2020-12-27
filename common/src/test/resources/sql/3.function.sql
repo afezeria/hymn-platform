@@ -463,22 +463,6 @@ $$;
 comment on function hymn.get_join_view_name(t_api text, f_api text) is '获取业务对象多选关联字段对应的中间表视图名';
 
 
-create or replace function hymn.delete_multiple_reference_field(record_old hymn.core_biz_object_field) returns void
-    language plpgsql as
-$$
-declare
-    sql_str text;
-begin
-    if record_old.type = 'mreference' then
-        perform hymn.rebuild_multiple_refernece_trigger_function(record_old.biz_object_id);
-        sql_str := format('drop table if exists hymn.%I cascade;',
-                          hymn.get_join_table_name(record_old.join_view_name));
-        execute sql_str;
-        return;
-    end if;
-end;
-$$;
-comment on function hymn.delete_multiple_reference_field(record_old hymn.core_biz_object_field) is '删除多选字段';
 create or replace function hymn.rebuild_multiple_refernece_trigger_function(obj_id text) returns void
     language plpgsql as
 $BODY$
@@ -1748,14 +1732,13 @@ begin
     if record_old.is_predefined = false then
         if obj.type <> 'remote' then
             if record_old.type = 'mreference' then
-                perform hymn.delete_multiple_reference_field(record_old);
+                perform hymn.rebuild_multiple_refernece_trigger_function(record_old.biz_object_id);
+--                 删除中间表
+                sql_str := format('drop table if exists hymn.%I cascade;',
+                                  hymn.get_join_table_name(record_old.join_view_name));
+                execute sql_str;
+
             end if;
-            --             if record_old.type = 'mreference' then
---
---                 sql_str := format('drop table if exists hymn.%I cascade;',
---                                   hymn.get_join_table_name(record_old.join_view_name));
---                 execute sql_str;
---             end if;
             --     如果found为true说明只删除了字段，需要执行数据清理和归还字段资源
 --     如果为false说明执行的是删除对象的流程，相关的操作由对象触发器处理
             if FOUND then
