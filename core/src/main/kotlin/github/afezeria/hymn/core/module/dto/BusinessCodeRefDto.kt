@@ -21,6 +21,8 @@ class BusinessCodeRefDto(
     var orgId: String? = null,
     @ApiModelProperty(value = "被引用角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String? = null,
+    @ApiModelProperty(value = "被引用共享代码id ;;fk:[core_shared_code cascade];idx", required = true)
+    var refSharedCodeId: String? = null,
 ) {
     fun toEntity(): BusinessCodeRef {
         return BusinessCodeRef(
@@ -31,6 +33,7 @@ class BusinessCodeRefDto(
             fieldId = fieldId,
             orgId = orgId,
             roleId = roleId,
+            refSharedCodeId = refSharedCodeId,
         )
     }
 
@@ -43,6 +46,7 @@ class BusinessCodeRefDto(
             it.fieldId = fieldId
             it.orgId = orgId
             it.roleId = roleId
+            it.refSharedCodeId = refSharedCodeId
         }
     }
 }

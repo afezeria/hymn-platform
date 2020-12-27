@@ -1,16 +1,15 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 业务代码引用关系表
  * @author afezeria
  */
-@ApiModel(value="业务代码引用关系表",description = """业务代码引用关系表""")
+@ApiModel(value = "业务代码引用关系表", description = """业务代码引用关系表""")
 data class BusinessCodeRef(
 
     @ApiModelProperty(value = "触发器id ;;fk:[core_biz_object_trigger cascade]", required = true)
@@ -27,6 +26,8 @@ data class BusinessCodeRef(
     var orgId: String? = null,
     @ApiModelProperty(value = "被引用角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String? = null,
+    @ApiModelProperty(value = "被引用共享代码id ;;fk:[core_shared_code cascade];idx", required = true)
+    var refSharedCodeId: String? = null,
 ) {
 
     lateinit var id: String

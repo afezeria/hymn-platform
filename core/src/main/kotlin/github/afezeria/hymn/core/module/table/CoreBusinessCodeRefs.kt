@@ -19,6 +19,7 @@ class CoreBusinessCodeRefs(alias: String? = null) :
     val fieldId = varchar("field_id")
     val orgId = varchar("org_id")
     val roleId = varchar("role_id")
+    val refSharedCodeId=varchar("ref_shared_code_id")
     val id = varchar("id")
     val createById = varchar("create_by_id")
     val createBy = varchar("create_by")
@@ -35,6 +36,7 @@ class CoreBusinessCodeRefs(alias: String? = null) :
         fieldId = row[this.fieldId],
         orgId = row[this.orgId],
         roleId = row[this.roleId],
+        refSharedCodeId=row[this.refSharedCodeId]
     ).also {
         it.id = requireNotNull(row[this.id]) { "field BusinessCodeRef.id should not be null" }
         it.createById =

@@ -1034,6 +1034,7 @@ create table hymn.core_business_code_ref
     field_id       text,
     org_id         text,
     role_id        text,
+    ref_shared_code_id text,
     create_by_id   text      not null,
     create_by      text      not null,
     modify_by_id   text      not null,
@@ -1049,6 +1050,7 @@ comment on column hymn.core_business_code_ref.biz_object_id is '被引用对象i
 comment on column hymn.core_business_code_ref.field_id is '被引用字段id ;;fk:[core_biz_object_field cascade];idx';
 comment on column hymn.core_business_code_ref.org_id is '被引用组织id ;;fk:[core_org cascade];idx';
 comment on column hymn.core_business_code_ref.role_id is '被引用角色id ;;fk:[core_role cascade];idx';
+comment on column hymn.core_business_code_ref.ref_shared_code_id is '被引用共享代码id ;;fk:[core_shared_code cascade]';
 
 drop table if exists hymn.core_cron_job;
 create table hymn.core_cron_job

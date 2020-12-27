@@ -46,6 +46,10 @@ fun main() {
 
     @Language("JavaScript")
     val js = """
+
+function tt(a:String){
+
+}
         function test(a,b) {
         abc.bb([1,2]);
         abc.bb({1:2});
@@ -59,12 +63,12 @@ fun main() {
     val jsbind = polyglot.getBindings("js")
     jsbind.putMember("abc", Abc())
     polyglot.eval("js", js)
-    (1..5).forEach {
-        Thread.sleep(1000 * 5)
-        println("sleep")
-    }
+//    (1..5).forEach {
+//        Thread.sleep(1000 * 5)
+//        println("sleep")
+//    }
     val test = jsbind.getMember("test")
-    test.execute(listOf(1, 2), mapOf("a" to "b"))
+        test.execute(listOf(1, 2), mapOf("a" to "b"))
 }
 
 class Abc {

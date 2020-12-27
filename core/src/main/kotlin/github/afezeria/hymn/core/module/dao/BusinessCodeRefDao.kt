@@ -42,6 +42,7 @@ class BusinessCodeRefDao {
             set(it.fieldId, e.fieldId)
             set(it.orgId, e.orgId)
             set(it.roleId, e.roleId)
+            set(it.refSharedCodeId, e.refSharedCodeId)
             set(it.modifyById, accountId)
             set(it.modifyBy, accountName)
             set(it.modifyDate, LocalDateTime.now())
