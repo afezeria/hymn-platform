@@ -12,9 +12,9 @@ import java.time.LocalDateTime
 @ApiModel(value = "系统配置表", description = """系统配置表""")
 data class Config(
 
-    @ApiModelProperty(value = "键 ;; idx")
+    @ApiModelProperty(value = "键 ;; idx", required = true)
     var key: String,
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "", required = true)
     var value: String,
 ) {
 

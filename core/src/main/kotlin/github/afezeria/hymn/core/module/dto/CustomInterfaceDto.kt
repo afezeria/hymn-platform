@@ -7,19 +7,19 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class CustomInterfaceDto(
-    @ApiModelProperty(value = "接口api名称，唯一标识 ;; uk")
+    @ApiModelProperty(value = "接口api名称，唯一标识 ;; uk", required = true)
     var api: String,
-    @ApiModelProperty(value = "接口名称")
+    @ApiModelProperty(value = "接口名称", required = true)
     var name: String,
-    @ApiModelProperty(value = "接口代码")
+    @ApiModelProperty(value = "接口代码", required = true)
     var code: String,
-    @ApiModelProperty(value = "是否启用")
+    @ApiModelProperty(value = "是否启用", required = true)
     var active: Boolean,
-    @ApiModelProperty(value = "语言 ;; optional_value:[javascript]")
+    @ApiModelProperty(value = "语言 ;; optional_value:[javascript]", required = true)
     var lang: String,
-    @ApiModelProperty(value = "用于给编译器或其他组件设置参数(格式参照具体实现）", required = true)
+    @ApiModelProperty(value = "用于给编译器或其他组件设置参数(格式参照具体实现）")
     var optionText: String? = null,
-    @ApiModelProperty(value = "", required = true)
+    @ApiModelProperty(value = "")
     var remark: String? = null,
 ) {
     fun toEntity(): CustomInterface {

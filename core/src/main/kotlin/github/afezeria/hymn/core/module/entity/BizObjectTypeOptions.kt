@@ -1,9 +1,8 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
@@ -11,17 +10,19 @@ import java.util.*
  * 限制指定记录类型时指定字段 （多选/单选）的可用选项
  * @author afezeria
  */
-@ApiModel(value="业务对象记录类型可选项限制",description = """业务对象记录类型可选项限制
-限制指定记录类型时指定字段 （多选/单选）的可用选项""")
+@ApiModel(
+    value = "业务对象记录类型可选项限制", description = """业务对象记录类型可选项限制
+限制指定记录类型时指定字段 （多选/单选）的可用选项"""
+)
 data class BizObjectTypeOptions(
 
-    @ApiModelProperty(value = "所属对象 ;;idx")
+    @ApiModelProperty(value = "所属对象 ;;idx", required = true)
     var bizObjectId: String,
-    @ApiModelProperty(value = "记录类型id ;;fk:[core_biz_object_type cascade];idx")
+    @ApiModelProperty(value = "记录类型id ;;fk:[core_biz_object_type cascade];idx", required = true)
     var typeId: String,
-    @ApiModelProperty(value = "字段id ;;fk:[core_biz_object_field cascade]")
+    @ApiModelProperty(value = "字段id ;;fk:[core_biz_object_field cascade]", required = true)
     var fieldId: String,
-    @ApiModelProperty(value = "字段关联的字典项id ;;fk:[core_dict_item cascade]")
+    @ApiModelProperty(value = "字段关联的字典项id ;;fk:[core_dict_item cascade]", required = true)
     var dictItemId: String,
 ) {
 

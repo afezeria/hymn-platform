@@ -7,13 +7,13 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class BizObjectTypeLayoutDto(
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx")
+    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String,
-    @ApiModelProperty(value = "业务对象id ;;fk:[core_biz_object cascade];idx")
+    @ApiModelProperty(value = "业务对象id ;;fk:[core_biz_object cascade];idx", required = true)
     var bizObjectId: String,
-    @ApiModelProperty(value = "记录类型id ;;fk:[core_biz_object_type cascade]")
+    @ApiModelProperty(value = "记录类型id ;;fk:[core_biz_object_type cascade]", required = true)
     var typeId: String,
-    @ApiModelProperty(value = "页面布局id ;;fk:[core_biz_object_layout cascade]")
+    @ApiModelProperty(value = "页面布局id ;;fk:[core_biz_object_layout cascade]", required = true)
     var layoutId: String,
 ) {
     fun toEntity(): BizObjectTypeLayout {

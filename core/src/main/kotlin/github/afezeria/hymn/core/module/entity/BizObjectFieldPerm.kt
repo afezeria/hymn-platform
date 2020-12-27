@@ -1,25 +1,24 @@
 package github.afezeria.hymn.core.module.entity
 
-import java.time.LocalDateTime
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import java.util.*
+import java.time.LocalDateTime
 
 /**
  *
  * 字段权限 ;;uk:[[role_id field_id]]
  * @author afezeria
  */
-@ApiModel(value="字段权限",description = """字段权限 ;;uk:[[role_id field_id]]""")
+@ApiModel(value = "字段权限", description = """字段权限 ;;uk:[[role_id field_id]]""")
 data class BizObjectFieldPerm(
 
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx")
+    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String,
-    @ApiModelProperty(value = "字段id ;;fk:[core_biz_object_field cascade];idx")
+    @ApiModelProperty(value = "字段id ;;fk:[core_biz_object_field cascade];idx", required = true)
     var fieldId: String,
-    @ApiModelProperty(value = "可读")
+    @ApiModelProperty(value = "可读", required = true)
     var pRead: Boolean,
-    @ApiModelProperty(value = "可编辑")
+    @ApiModelProperty(value = "可编辑", required = true)
     var pEdit: Boolean,
 ) {
 

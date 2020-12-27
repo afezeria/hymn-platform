@@ -7,13 +7,13 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class ModuleFunctionPermDto(
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx")
+    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String,
-    @ApiModelProperty(value = "模块api ;;fk:[core_module cascade]")
+    @ApiModelProperty(value = "模块api ;;fk:[core_module cascade]", required = true)
     var moduleApi: String,
-    @ApiModelProperty(value = "功能api ;;fk:[core_module_function cascade]")
+    @ApiModelProperty(value = "功能api ;;fk:[core_module_function cascade]", required = true)
     var functionApi: String,
-    @ApiModelProperty(value = "是否有访问权限", required = true)
+    @ApiModelProperty(value = "是否有访问权限")
     var perm: Boolean? = null,
 ) {
     fun toEntity(): ModuleFunctionPerm {

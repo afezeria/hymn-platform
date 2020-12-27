@@ -12,9 +12,9 @@ import java.time.LocalDateTime
 @ApiModel(value = "角色", description = """角色""")
 data class Role(
 
-    @ApiModelProperty(value = "角色名称")
+    @ApiModelProperty(value = "角色名称", required = true)
     var name: String,
-    @ApiModelProperty(value = "", required = true)
+    @ApiModelProperty(value = "")
     var remark: String? = null,
 ) {
 

@@ -12,13 +12,13 @@ import java.time.LocalDateTime
 @ApiModel(value = "业务对象记录类型", description = """业务对象记录类型 ;; uk:[[biz_object_id name]]""")
 data class BizObjectType(
 
-    @ApiModelProperty(value = "所属业务对象id ;;fk:[core_biz_object cascade]")
+    @ApiModelProperty(value = "所属业务对象id ;;fk:[core_biz_object cascade]", required = true)
     var bizObjectId: String,
-    @ApiModelProperty(value = "记录类型名称")
+    @ApiModelProperty(value = "记录类型名称", required = true)
     var name: String,
-    @ApiModelProperty(value = "是否启用")
+    @ApiModelProperty(value = "是否启用", required = true)
     var active: Boolean,
-    @ApiModelProperty(value = "", required = true)
+    @ApiModelProperty(value = "")
     var remark: String? = null,
 ) {
 

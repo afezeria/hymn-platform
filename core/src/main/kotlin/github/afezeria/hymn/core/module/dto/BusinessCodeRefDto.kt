@@ -7,21 +7,21 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class BusinessCodeRefDto(
-    @ApiModelProperty(value = "触发器id ;;fk:[core_biz_object_trigger cascade]", required = true)
+    @ApiModelProperty(value = "触发器id ;;fk:[core_biz_object_trigger cascade]")
     var triggerId: String? = null,
-    @ApiModelProperty(value = "接口id ;;fk:[core_custom_interface cascade]", required = true)
+    @ApiModelProperty(value = "接口id ;;fk:[core_custom_interface cascade]")
     var interfaceId: String? = null,
-    @ApiModelProperty(value = "共享代码id ;;fk:[core_shared_code cascade]", required = true)
+    @ApiModelProperty(value = "共享代码id ;;fk:[core_shared_code cascade]")
     var sharedCodeId: String? = null,
-    @ApiModelProperty(value = "被引用对象id ;;fk:[core_biz_object cascade]", required = true)
+    @ApiModelProperty(value = "被引用对象id ;;fk:[core_biz_object cascade]")
     var bizObjectId: String? = null,
-    @ApiModelProperty(value = "被引用字段id ;;fk:[core_biz_object_field cascade];idx", required = true)
+    @ApiModelProperty(value = "被引用字段id ;;fk:[core_biz_object_field cascade];idx")
     var fieldId: String? = null,
-    @ApiModelProperty(value = "被引用组织id ;;fk:[core_org cascade];idx", required = true)
+    @ApiModelProperty(value = "被引用组织id ;;fk:[core_org cascade];idx")
     var orgId: String? = null,
-    @ApiModelProperty(value = "被引用角色id ;;fk:[core_role cascade];idx", required = true)
+    @ApiModelProperty(value = "被引用角色id ;;fk:[core_role cascade];idx")
     var roleId: String? = null,
-    @ApiModelProperty(value = "被引用共享代码id ;;fk:[core_shared_code cascade];idx", required = true)
+    @ApiModelProperty(value = "被引用共享代码id ;;fk:[core_shared_code cascade];idx")
     var refSharedCodeId: String? = null,
 ) {
     fun toEntity(): BusinessCodeRef {

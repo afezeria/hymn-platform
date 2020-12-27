@@ -7,15 +7,15 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class CustomPageDto(
-    @ApiModelProperty(value = "api名称，唯一标识 ;;uk")
+    @ApiModelProperty(value = "api名称，唯一标识 ;;uk", required = true)
     var api: String,
-    @ApiModelProperty(value = "自定义页面名称，用于后台查看")
+    @ApiModelProperty(value = "自定义页面名称，用于后台查看", required = true)
     var name: String,
-    @ApiModelProperty(value = "页面模板")
+    @ApiModelProperty(value = "页面模板", required = true)
     var template: String,
-    @ApiModelProperty(value = "是否为静态页面")
+    @ApiModelProperty(value = "是否为静态页面", required = true)
     var static: Boolean,
-    @ApiModelProperty(value = "", required = true)
+    @ApiModelProperty(value = "")
     var remark: String? = null,
 ) {
     fun toEntity(): CustomPage {

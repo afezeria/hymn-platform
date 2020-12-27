@@ -7,11 +7,14 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class AccountMenuLayoutDto(
-    @ApiModelProperty(value = "用户id ;; fk:[core_account cascade];idx")
+    @ApiModelProperty(value = "用户id ;; fk:[core_account cascade];idx", required = true)
     var accountId: String,
-    @ApiModelProperty(value = "客户端类型 ;; optional_value:[browser(浏览器), mobile(移动端)]")
+    @ApiModelProperty(
+        value = "客户端类型 ;; optional_value:[browser(浏览器), mobile(移动端)]",
+        required = true
+    )
     var clientType: String,
-    @ApiModelProperty(value = "布局json字符串")
+    @ApiModelProperty(value = "布局json字符串", required = true)
     var layoutJson: String,
 ) {
     fun toEntity(): AccountMenuLayout {

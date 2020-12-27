@@ -7,13 +7,13 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class DictItemDto(
-    @ApiModelProperty(value = "所属字典id ;;fk:[core_dict cascade];idx")
+    @ApiModelProperty(value = "所属字典id ;;fk:[core_dict cascade];idx", required = true)
     var dictId: String,
-    @ApiModelProperty(value = "字典项名称")
+    @ApiModelProperty(value = "字典项名称", required = true)
     var name: String,
-    @ApiModelProperty(value = "字典项编码")
+    @ApiModelProperty(value = "字典项编码", required = true)
     var code: String,
-    @ApiModelProperty(value = "父字典中的字典项编码，用于表示多个选项列表的级联关系", required = true)
+    @ApiModelProperty(value = "父字典中的字典项编码，用于表示多个选项列表的级联关系")
     var parentCode: String? = null,
 ) {
     fun toEntity(): DictItem {

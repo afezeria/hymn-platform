@@ -7,9 +7,9 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class ConfigDto(
-    @ApiModelProperty(value = "键 ;; idx")
+    @ApiModelProperty(value = "键 ;; idx", required = true)
     var key: String,
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "", required = true)
     var value: String,
 ) {
     fun toEntity(): Config {

@@ -7,9 +7,9 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class RoleDto(
-    @ApiModelProperty(value = "角色名称")
+    @ApiModelProperty(value = "角色名称", required = true)
     var name: String,
-    @ApiModelProperty(value = "", required = true)
+    @ApiModelProperty(value = "")
     var remark: String? = null,
 ) {
     fun toEntity(): Role {

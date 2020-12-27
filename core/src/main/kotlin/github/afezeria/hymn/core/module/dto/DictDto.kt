@@ -7,15 +7,15 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class DictDto(
-    @ApiModelProperty(value = "表明当前字典是指定字段的字典，不能通用，通用字典可以被任意多选字段使用;idx", required = true)
+    @ApiModelProperty(value = "表明当前字典是指定字段的字典，不能通用，通用字典可以被任意多选字段使用;idx")
     var fieldId: String? = null,
-    @ApiModelProperty(value = "表明当前字典值依赖与其他字典", required = true)
+    @ApiModelProperty(value = "表明当前字典值依赖与其他字典")
     var parentDictId: String? = null,
-    @ApiModelProperty(value = "字典名称")
+    @ApiModelProperty(value = "字典名称", required = true)
     var name: String,
-    @ApiModelProperty(value = "api名称 ;;uk")
+    @ApiModelProperty(value = "api名称 ;;uk", required = true)
     var api: String,
-    @ApiModelProperty(value = "", required = true)
+    @ApiModelProperty(value = "")
     var remark: String? = null,
 ) {
     fun toEntity(): Dict {

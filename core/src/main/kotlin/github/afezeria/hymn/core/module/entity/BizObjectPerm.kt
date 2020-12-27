@@ -12,27 +12,27 @@ import java.time.LocalDateTime
 @ApiModel(value = "对象权限", description = """对象权限 ;;uk:[[role_id biz_object_id]]""")
 data class BizObjectPerm(
 
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx")
+    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String,
-    @ApiModelProperty(value = "对象id ;;fk:[core_biz_object cascade];idx")
+    @ApiModelProperty(value = "对象id ;;fk:[core_biz_object cascade];idx", required = true)
     var bizObjectId: String,
-    @ApiModelProperty(value = "创建")
+    @ApiModelProperty(value = "创建", required = true)
     var ins: Boolean,
-    @ApiModelProperty(value = "更新")
+    @ApiModelProperty(value = "更新", required = true)
     var upd: Boolean,
-    @ApiModelProperty(value = "删除")
+    @ApiModelProperty(value = "删除", required = true)
     var del: Boolean,
-    @ApiModelProperty(value = "查看")
+    @ApiModelProperty(value = "查看", required = true)
     var que: Boolean,
-    @ApiModelProperty(value = "查看本人及直接下属")
+    @ApiModelProperty(value = "查看本人及直接下属", required = true)
     var queryWithAccountTree: Boolean,
-    @ApiModelProperty(value = "查看本部门")
+    @ApiModelProperty(value = "查看本部门", required = true)
     var queryWithDept: Boolean,
-    @ApiModelProperty(value = "查看本部门及下级部门")
+    @ApiModelProperty(value = "查看本部门及下级部门", required = true)
     var queryWithDeptTree: Boolean,
-    @ApiModelProperty(value = "查看全部")
+    @ApiModelProperty(value = "查看全部", required = true)
     var queryAll: Boolean,
-    @ApiModelProperty(value = "编辑全部")
+    @ApiModelProperty(value = "编辑全部", required = true)
     var editAll: Boolean,
 ) {
 

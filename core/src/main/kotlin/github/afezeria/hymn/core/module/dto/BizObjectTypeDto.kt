@@ -7,13 +7,13 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class BizObjectTypeDto(
-    @ApiModelProperty(value = "所属业务对象id ;;fk:[core_biz_object cascade]")
+    @ApiModelProperty(value = "所属业务对象id ;;fk:[core_biz_object cascade]", required = true)
     var bizObjectId: String,
-    @ApiModelProperty(value = "记录类型名称")
+    @ApiModelProperty(value = "记录类型名称", required = true)
     var name: String,
-    @ApiModelProperty(value = "是否启用")
+    @ApiModelProperty(value = "是否启用", required = true)
     var active: Boolean,
-    @ApiModelProperty(value = "", required = true)
+    @ApiModelProperty(value = "")
     var remark: String? = null,
     @ApiModelProperty(value = "类型权限")
     var permList: List<BizObjectTypePermDto> = emptyList(),

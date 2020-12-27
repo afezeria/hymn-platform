@@ -12,11 +12,11 @@ import java.time.LocalDateTime
 @ApiModel(value = "按钮权限", description = """按钮权限 ;;uk:[[role_id button_id]]""")
 data class ButtonPerm(
 
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx")
+    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String,
-    @ApiModelProperty(value = "按钮id ;;fk:[core_custom_button cascade];idx")
+    @ApiModelProperty(value = "按钮id ;;fk:[core_custom_button cascade];idx", required = true)
     var buttonId: String,
-    @ApiModelProperty(value = "是否可见")
+    @ApiModelProperty(value = "是否可见", required = true)
     var visible: Boolean,
 ) {
 

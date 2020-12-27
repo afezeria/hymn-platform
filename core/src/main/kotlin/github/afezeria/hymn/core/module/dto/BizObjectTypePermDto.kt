@@ -7,11 +7,14 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class BizObjectTypePermDto(
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade]")
+    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade]", required = true)
     var roleId: String,
-    @ApiModelProperty(value = "类型id，新建类型时使用空字符串占位 ;;fk:[core_biz_object_type cascade];idx")
+    @ApiModelProperty(
+        value = "类型id，新建类型时使用空字符串占位 ;;fk:[core_biz_object_type cascade];idx",
+        required = true
+    )
     var typeId: String,
-    @ApiModelProperty(value = "创建数据时选择特定记录类型的权限")
+    @ApiModelProperty(value = "创建数据时选择特定记录类型的权限", required = true)
     var visible: Boolean = false,
 ) {
     fun toEntity(): BizObjectTypePerm {
