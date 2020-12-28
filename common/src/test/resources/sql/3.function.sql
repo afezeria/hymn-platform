@@ -7,6 +7,7 @@ declare
     perm_text text := 'select';
     sql_str   text;
 begin
+    raise notice 'grant_object_view_permission';
     select * into obj from hymn.core_biz_object where id = obj_id;
     if not found then
         raise exception '[t:inner:0001] 对象 [id:%] 不存在',obj_id;
@@ -30,6 +31,8 @@ begin
         if obj.can_delete then
             perm_text := perm_text || ',delete';
         end if;
+        raise notice 'perm %',perm_text;
+        raise notice 'view api %',obj.api;
         sql_str := format('grant %s on hymn_view.%I to hymn_user;', perm_text, obj.api);
         execute sql_str;
     end if;
@@ -1062,38 +1065,6 @@ begin
 
     record_new.active = true;
 
-    --     --     如果当前新增对象是业务对象则申请可用的数据表
---     if record_new.type = 'custom' then
--- --         业务对象自动在api后面添加 __co 的后缀
---         record_new.api := record_new.api || '__co';
---         update hymn.core_table_obj_mapping sctom
---         set obj_api= record_new.api
---         where table_name = (
---             select s.table_name
---             from hymn.core_table_obj_mapping s
---             where s.obj_api is null
---               and s.table_name like 'core_data_table_%'
---             limit 1 for update skip locked)
---         returning table_name into record_new.source_table;
---         if not FOUND then
---             raise exception '[t:inner:0069] 自定义对象的数量已达到上限';
---         end if;
---     elseif record_new.type = 'module' then
---         if record_new.source_table is null then
---             raise exception '[t:inner:0070] 创建模块对象必须指定数据表';
---         end if;
---         perform pn.nspname, pc.relname
---         from pg_class pc
---                  left join pg_namespace pn on pn.oid = pc.relnamespace
---         where pc.relkind = 'r'
---           and pn.nspname = 'hymn'
---           and pc.relname = record_new.source_table;
---         if not FOUND then
---             raise exception '[t:inner:0071] 表 %.% 不存在','hymn',record_new.source_table;
---         end if;
---     elseif record_new.type = 'remote' then
---         record_new.api = record_new.api || '__cr';
---     end if;
     return record_new;
 end;
 $$;
@@ -1116,6 +1087,7 @@ declare
     sql_str          text;
     trigger_fun_name text;
     trigger_name     text;
+    share_table_name text;
 begin
     if record_old.type = 'custom' or record_new.type = 'custom' then
         if tg_when = 'BEFORE' then
@@ -1167,6 +1139,21 @@ begin
                 perform hymn.rebuild_data_table_history_trigger(record_new.id);
 --                 创建视图
                 perform hymn.rebuild_object_view(record_new.id);
+--                 创建共享表并授权
+                share_table_name := record_new.api || '_share';
+                sql_str := format(E'create table hymn_view.%I'
+                                      '(\n'
+                                      '    data_id         text,\n'
+                                      '    role_id         text,\n'
+                                      '    org_id          text,\n'
+                                      '    account_id      text,\n'
+                                      '    read_only       bool not null default false\n'
+                                      ')', share_table_name);
+                execute sql_str;
+                sql_str := format('grant select,insert,delete on hymn_view.%I to hymn_user;',
+                                  share_table_name);
+                execute sql_str;
+
 
             end if;
             if tg_op = 'DELETE' then
@@ -1175,6 +1162,9 @@ begin
                 execute sql_str;
                 -- 删除历史记录
                 sql_str := format('drop table hymn_view.%s_history cascade', record_old.api);
+                execute sql_str;
+--                 删除共享表
+                sql_str := format('drop table hymn_view.%I cascade', record_old.api || '_share');
                 execute sql_str;
 --             删除序列
                 sql_str := format('drop sequence if exists hymn_view.%s_auto_number_seq cascade',
@@ -1217,7 +1207,7 @@ begin
     elsif tg_op = 'DELETE' then
         return record_old;
     end if;
-end;
+end ;
 $$;
 comment on function hymn.custom_object_trigger_fun() is '业务对象对象类型为custom的自定义对象的触发器';
 -- c10开头为根据type字段区分逻辑的触发器

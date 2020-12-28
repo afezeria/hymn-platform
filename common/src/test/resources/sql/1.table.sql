@@ -912,7 +912,6 @@ create table hymn.core_biz_object_field_perm
 (
     id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id       text      not null,
---     biz_object_id text      not null,
     field_id      text      not null,
     p_read        bool      not null,
     p_edit        bool      not null,
@@ -925,7 +924,6 @@ create table hymn.core_biz_object_field_perm
 );
 comment on table hymn.core_biz_object_field_perm is '字段权限 ;;uk:[[role_id field_id]]';
 comment on column hymn.core_biz_object_field_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
--- comment on column hymn.core_biz_object_field_perm.biz_object_id is '对象id ;;fk:[core_biz_object cascade]';
 comment on column hymn.core_biz_object_field_perm.field_id is '字段id ;;fk:[core_biz_object_field cascade];idx';
 comment on column hymn.core_biz_object_field_perm.p_read is '可读';
 comment on column hymn.core_biz_object_field_perm.p_edit is '可编辑';
@@ -937,7 +935,6 @@ create table hymn.core_biz_object_type_perm
 (
     id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id       text      not null,
---     biz_object_id text      not null,
     type_id       text      not null,
     visible       bool      not null,
     create_by_id  text      not null,
@@ -949,30 +946,8 @@ create table hymn.core_biz_object_type_perm
 );
 comment on table hymn.core_biz_object_type_perm is '记录类型权限 ;;uk:[[role_id type_id]]';
 comment on column hymn.core_biz_object_type_perm.role_id is '角色id ;;fk:[core_role cascade]';
--- comment on column hymn.core_biz_object_type_perm.biz_object_id is '对象id ;;fk:[core_biz_object cascade]';
 comment on column hymn.core_biz_object_type_perm.type_id is '类型id ;;fk:[core_biz_object_type cascade];idx';
 comment on column hymn.core_biz_object_type_perm.visible is '创建数据时选择特定记录类型的权限';
-
-
--- 数据权限表
--- todo 拆分成每个对象一张共享表
--- drop table if exists hymn.core_data_share cascade;
--- create table hymn.core_data_share
--- (
---     object_api_name text,
---     data_id         text,
---     role_id         text,
---     org_id          text,
---     account_id      text,
---     read_only       bool
--- );
--- comment on table hymn.core_data_share is '对象权限共享';
--- comment on column hymn.core_data_share.data_id is '要共享的数据id';
--- comment on column hymn.core_data_share.object_api_name is '共享数据所属对象api名称';
--- comment on column hymn.core_data_share.account_id is '共享数据的目标用户id';
--- comment on column hymn.core_data_share.role_id is '共享数据的目标角色id';
--- comment on column hymn.core_data_share.org_id is '共享数据目标组织id';
-
 
 drop table if exists hymn.core_table_obj_mapping cascade;
 create table hymn.core_table_obj_mapping

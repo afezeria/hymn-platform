@@ -66,13 +66,18 @@ private var objSeq = (1..100000).iterator()
 
 fun randomUUIDStr(): String = UUID.randomUUID().toString().replace("-", "")
 
-fun createBObject(): Map<String, Any?> {
+fun createBObject(
+    can_insert: Boolean = true,
+    can_update: Boolean = true,
+    can_delete: Boolean = true
+): Map<String, Any?> {
     adminConn.use {
         val obj = it.execute(
             """
             insert into hymn.core_biz_object(name,api,active,can_insert,can_update,can_delete,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
-            values ('测试对象','test_obj${objSeq.nextInt()}',true,true,true,true,?,?,?,?,?,?) returning *;
+            values ('测试对象','test_obj${objSeq.nextInt()}',true,?,?,?,?,?,?,?,?,?) returning *;
             """,
+            can_insert, can_update, can_delete,
             DEFAULT_ACCOUNT_ID,
             DEFAULT_ACCOUNT_NAME,
             DEFAULT_ACCOUNT_ID,
