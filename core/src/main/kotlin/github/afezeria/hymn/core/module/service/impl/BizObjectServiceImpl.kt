@@ -52,19 +52,22 @@ class BizObjectServiceImpl : BizObjectService {
     }
 
     override fun update(id: String, dto: BizObjectDto): Int {
-        val e = bizObjectDao.selectById(id)
-            ?: throw DataNotFoundException("BizObject".msgById(id))
-        dto.update(e)
-        val i = bizObjectDao.update(e)
+        dbService.db().useTransaction {
+
+            val e = bizObjectDao.selectById(id)
+                ?: throw DataNotFoundException("BizObject".msgById(id))
+            dto.update(e)
+            val i = bizObjectDao.update(e)
 
 //        更新对象权限
-        val roleIdSet = roleService.findIdList().toMutableSet()
-        val objPermDtoList = dto.permList
-            .filter { roleIdSet.contains(it.roleId) }
-            .onEach { it.bizObjectId = id }
-        objectPermService.batchSave(objPermDtoList)
+            val roleIdSet = roleService.findIdList().toMutableSet()
+            val objPermDtoList = dto.permList
+                .filter { roleIdSet.contains(it.roleId) }
+                .onEach { it.bizObjectId = id }
+            objectPermService.batchSave(objPermDtoList)
 
-        return i
+            return i
+        }
     }
 
     override fun create(dto: BizObjectDto): String {

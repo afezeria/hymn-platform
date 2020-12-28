@@ -40,40 +40,44 @@ class BizObjectTypeServiceImpl : BizObjectTypeService {
     }
 
     override fun update(id: String, dto: BizObjectTypeDto): Int {
-        val e = bizObjectTypeDao.selectById(id)
-            ?: throw DataNotFoundException("BizObjectType".msgById(id))
-        dto.update(e)
-        val i = bizObjectTypeDao.update(e)
-        //            更新类型权限数据
-        val roleIdSet = roleService.findIdList().toSet()
-        val typePermDtoList = dto.permList
-            .filter { roleIdSet.contains(it.roleId) }
-            .onEach { it.typeId = id }
-        typePermService.batchSave(typePermDtoList)
+        dbService.db().useTransaction {
+            val e = bizObjectTypeDao.selectById(id)
+                ?: throw DataNotFoundException("BizObjectType".msgById(id))
+            dto.update(e)
+            val i = bizObjectTypeDao.update(e)
+            //            更新类型权限数据
+            val roleIdSet = roleService.findIdList().toSet()
+            val typePermDtoList = dto.permList
+                .filter { roleIdSet.contains(it.roleId) }
+                .onEach { it.typeId = id }
+            typePermService.batchSave(typePermDtoList)
 
-        return i
+            return i
+        }
     }
 
     override fun create(dto: BizObjectTypeDto): String {
-        val e = dto.toEntity()
-        val id = bizObjectTypeDao.insert(e)
+        dbService.db().useTransaction {
+            val e = dto.toEntity()
+            val id = bizObjectTypeDao.insert(e)
 
-        //            创建类型权限数据
-        val allRoleId = roleService.findIdList()
-        val roleIdSet = allRoleId.toMutableSet()
-        val typePermDtoList = mutableListOf<BizObjectTypePermDto>()
-        dto.permList.forEach {
-            if (roleIdSet.remove(it.roleId)) {
-                it.typeId = id
-                typePermDtoList.add(it)
+            //            创建类型权限数据
+            val allRoleId = roleService.findIdList()
+            val roleIdSet = allRoleId.toMutableSet()
+            val typePermDtoList = mutableListOf<BizObjectTypePermDto>()
+            dto.permList.forEach {
+                if (roleIdSet.remove(it.roleId)) {
+                    it.typeId = id
+                    typePermDtoList.add(it)
+                }
             }
-        }
-        roleIdSet.forEach {
-            typePermDtoList.add(BizObjectTypePermDto(it, id))
-        }
-        typePermService.batchCreate(typePermDtoList)
+            roleIdSet.forEach {
+                typePermDtoList.add(BizObjectTypePermDto(it, id))
+            }
+            typePermService.batchCreate(typePermDtoList)
 
-        return id
+            return id
+        }
     }
 
     override fun findAll(): MutableList<BizObjectType> {

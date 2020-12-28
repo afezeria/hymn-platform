@@ -40,41 +40,45 @@ class CustomButtonServiceImpl : CustomButtonService {
     }
 
     override fun update(id: String, dto: CustomButtonDto): Int {
-        val e = customButtonDao.selectById(id)
-            ?: throw DataNotFoundException("CustomButton".msgById(id))
-        dto.update(e)
-        val i = customButtonDao.update(e)
+        dbService.db().useTransaction {
+            val e = customButtonDao.selectById(id)
+                ?: throw DataNotFoundException("CustomButton".msgById(id))
+            dto.update(e)
+            val i = customButtonDao.update(e)
 
 //        更新按钮权限数据
-        val roleIdSet = roleService.findIdList().toMutableSet()
-        val buttonPermDtoList = dto.permList
-            .filter { roleIdSet.contains(it.roleId) }
-            .onEach { it.buttonId = id }
-        buttonPermService.batchSave(buttonPermDtoList)
+            val roleIdSet = roleService.findIdList().toMutableSet()
+            val buttonPermDtoList = dto.permList
+                .filter { roleIdSet.contains(it.roleId) }
+                .onEach { it.buttonId = id }
+            buttonPermService.batchSave(buttonPermDtoList)
 
-        return i
+            return i
+        }
     }
 
     override fun create(dto: CustomButtonDto): String {
-        val e = dto.toEntity()
-        val id = customButtonDao.insert(e)
+        dbService.db().useTransaction {
+            val e = dto.toEntity()
+            val id = customButtonDao.insert(e)
 
 //        创建按钮权限数据
-        val allRoleId = roleService.findIdList()
-        val roleIdSet = allRoleId.toMutableSet()
-        val buttonPermDtoList = mutableListOf<ButtonPermDto>()
-        dto.permList.forEach {
-            if (roleIdSet.remove(it.roleId)) {
-                it.buttonId = id
-                buttonPermDtoList.add(it)
+            val allRoleId = roleService.findIdList()
+            val roleIdSet = allRoleId.toMutableSet()
+            val buttonPermDtoList = mutableListOf<ButtonPermDto>()
+            dto.permList.forEach {
+                if (roleIdSet.remove(it.roleId)) {
+                    it.buttonId = id
+                    buttonPermDtoList.add(it)
+                }
             }
-        }
-        roleIdSet.forEach {
-            buttonPermDtoList.add(ButtonPermDto(it, id))
-        }
-        buttonPermService.batchCreate(buttonPermDtoList)
+            roleIdSet.forEach {
+                buttonPermDtoList.add(ButtonPermDto(it, id))
+            }
+            buttonPermService.batchCreate(buttonPermDtoList)
 
-        return id
+            return id
+        }
     }
 
     override fun findAll(): MutableList<CustomButton> {

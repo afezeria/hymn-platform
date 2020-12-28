@@ -41,41 +41,45 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
     }
 
     override fun update(id: String, dto: BizObjectFieldDto): Int {
-        val e = bizObjectFieldDao.selectById(id)
-            ?: throw DataNotFoundException("BizObjectField".msgById(id))
-        dto.update(e)
-        val i = bizObjectFieldDao.update(e)
+        dbService.db().useTransaction {
+            val e = bizObjectFieldDao.selectById(id)
+                ?: throw DataNotFoundException("BizObjectField".msgById(id))
+            dto.update(e)
+            val i = bizObjectFieldDao.update(e)
 
 //        创建字段权限数据
-        val roleIdSet = roleService.findIdList().toMutableSet()
-        val fieldPermDtoList = dto.permList
-            .filter { roleIdSet.contains(it.roleId) }
-            .onEach { it.fieldId = id }
-        fieldPermService.batchSave(fieldPermDtoList)
+            val roleIdSet = roleService.findIdList().toMutableSet()
+            val fieldPermDtoList = dto.permList
+                .filter { roleIdSet.contains(it.roleId) }
+                .onEach { it.fieldId = id }
+            fieldPermService.batchSave(fieldPermDtoList)
 
-        return i
+            return i
+        }
     }
 
     override fun create(dto: BizObjectFieldDto): String {
-        val e = dto.toEntity()
-        val id = bizObjectFieldDao.insert(e)
+        dbService.db().useTransaction {
+            val e = dto.toEntity()
+            val id = bizObjectFieldDao.insert(e)
 
 //        创建字段权限数据
-        val allRoleId = roleService.findIdList()
-        val roleIdSet = allRoleId.toMutableSet()
-        val fieldPermDtoList = mutableListOf<BizObjectFieldPermDto>()
-        dto.permList.forEach {
-            if (roleIdSet.remove(it.roleId)) {
-                it.fieldId = id
-                fieldPermDtoList.add(it)
+            val allRoleId = roleService.findIdList()
+            val roleIdSet = allRoleId.toMutableSet()
+            val fieldPermDtoList = mutableListOf<BizObjectFieldPermDto>()
+            dto.permList.forEach {
+                if (roleIdSet.remove(it.roleId)) {
+                    it.fieldId = id
+                    fieldPermDtoList.add(it)
+                }
             }
-        }
-        roleIdSet.forEach {
-            fieldPermDtoList.add(BizObjectFieldPermDto(it, id))
-        }
-        fieldPermService.batchCreate(fieldPermDtoList)
+            roleIdSet.forEach {
+                fieldPermDtoList.add(BizObjectFieldPermDto(it, id))
+            }
+            fieldPermService.batchCreate(fieldPermDtoList)
 
-        return id
+            return id
+        }
     }
 
     override fun findAll(): MutableList<BizObjectField> {

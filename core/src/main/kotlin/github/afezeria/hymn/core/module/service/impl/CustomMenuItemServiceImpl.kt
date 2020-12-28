@@ -40,40 +40,44 @@ class CustomMenuItemServiceImpl : CustomMenuItemService {
     }
 
     override fun update(id: String, dto: CustomMenuItemDto): Int {
-        val e = customMenuItemDao.selectById(id)
-            ?: throw DataNotFoundException("CustomMenuItem".msgById(id))
-        dto.update(e)
-        val i = customMenuItemDao.update(e)
+        dbService.db().useTransaction {
+            val e = customMenuItemDao.selectById(id)
+                ?: throw DataNotFoundException("CustomMenuItem".msgById(id))
+            dto.update(e)
+            val i = customMenuItemDao.update(e)
 
-        //            创建菜单项权限数据
-        val roleIdSet = roleService.findIdList().toMutableSet()
-        val menuItemPermDtoList = dto.permList
-            .filter { roleIdSet.contains(it.roleId) }
-            .onEach { it.menuItemId = id }
-        menuItemPermService.batchSave(menuItemPermDtoList)
-        return i
+            //            创建菜单项权限数据
+            val roleIdSet = roleService.findIdList().toMutableSet()
+            val menuItemPermDtoList = dto.permList
+                .filter { roleIdSet.contains(it.roleId) }
+                .onEach { it.menuItemId = id }
+            menuItemPermService.batchSave(menuItemPermDtoList)
+            return i
+        }
     }
 
     override fun create(dto: CustomMenuItemDto): String {
-        val e = dto.toEntity()
-        val id = customMenuItemDao.insert(e)
+        dbService.db().useTransaction {
+            val e = dto.toEntity()
+            val id = customMenuItemDao.insert(e)
 
-        //            创建菜单项权限数据
-        val allRoleId = roleService.findIdList()
-        val roleIdSet = allRoleId.toMutableSet()
-        val menuItemPermDtoList = mutableListOf<MenuItemPermDto>()
-        dto.permList.forEach {
-            if (roleIdSet.remove(it.roleId)) {
-                it.menuItemId = id
-                menuItemPermDtoList.add(it)
+            //            创建菜单项权限数据
+            val allRoleId = roleService.findIdList()
+            val roleIdSet = allRoleId.toMutableSet()
+            val menuItemPermDtoList = mutableListOf<MenuItemPermDto>()
+            dto.permList.forEach {
+                if (roleIdSet.remove(it.roleId)) {
+                    it.menuItemId = id
+                    menuItemPermDtoList.add(it)
+                }
             }
-        }
-        roleIdSet.forEach {
-            menuItemPermDtoList.add(MenuItemPermDto(it, id))
-        }
-        menuItemPermService.batchCreate(menuItemPermDtoList)
+            roleIdSet.forEach {
+                menuItemPermDtoList.add(MenuItemPermDto(it, id))
+            }
+            menuItemPermService.batchCreate(menuItemPermDtoList)
 
-        return id
+            return id
+        }
     }
 
     override fun findAll(): MutableList<CustomMenuItem> {
