@@ -1,5 +1,6 @@
 package github.afezeria.hymn.common.db
 
+import github.afezeria.hymn.common.ann.ReadOnly
 import mu.KLogging
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around

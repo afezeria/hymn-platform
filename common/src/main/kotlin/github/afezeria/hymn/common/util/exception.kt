@@ -9,7 +9,7 @@ import github.afezeria.hymn.common.constant.ResultCode
 sealed class PlatformException(val code: ResultCode, override val message: String = code.msg) :
     RuntimeException(message)
 
-class NoAccessException(msg: String = ResultCode.PERMISSION_DENIED.msg) :
+class PermissionDeniedException(msg: String = ResultCode.PERMISSION_DENIED.msg) :
     PlatformException(ResultCode.PERMISSION_DENIED, msg)
 
 class UnauthorizedException(msg: String = ResultCode.UNAUTHORIZED.msg) :
