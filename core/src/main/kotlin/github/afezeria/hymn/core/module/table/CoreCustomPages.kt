@@ -15,8 +15,6 @@ class CoreCustomPages(alias: String? = null) :
 
     val api = varchar("api")
     val name = varchar("name")
-    val template = varchar("template")
-    val static = boolean("static")
     val remark = varchar("remark")
     val id = varchar("id")
     val createById = varchar("create_by_id")
@@ -29,8 +27,6 @@ class CoreCustomPages(alias: String? = null) :
     override fun doCreateEntity(row: QueryRowSet, withReferences: Boolean) = CustomPage(
         api = requireNotNull(row[this.api]) { "field CustomPage.api should not be null" },
         name = requireNotNull(row[this.name]) { "field CustomPage.name should not be null" },
-        template = requireNotNull(row[this.template]) { "field CustomPage.template should not be null" },
-        static = requireNotNull(row[this.static]) { "field CustomPage.static should not be null" },
         remark = row[this.remark],
     ).also {
         it.id = requireNotNull(row[this.id]) { "field CustomPage.id should not be null" }

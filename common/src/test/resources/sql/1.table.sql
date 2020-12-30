@@ -334,8 +334,6 @@ create table hymn.core_custom_page
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     api          text      not null,
     name         text      not null,
-    template     text      not null,
-    static       bool      not null,
     remark       text,
     create_by_id text      not null,
     create_by    text      not null,
@@ -344,7 +342,7 @@ create table hymn.core_custom_page
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
-comment on table hymn.core_custom_page is '自定义页面';
+comment on table hymn.core_custom_page is '自定义页面，上传压缩包，解压后存放在工作目录的static-resource/{api}目录下,访问路径为 /module/core/public/custom/{api}/{filename}';
 comment on column hymn.core_custom_page.api is 'api名称，唯一标识 ;;uk';
 comment on column hymn.core_custom_page.template is '页面模板';
 comment on column hymn.core_custom_page.name is '自定义页面名称，用于后台查看';

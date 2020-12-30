@@ -11,10 +11,6 @@ class CustomPageDto(
     var api: String,
     @ApiModelProperty(value = "自定义页面名称，用于后台查看", required = true)
     var name: String,
-    @ApiModelProperty(value = "页面模板", required = true)
-    var template: String,
-    @ApiModelProperty(value = "是否为静态页面", required = true)
-    var static: Boolean,
     @ApiModelProperty(value = "")
     var remark: String? = null,
 ) {
@@ -22,8 +18,6 @@ class CustomPageDto(
         return CustomPage(
             api = api,
             name = name,
-            template = template,
-            static = static,
             remark = remark,
         )
     }
@@ -32,8 +26,6 @@ class CustomPageDto(
         entity.also {
             it.api = api
             it.name = name
-            it.template = template
-            it.static = static
             it.remark = remark
         }
     }
