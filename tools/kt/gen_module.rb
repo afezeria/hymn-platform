@@ -31,12 +31,12 @@ conn.exec Constant::QUERY_TABLE do |r|
     x.column_arr.find { |c| c.column_name == 'id' }
   end
   tables.each { |t|
-    # Controller.new(t).write_file
-    Service.new(t).write_file
-    ServiceImpl.new(t).write_file
-    Dao.new(t).write_file
-    Entity.new(t).write_file
-    Table.new(t).write_file
-    Dto.new(t).write_file
+    Controller.new(t).write_file
+    # Service.new(t).write_file
+    # ServiceImpl.new(t).write_file
+    # Dao.new(t).write_file
+    # Entity.new(t).write_file
+    # Table.new(t).write_file
+    # Dto.new(t).write_file
   }
 end

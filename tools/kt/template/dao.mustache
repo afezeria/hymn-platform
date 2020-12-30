@@ -73,6 +73,7 @@ class {{name}} {
     fun selectById(id: String): {{entity_class}}? {
         return dbService.db().from(table)
             .select(table.columns)
+            .where { table.id eq id }
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
