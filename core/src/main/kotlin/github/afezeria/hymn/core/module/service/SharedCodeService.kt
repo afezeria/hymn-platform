@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.SharedCode
 /**
  * @author afezeria
  */
-interface SharedCodeService {
+internal interface SharedCodeService {
 
     fun removeById(id: String): Int
 

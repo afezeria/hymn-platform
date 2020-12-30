@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
 /**
  * @author afezeria
  */
-interface BizObjectTypePermService {
+internal interface BizObjectTypePermService {
 
     fun removeById(id: String): Int
 

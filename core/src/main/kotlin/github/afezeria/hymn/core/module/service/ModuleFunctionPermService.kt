@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.ModuleFunctionPerm
 /**
  * @author afezeria
  */
-interface ModuleFunctionPermService {
+internal interface ModuleFunctionPermService {
 
     fun removeById(id: String): Int
 

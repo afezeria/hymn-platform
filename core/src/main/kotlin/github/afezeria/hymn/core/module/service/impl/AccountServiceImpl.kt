@@ -3,6 +3,7 @@ package github.afezeria.hymn.core.module.service.impl
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.constant.ROOT_ACCOUNT_ID
 import github.afezeria.hymn.core.module.dao.AccountDao
 import github.afezeria.hymn.core.module.dto.AccountDto
 import github.afezeria.hymn.core.module.entity.Account
@@ -24,6 +25,9 @@ class AccountServiceImpl : AccountService {
 
 
     override fun removeById(id: String): Int {
+        if (id == ROOT_ACCOUNT_ID) {
+            return 0
+        }
         accountDao.selectById(id)
             ?: throw DataNotFoundException("Account".msgById(id))
         val i = accountDao.deleteById(id)

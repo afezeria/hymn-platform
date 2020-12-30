@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.MenuItemPerm
 /**
  * @author afezeria
  */
-interface MenuItemPermService {
+internal interface MenuItemPermService {
 
     fun removeById(id: String): Int
 

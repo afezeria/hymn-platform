@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.Role
 /**
  * @author afezeria
  */
-interface RoleService {
+internal interface RoleService {
 
     fun removeById(id: String): Int
 

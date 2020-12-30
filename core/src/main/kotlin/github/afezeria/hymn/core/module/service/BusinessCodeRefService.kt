@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.BusinessCodeRef
 /**
  * @author afezeria
  */
-interface BusinessCodeRefService {
+internal interface BusinessCodeRefService {
 
     fun removeById(id: String): Int
 

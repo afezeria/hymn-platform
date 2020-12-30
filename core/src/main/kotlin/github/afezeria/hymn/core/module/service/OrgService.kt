@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.Org
 /**
  * @author afezeria
  */
-interface OrgService {
+internal interface OrgService {
 
     fun removeById(id: String): Int
 

@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.Account
 /**
  * @author afezeria
  */
-interface AccountService {
+internal interface AccountService {
 
     fun removeById(id: String): Int
 
