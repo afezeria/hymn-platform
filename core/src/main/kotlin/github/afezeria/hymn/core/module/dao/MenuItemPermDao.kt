@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.platform.SessionService
+import github.afezeria.hymn.common.platform.PlatformService
 import github.afezeria.hymn.core.module.entity.MenuItemPerm
 import github.afezeria.hymn.core.module.table.CoreMenuItemPerms
 import org.ktorm.dsl.*
@@ -21,7 +21,7 @@ class MenuItemPermDao {
     private lateinit var dbService: DataBaseService
 
     @Autowired
-    private lateinit var sessionService: SessionService
+    private lateinit var platformService: PlatformService
 
     val table = CoreMenuItemPerms()
 
@@ -32,7 +32,7 @@ class MenuItemPermDao {
 
     fun update(e: MenuItemPerm): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session = sessionService.getSession()
+        val session = platformService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         return dbService.db().update(table) {
@@ -50,7 +50,7 @@ class MenuItemPermDao {
 
     fun insert(e: MenuItemPerm): String {
         val now = LocalDateTime.now()
-        val session = sessionService.getSession()
+        val session = platformService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now
@@ -81,6 +81,7 @@ class MenuItemPermDao {
     fun selectById(id: String): MenuItemPerm? {
         return dbService.db().from(table)
             .select(table.columns)
+            .where { table.id eq id }
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
@@ -117,7 +118,7 @@ class MenuItemPermDao {
 
     fun batchInsert(es: List<MenuItemPerm>): MutableList<Int> {
         val now = LocalDateTime.now()
-        val session = sessionService.getSession()
+        val session = platformService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         return dbService.db().batchInsert(table) {
@@ -152,7 +153,7 @@ class MenuItemPermDao {
 
     fun insertOrUpdate(e: MenuItemPerm): Int {
         val now = LocalDateTime.now()
-        val session = sessionService.getSession()
+        val session = platformService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now

@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.platform.SessionService
+import github.afezeria.hymn.common.platform.PlatformService
 import github.afezeria.hymn.core.module.entity.CustomComponent
 import github.afezeria.hymn.core.module.table.CoreCustomComponents
 import org.ktorm.dsl.*
@@ -20,7 +20,7 @@ class CustomComponentDao {
     private lateinit var dbService: DataBaseService
 
     @Autowired
-    private lateinit var sessionService: SessionService
+    private lateinit var platformService: PlatformService
 
     val table = CoreCustomComponents()
 
@@ -31,7 +31,7 @@ class CustomComponentDao {
 
     fun update(e: CustomComponent): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session = sessionService.getSession()
+        val session = platformService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         return dbService.db().update(table) {
@@ -49,7 +49,7 @@ class CustomComponentDao {
 
     fun insert(e: CustomComponent): String {
         val now = LocalDateTime.now()
-        val session = sessionService.getSession()
+        val session = platformService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now
@@ -80,6 +80,7 @@ class CustomComponentDao {
     fun selectById(id: String): CustomComponent? {
         return dbService.db().from(table)
             .select(table.columns)
+            .where { table.id eq id }
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()

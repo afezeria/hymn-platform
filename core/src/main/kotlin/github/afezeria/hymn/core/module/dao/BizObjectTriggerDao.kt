@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.platform.SessionService
+import github.afezeria.hymn.common.platform.PlatformService
 import github.afezeria.hymn.core.module.entity.BizObjectTrigger
 import github.afezeria.hymn.core.module.table.CoreBizObjectTriggers
 import org.ktorm.dsl.*
@@ -20,7 +20,7 @@ class BizObjectTriggerDao {
     private lateinit var dbService: DataBaseService
 
     @Autowired
-    private lateinit var sessionService: SessionService
+    private lateinit var platformService: PlatformService
 
     val table = CoreBizObjectTriggers()
 
@@ -31,7 +31,7 @@ class BizObjectTriggerDao {
 
     fun update(e: BizObjectTrigger): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session = sessionService.getSession()
+        val session = platformService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         return dbService.db().update(table) {
@@ -56,7 +56,7 @@ class BizObjectTriggerDao {
 
     fun insert(e: BizObjectTrigger): String {
         val now = LocalDateTime.now()
-        val session = sessionService.getSession()
+        val session = platformService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now
@@ -94,6 +94,7 @@ class BizObjectTriggerDao {
     fun selectById(id: String): BizObjectTrigger? {
         return dbService.db().from(table)
             .select(table.columns)
+            .where { table.id eq id }
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()

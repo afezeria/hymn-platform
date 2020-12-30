@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.platform.SessionService
+import github.afezeria.hymn.common.platform.PlatformService
 import github.afezeria.hymn.core.module.entity.CustomMenuItem
 import github.afezeria.hymn.core.module.table.CoreCustomMenuItems
 import org.ktorm.dsl.*
@@ -20,7 +20,7 @@ class CustomMenuItemDao {
     private lateinit var dbService: DataBaseService
 
     @Autowired
-    private lateinit var sessionService: SessionService
+    private lateinit var platformService: PlatformService
 
     val table = CoreCustomMenuItems()
 
@@ -31,7 +31,7 @@ class CustomMenuItemDao {
 
     fun update(e: CustomMenuItem): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session = sessionService.getSession()
+        val session = platformService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         return dbService.db().update(table) {
@@ -52,7 +52,7 @@ class CustomMenuItemDao {
 
     fun insert(e: CustomMenuItem): String {
         val now = LocalDateTime.now()
-        val session = sessionService.getSession()
+        val session = platformService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now
@@ -86,6 +86,7 @@ class CustomMenuItemDao {
     fun selectById(id: String): CustomMenuItem? {
         return dbService.db().from(table)
             .select(table.columns)
+            .where { table.id eq id }
             .limit(0, 1)
             .map { table.createEntity(it) }
             .firstOrNull()
