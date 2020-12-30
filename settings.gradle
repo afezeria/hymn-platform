@@ -1,7 +1,9 @@
 rootProject.name = 'hymn-platform'
 include 'core'
 include 'common'
+include 'api'
 include 'script'
+include 'app'
 
 //project(":common").projectDir = "common" as File
 //project(":core").projectDir = "core" as File
