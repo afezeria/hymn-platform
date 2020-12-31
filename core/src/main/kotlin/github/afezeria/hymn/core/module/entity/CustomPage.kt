@@ -9,7 +9,10 @@ import java.time.LocalDateTime
  * 自定义页面
  * @author afezeria
  */
-@ApiModel(value = "自定义页面", description = """自定义页面，上传压缩包，解压后存放在工作目录的static-resource/{api}目录下,访问路径为 /module/core/public/custom/{api}/{filename}""")
+@ApiModel(
+    value = "自定义页面",
+    description = """自定义页面，上传压缩包，解压后存放在工作目录的static-resource/{api}目录下,访问路径为 /module/core/public/custom/{api}/{filename}"""
+)
 data class CustomPage(
 
     @ApiModelProperty(value = "api名称，唯一标识 ;;uk", required = true)
@@ -21,6 +24,8 @@ data class CustomPage(
 ) {
 
     lateinit var id: String
+    @ApiModelProperty(value = "压缩包md5")
+    lateinit var md5: String
     lateinit var createById: String
     lateinit var createBy: String
     lateinit var modifyById: String

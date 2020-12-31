@@ -37,6 +37,7 @@ class CustomPageDao {
         return dbService.db().update(table) {
             set(it.api, e.api)
             set(it.name, e.name)
+            set(it.md5, e.md5)
             set(it.remark, e.remark)
             set(it.modifyById, accountId)
             set(it.modifyBy, accountName)
@@ -61,6 +62,7 @@ class CustomPageDao {
         return dbService.db().insertAndGenerateKey(table) {
             set(it.api, e.api)
             set(it.name, e.name)
+            set(it.md5, e.md5)
             set(it.remark, e.remark)
             set(it.createDate, e.createBy)
             set(it.modifyDate, e.modifyDate)

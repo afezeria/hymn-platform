@@ -9,22 +9,22 @@ grant usage on schema hymn_view to hymn_user;
 drop table if exists hymn.core_account cascade;
 create table hymn.core_account
 (
-    id           text primary key   default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     lock_time    timestamptz not null default make_timestamp(1970, 1, 1, 0, 0, 0),
-    name         text      not null,
-    username     text      not null,
-    password     text      not null,
-    online_rule  text      not null,
-    active       bool      not null,
-    admin        bool      not null,
-    root         bool               default false not null,
+    name         text        not null,
+    username     text        not null,
+    password     text        not null,
+    online_rule  text        not null,
+    active       bool        not null,
+    admin        bool        not null,
+    root         bool                 default false not null,
     leader_id    text,
-    org_id       text      not null,
-    role_id      text      not null,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    org_id       text        not null,
+    role_id      text        not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null,
     text001      text,
@@ -104,14 +104,14 @@ drop table if exists hymn.core_org cascade;
 create table hymn.core_org
 (
     id                 text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    name               text      not null,
+    name               text        not null,
     director_id        text,
     deputy_director_id text,
     parent_id          text,
-    create_by_id       text      not null,
-    create_by          text      not null,
-    modify_by_id       text      not null,
-    modify_by          text      not null,
+    create_by_id       text        not null,
+    create_by          text        not null,
+    modify_by_id       text        not null,
+    modify_by          text        not null,
     create_date        timestamptz not null,
     modify_date        timestamptz not null,
     text001            text,
@@ -144,13 +144,13 @@ drop table if exists hymn.core_role cascade;
 create table hymn.core_role
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    name         text      not null,
+    name         text        not null,
 --     type         text      not null,
     remark       text,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -161,12 +161,12 @@ drop table if exists hymn.core_config cascade;
 create table hymn.core_config
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    key          text      not null,
-    value        text      not null,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    key          text        not null,
+    value        text        not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -177,13 +177,13 @@ drop table if exists hymn.core_account_menu_layout cascade;
 create table hymn.core_account_menu_layout
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    account_id   text      not null,
-    client_type  text      not null,
-    layout_json  text      not null,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    account_id   text        not null,
+    client_type  text        not null,
+    layout_json  text        not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -200,16 +200,16 @@ create table hymn.core_account_object_view
     id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     copy_id       text,
     remark        text,
-    global_view   bool      not null,
-    default_view  bool      not null,
-    account_id    text      not null,
-    biz_object_id text      not null,
-    name          text      not null,
-    view_json     text      not null,
-    create_by_id  text      not null,
-    create_by     text      not null,
-    modify_by_id  text      not null,
-    modify_by     text      not null,
+    global_view   bool        not null,
+    default_view  bool        not null,
+    account_id    text        not null,
+    biz_object_id text        not null,
+    name          text        not null,
+    view_json     text        not null,
+    create_by_id  text        not null,
+    create_by     text        not null,
+    modify_by_id  text        not null,
+    modify_by     text        not null,
     create_date   timestamptz not null,
     modify_date   timestamptz not null
 );
@@ -230,15 +230,15 @@ create table hymn.core_custom_button
     id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     remark        text,
     biz_object_id text,
-    name          text      not null,
-    api           text      not null,
-    client_type   text      not null,
-    action        text      not null,
-    content       text      not null,
-    create_by_id  text      not null,
-    create_by     text      not null,
-    modify_by_id  text      not null,
-    modify_by     text      not null,
+    name          text        not null,
+    api           text        not null,
+    client_type   text        not null,
+    action        text        not null,
+    content       text        not null,
+    create_by_id  text        not null,
+    create_by     text        not null,
+    modify_by_id  text        not null,
+    modify_by     text        not null,
     create_date   timestamptz not null,
     modify_date   timestamptz not null
 );
@@ -255,13 +255,13 @@ drop table if exists hymn.core_custom_component cascade;
 create table hymn.core_custom_component
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    api          text      not null,
-    name         text      not null,
-    code         text      not null,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    api          text        not null,
+    name         text        not null,
+    code         text        not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -276,17 +276,17 @@ drop table if exists hymn.core_custom_interface cascade;
 create table hymn.core_custom_interface
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    api          text      not null,
-    name         text      not null,
-    code         text      not null,
-    active       bool      not null,
-    lang         text      not null,
+    api          text        not null,
+    name         text        not null,
+    code         text        not null,
+    active       bool        not null,
+    lang         text        not null,
     option_text  text,
     remark       text,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -304,16 +304,16 @@ drop table if exists hymn.core_custom_menu_item cascade;
 create table hymn.core_custom_menu_item
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    name         text      not null,
-    path         text      not null,
-    path_type    text      not null,
-    action       text      not null,
-    client_type  text      not null,
-    icon         text      not null,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    name         text        not null,
+    path         text        not null,
+    path_type    text        not null,
+    action       text        not null,
+    client_type  text        not null,
+    icon         text        not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -332,21 +332,21 @@ drop table if exists hymn.core_custom_page cascade;
 create table hymn.core_custom_page
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    api          text      not null,
-    name         text      not null,
+    api          text        not null,
+    name         text        not null,
+    md5          text        not null,
     remark       text,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
 comment on table hymn.core_custom_page is '自定义页面，上传压缩包，解压后存放在工作目录的static-resource/{api}目录下,访问路径为 /module/core/public/custom/{api}/{filename}';
-comment on column hymn.core_custom_page.api is 'api名称，唯一标识 ;;uk';
-comment on column hymn.core_custom_page.template is '页面模板';
+comment on column hymn.core_custom_page.api is 'api名称，唯一标识，压缩包文件名 ;;uk';
+comment on column hymn.core_custom_page.md5 is '压缩文档md5';
 comment on column hymn.core_custom_page.name is '自定义页面名称，用于后台查看';
-comment on column hymn.core_custom_page.static is '是否为静态页面';
 
 
 
@@ -356,13 +356,13 @@ create table hymn.core_dict
     id             text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     field_id       text,
     parent_dict_id text,
-    name           text      not null,
-    api            text      not null,
+    name           text        not null,
+    api            text        not null,
     remark         text,
-    create_by_id   text      not null,
-    create_by      text      not null,
-    modify_by_id   text      not null,
-    modify_by      text      not null,
+    create_by_id   text        not null,
+    create_by      text        not null,
+    modify_by_id   text        not null,
+    modify_by      text        not null,
     create_date    timestamptz not null,
     modify_date    timestamptz not null
 );
@@ -378,14 +378,14 @@ drop table if exists hymn.core_dict_item cascade;
 create table hymn.core_dict_item
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    dict_id      text      not null,
-    name         text      not null,
-    code         text      not null,
+    dict_id      text        not null,
+    name         text        not null,
+    code         text        not null,
     parent_code  text,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -400,23 +400,23 @@ comment on column hymn.core_dict_item.parent_code is '父字典中的字典项�
 drop table if exists hymn.core_biz_object cascade;
 create table hymn.core_biz_object
 (
-    id           text primary key   default replace(public.uuid_generate_v4()::text, '-', ''),
-    name         text      not null,
-    api          text      not null,
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    name         text        not null,
+    api          text        not null,
     source_table text,
-    active       bool               default true not null,
-    type         text      not null default 'custom',
+    active       bool                 default true not null,
+    type         text        not null default 'custom',
     remote_url   text,
     remote_token text,
     module_api   text,
-    remark       text      not null default '',
+    remark       text        not null default '',
     can_insert   bool,
     can_update   bool,
     can_delete   bool,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -438,14 +438,14 @@ comment on column hymn.core_biz_object.remote_token is '远程rest验证信息';
 drop table if exists hymn.core_biz_object_field cascade;
 create table hymn.core_biz_object_field
 (
-    id                text primary key   default replace(public.uuid_generate_v4()::text, '-', ''),
-    source_column     text      not null,
-    biz_object_id     text      not null,
-    name              text      not null,
-    api               text      not null,
-    type              text      not null,
-    active            bool               default true,
-    history           bool               default false,
+    id                text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    source_column     text        not null,
+    biz_object_id     text        not null,
+    name              text        not null,
+    api               text        not null,
+    type              text        not null,
+    active            bool                 default true,
+    history           bool                 default false,
     default_value     text,
     formula           text,
     max_length        integer,
@@ -467,11 +467,11 @@ create table hymn.core_biz_object_field
     tmp               text,
     join_view_name    text,
     standard_type     text,
-    is_predefined     bool      not null default false,
-    create_by_id      text      not null,
-    create_by         text      not null,
-    modify_by_id      text      not null,
-    modify_by         text      not null,
+    is_predefined     bool        not null default false,
+    create_by_id      text        not null,
+    create_by         text        not null,
+    modify_by_id      text        not null,
+    modify_by         text        not null,
     create_date       timestamptz not null,
     modify_date       timestamptz not null
 );
@@ -590,19 +590,19 @@ drop table if exists hymn.core_biz_object_layout cascade;
 create table hymn.core_biz_object_layout
 (
     id                      text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    biz_object_id           text      not null,
-    name                    text      not null,
+    biz_object_id           text        not null,
+    name                    text        not null,
     remark                  text,
-    rel_field_json_arr      text      not null,
-    pc_read_layout_json     text      not null,
-    pc_edit_layout_json     text      not null,
-    mobile_read_layout_json text      not null,
-    mobile_edit_layout_json text      not null,
-    preview_layout_json     text      not null,
-    create_by_id            text      not null,
-    create_by               text      not null,
-    modify_by_id            text      not null,
-    modify_by               text      not null,
+    rel_field_json_arr      text        not null,
+    pc_read_layout_json     text        not null,
+    pc_edit_layout_json     text        not null,
+    mobile_read_layout_json text        not null,
+    mobile_edit_layout_json text        not null,
+    preview_layout_json     text        not null,
+    create_by_id            text        not null,
+    create_by               text        not null,
+    modify_by_id            text        not null,
+    modify_by               text        not null,
     create_date             timestamptz not null,
     modify_date             timestamptz not null
 );
@@ -630,8 +630,8 @@ create table hymn.core_biz_object_type
     create_by     text                           not null,
     modify_by_id  text                           not null,
     modify_by     text                           not null,
-    create_date   timestamptz                      not null,
-    modify_date   timestamptz                      not null
+    create_date   timestamptz                    not null,
+    modify_date   timestamptz                    not null
 );
 comment on table hymn.core_biz_object_type is '业务对象记录类型 ;; uk:[[biz_object_id name]]';
 comment on column hymn.core_biz_object_type.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade]';
@@ -642,14 +642,14 @@ drop table if exists hymn.core_biz_object_type_options cascade;
 create table hymn.core_biz_object_type_options
 (
     id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    biz_object_id text      not null,
-    type_id       text      not null,
-    field_id      text      not null,
-    dict_item_id  text      not null,
-    create_by_id  text      not null,
-    create_by     text      not null,
-    modify_by_id  text      not null,
-    modify_by     text      not null,
+    biz_object_id text        not null,
+    type_id       text        not null,
+    field_id      text        not null,
+    dict_item_id  text        not null,
+    create_by_id  text        not null,
+    create_by     text        not null,
+    modify_by_id  text        not null,
+    modify_by     text        not null,
     create_date   timestamptz not null,
     modify_date   timestamptz not null
 );
@@ -665,14 +665,14 @@ drop table if exists hymn.core_biz_object_type_layout cascade;
 create table hymn.core_biz_object_type_layout
 (
     id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id       text      not null,
-    biz_object_id text      not null,
-    type_id       text      not null,
-    layout_id     text      not null,
-    create_by_id  text      not null,
-    create_by     text      not null,
-    modify_by_id  text      not null,
-    modify_by     text      not null,
+    role_id       text        not null,
+    biz_object_id text        not null,
+    type_id       text        not null,
+    layout_id     text        not null,
+    create_by_id  text        not null,
+    create_by     text        not null,
+    modify_by_id  text        not null,
+    modify_by     text        not null,
     create_date   timestamptz not null,
     modify_date   timestamptz not null
 );
@@ -688,20 +688,20 @@ drop table if exists hymn.core_biz_object_trigger cascade;
 create table hymn.core_biz_object_trigger
 (
     id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    active        bool      not null,
+    active        bool        not null,
     remark        text,
-    biz_object_id text      not null,
-    name          text      not null,
-    api           text      not null,
-    lang          text      not null,
+    biz_object_id text        not null,
+    name          text        not null,
+    api           text        not null,
+    lang          text        not null,
     option_text   text,
-    ord           integer   not null,
-    event         text      not null,
-    code          text      not null,
-    create_by_id  text      not null,
-    create_by     text      not null,
-    modify_by_id  text      not null,
-    modify_by     text      not null,
+    ord           integer     not null,
+    event         text        not null,
+    code          text        not null,
+    create_by_id  text        not null,
+    create_by     text        not null,
+    modify_by_id  text        not null,
+    modify_by     text        not null,
     create_date   timestamptz not null,
     modify_date   timestamptz not null
 );
@@ -722,14 +722,14 @@ drop table if exists hymn.core_biz_object_mapping cascade;
 create table hymn.core_biz_object_mapping
 (
     id                   text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    source_biz_object_id text      not null,
-    source_type_id       text      not null,
-    target_biz_object_id text      not null,
-    target_type_id       text      not null,
-    create_by_id         text      not null,
-    create_by            text      not null,
-    modify_by_id         text      not null,
-    modify_by            text      not null,
+    source_biz_object_id text        not null,
+    source_type_id       text        not null,
+    target_biz_object_id text        not null,
+    target_type_id       text        not null,
+    create_by_id         text        not null,
+    create_by            text        not null,
+    modify_by_id         text        not null,
+    modify_by            text        not null,
     create_date          timestamptz not null,
     modify_date          timestamptz not null
 );
@@ -744,9 +744,9 @@ drop table if exists hymn.core_biz_object_mapping_item cascade;
 create table hymn.core_biz_object_mapping_item
 (
     id                       text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    mapping_id               text      not null,
-    source_field_id          text      not null,
-    target_field_id          text      not null,
+    mapping_id               text        not null,
+    source_field_id          text        not null,
+    target_field_id          text        not null,
     ref_field1_id            text,
     ref_field1_biz_object_id text,
     ref_field2_id            text,
@@ -755,10 +755,10 @@ create table hymn.core_biz_object_mapping_item
     ref_field3_biz_object_id text,
     ref_field4_id            text,
     ref_field4_biz_object_id text,
-    create_by_id             text      not null,
-    create_by                text      not null,
-    modify_by_id             text      not null,
-    modify_by                text      not null,
+    create_by_id             text        not null,
+    create_by                text        not null,
+    modify_by_id             text        not null,
+    modify_by                text        not null,
     create_date              timestamptz not null,
     modify_date              timestamptz not null
 );
@@ -778,11 +778,11 @@ comment on column hymn.core_biz_object_mapping_item.ref_field4_biz_object_id is 
 drop table if exists hymn.core_module;
 create table hymn.core_module
 (
-    api          text primary key ,
-    name         text      not null,
-    remark       text      not null,
-    version      text      not null,
-    create_date  timestamptz default now()
+    api         text primary key,
+    name        text not null,
+    remark      text not null,
+    version     text not null,
+    create_date timestamptz default now()
 );
 comment on table hymn.core_module is '模块列表';
 comment on column hymn.core_module.api is '模块api ;;uk';
@@ -792,10 +792,10 @@ comment on column hymn.core_module.name is '模块名称';
 drop table if exists hymn.core_module_function;
 create table hymn.core_module_function
 (
-    api        text primary key,
-    module_api text not null,
-    name       text not null,
-    remark     text,
+    api         text primary key,
+    module_api  text not null,
+    name        text not null,
+    remark      text,
     create_date timestamptz default now()
 );
 comment on table hymn.core_module_function is '模块功能表，模块中的功能需要根据角色进行权限控制时在该表中添加相关数据 ;;uk:[[module_api api]]';
@@ -809,14 +809,14 @@ drop table if exists hymn.core_module_function_perm;
 create table hymn.core_module_function_perm
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id      text      not null,
-    module_api   text      not null,
-    function_api text      not null,
+    role_id      text        not null,
+    module_api   text        not null,
+    function_api text        not null,
     perm         bool,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -830,13 +830,13 @@ drop table if exists hymn.core_button_perm cascade;
 create table hymn.core_button_perm
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id      text      not null,
-    button_id    text      not null,
-    visible      bool      not null,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    role_id      text        not null,
+    button_id    text        not null,
+    visible      bool        not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -851,13 +851,13 @@ drop table if exists hymn.core_menu_item_perm cascade;
 create table hymn.core_menu_item_perm
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id      text      not null,
-    menu_item_id text      not null,
-    visible      bool      not null,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    role_id      text        not null,
+    menu_item_id text        not null,
+    visible      bool        not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -872,21 +872,21 @@ drop table if exists hymn.core_biz_object_perm cascade;
 create table hymn.core_biz_object_perm
 (
     id                      text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id                 text      not null,
-    biz_object_id           text      not null,
-    ins                     bool      not null,
-    upd                     bool      not null,
-    del                     bool      not null,
-    que                     bool      not null,
-    query_with_account_tree bool      not null,
-    query_with_dept         bool      not null,
-    query_with_dept_tree    bool      not null,
-    query_all               bool      not null,
-    edit_all                bool      not null,
-    create_by_id            text      not null,
-    create_by               text      not null,
-    modify_by_id            text      not null,
-    modify_by               text      not null,
+    role_id                 text        not null,
+    biz_object_id           text        not null,
+    ins                     bool        not null,
+    upd                     bool        not null,
+    del                     bool        not null,
+    que                     bool        not null,
+    query_with_account_tree bool        not null,
+    query_with_dept         bool        not null,
+    query_with_dept_tree    bool        not null,
+    query_all               bool        not null,
+    edit_all                bool        not null,
+    create_by_id            text        not null,
+    create_by               text        not null,
+    modify_by_id            text        not null,
+    modify_by               text        not null,
     create_date             timestamptz not null,
     modify_date             timestamptz not null
 );
@@ -908,17 +908,17 @@ comment on column hymn.core_biz_object_perm.edit_all is '编辑全部';
 drop table if exists hymn.core_biz_object_field_perm cascade;
 create table hymn.core_biz_object_field_perm
 (
-    id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id       text      not null,
-    field_id      text      not null,
-    p_read        bool      not null,
-    p_edit        bool      not null,
-    create_by_id  text      not null,
-    create_by     text      not null,
-    modify_by_id  text      not null,
-    modify_by     text      not null,
-    create_date   timestamptz not null,
-    modify_date   timestamptz not null
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    role_id      text        not null,
+    field_id     text        not null,
+    p_read       bool        not null,
+    p_edit       bool        not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_biz_object_field_perm is '字段权限 ;;uk:[[role_id field_id]]';
 comment on column hymn.core_biz_object_field_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
@@ -931,16 +931,16 @@ comment on column hymn.core_biz_object_field_perm.p_edit is '可编辑';
 drop table if exists hymn.core_biz_object_type_perm cascade;
 create table hymn.core_biz_object_type_perm
 (
-    id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id       text      not null,
-    type_id       text      not null,
-    visible       bool      not null,
-    create_by_id  text      not null,
-    create_by     text      not null,
-    modify_by_id  text      not null,
-    modify_by     text      not null,
-    create_date   timestamptz not null,
-    modify_date   timestamptz not null
+    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    role_id      text        not null,
+    type_id      text        not null,
+    visible      bool        not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
+    create_date  timestamptz not null,
+    modify_date  timestamptz not null
 );
 comment on table hymn.core_biz_object_type_perm is '记录类型权限 ;;uk:[[role_id type_id]]';
 comment on column hymn.core_biz_object_type_perm.role_id is '角色id ;;fk:[core_role cascade]';
@@ -977,15 +977,15 @@ drop table if exists hymn.core_shared_code;
 create table hymn.core_shared_code
 (
     id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    api          text      not null,
-    type         text      not null,
-    code         text      not null,
-    lang         text      not null,
+    api          text        not null,
+    type         text        not null,
+    code         text        not null,
+    lang         text        not null,
     option_text  text,
-    create_by_id text      not null,
-    create_by    text      not null,
-    modify_by_id text      not null,
-    modify_by    text      not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
     create_date  timestamptz not null,
     modify_date  timestamptz not null
 );
@@ -1000,21 +1000,21 @@ comment on column hymn.core_shared_code.option_text is '用于给编译器或其
 drop table if exists hymn.core_business_code_ref;
 create table hymn.core_business_code_ref
 (
-    id             text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    trigger_id     text,
-    interface_id   text,
-    shared_code_id text,
-    biz_object_id  text,
-    field_id       text,
-    org_id         text,
-    role_id        text,
+    id                 text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    trigger_id         text,
+    interface_id       text,
+    shared_code_id     text,
+    biz_object_id      text,
+    field_id           text,
+    org_id             text,
+    role_id            text,
     ref_shared_code_id text,
-    create_by_id   text      not null,
-    create_by      text      not null,
-    modify_by_id   text      not null,
-    modify_by      text      not null,
-    create_date    timestamptz not null,
-    modify_date    timestamptz not null
+    create_by_id       text        not null,
+    create_by          text        not null,
+    modify_by_id       text        not null,
+    modify_by          text        not null,
+    create_date        timestamptz not null,
+    modify_date        timestamptz not null
 );
 comment on table hymn.core_business_code_ref is '业务代码引用关系表';
 comment on column hymn.core_business_code_ref.trigger_id is '触发器id ;;fk:[core_biz_object_trigger cascade]';
@@ -1030,15 +1030,15 @@ drop table if exists hymn.core_cron_job;
 create table hymn.core_cron_job
 (
     id              text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    active          bool      not null,
-    shared_code_id  text      not null,
-    cron            text      not null,
+    active          bool        not null,
+    shared_code_id  text        not null,
+    cron            text        not null,
     start_date_time timestamptz not null,
     end_date_time   timestamptz not null,
-    create_by_id    text      not null,
-    create_by       text      not null,
-    modify_by_id    text      not null,
-    modify_by       text      not null,
+    create_by_id    text        not null,
+    create_by       text        not null,
+    modify_by_id    text        not null,
+    modify_by       text        not null,
     create_date     timestamptz not null,
     modify_date     timestamptz not null
 );

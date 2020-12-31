@@ -3,7 +3,6 @@ package github.afezeria.hymn.core.module.table
 import github.afezeria.hymn.core.module.entity.CustomPage
 import org.ktorm.dsl.QueryRowSet
 import org.ktorm.schema.BaseTable
-import org.ktorm.schema.boolean
 import org.ktorm.schema.datetime
 import org.ktorm.schema.varchar
 
@@ -15,6 +14,7 @@ class CoreCustomPages(alias: String? = null) :
 
     val api = varchar("api")
     val name = varchar("name")
+    val md5 = varchar("md5")
     val remark = varchar("remark")
     val id = varchar("id")
     val createById = varchar("create_by_id")
@@ -30,6 +30,7 @@ class CoreCustomPages(alias: String? = null) :
         remark = row[this.remark],
     ).also {
         it.id = requireNotNull(row[this.id]) { "field CustomPage.id should not be null" }
+        it.md5 = requireNotNull(row[this.md5]) { "field CustomPage.md5 should not be null" }
         it.createById =
             requireNotNull(row[this.createById]) { "field CustomPage.createById should not be null" }
         it.createBy =
