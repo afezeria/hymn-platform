@@ -1,14 +1,13 @@
 package github.afezeria.hymn.common.sql.bobject
 
+import github.afezeria.hymn.common.BaseDbTest
+import github.afezeria.hymn.common.COMMON_INFO
 import github.afezeria.hymn.common.adminConn
-import github.afezeria.hymn.common.sql.BaseDbTest
-import github.afezeria.hymn.common.sql.COMMON_INFO
-import github.afezeria.hymn.common.sql.clearBObject
+import github.afezeria.hymn.common.clearBObject
 import github.afezeria.hymn.common.util.execute
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 
 /**

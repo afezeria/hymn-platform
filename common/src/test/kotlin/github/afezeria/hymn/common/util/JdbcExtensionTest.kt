@@ -20,7 +20,8 @@ internal class JdbcExtensionTest {
         @JvmStatic
         fun beforeAll() {
             adminConn.use {
-                it.createStatement().execute("""
+                it.createStatement().execute(
+                    """
                     drop table if exists test_table;
                     create table test_table(
                     id uuid primary key default uuid_generate_v4(),
@@ -29,7 +30,8 @@ internal class JdbcExtensionTest {
                     adatetime timestamptz default now(),
                     adate date default now()
                     )
-            """)
+            """
+                )
             }
         }
 
@@ -37,9 +39,11 @@ internal class JdbcExtensionTest {
         @JvmStatic
         fun afterAll() {
             adminConn.use {
-                it.createStatement().execute("""
+                it.createStatement().execute(
+                    """
                     drop table test_table
-                """)
+                """
+                )
             }
         }
     }
@@ -107,7 +111,11 @@ internal class JdbcExtensionTest {
 
     @Test
     fun `execute with params`() {
-        val ins = adminConn.execute("insert into test_table (atext,aint) values (?,?) returning id,atext,aint,adate;", "abc", 123)
+        val ins = adminConn.execute(
+            "insert into test_table (atext,aint) values (?,?) returning id,atext,aint,adate;",
+            "abc",
+            123
+        )
         ins.size shouldBe 1
         ins[0].apply {
             size shouldBe 4
@@ -119,7 +127,10 @@ internal class JdbcExtensionTest {
 
     @Test
     fun `execute with list`() {
-        val ins = adminConn.execute("insert into test_table (atext,aint) values (?,?) returning id,atext,aint,adate;", listOf("abc", 123))
+        val ins = adminConn.execute(
+            "insert into test_table (atext,aint) values (?,?) returning id,atext,aint,adate;",
+            listOf("abc", 123)
+        )
         ins.size shouldBe 1
         ins[0].apply {
             size shouldBe 4
@@ -132,7 +143,8 @@ internal class JdbcExtensionTest {
 
     @Nested
     inner class ExecuteWithMapTest {
-        private val sql = "insert into test_table (atext,aint) values (#{atext},#{aint}) returning id,atext,aint,adate;"
+        private val sql =
+            "insert into test_table (atext,aint) values (#{atext},#{aint}) returning id,atext,aint,adate;"
 
         @Test
         fun `execute`() {
@@ -170,7 +182,11 @@ internal class JdbcExtensionTest {
 
     @Test
     fun `sql time convert to local time 1`() {
-        val ins = adminConn.execute("insert into test_table (atext,aint) values (?,?) returning id,adate,adatetime;", "abc", 123)
+        val ins = adminConn.execute(
+            "insert into test_table (atext,aint) values (?,?) returning id,adate,adatetime;",
+            "abc",
+            123
+        )
         ins.size shouldBe 1
         ins[0].apply {
             size shouldBe 3
@@ -184,7 +200,11 @@ internal class JdbcExtensionTest {
     fun `sql time convert to local time 2`() {
         val dateTime = LocalDateTime.now()
         val date = LocalDate.now()
-        val ins = adminConn.execute("insert into test_table (adatetime,adate) values (?,?) returning adate,adatetime;", dateTime, date)
+        val ins = adminConn.execute(
+            "insert into test_table (adatetime,adate) values (?,?) returning adate,adatetime;",
+            dateTime,
+            date
+        )
         ins.size shouldBe 1
         ins[0].apply {
             size shouldBe 2

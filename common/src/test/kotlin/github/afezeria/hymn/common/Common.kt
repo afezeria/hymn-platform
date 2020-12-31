@@ -1,6 +1,5 @@
-package github.afezeria.hymn.common.sql
+package github.afezeria.hymn.common
 
-import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.util.execute
 import java.time.LocalDateTime
 import java.util.*

@@ -1,8 +1,6 @@
 package github.afezeria.hymn.common.sql.field
 
-import github.afezeria.hymn.common.adminConn
-import github.afezeria.hymn.common.sql.*
-import github.afezeria.hymn.common.userConn
+import github.afezeria.hymn.common.*
 import github.afezeria.hymn.common.util.execute
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainAll
@@ -81,7 +79,10 @@ class UpdateTriggerTest : BaseDbTest() {
                     """,
                 objId, *COMMON_INFO
             )[0]
-            it.execute("update hymn.core_biz_object_field set active=false where id = ?", field["id"])
+            it.execute(
+                "update hymn.core_biz_object_field set active=false where id = ?",
+                field["id"]
+            )
             field = it.execute(
                 "update hymn.core_biz_object_field set name='测试' where id = ? returning *",
                 field["id"]
@@ -156,7 +157,10 @@ class UpdateTriggerTest : BaseDbTest() {
                     """,
                 objId, *COMMON_INFO
             )[0]
-            it.execute("update hymn.core_biz_object_field set active=false where id = ?", field["id"])
+            it.execute(
+                "update hymn.core_biz_object_field set active=false where id = ?",
+                field["id"]
+            )
             field = it.execute(
                 "update hymn.core_biz_object_field set active =true , name='测试' where id = ? returning *",
                 field["id"]
@@ -276,7 +280,10 @@ class UpdateTriggerTest : BaseDbTest() {
             ).size shouldBe 0
         }
         adminConn.use {
-            it.execute("update hymn.core_biz_object_field set history=true where id = ?", field["id"])
+            it.execute(
+                "update hymn.core_biz_object_field set history=true where id = ?",
+                field["id"]
+            )
         }
         userConn.use {
             it.execute("update hymn_view.${objApi} set tfield__cf='123' where id = ?", data["id"])

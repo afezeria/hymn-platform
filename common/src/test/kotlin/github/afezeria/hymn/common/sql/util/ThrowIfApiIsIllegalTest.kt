@@ -1,7 +1,7 @@
 package github.afezeria.hymn.common.sql.util
 
+import github.afezeria.hymn.common.BaseDbTest
 import github.afezeria.hymn.common.adminConn
-import github.afezeria.hymn.common.sql.BaseDbTest
 import github.afezeria.hymn.common.util.execute
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow

@@ -1,7 +1,6 @@
 package github.afezeria.hymn.common.sql.field
 
-import github.afezeria.hymn.common.adminConn
-import github.afezeria.hymn.common.sql.*
+import github.afezeria.hymn.common.*
 import github.afezeria.hymn.common.util.execute
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
@@ -84,8 +83,9 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
             e.message shouldContain "预定义字段必须指定 source_column"
         }
     }
+
     @Test
-    fun `wrong field type`(){
+    fun `wrong field type`() {
         adminConn.use {
             val e = shouldThrow<PSQLException> {
                 it.execute(

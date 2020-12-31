@@ -1,5 +1,6 @@
-package github.afezeria.hymn.common.sql
+package github.afezeria.hymn.common
 
+import java.io.File
 import java.io.InputStreamReader
 import java.util.*
 
@@ -27,7 +28,14 @@ open class BaseDbTest {
                 "6.test-data-table.sql",
             )
             for (script in scripts) {
-                runSqlScript("$path/src/test/resources/sql/$script")
+                val temp = File.createTempFile(script, ".sql")
+                temp.deleteOnExit()
+                val stream =
+                    requireNotNull(this::class.java.classLoader.getResourceAsStream("sql/$script"))
+                temp.outputStream().use {
+                    it.write(stream.readAllBytes())
+                }
+                runSqlScript(temp.absolutePath)
             }
             println("========== db init end ==========")
         }

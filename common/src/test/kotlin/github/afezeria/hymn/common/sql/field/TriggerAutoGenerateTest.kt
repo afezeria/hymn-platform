@@ -1,8 +1,6 @@
 package github.afezeria.hymn.common.sql.field
 
-import github.afezeria.hymn.common.adminConn
-import github.afezeria.hymn.common.sql.*
-import github.afezeria.hymn.common.userConn
+import github.afezeria.hymn.common.*
 import github.afezeria.hymn.common.util.execute
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
@@ -14,7 +12,7 @@ import org.junit.jupiter.api.Test
 /**
  * @author afezeria
  */
-class TriggerAutoGenerateTest:BaseDbTest() {
+class TriggerAutoGenerateTest : BaseDbTest() {
     companion object {
         lateinit var objId: String
         lateinit var objSourceTable: String
@@ -85,7 +83,7 @@ class TriggerAutoGenerateTest:BaseDbTest() {
                         insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${fieldApi1},${fieldApi2}) 
                         values (now(), now(), ?, ?, ?, ?, ?, ?) returning *;""",
-                    *STANDARD_FIELD, refDataIds,refDataIds
+                    *STANDARD_FIELD, refDataIds, refDataIds
                 )
                 insData.size shouldBe 1
                 val dataId = insData[0]["id"] as String
