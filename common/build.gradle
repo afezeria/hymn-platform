@@ -8,7 +8,17 @@
 //def ktormVersion = project.ktormVersion
 //
 //
+task testJar(type: Jar) {
+    classifier = 'test'
+    from sourceSets.test.output
+}
+
+artifacts {
+    testRuntime testJar
+}
+
 dependencies {
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
     implementation "com.fasterxml.jackson.core:jackson-core:2.11.3"
@@ -38,11 +48,16 @@ dependencies {
         exclude group: 'org.jetbrains.kotlin'
     }
 
+//    testCompile project(path: ':shared', configuration: 'testRuntime')
+//    compile "org.postgresql:postgresql:42.2.10"
+//    compile group: "com.zaxxer", name: "HikariCP", version: "3.4.5"
+
     testCompile "org.postgresql:postgresql:42.2.10"
     testCompile group: "com.zaxxer", name: "HikariCP", version: "3.4.5"
-    testImplementation 'io.kotest:kotest-assertions-core-jvm:4.3.1' //单独使用kotest的断言库时引入的依赖
-    testImplementation(platform("org.junit:junit-bom:5.7.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testCompile 'io.kotest:kotest-assertions-core-jvm:4.3.1' //单独使用kotest的断言库时引入的依赖
+    testCompile(platform("org.junit:junit-bom:5.7.0"))
+    testCompile("org.junit.jupiter:junit-jupiter")
+
 }
 
 test {
