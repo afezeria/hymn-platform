@@ -97,7 +97,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                     objId, *COMMON_INFO
                 )
             }
-            e.message shouldContain "无效的字段类型"
+            e.message shouldContain "[t:inner:0013] 未知的字段类型"
         }
     }
 
@@ -304,7 +304,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                         """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'主对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,'主对象','mreffield3','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
                         objId, null, *COMMON_INFO
                     )
@@ -314,7 +314,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                         """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'主对象','mreffield','mreference',?,null,'从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,'主对象','mreffield4','mreference',?,null,'从对象',?,?,?,?,now(),now()) returning *;
                     """,
                         objId, randomUUIDStr(), *COMMON_INFO
                     )
@@ -735,7 +735,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                         """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'主对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,'主对象','mreffield5','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
                         objId, randomUUIDStr(), *COMMON_INFO
                     )
@@ -751,7 +751,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                         """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'主对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,'主对象','mreffield6','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
                         objId, refId, *COMMON_INFO
                     )

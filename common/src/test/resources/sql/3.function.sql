@@ -1,3 +1,10 @@
+-- 触发器以a开头的表示通用函数的触发器
+-- 以c10开头的表示特定表的函数构建的触发器
+-- 以c开头接其他数字的表示根据特定字段值区分的特定表的函数构建的触发器
+
+-- biz_object_field 中字段的 source_column 如果以 pl_ 开头表示该字段并不对应数据表中的某一列,
+-- 该列的相关数据由应用层生成然后展示给前端
+
 -- 授予 hymn_user 角色业务对象视图的相关权限
 create or replace function hymn.grant_object_view_permission(obj_id text) returns void
     language plpgsql as
@@ -7,7 +14,6 @@ declare
     perm_text text := 'select';
     sql_str   text;
 begin
-    raise notice 'grant_object_view_permission';
     select * into obj from hymn.core_biz_object where id = obj_id;
     if not found then
         raise exception '[t:inner:0001] 对象 [id:%] 不存在',obj_id;
@@ -31,8 +37,6 @@ begin
         if obj.can_delete then
             perm_text := perm_text || ',delete';
         end if;
-        raise notice 'perm %',perm_text;
-        raise notice 'view api %',obj.api;
         sql_str := format('grant %s on hymn_view.%I to hymn_user;', perm_text, obj.api);
         execute sql_str;
     end if;
@@ -242,12 +246,12 @@ begin
 end;
 $$;
 comment on function hymn.cannot_delete_when_object_is_inactive() is '检查当前数据所属的对象是否已停用，对象处于停用状态时不能修改相关数据（delete触发器）';
-drop trigger if exists a11_check_object_active_status_delete on hymn.core_biz_object_field;
-create trigger a11_check_object_active_status_delete
-    before delete
-    on hymn.core_biz_object_field
-    for each row
-execute function hymn.cannot_delete_when_object_is_inactive();
+-- drop trigger if exists a11_check_object_active_status_delete on hymn.core_biz_object_field;
+-- create trigger a11_check_object_active_status_delete
+--     before delete
+--     on hymn.core_biz_object_field
+--     for each row
+-- execute function hymn.cannot_delete_when_object_is_inactive();
 drop trigger if exists a11_check_object_active_status_delete on hymn.core_biz_object_layout;
 create trigger a11_check_object_active_status_delete
     before delete
@@ -318,10 +322,8 @@ declare
     field      hymn.core_biz_object_field;
     column_arr text[] := ARRAY [' id as id '];
 begin
-    raise notice 'rebuild_object_view';
     select * into obj from hymn.core_biz_object where id = obj_id;
     if FOUND then
-        raise notice 'rebuild_object_view loop';
         for field in select *
                      from hymn.core_biz_object_field
                      where active = true
@@ -348,17 +350,19 @@ create or replace function hymn.field_type_2_column_prefix(field_type text) retu
 $$
 begin
     case field_type
-        when 'text', 'check_box_group', 'select', 'reference', 'auto', 'picture'
+        when 'text', 'check_box_group', 'select', 'reference', 'auto'
             then return 'text';
         when 'master_slave' then return 'master';
         when 'check_box' then return 'bool';
         when 'integer' then return 'bigint';
         when 'float' then return 'double';
+        when 'picture' then return 'picture';
+        when 'files' then return 'files';
         when 'money' then return 'decimal';
         when 'datetime','date' then return 'datetime' ;
         when 'summary' then return 'pl_summary';
         when 'mreference' then return 'mref';
-        else raise exception '[t:inner:0013] 未知的字段类型: %',field_type;
+        else raise exception '[t:inner:0013] 未知的字段类型 %',field_type;
     end case;
 end ;
 $$;
@@ -370,11 +374,13 @@ create or replace function hymn.column_prefix_2_field_type_description(prefix te
 $$
 begin
     case prefix
-        when 'text' then return '文本/复选框组/下拉/关联/自动编号/图片';
+        when 'text' then return '文本/复选框组/下拉/关联/自动编号';
         when 'bool' then return '复选框';
         when 'bigint' then return '整型';
         when 'double' then return '浮点型';
         when 'decimal' then return '金额';
+        when 'picture' then return '图片';
+        when 'files' then return '文件';
         when 'datetime' then return '日期/日期时间';
         when 'master' then return '主从';
         when 'mref' then return '多选关联';
@@ -401,6 +407,7 @@ begin
         when 'summary' then return '汇总';
         when 'auto' then return '自动编号';
         when 'picture' then return '图片';
+        when 'files' then return '文件';
         when 'integer' then return '整数';
         when 'float' then return '浮点数';
         when 'money' then return '金额';
@@ -841,214 +848,6 @@ end;
 $BODY$;
 comment on function hymn.rebuild_data_table_history_trigger(obj_id text) is '重建数据表的历史记录触发器，生成触发器函数';
 
-create or replace function hymn.check_field_properties(record_new hymn.core_biz_object_field) returns void
-    language plpgsql as
-$$
-declare
-    ref_obj   hymn.core_biz_object;
-    obj       hymn.core_biz_object;
-    count     int;
-    ref_field hymn.core_biz_object_field;
-begin
-    if record_new.is_predefined = true and record_new.source_column is null then
-        raise exception '[t:inner:0022] 预定义字段必须指定 source_column';
-    end if;
-    if record_new.type = 'text' then
---         文本类型：最小值 最大值 显示行数
-        if record_new.min_length is null or record_new.max_length is null or
-           record_new.visible_row is null then
-            raise exception '[t:inner:0023] 最小长度、最大长度和显示行数都不能为空';
-        end if;
-        if record_new.min_length < 0 then
-            raise exception '[t:inner:0024] 最小长度必须大于等于0';
-        end if;
-        if record_new.max_length > 50000 then
-            raise exception '[t:inner:0025] 最大长度必须小于等于50000';
-        end if;
-        if record_new.max_length < record_new.min_length then
-            raise exception '[t:inner:0026] 最小长度必须小于等于最大长度';
-        end if;
-        if record_new.visible_row < 1 then
-            raise exception '[t:inner:0027] 可见行数必须大于等于1';
-        end if;
-    elseif record_new.type = 'check_box' then
-    elseif record_new.type = 'check_box_group' then
---         复选框组： 选项个数 字典id/字典项文本（字典项文本存储在tmp中，这连个字段只要取一个就行）
-        if record_new.optional_number is null or record_new.dict_id is null then
-            raise exception '[t:inner:0028] 可选个数/字典项不能为空';
-        end if;
-        if record_new.optional_number < 1 then
-            raise exception '[t:inner:0029] 可选个数必须大于0';
-        end if;
-        perform * from hymn.core_dict where id = record_new.dict_id;
-        if not FOUND then
-            raise exception '[t:inner:0030] 字典 [id:%] 不存在',record_new.dict_id;
-        end if;
-    elseif record_new.type = 'select' then
---         选项列表： 选项个数 字典id/字典项文本（字典项文本存储在tmp中，这连个字段只要取一个就行）
-        if record_new.optional_number is null or record_new.visible_row is null or
-           record_new.dict_id is null then
-            raise exception '[t:inner:0031] 可选个数/可见行数/字典项不能为空';
-        end if;
-        if record_new.optional_number < 1 then
-            raise exception '[t:inner:0032] 可选个数必须大于0';
-        end if;
-        if record_new.visible_row < 1 then
-            raise exception '[t:inner:0033] 可见行数必须大于0';
-        end if;
-        perform * from hymn.core_dict where id = record_new.dict_id;
-        if not FOUND then
-            raise exception '[t:inner:0034] 字典 [id:%] 不存在',record_new.dict_id;
-        end if;
-    elseif record_new.type = 'integer' then
-        if record_new.min_length is null or record_new.max_length is null then
-            raise exception '[t:inner:0035] 最小值/最大值不能为空';
-        end if;
---         整型
-        if record_new.min_length > record_new.max_length then
-            raise exception '[t:inner:0036] 最小值必须小于最大值';
-        end if;
-    elseif record_new.type = 'float' then
---         浮点: 整数位长度 小数位长度
-        if record_new.min_length is null or record_new.max_length is null then
-            raise exception '[t:inner:0037] 小数位数/整数位数不能为空';
-        end if;
-        if record_new.min_length < 1 then
-            raise exception '[t:inner:0038] 小数位数必须大于等于1';
-        end if;
-        if record_new.max_length < 1 then
-            raise exception '[t:inner:0039] 整数位数必须大于等于1';
-        end if;
-        if (record_new.min_length + record_new.max_length) > 18 then
-            raise exception '[t:inner:0040] 总位数必须小于等于18';
-        end if;
-    elseif record_new.type = 'money' then
---          货币: 整数位长度 小数位长度
-        if record_new.min_length is null or record_new.max_length is null then
-            raise exception '[t:inner:0041] 小数位数/整数位数不能为空';
-        end if;
-        if record_new.min_length < 1 then
-            raise exception '[t:inner:0042] 小数位数必须大于等于1';
-        end if;
-        if record_new.max_length < 1 then
-            raise exception '[t:inner:0043] 整数位数必须大于等于1';
-        end if;
-    elseif record_new.type = 'date' then
---         日期 没有字段限制
-    elseif record_new.type = 'datetime' then
---         日期时间 没有字段限制
-    elseif record_new.type = 'picture' then
---         图片
-        if record_new.min_length is null or record_new.max_length is null then
-            raise exception '[t:inner:0044] 图片数量/图片大小不能为空';
-        end if;
-        if record_new.min_length < 1 then
-            raise exception '[t:inner:0045] 图片数量必须大于等于1';
-        end if;
-        if record_new.max_length < 1 then
-            raise exception '[t:inner:0046] 图片大小必须大于1';
-        end if;
-    elseif record_new.type = 'mreference' then
---         多选关联关系
-        if record_new.ref_id is null or record_new.ref_delete_policy is null then
-            raise exception '[t:inner:0047] 关联对象/关联对象删除策略不能为空';
-        end if;
-        if record_new.is_predefined = true then
-            raise exception '[t:inner:0048] 多选关联字段不能是预定义字段';
-        end if;
-        select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
-        if not FOUND then
-            raise exception '[t:inner:0049] 引用对象 [id:%] 不存在',record_new.ref_id;
-        end if;
-        if ref_obj.active = false then
-            raise exception '[t:inner:0050] 引用对象 [id:%] 未启用',ref_obj.id;
-        end if;
-        select * into obj from hymn.core_biz_object where id = record_new.biz_object_id;
-        if obj.type = 'remote' or ref_obj.type = 'remote' then
-            raise exception '[t:inner:0051] 远程对象不能创建多选关联字段或被多选关联字段引用';
-        end if;
-    elseif record_new.type = 'reference' then
---         关联关系
-        if record_new.ref_id is null or record_new.ref_delete_policy is null then
-            raise exception '[t:inner:0052] 关联对象/关联对象删除策略不能为空';
-        end if;
-        select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
-        if not FOUND then
-            raise exception '[t:inner:0053] 引用对象 [id:%] 不存在',record_new.ref_id;
-        end if;
-        if ref_obj.active = false then
-            raise exception '[t:inner:0054] 引用对象 [id:%] 未启用',ref_obj.id;
-        end if;
-    elseif record_new.type = 'master_slave' then
---         主详关系
-        if record_new.ref_id is null or record_new.ref_list_label is null then
-            raise exception '[t:inner:0055] 关联对象/关联对象相关列表标签不能为空';
-        end if;
-        select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
-        if not FOUND then
-            raise exception '[t:inner:0056] 引用对象 [id:%] 不存在',record_new.ref_id;
-        end if;
-        if ref_obj.active = false then
-            raise exception '[t:inner:0057] 引用对象 [id:%] 未启用',ref_obj.id;
-        end if;
-    elseif record_new.type = 'auto' then
---         自动编号
-        if record_new.gen_rule is null then
-            raise exception '[t:inner:0058] 编号规则不能为空';
-        end if;
-        select count(*)
-        into count
-        from regexp_matches(record_new.gen_rule, '\{0+\}', 'g') t;
-        if count != 1 then
-            raise exception '[t:inner:0059] 编号规则中有且只能有一个{0}占位符';
-        end if;
-    elseif record_new.type = 'summary' then
---         汇总字段
-        if record_new.s_id is null or record_new.s_type is null or
-           record_new.min_length is null then
-            raise exception '[t:inner:0060] 汇总对象/汇总类型/小数位长度不能为空';
-        end if;
-        if record_new.s_type in ('max', 'min', 'sum') and record_new.s_field_id is null then
-            raise exception '[t:inner:0061] 汇总字段不能为空';
-        end if;
-        if record_new.min_length < 0 then
-            raise exception '[t:inner:0062] 小数位长度必须大于等于0';
-        end if;
-        select * into ref_obj from hymn.core_biz_object where id = record_new.s_id;
-        if not FOUND then
-            raise exception '[t:inner:0063] 汇总对象 [id:%] 不存在',record_new.s_id;
-        end if;
-        if ref_obj.active = false then
-            raise exception '[t:inner:0064] 汇总对象 [id:%] 未启用',ref_obj.id;
-        end if;
-        perform *
-        from hymn.core_biz_object_field
-        where biz_object_id = record_new.s_id
-          and active = true
-          and type = 'master_slave';
-        if not FOUND then
-            raise exception '[t:inner:0065] 汇总对象必须是当前对象的子对象';
-        end if;
-        if record_new.s_type in ('max', 'min', 'sum') then
-            select *
-            into ref_field
-            from hymn.core_biz_object_field
-            where id = record_new.s_field_id
-              and biz_object_id = record_new.s_id;
-            if not FOUND then
-                raise exception '[t:inner:0066] 汇总字段 [id:%] 不存在',record_new.s_field_id;
-            end if;
-            if ref_field.type not in ('integer', 'float', 'money') then
-                raise exception '[t:inner:0067] 最大值、最小值、总和的汇总字段类型必须为：整型/浮点型/金额';
-            end if;
-        end if;
-    else
-        RAISE EXCEPTION '无效的字段类型： %',record_new.type;
-    end if;
-end;
-$$;
-comment on function hymn.check_field_properties(record_new hymn.core_biz_object_field) is '根据业务对象字段类型检查属性是否符合要求';
-
 -- 触发器函数
 
 -- flag:object 对象相关触发器
@@ -1069,9 +868,9 @@ begin
 end;
 $$;
 comment on function hymn.object_trigger_fun_before_insert() is '业务对象 before insert 触发器函数, 申请数据表';
--- c00开头为通用逻辑触发器
-drop trigger if exists c00_object_before_insert on hymn.core_biz_object;
-create trigger c00_object_before_insert
+-- c10开头为通用逻辑触发器
+drop trigger if exists c10_object_before_insert on hymn.core_biz_object;
+create trigger c10_object_before_insert
     before insert
     on hymn.core_biz_object
     for each row
@@ -1117,10 +916,10 @@ begin
                     from hymn.core_biz_object scbo
                              inner join hymn.core_biz_object_field scbof
                                         on scbof.biz_object_id = scbo.id
-                    where scbof.type in ('mreference', 'reference', 'master_slave')
+                    where scbof.type in ('mreference', 'reference', 'master_slave', 'summary')
                       and scbof.active = true
                       and scbo.active = true
-                      and scbof.ref_id = record_new.id;
+                      and (scbof.ref_id = record_new.id or scbof.s_id = record_new.id);
                     if ref_field_arr is not null then
                         raise exception '[t:inner:0073] 不能停用当前对象，以下字段引用了当前对象：%',ref_field_arr;
                     end if;
@@ -1210,15 +1009,15 @@ begin
 end ;
 $$;
 comment on function hymn.custom_object_trigger_fun() is '业务对象对象类型为custom的自定义对象的触发器';
--- c10开头为根据type字段区分逻辑的触发器
-drop trigger if exists c10_custom_object_before on hymn.core_biz_object;
-create trigger c10_custom_object_before
+-- c20开头为根据type字段区分逻辑的触发器
+drop trigger if exists c20_custom_object_before on hymn.core_biz_object;
+create trigger c20_custom_object_before
     before insert or update
     on hymn.core_biz_object
     for each row
 execute function hymn.custom_object_trigger_fun();
-drop trigger if exists c10_custom_object_after on hymn.core_biz_object;
-create trigger c10_custom_object_after
+drop trigger if exists c20_custom_object_after on hymn.core_biz_object;
+create trigger c20_custom_object_after
     after insert or delete
     on hymn.core_biz_object
     for each row
@@ -1261,10 +1060,10 @@ begin
                     from hymn.core_biz_object scbo
                              inner join hymn.core_biz_object_field scbof
                                         on scbof.biz_object_id = scbo.id
-                    where scbof.type in ('mreference', 'reference', 'master_slave')
+                    where scbof.type in ('mreference', 'reference', 'master_slave', 'summary')
                       and scbof.active = true
                       and scbo.active = true
-                      and scbof.ref_id = record_new.id;
+                      and (scbof.ref_id = record_new.id or scbof.s_id = record_new.id);
                     if ref_field_arr is not null then
                         raise exception '[t:inner:0076] 不能停用当前对象，以下字段引用了当前对象：%',ref_field_arr;
                     end if;
@@ -1298,14 +1097,14 @@ begin
 end ;
 $$;
 comment on function hymn.module_object_trigger_fun() is '业务对象对象类型为module的自定义对象的触发器';
-drop trigger if exists c10_module_object_before on hymn.core_biz_object;
-create trigger c10_module_object_before
+drop trigger if exists c20_module_object_before on hymn.core_biz_object;
+create trigger c20_module_object_before
     before insert or update
     on hymn.core_biz_object
     for each row
 execute function hymn.module_object_trigger_fun();
-drop trigger if exists c10_module_object_after on hymn.core_biz_object;
-create trigger c10_module_object_after
+drop trigger if exists c20_module_object_after on hymn.core_biz_object;
+create trigger c20_module_object_after
     after insert or delete
     on hymn.core_biz_object
     for each row
@@ -1335,14 +1134,14 @@ begin
 end;
 $$;
 comment on function hymn.remote_object_trigger_fun() is '业务对象对象类型为remote的自定义对象的触发器';
-drop trigger if exists c10_remote_object_before on hymn.core_biz_object;
-create trigger c10_remote_object_before
+drop trigger if exists c20_remote_object_before on hymn.core_biz_object;
+create trigger c20_remote_object_before
     before insert
     on hymn.core_biz_object
     for each row
 execute function hymn.remote_object_trigger_fun();
--- drop trigger if exists c10_remote_object_after on hymn.core_biz_object;
--- create trigger c10_remote_object_after
+-- drop trigger if exists c20_remote_object_after on hymn.core_biz_object;
+-- create trigger c20_remote_object_after
 --     after insert
 --     on hymn.core_biz_object
 --     for each row
@@ -1379,8 +1178,8 @@ begin
 end;
 $$;
 comment on function hymn.object_trigger_fun_before_update() is '业务对象 before update 触发器函数, 阻止修改 api 和 source_table ，对象停用时阻止更新';
-drop trigger if exists c00_object_before_update on hymn.core_biz_object;
-create trigger c00_object_before_update
+drop trigger if exists c10_object_before_update on hymn.core_biz_object;
+create trigger c10_object_before_update
     before update
     on hymn.core_biz_object
     for each row
@@ -1391,16 +1190,28 @@ create or replace function hymn.object_trigger_fun_before_delete() returns trigg
 $$
 declare
     record_old hymn.core_biz_object := old;
+    ref_field  hymn.core_biz_object_field;
 begin
     if record_old.active = true then
         raise exception '[t:inner:0079] 无法删除启用的对象';
     end if;
+--     对象删除的同时删除所有关联到该对象的字段
+    raise notice 'delete bussiness object [id:%,api:%]',record_old.id,record_old.api;
+    for ref_field in select *
+                     from hymn.core_biz_object_field
+                     where (type in ('mreference', 'reference', 'master_slave')
+                         and ref_id = record_old.id)
+                        or (type = 'summary' and s_id = record_old.id)
+        loop
+            raise notice 'delete reference field [id:%,biz_object_id:%]',ref_field.id,ref_field.biz_object_id;
+            delete from hymn.core_biz_object_field where id = ref_field.id;
+        end loop;
     return record_old;
 end;
 $$;
 comment on function hymn.object_trigger_fun_before_delete() is '业务对象 before delete 触发器函数，阻止删除未停用的对象';
-drop trigger if exists c00_object_before_delete on hymn.core_biz_object;
-create trigger c00_object_before_delete
+drop trigger if exists c10_object_before_delete on hymn.core_biz_object;
+create trigger c10_object_before_delete
     before delete
     on hymn.core_biz_object
     for each row
@@ -1412,28 +1223,39 @@ create or replace function hymn.field_trigger_fun_before_insert() returns trigge
     language plpgsql as
 $$
 declare
-    record_new      hymn.core_biz_object_field := new;
-    column_prefix   text;
-    obj             hymn.core_biz_object;
-    ref_obj         hymn.core_biz_object;
-    join_table_name text;
-    join_view_name  text;
-    sql_str         text;
+    record_new    hymn.core_biz_object_field := new;
+    column_prefix text;
+    obj           hymn.core_biz_object;
 begin
-    --     检查字段类型约束
-    perform hymn.check_field_properties(record_new);
+--     新建字段启用状态为真
     record_new.active = true;
     select * into obj from hymn.core_biz_object where id = record_new.biz_object_id;
+    if not FOUND then
+        raise exception '[t:inner:0080] 对象 [id:%] 不存在',record_new.biz_object_id;
+    end if;
+    if obj.active = false then
+        raise exception '[t:inner:0085] 对象 [id:%] 未启用',record_new.biz_object_id;
+    end if;
+    if record_new.is_predefined = true and record_new.source_column is null then
+        raise exception '[t:inner:0022] 预定义字段必须指定 source_column';
+    end if;
     if obj.type = 'remote' then
         --     远程对象不需要数据表中的列
         record_new.source_column = '';
+        if record_new.is_predefined = true then
+            raise exception '[t:inner:0086] 远程对象不能创建预定义字段';
+        end if;
+        if record_new.type in ('picture', 'files', 'mreference', 'summary', 'master_slave') then
+            raise exception '[t:inner:0086] 远程对象不能创建 图片/文件/多选关联/汇总/主从 字段';
+        end if;
     end if;
+--     检查字段类型
+    select hymn.field_type_2_column_prefix(record_new.type) into column_prefix;
 --     预定义字段不需要申请列
     if record_new.is_predefined = false and obj.type <> 'remote' then
 --     自定义字段末尾加上 __cf
         record_new.api := record_new.api || '__cf';
 --     申请列名
-        select hymn.field_type_2_column_prefix(record_new.type) into column_prefix;
         update hymn.core_column_field_mapping sccfm
         set field_api= record_new.api
         where (table_name, column_name) = (
@@ -1448,39 +1270,18 @@ begin
         if not FOUND then
             raise exception '[t:inner:0080] %类型字段的数量已达到上限',hymn.field_type_description(record_new.type);
         end if;
-        if record_new.type = 'mreference' then
---             字段类型为多选关联字段时创建中间表及视图
-            select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
-            join_view_name := hymn.get_join_view_name(obj.api, record_new.api);
-            join_table_name := hymn.get_join_table_name(join_view_name);
---             创建连接表
-            sql_str = format('create table hymn.%I(s_id text, t_id text);', join_table_name);
-            execute sql_str;
---             创建连接表视图
-            sql_str = format('create view hymn_view.%I as select s_id,t_id from hymn.%I;',
-                             join_view_name, join_table_name);
-            execute sql_str;
---             创建连接表索引
-            sql_str = format('create index %I on hymn.%I (s_id);', join_table_name || '_s_idx',
-                             join_table_name);
-            execute sql_str;
-            sql_str = format('create index %I on hymn.%I (t_id);', join_table_name || '_t_idx',
-                             join_table_name);
-            execute sql_str;
-            record_new.join_view_name := join_view_name;
-            perform hymn.grant_join_view_permission(join_view_name);
-        end if;
     end if;
     return record_new;
-end;
+end ;
 $$;
 comment on function hymn.field_trigger_fun_before_insert() is '字段 before insert 触发器函数，新建字段时执行校验和相关操作';
-drop trigger if exists c00_field_before_insert on hymn.core_biz_object_field;
-create trigger c00_field_before_insert
+drop trigger if exists c10_field_before_insert on hymn.core_biz_object_field;
+create trigger c10_field_before_insert
     before insert
     on hymn.core_biz_object_field
     for each row
 execute function hymn.field_trigger_fun_before_insert();
+
 
 create or replace function hymn.field_trigger_fun_after_insert() returns trigger
     language plpgsql as
@@ -1495,22 +1296,13 @@ begin
 --     构建视图
             perform hymn.rebuild_object_view(record_new.biz_object_id);
         end if;
---         创建多选关联字段的表、视图及触发器
-        if record_new.type = 'mreference' then
-            --     创建触发器
-            perform hymn.rebuild_multiple_refernece_trigger_function(obj.id);
-        end if;
---     如果是自动编号字段则重建触发器
-        if obj.type = 'custom' and record_new.type = 'auto' then
-            perform hymn.rebuild_auto_numbering_trigger(record_new.biz_object_id);
-        end if;
     end if;
     return record_new;
 end;
 $$;
 comment on function hymn.field_trigger_fun_after_insert() is '字段 after insert 触发器函数，重建视图，如果是自动编号字段则重建触发器';
-drop trigger if exists c00_field_after_insert on hymn.core_biz_object_field;
-create trigger c00_field_after_insert
+drop trigger if exists c10_field_after_insert on hymn.core_biz_object_field;
+create trigger c10_field_after_insert
     after insert
     on hymn.core_biz_object_field
     for each row
@@ -1525,6 +1317,7 @@ declare
     record_new        hymn.core_biz_object_field := new;
     ref_obj           hymn.core_biz_object;
     summary_field_api text;
+    is_active         bool;
 begin
     --     状态为停用的字段不允许修改数据
     if record_new.active = record_old.active and record_new.active = false then
@@ -1535,12 +1328,39 @@ begin
         raise exception '[t:inner:0081] 不能修改字段类型';
     end if;
 
---     关联/汇总字段关联的对象删除后不能启用字段，只能手动删除
+--     关联/汇总字段关联的对象停用后不能启用字段，只能手动删除或删除关联的对象时自动删除
     if record_old.active = false and record_new.active = true then
         if record_old.type in ('reference', 'master_slave', 'mreference') then
             select * into ref_obj from hymn.core_biz_object where id = record_old.ref_id;
             if not found then
+--             不可达，对象删除后会删除所有关联字段
                 raise exception '[t:inner:0082] 引用对象已删除，不能启用字段';
+            end if;
+            if ref_obj.active = false then
+                raise exception '[t:inner:0082] 引用对象已停用，不能启用字段';
+            end if;
+        end if;
+        if record_old.type = 'summary' then
+            select active
+            into is_active
+            from hymn.core_biz_object_field
+            where record_old.s_field_id = id;
+            if not found then
+                raise exception '[t:inner:0082] 汇总目标字段已删除，不能启用字段';
+            end if;
+            if is_active = false then
+                raise exception '[t:inner:0082] 汇总目标字段已停用，不能启用当前字段';
+            end if;
+            select cbo.active
+            into is_active
+            from hymn.core_biz_object cbo
+                     left join core_biz_object_field cbof on cbof.biz_object_id = cbo.id
+            where cbof.id = record_old.s_field_id;
+            if not found then
+                raise exception '[t:inner:0082] 引用对象已删除，不能启用字段';
+            end if;
+            if is_active = false then
+                raise exception '[t:inner:0082] 引用对象已停用，不能启用字段';
             end if;
         end if;
     end if;
@@ -1557,7 +1377,7 @@ begin
           and cbo.active = true
           and cbof.s_field_id = record_old.id;
         if FOUND then
-            raise exception '[t:inner:0083] 当前字段被汇总字段： % 引用，不能停用',summary_field_api;
+            raise exception '[t:inner:0083] 当前字段被汇总字段 % 引用，不能停用',summary_field_api;
         end if;
     end if;
 
@@ -1569,75 +1389,12 @@ begin
         record_old.modify_date = record_new.modify_date;
         return record_old;
     end if;
-
-    --     检查字段类型约束
-    perform hymn.check_field_properties(record_new);
-
-    --     限制字段只能更新特定属性
-    if record_new.type = 'text' then
-        if not (record_old.is_predefined = true and record_new.standard_type = 'name') then
-            record_old.max_length = record_new.max_length;
-            record_old.min_length = record_new.min_length;
-            record_old.visible_row = record_new.visible_row;
-        end if;
-    elseif record_old.type = 'check_box_group' then
-        record_old.optional_number = record_new.optional_number;
-        record_old.dict_id = record_new.dict_id;
-    elseif record_old.type = 'select' then
-        record_old.visible_row = record_new.visible_row;
-        record_old.optional_number = record_new.optional_number;
-        record_old.dict_id = record_new.dict_id;
-        record_old.master_field_id = record_new.master_field_id;
-    elseif record_old.type = 'integer' then
-        record_old.min_length = record_new.min_length;
-        record_old.max_length = record_new.max_length;
-    elseif record_old.type = 'float' then
-        record_old.min_length = record_new.min_length;
-        record_old.max_length = record_new.max_length;
-    elseif record_old.type = 'money' then
-        record_old.min_length = record_new.min_length;
-        record_old.max_length = record_new.max_length;
-    elseif record_old.type = 'master_slave' then
-        record_old.ref_list_label = record_new.ref_list_label;
-        record_old.query_filter = record_new.query_filter;
-    elseif record_old.type = 'reference' then
-        record_old.ref_list_label = record_new.ref_list_label;
-        record_old.ref_delete_policy = record_new.ref_delete_policy;
-        record_old.query_filter = record_new.query_filter;
-    elseif record_old.type = 'mreference' then
-        record_old.ref_list_label = record_new.ref_list_label;
-        record_old.ref_delete_policy = record_new.ref_delete_policy;
-        record_old.query_filter = record_new.query_filter;
-    elseif record_old.type = 'summary' then
-        record_old.s_id = record_new.s_id;
-        record_old.s_field_id = record_new.s_field_id;
-        record_old.s_type = record_new.s_type;
-        record_old.min_length = record_new.min_length;
-        record_old.query_filter = record_new.query_filter;
-    elseif record_old.type = 'auto' then
-        record_old.gen_rule = record_new.gen_rule;
-    elseif record_old.type = 'picture' then
-        record_old.min_length = record_new.min_length;
-        record_old.max_length = record_new.max_length;
-    end if;
-    if record_old.standard_type is null then
-        record_old.default_value = record_new.default_value;
-        record_old.formula = record_new.formula;
-    end if;
---     通用字段赋值
-    record_old.name = record_new.name;
-    record_old.history = record_new.history;
-    record_old.remark = record_new.remark;
-    record_old.help = record_new.help;
-    record_old.modify_by = record_new.modify_by;
-    record_old.modify_by_id = record_new.modify_by_id;
-    record_old.modify_date = record_new.modify_date;
     return record_new;
 end ;
 $$;
 comment on function hymn.field_trigger_fun_before_update() is '字段 before update 触发器函数，检查字段属性';
-drop trigger if exists c00_field_before_update on hymn.core_biz_object_field;
-create trigger c00_field_before_update
+drop trigger if exists c10_field_before_update on hymn.core_biz_object_field;
+create trigger c10_field_before_update
     before update
     on hymn.core_biz_object_field
     for each row
@@ -1648,11 +1405,10 @@ create or replace function hymn.field_trigger_fun_after_update() returns trigger
     language plpgsql as
 $$
 declare
-    record_old      hymn.core_biz_object_field := old;
-    record_new      hymn.core_biz_object_field := new;
-    obj_type        text;
-    sql_str         text;
-    join_table_name text;
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+    obj_type   text;
+
 begin
     select type into obj_type from hymn.core_biz_object where id = record_new.biz_object_id;
     if obj_type <> 'remote' then
@@ -1661,44 +1417,19 @@ begin
         if record_new.active <> record_old.active then
             perform hymn.rebuild_object_view(record_new.biz_object_id);
         end if;
---             字段为多选关联时重置触发器
-        if (record_old.type = 'mreference' and record_new.active <> record_old.active) then
-            perform hymn.rebuild_multiple_refernece_trigger_function(record_old.biz_object_id);
-        end if;
 --         历史记录状态变更时重置历史记录触发器
         if record_new.history <> record_old.history or
            (record_new.history = true and record_old.active <> record_new.active) then
             perform hymn.rebuild_data_table_history_trigger(record_new.biz_object_id);
         end if;
 
---          自动编号字段规则改变或者启用状态改变时重置触发器
-        if obj_type = 'custom' and record_new.type = 'auto' and
-           (record_old.gen_rule != record_new.gen_rule or
-            record_new.active <> record_old.active) then
-            perform hymn.rebuild_auto_numbering_trigger(record_new.biz_object_id);
-        end if;
-        if record_old.type = 'mreference' then
-            if record_new.active = true and record_old.active = false then
---                 启用多选关联字段时创建视图
-                join_table_name := hymn.get_join_table_name(record_old.join_view_name);
-                sql_str = format('create view hymn_view.%I as select s_id,t_id from hymn.%I;',
-                                 record_old.join_view_name, join_table_name);
-                execute sql_str;
-                perform hymn.grant_join_view_permission(record_old.join_view_name);
-            end if;
-            if record_old.active = true and record_new.active = false then
---                 停用多选关联字段时删除视图
-                sql_str = format('drop view if exists hymn_view.%I;', record_old.join_view_name);
-                execute sql_str;
-            end if;
-        end if;
     end if;
     return null;
 end;
 $$;
 comment on function hymn.field_trigger_fun_after_update() is '字段 after update 触发器函数，重建视图，如果是自动编号字段则重建触发器';
-drop trigger if exists c00_field_after_update on hymn.core_biz_object_field;
-create trigger c00_field_after_update
+drop trigger if exists c10_field_after_update on hymn.core_biz_object_field;
+create trigger c10_field_after_update
     after update
     on hymn.core_biz_object_field
     for each row
@@ -1721,18 +1452,11 @@ begin
 --     删除预定义字段需手动处理
     if record_old.is_predefined = false then
         if obj.type <> 'remote' then
-            if record_old.type = 'mreference' then
-                perform hymn.rebuild_multiple_refernece_trigger_function(record_old.biz_object_id);
---                 删除中间表
-                sql_str := format('drop table if exists hymn.%I cascade;',
-                                  hymn.get_join_table_name(record_old.join_view_name));
-                execute sql_str;
-
-            end if;
             --     如果found为true说明只删除了字段，需要执行数据清理和归还字段资源
 --     如果为false说明执行的是删除对象的流程，相关的操作由对象触发器处理
             if FOUND then
-                if record_old.type <> 'mreference' then
+                if record_old.source_column ~ '^(?!pl_)' then
+--                 删除有数据列的字段时清空列中的数据
                     sql_str :=
                             format('update hymn.%I set %I = null', obj.source_table,
                                    record_old.source_column);
@@ -1745,12 +1469,753 @@ begin
             end if;
         end if;
     end if;
+    if record_old.source_column <> '' then
+--         删除引用当前字段的汇总字段
+        delete
+        from hymn.core_biz_object_field
+        where type = 'summary' and s_field_id = record_old.id;
+    end if;
     return old;
 end;
 $$;
-drop trigger if exists c00_field_before_delete on hymn.core_biz_object_field;
-create trigger c00_field_before_delete
+drop trigger if exists c10_field_before_delete on hymn.core_biz_object_field;
+create trigger c10_field_before_delete
     before delete
     on hymn.core_biz_object_field
     for each row
 execute function hymn.field_trigger_fun_before_delete();
+
+create or replace function hymn.mreference_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_new      hymn.core_biz_object_field := new;
+    record_old      hymn.core_biz_object_field := old;
+    obj             hymn.core_biz_object;
+    ref_obj         hymn.core_biz_object;
+    join_table_name text;
+    join_view_name  text;
+    sql_str         text;
+begin
+    if record_old.type = 'mreference' or record_new.type = 'mreference' then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+                if record_new.ref_id is null or record_new.ref_delete_policy is null then
+                    raise exception '[t:inner:0047] 关联对象/关联对象删除策略不能为空';
+                end if;
+                if record_new.is_predefined = true then
+                    raise exception '[t:inner:0048] 多选关联字段不能是预定义字段';
+                end if;
+                select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
+                if not FOUND then
+                    raise exception '[t:inner:0049] 引用对象 [id:%] 不存在',record_new.ref_id;
+                end if;
+                if ref_obj.active = false then
+                    raise exception '[t:inner:0050] 引用对象 [id:%] 未启用',ref_obj.id;
+                end if;
+                select * into obj from hymn.core_biz_object where id = record_new.biz_object_id;
+                if obj.type = 'remote' or ref_obj.type = 'remote' then
+                    raise exception '[t:inner:0051] 远程对象不能创建多选关联字段或被多选关联字段引用';
+                end if;
+            end if;
+            if tg_op = 'INSERT' then
+--                 字段不属于远程对象且不是预定义字段
+                if record_new.source_column ~ 'mref\d{3}' and record_new.is_predefined = false then
+--             字段类型为多选关联字段时创建中间表及视图
+                    select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
+                    join_view_name := hymn.get_join_view_name(obj.api, record_new.api);
+                    join_table_name := hymn.get_join_table_name(join_view_name);
+--             创建连接表
+                    sql_str =
+                            format('create table hymn.%I(s_id text, t_id text);', join_table_name);
+                    execute sql_str;
+--             创建连接表视图
+                    sql_str = format('create view hymn_view.%I as select s_id,t_id from hymn.%I;',
+                                     join_view_name, join_table_name);
+                    execute sql_str;
+--             创建连接表索引
+                    sql_str = format('create index %I on hymn.%I (s_id);',
+                                     join_table_name || '_s_idx',
+                                     join_table_name);
+                    execute sql_str;
+                    sql_str = format('create index %I on hymn.%I (t_id);',
+                                     join_table_name || '_t_idx',
+                                     join_table_name);
+                    execute sql_str;
+                    record_new.join_view_name := join_view_name;
+                    perform hymn.grant_join_view_permission(join_view_name);
+                end if;
+            end if;
+            if tg_op = 'UPDATE' then
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+            if tg_op = 'INSERT' then
+                if record_new.source_column ~ 'mref\d{3}' and record_new.is_predefined = false then
+                    --     创建多选关联触发器
+                    perform hymn.rebuild_multiple_refernece_trigger_function(
+                            record_new.biz_object_id);
+                end if;
+            end if;
+            if tg_op = 'UPDATE' then
+                if record_new.source_column ~ 'mref\d{3}' and record_new.is_predefined = false then
+                    if record_old.active <> record_new.active then
+--                         启用/停用时重建触发器
+                        perform hymn.rebuild_multiple_refernece_trigger_function(
+                                record_old.biz_object_id);
+                        if record_old.active = true then
+--                 停用多选关联字段时删除视图
+                            sql_str = format('drop view hymn_view.%I;',
+                                             record_old.join_view_name);
+                            execute sql_str;
+                        else
+--                 启用多选关联字段时创建视图
+                            join_table_name := hymn.get_join_table_name(record_old.join_view_name);
+                            sql_str = format(
+                                    'create view hymn_view.%I as select s_id,t_id from hymn.%I;',
+                                    record_old.join_view_name, join_table_name);
+                            execute sql_str;
+                            perform hymn.grant_join_view_permission(record_old.join_view_name);
+                        end if;
+                    end if;
+                end if;
+            end if;
+            if tg_op = 'DELETE' then
+                if record_old.source_column ~ 'mref\d{3}' and record_old.is_predefined = false then
+                    perform hymn.rebuild_multiple_refernece_trigger_function(
+                            record_old.biz_object_id);
+--                 删除中间表
+                    sql_str := format('drop table hymn.%I cascade;',
+                                      hymn.get_join_table_name(record_old.join_view_name));
+                    execute sql_str;
+                end if;
+            end if;
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.mreference_field_trigger_fun() is '多选关联字段触发器函数';
+drop trigger if exists c20_mreference_field_before on hymn.core_biz_object_field;
+create trigger c20_mreference_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.mreference_field_trigger_fun();
+-- 多选关联的 after delete 触发器需要在通用的after delete清楚表数据之前重建多选关联触发器
+drop trigger if exists c00_mreference_field_after on hymn.core_biz_object_field;
+create trigger c00_mreference_field_after
+    after insert or update or delete
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.mreference_field_trigger_fun();
+
+create or replace function hymn.text_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+begin
+
+    if (record_old.type = 'text' or record_new.type = 'text') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--         文本类型：最小值 最大值 显示行数
+                if record_new.min_length is null or record_new.max_length is null or
+                   record_new.visible_row is null then
+                    raise exception '[t:inner:0023] 最小长度、最大长度和显示行数都不能为空';
+                end if;
+                if record_new.min_length < 0 then
+                    raise exception '[t:inner:0024] 最小长度必须大于等于0';
+                end if;
+                if record_new.max_length > 50000 then
+                    raise exception '[t:inner:0025] 最大长度必须小于等于50000';
+                end if;
+                if record_new.max_length < record_new.min_length then
+                    raise exception '[t:inner:0026] 最小长度必须小于等于最大长度';
+                end if;
+                if record_new.visible_row < 1 then
+                    raise exception '[t:inner:0027] 可见行数必须大于等于1';
+                end if;
+                if record_new.api = 'name' then
+                    if record_new.max_length > 255 then
+                        raise exception '[t:inner:0025] name字段最大长度必须小于等于255';
+                    end if;
+                    record_new.visible_row = 1;
+                    if record_new.is_predefined is null or record_new.is_predefined = false then
+                        raise exception '[t:inner:0025] name字段 is_predefined 属性必须为 true';
+                    end if;
+                    if record_new.standard_type is null or record_new.standard_type <> 'name' then
+                        raise exception '[t:inner:0025] name字段 standard_type 属性必须为 ''name''';
+                    end if;
+                    record_new.is_predefined = true;
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.text_field_trigger_fun() is '文本字段触发器函数';
+drop trigger if exists c20_text_field_before on hymn.core_biz_object_field;
+create trigger c20_text_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.text_field_trigger_fun();
+
+create or replace function hymn.check_box_group_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+begin
+    if (record_old.type = 'check_box_group' or record_new.type = 'check_box_group') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--         复选框组： 选项个数 字典id
+                if record_new.optional_number is null or record_new.dict_id is null then
+                    raise exception '[t:inner:0028] 可选个数/字典项不能为空';
+                end if;
+                if record_new.optional_number < 1 then
+                    raise exception '[t:inner:0029] 可选个数必须大于0';
+                end if;
+                perform * from hymn.core_dict where id = record_new.dict_id;
+                if not FOUND then
+                    raise exception '[t:inner:0030] 字典 [id:%] 不存在',record_new.dict_id;
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.check_box_group_field_trigger_fun() is '复选框组字段触发器函数';
+drop trigger if exists c20_check_box_group_field_before on hymn.core_biz_object_field;
+create trigger c20_check_box_group_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.check_box_group_field_trigger_fun();
+
+create or replace function hymn.select_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+begin
+    if (record_old.type = 'select' or record_new.type = 'select') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--                  可选个数 可见行数 字典id
+                if record_new.optional_number is null or record_new.visible_row is null or
+                   record_new.dict_id is null then
+                    raise exception '[t:inner:0031] 可选个数/可见行数/字典项不能为空';
+                end if;
+                if record_new.optional_number < 1 then
+                    raise exception '[t:inner:0032] 可选个数必须大于0';
+                end if;
+                if record_new.visible_row < 1 then
+                    raise exception '[t:inner:0033] 可见行数必须大于0';
+                end if;
+                perform * from hymn.core_dict where id = record_new.dict_id;
+                if not FOUND then
+                    raise exception '[t:inner:0034] 字典 [id:%] 不存在',record_new.dict_id;
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.select_field_trigger_fun() is '多选字段触发器函数';
+drop trigger if exists c20_select_field_before on hymn.core_biz_object_field;
+create trigger c20_select_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.select_field_trigger_fun();
+
+create or replace function hymn.integer_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+begin
+    if (record_old.type = 'integer' or record_new.type = 'integer') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+                if record_new.min_length is null or record_new.max_length is null then
+                    raise exception '[t:inner:0035] 最小值/最大值不能为空';
+                end if;
+                if record_new.min_length > record_new.max_length then
+                    raise exception '[t:inner:0036] 最小值必须小于最大值';
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.integer_field_trigger_fun() is '复选框组字段触发器函数';
+drop trigger if exists c20_integer_field_before on hymn.core_biz_object_field;
+create trigger c20_integer_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.integer_field_trigger_fun();
+
+create or replace function hymn.float_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+begin
+    if (record_old.type = 'float' or record_new.type = 'float') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--                  整数位长度 小数位长度
+                if record_new.min_length is null or record_new.max_length is null then
+                    raise exception '[t:inner:0037] 小数位数/整数位数不能为空';
+                end if;
+                if record_new.min_length < 1 then
+                    raise exception '[t:inner:0038] 小数位数必须大于等于1';
+                end if;
+                if record_new.max_length < 1 then
+                    raise exception '[t:inner:0039] 整数位数必须大于等于1';
+                end if;
+                if (record_new.min_length + record_new.max_length) > 18 then
+                    raise exception '[t:inner:0040] 总位数必须小于等于18';
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.float_field_trigger_fun() is '多选字段触发器函数';
+drop trigger if exists c20_float_field_before on hymn.core_biz_object_field;
+create trigger c20_float_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.float_field_trigger_fun();
+
+create or replace function hymn.money_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+begin
+    if (record_old.type = 'money' or record_new.type = 'money') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--                  货币: 整数位长度 小数位长度
+                if record_new.min_length is null or record_new.max_length is null then
+                    raise exception '[t:inner:0041] 小数位数/整数位数不能为空';
+                end if;
+                if record_new.min_length < 1 then
+                    raise exception '[t:inner:0042] 小数位数必须大于等于1';
+                end if;
+                if record_new.max_length < 1 then
+                    raise exception '[t:inner:0043] 整数位数必须大于等于1';
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.money_field_trigger_fun() is '多选字段触发器函数';
+drop trigger if exists c20_money_field_before on hymn.core_biz_object_field;
+create trigger c20_money_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.money_field_trigger_fun();
+
+create or replace function hymn.picture_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+begin
+    if (record_old.type = 'picture' or record_new.type = 'picture') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--                  图片
+                if record_new.min_length is null or record_new.max_length is null then
+                    raise exception '[t:inner:0044] 图片数量/图片大小不能为空';
+                end if;
+                if record_new.min_length < 1 then
+                    raise exception '[t:inner:0045] 图片数量必须大于等于1';
+                end if;
+                if record_new.max_length < 1 then
+                    raise exception '[t:inner:0046] 图片大小必须大于1';
+                end if;
+
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.picture_field_trigger_fun() is '多选字段触发器函数';
+drop trigger if exists c20_picture_field_before on hymn.core_biz_object_field;
+create trigger c20_picture_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.picture_field_trigger_fun();
+
+create or replace function hymn.files_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+begin
+    if (record_old.type = 'files' or record_new.type = 'files') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--                  图片
+                if record_new.min_length is null or record_new.max_length is null then
+                    raise exception '[t:inner:0044] 文件数量/文件大小不能为空';
+                end if;
+                if record_new.min_length < 1 then
+                    raise exception '[t:inner:0045] 文件数量必须大于等于1';
+                end if;
+                if record_new.max_length < 1 then
+                    raise exception '[t:inner:0046] 文件大小必须大于1';
+                end if;
+
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.files_field_trigger_fun() is '多选字段触发器函数';
+drop trigger if exists c20_files_field_before on hymn.core_biz_object_field;
+create trigger c20_files_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.files_field_trigger_fun();
+
+create or replace function hymn.reference_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+    ref_obj    hymn.core_biz_object;
+begin
+    if (record_old.type = 'reference' or record_new.type = 'reference') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--                  关联关系
+                if record_new.ref_id is null or record_new.ref_delete_policy is null then
+                    raise exception '[t:inner:0052] 关联对象/关联对象删除策略不能为空';
+                end if;
+                select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
+                if not FOUND then
+                    raise exception '[t:inner:0053] 引用对象 [id:%] 不存在',record_new.ref_id;
+                end if;
+                if ref_obj.active = false then
+                    raise exception '[t:inner:0054] 引用对象 [id:%] 未启用',ref_obj.id;
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.reference_field_trigger_fun() is '多选字段触发器函数';
+drop trigger if exists c20_reference_field_before on hymn.core_biz_object_field;
+create trigger c20_reference_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.reference_field_trigger_fun();
+
+create or replace function hymn.master_slave_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old         hymn.core_biz_object_field := old;
+    record_new         hymn.core_biz_object_field := new;
+    ref_obj            hymn.core_biz_object;
+    summary_field_name text;
+begin
+    if (record_old.type = 'master_slave' or record_new.type = 'master_slave') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+
+--         主详关系
+                if record_new.ref_id is null or record_new.ref_list_label is null then
+                    raise exception '[t:inner:0055] 关联对象/关联对象相关列表标签不能为空';
+                end if;
+                select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
+                if not FOUND then
+                    raise exception '[t:inner:0056] 引用对象 [id:%] 不存在',record_new.ref_id;
+                end if;
+                if ref_obj.active = false then
+                    raise exception '[t:inner:0057] 引用对象 [id:%] 未启用',ref_obj.id;
+                end if;
+            end if;
+        end if;
+        if tg_op = 'UPDATE' then
+            if record_new.active <> record_old.active and record_new.active = false then
+                select scbo.api || '.' || scbof.api
+                into summary_field_name
+                from hymn.core_biz_object scbo
+                         inner join hymn.core_biz_object_field scbof
+                                    on scbof.biz_object_id = scbo.id
+                where scbof.type = 'summary'
+                  and scbof.active = true
+                  and scbo.active = true
+                  and scbof.s_id = record_old.biz_object_id;
+                if summary_field_name is not null then
+                    raise exception '[t:inner:0073] 不能停用当前字段，汇总字段 % 引用了当前对象',summary_field_name;
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.master_slave_field_trigger_fun() is '多选字段触发器函数';
+drop trigger if exists c20_master_slave_field_before on hymn.core_biz_object_field;
+create trigger c20_master_slave_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.master_slave_field_trigger_fun();
+
+create or replace function hymn.auto_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+    count      int;
+begin
+    if (record_old.type = 'auto' or record_new.type = 'auto') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--                  自动编号
+                if record_new.gen_rule is null then
+                    raise exception '[t:inner:0058] 编号规则不能为空';
+                end if;
+                select count(*)
+                into count
+                from regexp_matches(record_new.gen_rule, '\{0+\}', 'g') t;
+                if count != 1 then
+                    raise exception '[t:inner:0059] 编号规则中有且只能有一个{0}占位符';
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+            if tg_op = 'INSERT' then
+                perform hymn.rebuild_auto_numbering_trigger(record_new.biz_object_id);
+            end if;
+            if tg_op = 'UPDATE' then
+                if (record_old.gen_rule != record_new.gen_rule or
+                    record_new.active <> record_old.active) then
+                    perform hymn.rebuild_auto_numbering_trigger(record_new.biz_object_id);
+                end if;
+            end if;
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.auto_field_trigger_fun() is '多选字段触发器函数';
+drop trigger if exists c20_auto_field_before on hymn.core_biz_object_field;
+create trigger c20_auto_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.auto_field_trigger_fun();
+drop trigger if exists c20_auto_field_after on hymn.core_biz_object_field;
+create trigger c20_auto_field_after
+    after insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.auto_field_trigger_fun();
+
+create or replace function hymn.summary_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+    ref_obj    hymn.core_biz_object;
+    ref_field  hymn.core_biz_object_field;
+begin
+    if (record_old.type = 'summary' or record_new.type = 'summary') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--         汇总字段
+                if record_new.s_id is null or record_new.s_type is null or
+                   record_new.min_length is null then
+                    raise exception '[t:inner:0060] 汇总对象/汇总类型/小数位长度不能为空';
+                end if;
+                if record_new.s_type in ('max', 'min', 'sum') and record_new.s_field_id is null then
+                    raise exception '[t:inner:0061] 汇总字段不能为空';
+                end if;
+                if record_new.min_length < 0 then
+                    raise exception '[t:inner:0062] 小数位长度必须大于等于0';
+                end if;
+                select * into ref_obj from hymn.core_biz_object where id = record_new.s_id;
+                if not FOUND then
+                    raise exception '[t:inner:0063] 汇总对象 [id:%] 不存在',record_new.s_id;
+                end if;
+                if ref_obj.active = false then
+                    raise exception '[t:inner:0064] 汇总对象 [id:%] 未启用',ref_obj.id;
+                end if;
+                perform *
+                from hymn.core_biz_object_field
+                where biz_object_id = record_new.s_id
+                  and active = true
+                  and type = 'master_slave';
+                if not FOUND then
+                    raise notice 'when % op %',tg_when,tg_op;
+                    raise notice 'new %',record_new;
+                    raise notice 'old %',record_old;
+                    raise exception E'[t:inner:0065] 汇总对象必须是当前对象的子对象';
+                end if;
+                if record_new.s_type in ('max', 'min', 'sum') then
+                    select *
+                    into ref_field
+                    from hymn.core_biz_object_field
+                    where id = record_new.s_field_id
+                      and biz_object_id = record_new.s_id;
+                    if not FOUND then
+                        raise exception '[t:inner:0066] 汇总字段 [id:%] 不存在',record_new.s_field_id;
+                    end if;
+                    if ref_field.type not in ('integer', 'float', 'money') then
+                        raise exception '[t:inner:0067] 最大值、最小值、总和的汇总字段类型必须为：整型/浮点型/金额';
+                    end if;
+                end if;
+
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end;
+$$;
+comment on function hymn.summary_field_trigger_fun() is '汇总字段触发器函数';
+drop trigger if exists c20_summary_field_before on hymn.core_biz_object_field;
+create trigger c20_summary_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.summary_field_trigger_fun();

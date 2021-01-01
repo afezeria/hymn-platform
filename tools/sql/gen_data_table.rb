@@ -26,6 +26,8 @@ EOM
   table = table_name x
   io.write <<EOM
        ('#{table}','master001',null),
+#{(1..3).map { |i| "       ('#{table}','files#{'%03d' % i}',null)," }.join("\n")}
+#{(1..3).map { |i| "       ('#{table}','picture#{'%03d' % i}',null)," }.join("\n")}
 #{(1..5).map { |i| "       ('#{table}','bool#{'%03d' % i}',null)," }.join("\n")}
 #{(1..5).map { |i| "       ('#{table}','mref#{'%03d' % i}',null)," }.join("\n")}
 #{(1..5).map { |i| "       ('#{table}','pl_summary#{'%03d' % i}',null)," }.join("\n")}
@@ -55,6 +57,8 @@ create table hymn.#{table}(
     lock_state   bool        not null default false,
     name         text        not null,
     master001    text,
+#{(1..3).map { |i| "    files#{'%03d' % i}     text," }.join("\n")}
+#{(1..3).map { |i| "    picture#{'%03d' % i}   text," }.join("\n")}
 #{(1..5).map { |i| "    bool#{'%03d' % i}      bool," }.join("\n")}
 #{(1..5).map { |i| "    mref#{'%03d' % i}      text," }.join("\n")}
 #{(1..100).map { |i| "    text#{'%03d' % i}      text," }.join("\n")}

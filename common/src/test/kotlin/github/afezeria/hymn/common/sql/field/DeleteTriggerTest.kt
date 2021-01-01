@@ -2,6 +2,7 @@ package github.afezeria.hymn.common.sql.field
 
 import github.afezeria.hymn.common.*
 import github.afezeria.hymn.common.util.execute
+import github.afezeria.hymn.common.util.toFormatJson
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -119,7 +120,7 @@ class DeleteTriggerTest : BaseDbTest() {
                     """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'多选关联对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,'多选关联对象','mreffield7','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
                     objId, refId, *COMMON_INFO
                 )[0]
@@ -163,19 +164,23 @@ class DeleteTriggerTest : BaseDbTest() {
                         and pp.proname = '${objSourceTable}' || '_mref_trigger_function'
                     """
                 ).size shouldBe 1
+                logger.info("==================================================update")
                 it.execute(
                     "update hymn.core_biz_object_field set active=false where id=?",
                     field["id"]
                 )
-                it.execute(
-                    "delete from hymn.core_biz_object_field where id=?",
+                logger.info("==================================================delete")
+                val deleted = it.execute(
+                    "delete from hymn.core_biz_object_field where id=? returning *",
                     field["id"]
                 )
+                logger.info(deleted[0].toFormatJson())
+                logger.info("==================================================")
 //                中间表已删除
                 it.execute(
                     """
                         select * from pg_class pc left join pg_namespace pn on pc.relnamespace = pn.oid
-                        where pn.nspname='hymn_view'
+                        where pn.nspname='hymn'
                         and pc.relkind='r'
                         and pc.relname='core_${field["join_view_name"]}'
                     """

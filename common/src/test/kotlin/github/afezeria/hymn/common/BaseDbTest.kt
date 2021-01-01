@@ -18,7 +18,6 @@ open class BaseDbTest {
             prop.load(
                 this::class.java.classLoader.getResourceAsStream("admin-database.properties")
             )
-            val path = System.getProperty("user.dir")
             val scripts = listOf(
                 "1.table.sql",
                 "2.history-table-and-trigger.sql",
@@ -53,12 +52,12 @@ open class BaseDbTest {
 
             //检查数据库是否报错
             val regex = "(psql:(.+:\\d+:)* 错误)".toRegex()
-            InputStreamReader(proc.errorStream).readLines().takeIf {
-                it.find { regex.find(it) != null }.isNullOrBlank().not()
-            }?.apply {
+
+            InputStreamReader(proc.errorStream).readLines().filter {
+                regex.find(it) != null
+            }.takeIf { it.isNotEmpty() }?.apply{
                 println("========== error ==========")
-                forEach(::println)
-                throw RuntimeException()
+                throw RuntimeException(this.joinToString("\n"))
             }
         }
     }

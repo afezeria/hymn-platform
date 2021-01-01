@@ -27,6 +27,18 @@ fun deleteBObject(id: String) {
     adminConn.use {
         val obj = it.execute("select * from hymn.core_biz_object where id = ?", id)
         if (obj.isNotEmpty()) {
+//            停用所有引用当前对象的汇总字段
+            it.execute(
+                """
+                    update hymn.core_biz_object_field set active = false where s_id = ? and active=true
+                """, id
+            )
+//            停用当前对象的所有字段
+            it.execute(
+                "update hymn.core_biz_object_field set active = false where biz_object_id = ?",
+                id
+            )
+//            停用所有引用当前对象的引用字段
             it.execute(
                 "update hymn.core_biz_object_field set active=false where ref_id=? and active=true",
                 id
@@ -45,6 +57,15 @@ fun clearBObject() {
             "update hymn.core_biz_object set active = true where api not in (?,?,?,?)",
             PREDEFINED_OBJECT
         )
+//        停用汇总字段
+        it.execute(
+            """
+            update hymn.core_biz_object_field set active = false 
+            where active=true and type = 'summary' and biz_object_id in 
+                (select id from hymn.core_biz_object where api not in (?,?,?,?))
+        """, PREDEFINED_OBJECT
+        )
+//        停用所有字段
         it.execute(
             """
             update hymn.core_biz_object_field set active = false 

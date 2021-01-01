@@ -347,7 +347,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
                 objId,
                 *COMMON_INFO
             )[0]
-            (field["source_column"] as String) shouldStartWith "text"
+            (field["source_column"] as String) shouldStartWith "picture"
             it.fieldShouldExists("picturefield")
             it.execute(
                 """
@@ -374,11 +374,11 @@ class FieldInsertSuccessTest : BaseDbTest() {
                     """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'多选关联对象','mreffield','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,'多选关联对象','mreffield8','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
                     objId, refId, *COMMON_INFO
                 )[0]
-                (field["source_column"] as String) shouldStartWith "mref"
+                (field!!["source_column"] as String) shouldStartWith "mref"
                 fieldApi = field["api"] as String
                 it.execute(
                     """
@@ -480,6 +480,38 @@ class FieldInsertSuccessTest : BaseDbTest() {
     fun masteslave() {
         val master = createBObject()
         val masterId = master["id"] as String
+        try{
+            adminConn.use {
+                val field = it.execute(
+                    """
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
+                        create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
+                    values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
+                    """,
+                    objId, masterId, *COMMON_INFO
+                )[0]
+                (field["source_column"] as String) shouldBe "master001"
+                it.fieldShouldExists("masterfield")
+                masterObjId = masterId
+                masterFieldId = field["id"] as String
+                it.execute(
+                    """
+                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
+                            modify_by_id,type_id,${field["api"]}) 
+                        values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
+                    *STANDARD_FIELD, randomUUIDStr()
+                ).size shouldBe 1
+            }
+        }finally {
+            deleteBObject(masterId)
+        }
+    }
+
+    @Test
+    @Order(20)
+    fun summary() {
+        val master = createBObject()
+        val masterId = master["id"] as String
         adminConn.use {
             val field = it.execute(
                 """
@@ -493,20 +525,7 @@ class FieldInsertSuccessTest : BaseDbTest() {
             it.fieldShouldExists("masterfield")
             masterObjId = masterId
             masterFieldId = field["id"] as String
-            it.execute(
-                """
-                        insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,
-                            modify_by_id,type_id,${field["api"]}) 
-                        values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
-                *STANDARD_FIELD, randomUUIDStr()
-            ).size shouldBe 1
-
         }
-    }
-
-    @Test
-    @Order(20)
-    fun summary() {
         adminConn.use {
             val field = it.execute(
                 """
