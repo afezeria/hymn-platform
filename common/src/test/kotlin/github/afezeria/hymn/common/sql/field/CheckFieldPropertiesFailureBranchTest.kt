@@ -97,7 +97,7 @@ class CheckFieldPropertiesFailureBranchTest : BaseDbTest() {
                     objId, *COMMON_INFO
                 )
             }
-            e.message shouldContain "[t:inner:0013] 未知的字段类型"
+            e.message shouldContain "未知的字段类型"
         }
     }
 

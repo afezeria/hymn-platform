@@ -16,7 +16,7 @@ declare
 begin
     select * into obj from hymn.core_biz_object where id = obj_id;
     if not found then
-        raise exception '[t:inner:0001] 对象 [id:%] 不存在',obj_id;
+        raise exception '[f:inner:00100] 对象 [id:%] 不存在',obj_id;
     end if;
     perform *
     from pg_class pc
@@ -25,7 +25,7 @@ begin
       and pc.relkind = 'v'
       and pc.relname = obj.api;
     if not FOUND then
-        raise exception '[t:inner:0002] 视图 % 不存在',obj.api;
+        raise exception '[f:inner:00200] 视图 % 不存在',obj.api;
     end if;
     if obj.type in ('custom', 'module') then
         if obj.can_insert then
@@ -56,7 +56,7 @@ begin
       and pc.relkind = 'v'
       and pc.relname = view_name;
     if not FOUND then
-        raise exception '[t:inner:0003] 视图 % 不存在',view_name;
+        raise exception '[f:inner:00300] 视图 % 不存在',view_name;
     end if;
     sql_str := format('grant select,insert,update,delete on hymn_view.%I to hymn_user;', view_name);
     execute sql_str;
@@ -71,7 +71,7 @@ create or replace function hymn.cannot_change_biz_object_id() returns trigger
 $$
 begin
     if old.biz_object_id != new.biz_object_id then
-        raise exception '[t:inner:0004] 不能修改所属业务对象';
+        raise exception '[f:inner:00400] 不能修改所属业务对象';
     end if;
     return new;
 end;
@@ -113,7 +113,7 @@ create or replace function hymn.cannot_change_api() returns trigger
 $$
 begin
     if old.api != new.api then
-        raise exception '[t:inner:0005] 不能修改api';
+        raise exception '[f:inner:00500] 不能修改api';
     end if;
     return new;
 end;
@@ -191,10 +191,10 @@ declare
 begin
     select * into obj from hymn.core_biz_object where id = new.biz_object_id;
     if not FOUND then
-        raise exception '[t:inner:0006] 对象 [id:%] 不存在',new.biz_object_id;
+        raise exception '[f:inner:00600] 对象 [id:%] 不存在',new.biz_object_id;
     end if;
     if not obj.active then
-        raise exception '[t:inner:0007] 对象 [id:%] 已停用，不能新增/更新相关数据',new.biz_object_id;
+        raise exception '[f:inner:00700] 对象 [id:%] 已停用，不能新增/更新相关数据',new.biz_object_id;
     end if;
     return new;
 end;
@@ -240,7 +240,7 @@ declare
 begin
     select * into obj from hymn.core_biz_object where id = old.biz_object_id;
     if not obj.active then
-        raise exception '[t:inner:0008] 对象 [id:%] 已停用，不能删除相关数据',new.biz_object_id;
+        raise exception '[f:inner:00800] 对象 [id:%] 已停用，不能删除相关数据',new.biz_object_id;
     end if;
     return old;
 end;
@@ -284,11 +284,11 @@ $$
 declare
 begin
     if api_value not similar to '[a-zA-Z][a-zA-Z0-9_]{1,22}' then
-        raise exception '[t:inner:0009] 无效的 %, 值必须匹配正则: [a-zA-Z][a-zA-Z0-9_]{1,22}',api_name;
+        raise exception '[f:inner:00900] 无效的 %, 值必须匹配正则: [a-zA-Z][a-zA-Z0-9_]{1,22}',api_name;
     end if;
     perform keyword from hymn.sql_keyword where keyword = lower(api_value);
     if FOUND then
-        raise exception '[t:inner:0010] 无效的 %, % 是数据库关键字',api_name,api_value;
+        raise exception '[f:inner:01000] 无效的 %, % 是数据库关键字',api_name,api_value;
     end if;
 end;
 $$;
@@ -303,10 +303,10 @@ declare
 begin
     select * into obj from hymn.core_biz_object scbo where id = obj_id;
     if not FOUND then
-        raise exception '[t:inner:0011] 对象 [id:%] 不存在',obj_id;
+        raise exception '[f:inner:01100] 对象 [id:%] 不存在',obj_id;
     end if;
     if obj.source_table not like 'core_data_table_%' or obj.type <> 'custom' then
-        raise exception '[t:inner:0012] 非自定义对象需不能自动重置递增序列';
+        raise exception '[f:inner:01200] 非自定义对象需不能自动重置递增序列';
     end if;
     seq_name := 'hymn.' || obj.source_table || '_seq';
     perform setval(seq_name, 1, false);
@@ -362,7 +362,7 @@ begin
         when 'datetime','date' then return 'datetime' ;
         when 'summary' then return 'pl_summary';
         when 'mreference' then return 'mref';
-        else raise exception '[t:inner:0013] 未知的字段类型 %',field_type;
+        else raise exception '[f:inner:01300] 未知的字段类型 %',field_type;
     end case;
 end ;
 $$;
@@ -385,7 +385,7 @@ begin
         when 'master' then return '主从';
         when 'mref' then return '多选关联';
         when 'pl_summary' then return '汇总';
-        else raise exception '[t:inner:0014] 未知的列名前缀: %',prefix;
+        else raise exception '[f:inner:01400] 未知的列名前缀: %',prefix;
     end case;
 end;
 $$;
@@ -413,7 +413,7 @@ begin
         when 'money' then return '金额';
         when 'datetime' then return '日期时间';
         when 'date' then return '日期';
-        else raise exception '[t:inner:0015] 未知的字段类型： %',field_type;
+        else raise exception '[f:inner:01500] 未知的字段类型： %',field_type;
     end case;
 end;
 $$;
@@ -489,10 +489,10 @@ declare
 begin
     select * into obj from hymn.core_biz_object where id = obj_id;
     if not FOUND then
-        raise exception '[t:inner:0016] 对象 [id:%] 不存在',obj_id;
+        raise exception '[f:inner:01600] 对象 [id:%] 不存在',obj_id;
     end if;
     if obj.active = false then
-        raise exception '[t:inner:0017] 对象 [id:%] 未启用',obj_id;
+        raise exception '[f:inner:01700] 对象 [id:%] 未启用',obj_id;
     end if;
     if obj.type <> 'custom' then
         raise notice '对象 % 不是自定义业对象，不支持创建自动编号字段',obj.api;
@@ -583,7 +583,7 @@ begin
     execute sql_str;
 
 
-    --     如果触发器不存在则创建触发器，如果触发器已存在则跳过
+--     如果触发器不存在则创建触发器，如果触发器已存在则跳过
     perform *
     from pg_trigger pt
              left join pg_class pc on pt.tgrelid = pc.oid
@@ -623,10 +623,10 @@ declare
 begin
     select * into obj from hymn.core_biz_object where id = obj_id;
     if not FOUND then
-        raise exception '[t:inner:0018] 对象 [id:%] 不存在',obj_id;
+        raise exception '[f:inner:01800] 对象 [id:%] 不存在',obj_id;
     end if;
     if obj.active = false then
-        raise exception '[t:inner:0019] 对象 [id:%] 未启用',obj_id;
+        raise exception '[f:inner:01900] 对象 [id:%] 未启用',obj_id;
     end if;
     if obj.type <> 'custom' then
         raise notice '对象 % 不是自定义业对象，不支持创建自动编号字段',obj.api;
@@ -740,10 +740,10 @@ declare
 begin
     select * into obj from hymn.core_biz_object where id = obj_id;
     if not FOUND then
-        raise exception '[t:inner:0020] 对象 [id:%] 不存在',obj_id;
+        raise exception '[f:inner:02000] 对象 [id:%] 不存在',obj_id;
     end if;
     if obj.active = false then
-        raise exception '[t:inner:0021] 对象 [id:%] 未启用',obj_id;
+        raise exception '[f:inner:02100] 对象 [id:%] 未启用',obj_id;
     end if;
     if obj.type <> 'custom' then
         raise notice '对象 % 不是自定义业对象，不执行创建历史记录触发器相关动作',obj.api;
@@ -859,7 +859,7 @@ declare
 begin
     perform hymn.throw_if_api_is_illegal('api', record_new.api);
     if record_new.api similar to '%_history' then
-        raise exception '[t:inner:0068] 对象api不能以 _history 结尾';
+        raise exception '[f:inner:02200] 对象api不能以 _history 结尾';
     end if;
 
     record_new.active = true;
@@ -904,7 +904,7 @@ begin
                     limit 1 for update skip locked)
                 returning table_name into record_new.source_table;
                 if not FOUND then
-                    raise exception '[t:inner:0072] 自定义对象的数量已达到上限';
+                    raise exception '[f:inner:02300] 自定义对象的数量已达到上限';
                 end if;
             end if;
             if tg_op = 'UPDATE' then
@@ -921,7 +921,7 @@ begin
                       and scbo.active = true
                       and (scbof.ref_id = record_new.id or scbof.s_id = record_new.id);
                     if ref_field_arr is not null then
-                        raise exception '[t:inner:0073] 不能停用当前对象，以下字段引用了当前对象：%',ref_field_arr;
+                        raise exception '[f:inner:02400] 不能停用当前对象，以下字段引用了当前对象：%',ref_field_arr;
                     end if;
                     sql_str := format('drop view if exists hymn_view.%I cascade', record_old.api);
                     execute sql_str;
@@ -959,7 +959,7 @@ begin
                 -- 删除数据
                 sql_str := format('truncate hymn.%I', record_old.source_table);
                 execute sql_str;
-                -- 删除历史记录
+-- 删除历史记录
                 sql_str := format('drop table hymn_view.%s_history cascade', record_old.api);
                 execute sql_str;
 --                 删除共享表
@@ -975,7 +975,7 @@ begin
                 where type = 'mreference'
                   and ref_id = record_old.id;
 
-                --     删除触发器及触发器函数
+--     删除触发器及触发器函数
                 for trigger_fun_name,trigger_name in select pp.proname, pt.tgname
                                                      from pg_trigger pt
                                                               left join pg_class pc on pt.tgrelid = pc.oid
@@ -1035,10 +1035,9 @@ begin
     if record_old.type = 'module' or record_new.type = 'module' then
         if tg_when = 'BEFORE' then
             if tg_op = 'INSERT' then
-                raise notice 'module trigger before insert';
 
                 if record_new.source_table is null then
-                    raise exception '[t:inner:0074] 创建模块对象必须指定数据表';
+                    raise exception '[f:inner:02500] 创建模块对象必须指定数据表';
                 end if;
                 perform pn.nspname, pc.relname
                 from pg_class pc
@@ -1047,11 +1046,10 @@ begin
                   and pn.nspname = 'hymn'
                   and pc.relname = record_new.source_table;
                 if not FOUND then
-                    raise exception '[t:inner:0075] 表 %.% 不存在','hymn',record_new.source_table;
+                    raise exception '[f:inner:02600] 表 %.% 不存在','hymn',record_new.source_table;
                 end if;
             end if;
             if tg_op = 'UPDATE' then
-                raise notice 'module trigger before update';
                 if record_old.active = true and record_new.active = false then
                     --                      停用对象时删除视图
 --                      停用对象时不能有其他对象引用当前对象
@@ -1065,7 +1063,7 @@ begin
                       and scbo.active = true
                       and (scbof.ref_id = record_new.id or scbof.s_id = record_new.id);
                     if ref_field_arr is not null then
-                        raise exception '[t:inner:0076] 不能停用当前对象，以下字段引用了当前对象：%',ref_field_arr;
+                        raise exception '[f:inner:02700] 不能停用当前对象，以下字段引用了当前对象：%',ref_field_arr;
                     end if;
                     sql_str :=
                             format('drop view if exists hymn_view.%I cascade', record_old.api);
@@ -1079,7 +1077,6 @@ begin
         end if;
         if tg_when = 'AFTER' then
             if tg_op = 'INSERT' then
-                raise notice 'module trigger after insert';
 --                 创建视图
                 perform hymn.rebuild_object_view(record_new.id);
             end if;
@@ -1160,10 +1157,10 @@ begin
     end if;
 
     if record_new.source_table <> record_old.source_table then
-        raise exception '[t:inner:0077] 不能修改source_table';
+        raise exception '[f:inner:02800] 不能修改source_table';
     end if;
     if record_new.type <> record_old.type then
-        raise exception '[t:inner:0078] 不能修改对象类型';
+        raise exception '[f:inner:02900] 不能修改对象类型';
     end if;
 
     -- 停用/启用是独立操作，不能同时修改其他数据
@@ -1193,7 +1190,7 @@ declare
     ref_field  hymn.core_biz_object_field;
 begin
     if record_old.active = true then
-        raise exception '[t:inner:0079] 无法删除启用的对象';
+        raise exception '[f:inner:03000] 无法删除启用的对象';
     end if;
 --     对象删除的同时删除所有关联到该对象的字段
     raise notice 'delete bussiness object [id:%,api:%]',record_old.id,record_old.api;
@@ -1227,26 +1224,26 @@ declare
     column_prefix text;
     obj           hymn.core_biz_object;
 begin
---     新建字段启用状态为真
+    --     新建字段启用状态为真
     record_new.active = true;
     select * into obj from hymn.core_biz_object where id = record_new.biz_object_id;
     if not FOUND then
-        raise exception '[t:inner:0080] 对象 [id:%] 不存在',record_new.biz_object_id;
+        raise exception '[f:inner:03100] 对象 [id:%] 不存在',record_new.biz_object_id;
     end if;
     if obj.active = false then
-        raise exception '[t:inner:0085] 对象 [id:%] 未启用',record_new.biz_object_id;
+        raise exception '[f:inner:03200] 对象 [id:%] 未启用',record_new.biz_object_id;
     end if;
     if record_new.is_predefined = true and record_new.source_column is null then
-        raise exception '[t:inner:0022] 预定义字段必须指定 source_column';
+        raise exception '[f:inner:03300] 预定义字段必须指定 source_column';
     end if;
     if obj.type = 'remote' then
         --     远程对象不需要数据表中的列
         record_new.source_column = '';
         if record_new.is_predefined = true then
-            raise exception '[t:inner:0086] 远程对象不能创建预定义字段';
+            raise exception '[f:inner:03400] 远程对象不能创建预定义字段';
         end if;
         if record_new.type in ('picture', 'files', 'mreference', 'summary', 'master_slave') then
-            raise exception '[t:inner:0086] 远程对象不能创建 图片/文件/多选关联/汇总/主从 字段';
+            raise exception '[f:inner:03500] 远程对象不能创建 图片/文件/多选关联/汇总/主从 字段';
         end if;
     end if;
 --     检查字段类型
@@ -1268,7 +1265,7 @@ begin
             limit 1 for update skip locked)
         returning column_name into record_new.source_column;
         if not FOUND then
-            raise exception '[t:inner:0080] %类型字段的数量已达到上限',hymn.field_type_description(record_new.type);
+            raise exception '[f:inner:03600] %类型字段的数量已达到上限',hymn.field_type_description(record_new.type);
         end if;
     end if;
     return record_new;
@@ -1325,7 +1322,7 @@ begin
     end if;
     --     禁止修改type
     if record_new.type <> record_old.type then
-        raise exception '[t:inner:0081] 不能修改字段类型';
+        raise exception '[f:inner:03700] 不能修改字段类型';
     end if;
 
 --     关联/汇总字段关联的对象停用后不能启用字段，只能手动删除或删除关联的对象时自动删除
@@ -1334,10 +1331,10 @@ begin
             select * into ref_obj from hymn.core_biz_object where id = record_old.ref_id;
             if not found then
 --             不可达，对象删除后会删除所有关联字段
-                raise exception '[t:inner:0082] 引用对象已删除，不能启用字段';
+                raise exception '[f:inner:03800] 引用对象已删除，不能启用字段';
             end if;
             if ref_obj.active = false then
-                raise exception '[t:inner:0082] 引用对象已停用，不能启用字段';
+                raise exception '[f:inner:03900] 引用对象已停用，不能启用字段';
             end if;
         end if;
         if record_old.type = 'summary' then
@@ -1346,10 +1343,10 @@ begin
             from hymn.core_biz_object_field
             where record_old.s_field_id = id;
             if not found then
-                raise exception '[t:inner:0082] 汇总目标字段已删除，不能启用字段';
+                raise exception '[f:inner:04000] 汇总目标字段已删除，不能启用字段';
             end if;
             if is_active = false then
-                raise exception '[t:inner:0082] 汇总目标字段已停用，不能启用当前字段';
+                raise exception '[f:inner:04100] 汇总目标字段已停用，不能启用当前字段';
             end if;
             select cbo.active
             into is_active
@@ -1357,10 +1354,10 @@ begin
                      left join core_biz_object_field cbof on cbof.biz_object_id = cbo.id
             where cbof.id = record_old.s_field_id;
             if not found then
-                raise exception '[t:inner:0082] 引用对象已删除，不能启用字段';
+                raise exception '[f:inner:04200] 引用对象已删除，不能启用字段';
             end if;
             if is_active = false then
-                raise exception '[t:inner:0082] 引用对象已停用，不能启用字段';
+                raise exception '[f:inner:04300] 引用对象已停用，不能启用字段';
             end if;
         end if;
     end if;
@@ -1377,7 +1374,7 @@ begin
           and cbo.active = true
           and cbof.s_field_id = record_old.id;
         if FOUND then
-            raise exception '[t:inner:0083] 当前字段被汇总字段 % 引用，不能停用',summary_field_api;
+            raise exception '[f:inner:04400] 当前字段被汇总字段 % 引用，不能停用',summary_field_api;
         end if;
     end if;
 
@@ -1446,7 +1443,7 @@ begin
     select * into obj from hymn.core_biz_object where id = record_old.biz_object_id;
     if FOUND then
         if record_old.active = true then
-            raise exception '[t:inner:0084] 字段 % 未停用，无法删除',record_old.api;
+            raise exception '[f:inner:04500] 字段 % 未停用，无法删除',record_old.api;
         end if;
     end if;
 --     删除预定义字段需手动处理
@@ -1502,21 +1499,21 @@ begin
 --             属性检查
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
                 if record_new.ref_id is null or record_new.ref_delete_policy is null then
-                    raise exception '[t:inner:0047] 关联对象/关联对象删除策略不能为空';
+                    raise exception '[f:inner:04600] 关联对象/关联对象删除策略不能为空';
                 end if;
                 if record_new.is_predefined = true then
-                    raise exception '[t:inner:0048] 多选关联字段不能是预定义字段';
+                    raise exception '[f:inner:04700] 多选关联字段不能是预定义字段';
                 end if;
                 select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
                 if not FOUND then
-                    raise exception '[t:inner:0049] 引用对象 [id:%] 不存在',record_new.ref_id;
+                    raise exception '[f:inner:04800] 引用对象 [id:%] 不存在',record_new.ref_id;
                 end if;
                 if ref_obj.active = false then
-                    raise exception '[t:inner:0050] 引用对象 [id:%] 未启用',ref_obj.id;
+                    raise exception '[f:inner:04900] 引用对象 [id:%] 未启用',ref_obj.id;
                 end if;
                 select * into obj from hymn.core_biz_object where id = record_new.biz_object_id;
                 if obj.type = 'remote' or ref_obj.type = 'remote' then
-                    raise exception '[t:inner:0051] 远程对象不能创建多选关联字段或被多选关联字段引用';
+                    raise exception '[f:inner:05000] 远程对象不能创建多选关联字段或被多选关联字段引用';
                 end if;
             end if;
             if tg_op = 'INSERT' then
@@ -1631,30 +1628,30 @@ begin
 --         文本类型：最小值 最大值 显示行数
                 if record_new.min_length is null or record_new.max_length is null or
                    record_new.visible_row is null then
-                    raise exception '[t:inner:0023] 最小长度、最大长度和显示行数都不能为空';
+                    raise exception '[f:inner:05100] 最小长度、最大长度和显示行数都不能为空';
                 end if;
                 if record_new.min_length < 0 then
-                    raise exception '[t:inner:0024] 最小长度必须大于等于0';
+                    raise exception '[f:inner:05200] 最小长度必须大于等于0';
                 end if;
                 if record_new.max_length > 50000 then
-                    raise exception '[t:inner:0025] 最大长度必须小于等于50000';
+                    raise exception '[f:inner:05300] 最大长度必须小于等于50000';
                 end if;
                 if record_new.max_length < record_new.min_length then
-                    raise exception '[t:inner:0026] 最小长度必须小于等于最大长度';
+                    raise exception '[f:inner:05400] 最小长度必须小于等于最大长度';
                 end if;
                 if record_new.visible_row < 1 then
-                    raise exception '[t:inner:0027] 可见行数必须大于等于1';
+                    raise exception '[f:inner:05500] 可见行数必须大于等于1';
                 end if;
                 if record_new.api = 'name' then
                     if record_new.max_length > 255 then
-                        raise exception '[t:inner:0025] name字段最大长度必须小于等于255';
+                        raise exception '[f:inner:05600] name字段最大长度必须小于等于255';
                     end if;
                     record_new.visible_row = 1;
                     if record_new.is_predefined is null or record_new.is_predefined = false then
-                        raise exception '[t:inner:0025] name字段 is_predefined 属性必须为 true';
+                        raise exception '[f:inner:05700] name字段 is_predefined 属性必须为 true';
                     end if;
                     if record_new.standard_type is null or record_new.standard_type <> 'name' then
-                        raise exception '[t:inner:0025] name字段 standard_type 属性必须为 ''name''';
+                        raise exception '[f:inner:05800] name字段 standard_type 属性必须为 ''name''';
                     end if;
                     record_new.is_predefined = true;
                 end if;
@@ -1692,14 +1689,14 @@ begin
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
 --         复选框组： 选项个数 字典id
                 if record_new.optional_number is null or record_new.dict_id is null then
-                    raise exception '[t:inner:0028] 可选个数/字典项不能为空';
+                    raise exception '[f:inner:05900] 可选个数/字典项不能为空';
                 end if;
                 if record_new.optional_number < 1 then
-                    raise exception '[t:inner:0029] 可选个数必须大于0';
+                    raise exception '[f:inner:06000] 可选个数必须大于0';
                 end if;
                 perform * from hymn.core_dict where id = record_new.dict_id;
                 if not FOUND then
-                    raise exception '[t:inner:0030] 字典 [id:%] 不存在',record_new.dict_id;
+                    raise exception '[f:inner:06100] 字典 [id:%] 不存在',record_new.dict_id;
                 end if;
             end if;
         end if;
@@ -1736,17 +1733,17 @@ begin
 --                  可选个数 可见行数 字典id
                 if record_new.optional_number is null or record_new.visible_row is null or
                    record_new.dict_id is null then
-                    raise exception '[t:inner:0031] 可选个数/可见行数/字典项不能为空';
+                    raise exception '[f:inner:06200] 可选个数/可见行数/字典项不能为空';
                 end if;
                 if record_new.optional_number < 1 then
-                    raise exception '[t:inner:0032] 可选个数必须大于0';
+                    raise exception '[f:inner:06300] 可选个数必须大于0';
                 end if;
                 if record_new.visible_row < 1 then
-                    raise exception '[t:inner:0033] 可见行数必须大于0';
+                    raise exception '[f:inner:06400] 可见行数必须大于0';
                 end if;
                 perform * from hymn.core_dict where id = record_new.dict_id;
                 if not FOUND then
-                    raise exception '[t:inner:0034] 字典 [id:%] 不存在',record_new.dict_id;
+                    raise exception '[f:inner:06500] 字典 [id:%] 不存在',record_new.dict_id;
                 end if;
             end if;
         end if;
@@ -1781,10 +1778,10 @@ begin
 --             属性检查
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
                 if record_new.min_length is null or record_new.max_length is null then
-                    raise exception '[t:inner:0035] 最小值/最大值不能为空';
+                    raise exception '[f:inner:06600] 最小值/最大值不能为空';
                 end if;
                 if record_new.min_length > record_new.max_length then
-                    raise exception '[t:inner:0036] 最小值必须小于最大值';
+                    raise exception '[f:inner:06700] 最小值必须小于最大值';
                 end if;
             end if;
         end if;
@@ -1820,16 +1817,16 @@ begin
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
 --                  整数位长度 小数位长度
                 if record_new.min_length is null or record_new.max_length is null then
-                    raise exception '[t:inner:0037] 小数位数/整数位数不能为空';
+                    raise exception '[f:inner:06800] 小数位数/整数位数不能为空';
                 end if;
                 if record_new.min_length < 1 then
-                    raise exception '[t:inner:0038] 小数位数必须大于等于1';
+                    raise exception '[f:inner:06900] 小数位数必须大于等于1';
                 end if;
                 if record_new.max_length < 1 then
-                    raise exception '[t:inner:0039] 整数位数必须大于等于1';
+                    raise exception '[f:inner:07000] 整数位数必须大于等于1';
                 end if;
                 if (record_new.min_length + record_new.max_length) > 18 then
-                    raise exception '[t:inner:0040] 总位数必须小于等于18';
+                    raise exception '[f:inner:07100] 总位数必须小于等于18';
                 end if;
             end if;
         end if;
@@ -1865,13 +1862,13 @@ begin
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
 --                  货币: 整数位长度 小数位长度
                 if record_new.min_length is null or record_new.max_length is null then
-                    raise exception '[t:inner:0041] 小数位数/整数位数不能为空';
+                    raise exception '[f:inner:07200] 小数位数/整数位数不能为空';
                 end if;
                 if record_new.min_length < 1 then
-                    raise exception '[t:inner:0042] 小数位数必须大于等于1';
+                    raise exception '[f:inner:07300] 小数位数必须大于等于1';
                 end if;
                 if record_new.max_length < 1 then
-                    raise exception '[t:inner:0043] 整数位数必须大于等于1';
+                    raise exception '[f:inner:07400] 整数位数必须大于等于1';
                 end if;
             end if;
         end if;
@@ -1907,13 +1904,13 @@ begin
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
 --                  图片
                 if record_new.min_length is null or record_new.max_length is null then
-                    raise exception '[t:inner:0044] 图片数量/图片大小不能为空';
+                    raise exception '[f:inner:07500] 图片数量/图片大小不能为空';
                 end if;
                 if record_new.min_length < 1 then
-                    raise exception '[t:inner:0045] 图片数量必须大于等于1';
+                    raise exception '[f:inner:07600] 图片数量必须大于等于1';
                 end if;
                 if record_new.max_length < 1 then
-                    raise exception '[t:inner:0046] 图片大小必须大于1';
+                    raise exception '[f:inner:07700] 图片大小必须大于1';
                 end if;
 
             end if;
@@ -1950,13 +1947,13 @@ begin
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
 --                  图片
                 if record_new.min_length is null or record_new.max_length is null then
-                    raise exception '[t:inner:0044] 文件数量/文件大小不能为空';
+                    raise exception '[f:inner:07800] 文件数量/文件大小不能为空';
                 end if;
                 if record_new.min_length < 1 then
-                    raise exception '[t:inner:0045] 文件数量必须大于等于1';
+                    raise exception '[f:inner:07900] 文件数量必须大于等于1';
                 end if;
                 if record_new.max_length < 1 then
-                    raise exception '[t:inner:0046] 文件大小必须大于1';
+                    raise exception '[f:inner:08000] 文件大小必须大于1';
                 end if;
 
             end if;
@@ -1994,14 +1991,14 @@ begin
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
 --                  关联关系
                 if record_new.ref_id is null or record_new.ref_delete_policy is null then
-                    raise exception '[t:inner:0052] 关联对象/关联对象删除策略不能为空';
+                    raise exception '[f:inner:08100] 关联对象/关联对象删除策略不能为空';
                 end if;
                 select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
                 if not FOUND then
-                    raise exception '[t:inner:0053] 引用对象 [id:%] 不存在',record_new.ref_id;
+                    raise exception '[f:inner:08200] 引用对象 [id:%] 不存在',record_new.ref_id;
                 end if;
                 if ref_obj.active = false then
-                    raise exception '[t:inner:0054] 引用对象 [id:%] 未启用',ref_obj.id;
+                    raise exception '[f:inner:08300] 引用对象 [id:%] 未启用',ref_obj.id;
                 end if;
             end if;
         end if;
@@ -2040,14 +2037,14 @@ begin
 
 --         主详关系
                 if record_new.ref_id is null or record_new.ref_list_label is null then
-                    raise exception '[t:inner:0055] 关联对象/关联对象相关列表标签不能为空';
+                    raise exception '[f:inner:08400] 关联对象/关联对象相关列表标签不能为空';
                 end if;
                 select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
                 if not FOUND then
-                    raise exception '[t:inner:0056] 引用对象 [id:%] 不存在',record_new.ref_id;
+                    raise exception '[f:inner:08500] 引用对象 [id:%] 不存在',record_new.ref_id;
                 end if;
                 if ref_obj.active = false then
-                    raise exception '[t:inner:0057] 引用对象 [id:%] 未启用',ref_obj.id;
+                    raise exception '[f:inner:08600] 引用对象 [id:%] 未启用',ref_obj.id;
                 end if;
             end if;
         end if;
@@ -2063,7 +2060,7 @@ begin
                   and scbo.active = true
                   and scbof.s_id = record_old.biz_object_id;
                 if summary_field_name is not null then
-                    raise exception '[t:inner:0073] 不能停用当前字段，汇总字段 % 引用了当前对象',summary_field_name;
+                    raise exception '[f:inner:08700] 不能停用当前字段，汇总字段 % 引用了当前对象',summary_field_name;
                 end if;
             end if;
         end if;
@@ -2100,13 +2097,13 @@ begin
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
 --                  自动编号
                 if record_new.gen_rule is null then
-                    raise exception '[t:inner:0058] 编号规则不能为空';
+                    raise exception '[f:inner:08800] 编号规则不能为空';
                 end if;
                 select count(*)
                 into count
                 from regexp_matches(record_new.gen_rule, '\{0+\}', 'g') t;
                 if count != 1 then
-                    raise exception '[t:inner:0059] 编号规则中有且只能有一个{0}占位符';
+                    raise exception '[f:inner:08900] 编号规则中有且只能有一个{0}占位符';
                 end if;
             end if;
         end if;
@@ -2160,20 +2157,20 @@ begin
 --         汇总字段
                 if record_new.s_id is null or record_new.s_type is null or
                    record_new.min_length is null then
-                    raise exception '[t:inner:0060] 汇总对象/汇总类型/小数位长度不能为空';
+                    raise exception '[f:inner:09000] 汇总对象/汇总类型/小数位长度不能为空';
                 end if;
                 if record_new.s_type in ('max', 'min', 'sum') and record_new.s_field_id is null then
-                    raise exception '[t:inner:0061] 汇总字段不能为空';
+                    raise exception '[f:inner:09100] 汇总字段不能为空';
                 end if;
                 if record_new.min_length < 0 then
-                    raise exception '[t:inner:0062] 小数位长度必须大于等于0';
+                    raise exception '[f:inner:09200] 小数位长度必须大于等于0';
                 end if;
                 select * into ref_obj from hymn.core_biz_object where id = record_new.s_id;
                 if not FOUND then
-                    raise exception '[t:inner:0063] 汇总对象 [id:%] 不存在',record_new.s_id;
+                    raise exception '[f:inner:09300] 汇总对象 [id:%] 不存在',record_new.s_id;
                 end if;
                 if ref_obj.active = false then
-                    raise exception '[t:inner:0064] 汇总对象 [id:%] 未启用',ref_obj.id;
+                    raise exception '[f:inner:09400] 汇总对象 [id:%] 未启用',ref_obj.id;
                 end if;
                 perform *
                 from hymn.core_biz_object_field
@@ -2181,10 +2178,7 @@ begin
                   and active = true
                   and type = 'master_slave';
                 if not FOUND then
-                    raise notice 'when % op %',tg_when,tg_op;
-                    raise notice 'new %',record_new;
-                    raise notice 'old %',record_old;
-                    raise exception E'[t:inner:0065] 汇总对象必须是当前对象的子对象';
+                    raise exception '[f:inner:09500] 汇总对象必须是当前对象的子对象';
                 end if;
                 if record_new.s_type in ('max', 'min', 'sum') then
                     select *
@@ -2193,10 +2187,10 @@ begin
                     where id = record_new.s_field_id
                       and biz_object_id = record_new.s_id;
                     if not FOUND then
-                        raise exception '[t:inner:0066] 汇总字段 [id:%] 不存在',record_new.s_field_id;
+                        raise exception '[f:inner:09600] 汇总字段 [id:%] 不存在',record_new.s_field_id;
                     end if;
                     if ref_field.type not in ('integer', 'float', 'money') then
-                        raise exception '[t:inner:0067] 最大值、最小值、总和的汇总字段类型必须为：整型/浮点型/金额';
+                        raise exception '[f:inner:09700] 最大值、最小值、总和的汇总字段类型必须为：整型/浮点型/金额';
                     end if;
                 end if;
 
