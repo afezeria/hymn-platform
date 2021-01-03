@@ -61,6 +61,8 @@ alter table hymn.core_biz_object_field
 create index core_biz_object_field_biz_object_id_idx
     on hymn.core_biz_object_field (biz_object_id);
 alter table hymn.core_biz_object_field
+    add check ( type in ('text', 'check_box', 'check_box_group', 'select', 'integer', 'float', 'money', 'date', 'datetime', 'master_slave', 'reference', 'mreference', 'summary', 'auto', 'picture', 'files') );
+alter table hymn.core_biz_object_field
     add check ( s_type in ('sum', 'count', 'min', 'max') );
 alter table hymn.core_biz_object_field
     add check ( standard_type in ('create_by_id', 'create_by', 'modify_by_id', 'modify_by', 'create_date', 'modify_date', 'org_id', 'lock_state', 'name', 'type_id', 'owner_id') );

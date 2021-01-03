@@ -549,7 +549,12 @@ optional:
 rule: auto_gen_rule SIMILAR TO ''%\{0+\}%''
 
 type: 图片 picture
-required: min_length （图片数量）, max_length （图片大小，单位：kb）
+required: min_length （图片最大数量）, max_length （图片最大大小，单位：kb）
+optional:
+rule: min_length >= 1, max_length > 0
+
+type: 文件 files
+required: min_length （文件最大数量）, max_length （文件最大大小，单位：kb）
 optional:
 rule: min_length >= 1, max_length > 0
 ;;uk:[[biz_object_id api]]
@@ -558,7 +563,7 @@ comment on column hymn.core_biz_object_field.source_column is '字段对应的�
 comment on column hymn.core_biz_object_field.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade];idx';
 comment on column hymn.core_biz_object_field.api is 'api名称，用于触发器和自定义接口';
 comment on column hymn.core_biz_object_field.name is '名称，用于页面显示';
-comment on column hymn.core_biz_object_field.type is '字段类型 ;;optional_value:[text(文本),check_box(复选框),check_box_group(复选框组),select(下拉菜单),integer(整型),float(浮点型),money(货币),date(日期),datetime(日期时间),master_slave(主详),reference(关联关系),mreference(多选关联关系),summary(汇总),auto(自动编号),picture(图片);';
+comment on column hymn.core_biz_object_field.type is '字段类型 ;;optional_value:[text(文本),check_box(复选框),check_box_group(复选框组),select(下拉菜单),integer(整型),float(浮点型),money(货币),date(日期),datetime(日期时间),master_slave(主详),reference(关联关系),mreference(多选关联关系),summary(汇总),auto(自动编号),picture(图片),files(文件)];';
 comment on column hymn.core_biz_object_field.history is '是否启用历史记录';
 comment on column hymn.core_biz_object_field.active is '字段启用状态，false表示停用，字段停用时从视图中移除，删除时清空没一行中对应字段数据';
 comment on column hymn.core_biz_object_field.default_value is '默认值，可选择其他表中的字段，由后端处理，新建时与页面布局一起返回给前端';
