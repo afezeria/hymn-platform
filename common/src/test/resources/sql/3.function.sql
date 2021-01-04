@@ -876,6 +876,77 @@ create trigger c10_object_before_insert
     for each row
 execute function hymn.object_trigger_fun_before_insert();
 
+create or replace function hymn.object_trigger_fun_before_update() returns trigger
+    language plpgsql as
+$$
+declare
+    record_new hymn.core_biz_object := new;
+    record_old hymn.core_biz_object := old;
+begin
+    --     停用对对象停用状态未改变时不能更新其他状态
+    if record_new.active = false and record_old.active = false then
+        return record_old;
+    end if;
+
+    if record_new.source_table <> record_old.source_table then
+        raise exception '[f:inner:02800] 不能修改source_table';
+    end if;
+    if record_new.type <> record_old.type then
+        raise exception '[f:inner:02900] 不能修改对象类型';
+    end if;
+
+    -- 停用/启用是独立操作，不能同时修改其他数据
+    if record_new.active <> record_old.active then
+        record_old.active = record_new.active;
+        record_old.modify_by = record_new.modify_by;
+        record_old.modify_by_id = record_new.modify_by_id;
+        record_old.modify_date = record_new.modify_date;
+        return record_old;
+    end if;
+    return record_new;
+end;
+$$;
+comment on function hymn.object_trigger_fun_before_update() is '业务对象 before update 触发器函数, 阻止修改 api 和 source_table ，对象停用时阻止更新';
+drop trigger if exists c10_object_before_update on hymn.core_biz_object;
+create trigger c10_object_before_update
+    before update
+    on hymn.core_biz_object
+    for each row
+execute function hymn.object_trigger_fun_before_update();
+
+create or replace function hymn.object_trigger_fun_before_delete() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object := old;
+    ref_field  hymn.core_biz_object_field;
+begin
+    if record_old.active = true then
+        raise exception '[f:inner:03000] 无法删除启用的对象';
+    end if;
+--     对象删除的同时删除所有关联到该对象的字段
+    raise notice 'delete bussiness object [id:%,api:%]',record_old.id,record_old.api;
+    for ref_field in select *
+                     from hymn.core_biz_object_field
+                     where (type in ('mreference', 'reference', 'master_slave')
+                         and ref_id = record_old.id)
+                        or (type = 'summary' and s_id = record_old.id)
+        loop
+            raise notice 'delete reference field [id:%,biz_object_id:%]',ref_field.id,ref_field.biz_object_id;
+            delete from hymn.core_biz_object_field where id = ref_field.id;
+        end loop;
+    return record_old;
+end;
+$$;
+comment on function hymn.object_trigger_fun_before_delete() is '业务对象 before delete 触发器函数，阻止删除未停用的对象';
+drop trigger if exists c10_object_before_delete on hymn.core_biz_object;
+create trigger c10_object_before_delete
+    before delete
+    on hymn.core_biz_object
+    for each row
+execute function hymn.object_trigger_fun_before_delete();
+
+
 create or replace function hymn.custom_object_trigger_fun() returns trigger
     language plpgsql as
 $$
@@ -1144,76 +1215,6 @@ execute function hymn.remote_object_trigger_fun();
 --     for each row
 -- execute function hymn.remote_object_trigger_fun();
 
-create or replace function hymn.object_trigger_fun_before_update() returns trigger
-    language plpgsql as
-$$
-declare
-    record_new hymn.core_biz_object := new;
-    record_old hymn.core_biz_object := old;
-begin
-    --     停用对对象停用状态未改变时不能更新其他状态
-    if record_new.active = false and record_old.active = false then
-        return record_old;
-    end if;
-
-    if record_new.source_table <> record_old.source_table then
-        raise exception '[f:inner:02800] 不能修改source_table';
-    end if;
-    if record_new.type <> record_old.type then
-        raise exception '[f:inner:02900] 不能修改对象类型';
-    end if;
-
-    -- 停用/启用是独立操作，不能同时修改其他数据
-    if record_new.active <> record_old.active then
-        record_old.active = record_new.active;
-        record_old.modify_by = record_new.modify_by;
-        record_old.modify_by_id = record_new.modify_by_id;
-        record_old.modify_date = record_new.modify_date;
-        return record_old;
-    end if;
-    return record_new;
-end;
-$$;
-comment on function hymn.object_trigger_fun_before_update() is '业务对象 before update 触发器函数, 阻止修改 api 和 source_table ，对象停用时阻止更新';
-drop trigger if exists c10_object_before_update on hymn.core_biz_object;
-create trigger c10_object_before_update
-    before update
-    on hymn.core_biz_object
-    for each row
-execute function hymn.object_trigger_fun_before_update();
-
-create or replace function hymn.object_trigger_fun_before_delete() returns trigger
-    language plpgsql as
-$$
-declare
-    record_old hymn.core_biz_object := old;
-    ref_field  hymn.core_biz_object_field;
-begin
-    if record_old.active = true then
-        raise exception '[f:inner:03000] 无法删除启用的对象';
-    end if;
---     对象删除的同时删除所有关联到该对象的字段
-    raise notice 'delete bussiness object [id:%,api:%]',record_old.id,record_old.api;
-    for ref_field in select *
-                     from hymn.core_biz_object_field
-                     where (type in ('mreference', 'reference', 'master_slave')
-                         and ref_id = record_old.id)
-                        or (type = 'summary' and s_id = record_old.id)
-        loop
-            raise notice 'delete reference field [id:%,biz_object_id:%]',ref_field.id,ref_field.biz_object_id;
-            delete from hymn.core_biz_object_field where id = ref_field.id;
-        end loop;
-    return record_old;
-end;
-$$;
-comment on function hymn.object_trigger_fun_before_delete() is '业务对象 before delete 触发器函数，阻止删除未停用的对象';
-drop trigger if exists c10_object_before_delete on hymn.core_biz_object;
-create trigger c10_object_before_delete
-    before delete
-    on hymn.core_biz_object
-    for each row
-execute function hymn.object_trigger_fun_before_delete();
-
 
 -- flag:field 业务对象字段触发器
 create or replace function hymn.field_trigger_fun_before_insert() returns trigger
@@ -1224,13 +1225,16 @@ declare
     column_prefix text;
     obj           hymn.core_biz_object;
 begin
+    perform hymn.throw_if_api_is_illegal('api', record_new.api);
     --     新建字段启用状态为真
     record_new.active = true;
     select * into obj from hymn.core_biz_object where id = record_new.biz_object_id;
     if not FOUND then
+--         不会执行，a10_check_object_active_status_upsert 触发器已执行相同的检查
         raise exception '[f:inner:03100] 对象 [id:%] 不存在',record_new.biz_object_id;
     end if;
     if obj.active = false then
+--         不会执行，a10_check_object_active_status_upsert 触发器已执行相同的检查
         raise exception '[f:inner:03200] 对象 [id:%] 未启用',record_new.biz_object_id;
     end if;
     if record_new.is_predefined = true and record_new.source_column is null then
@@ -1244,6 +1248,11 @@ begin
         end if;
         if record_new.type in ('picture', 'files', 'mreference', 'summary', 'master_slave') then
             raise exception '[f:inner:03500] 远程对象不能创建 图片/文件/多选关联/汇总/主从 字段';
+        end if;
+    end if;
+    if record_new.is_predefined = true then
+        if record_new.type in ('mreference', 'summary', 'master_slave') then
+            raise exception '[f:inner:03501] 预定义字段类型不能为 多选关联/汇总/主从';
         end if;
     end if;
 --     检查字段类型
@@ -1312,54 +1321,15 @@ $$
 declare
     record_old        hymn.core_biz_object_field := old;
     record_new        hymn.core_biz_object_field := new;
-    ref_obj           hymn.core_biz_object;
     summary_field_api text;
-    is_active         bool;
 begin
     --     状态为停用的字段不允许修改数据
     if record_new.active = record_old.active and record_new.active = false then
-        return old;
+        raise exception '[f:inner:03601] 字段停用时无法修改属性';
     end if;
     --     禁止修改type
     if record_new.type <> record_old.type then
         raise exception '[f:inner:03700] 不能修改字段类型';
-    end if;
-
---     关联/汇总字段关联的对象停用后不能启用字段，只能手动删除或删除关联的对象时自动删除
-    if record_old.active = false and record_new.active = true then
-        if record_old.type in ('reference', 'master_slave', 'mreference') then
-            select * into ref_obj from hymn.core_biz_object where id = record_old.ref_id;
-            if not found then
---             不可达，对象删除后会删除所有关联字段
-                raise exception '[f:inner:03800] 引用对象已删除，不能启用字段';
-            end if;
-            if ref_obj.active = false then
-                raise exception '[f:inner:03900] 引用对象已停用，不能启用字段';
-            end if;
-        end if;
-        if record_old.type = 'summary' then
-            select active
-            into is_active
-            from hymn.core_biz_object_field
-            where record_old.s_field_id = id;
-            if not found then
-                raise exception '[f:inner:04000] 汇总目标字段已删除，不能启用字段';
-            end if;
-            if is_active = false then
-                raise exception '[f:inner:04100] 汇总目标字段已停用，不能启用当前字段';
-            end if;
-            select cbo.active
-            into is_active
-            from hymn.core_biz_object cbo
-                     left join core_biz_object_field cbof on cbof.biz_object_id = cbo.id
-            where cbof.id = record_old.s_field_id;
-            if not found then
-                raise exception '[f:inner:04200] 引用对象已删除，不能启用字段';
-            end if;
-            if is_active = false then
-                raise exception '[f:inner:04300] 引用对象已停用，不能启用字段';
-            end if;
-        end if;
     end if;
 
     --     字段被汇总字段引用时不能停用
@@ -1410,7 +1380,6 @@ begin
     select type into obj_type from hymn.core_biz_object where id = record_new.biz_object_id;
     if obj_type <> 'remote' then
         --         启用字段时重新创建视图
-
         if record_new.active <> record_old.active then
             perform hymn.rebuild_object_view(record_new.biz_object_id);
         end if;
@@ -1470,7 +1439,8 @@ begin
 --         删除引用当前字段的汇总字段
         delete
         from hymn.core_biz_object_field
-        where type = 'summary' and s_field_id = record_old.id;
+        where type = 'summary'
+          and s_field_id = record_old.id;
     end if;
     return old;
 end;
@@ -2148,6 +2118,7 @@ declare
     record_new hymn.core_biz_object_field := new;
     ref_obj    hymn.core_biz_object;
     ref_field  hymn.core_biz_object_field;
+    is_active  bool;
 begin
     if (record_old.type = 'summary' or record_new.type = 'summary') and
        (record_new.source_column <> '' or record_old.source_column <> '') then
@@ -2194,6 +2165,23 @@ begin
                     end if;
                 end if;
 
+            end if;
+            if tg_op = 'UPDATE' then
+                if record_old.active = false and record_new.active then
+                    if record_old.s_type in ('sum', 'max', 'min') then
+                        select active
+                        into is_active
+                        from hymn.core_biz_object_field
+                        where record_old.s_field_id = id;
+                        if not found then
+--                      不可达，目标字段删除时会删除所有引用该字段的汇总字段
+                            raise exception '[f:inner:04000] 汇总目标字段已删除，不能启用字段';
+                        end if;
+                        if is_active = false then
+                            raise exception '[f:inner:04100] 汇总目标字段已停用，不能启用当前字段';
+                        end if;
+                    end if;
+                end if;
             end if;
         end if;
         if tg_when = 'AFTER' then

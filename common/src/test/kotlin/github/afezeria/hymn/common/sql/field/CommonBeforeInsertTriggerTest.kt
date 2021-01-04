@@ -5,6 +5,7 @@ import github.afezeria.hymn.common.util.execute
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldNotContain
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -15,16 +16,13 @@ import java.sql.Connection
 /**
  * @author afezeria
  */
-class CommonTriggerTest : BaseDbTest() {
+class CommonBeforeInsertTriggerTest : BaseDbTest() {
     companion object {
         lateinit var objId: String
         lateinit var objSourceTable: String
         lateinit var objApi: String
         lateinit var typeId: String
         lateinit var remoteObjId: String
-
-        lateinit var masterObjId: String
-        lateinit var masterFieldId: String
 
         lateinit var STANDARD_FIELD: Array<String>
 
@@ -58,20 +56,24 @@ class CommonTriggerTest : BaseDbTest() {
             clearBObject()
         }
 
-        fun Connection.fieldShouldExists(fieldName: String) {
-            execute(
-                """
-                select pc.relname,pa.attname
-                from pg_class pc
-                left join pg_attribute pa on pc.oid=pa.attrelid
-                left join pg_namespace pn on pc.relnamespace = pn.oid
-                where pc.relkind='v'
-                and pn.nspname='hymn_view'
-                and pc.relname=?
-                and pa.attname=?
-                """,
-                objApi, fieldName + "__cf"
-            ).size shouldBe 1
+    }
+
+    @Test
+    fun `throw if api is illegal`() {
+        adminConn.use {
+            shouldThrow<PSQLException> {
+                it.execute(
+                    """
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
+                        visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                    values (?,'文本字段j52','text','text',255,1,1,?,?,?,?,now(),now()) returning *;
+                    """,
+                    objId, *COMMON_INFO
+                )[0]
+            }.apply {
+                sqlState shouldBe "P0001"
+                message shouldContain "[f:inner:01000] 无效的 api, text 是数据库关键字"
+            }
         }
     }
 
@@ -206,6 +208,95 @@ class CommonTriggerTest : BaseDbTest() {
                 e.sqlState shouldBe "P0001"
                 e.message shouldContain "[f:inner:03500] 远程对象不能创建 图片/文件/多选关联/汇总/主从 字段"
             }
+        }
+    }
+
+    @Test
+    fun `predefined field type cannot be mreference or summary or master_slave`() {
+        adminConn.use {
+            listOf("mreference", "summary", "master_slave").forEach { type ->
+                shouldThrow<PSQLException> {
+                    it.execute(
+                        """
+                    insert into hymn.core_biz_object_field (is_predefined,source_column,biz_object_id, name, api, type, max_length, min_length, 
+                        visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                    values (true,'abc',?,${randomFieldNameAndApi(type)},255,1,1,?,?,?,?,now(),now()) returning *;
+                    """,
+                        objId, *COMMON_INFO
+                    )[0]
+                }.apply {
+                    sqlState shouldBe "P0001"
+                    message shouldContain "[f:inner:03501] 预定义字段类型不能为 多选关联/汇总/主从"
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `field type check`() {
+        adminConn.use {
+            shouldThrow<PSQLException> {
+                it.execute(
+                    """
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
+                        visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                    values (?,'测试字段','test242','double',255,1,1,?,?,?,?,now(),now()) returning *;
+                    """,
+                    objId, *COMMON_INFO
+                )[0]
+            }.apply {
+                sqlState shouldBe "P0001"
+                message shouldContain "[f:inner:01300] 未知的字段类型 double"
+            }
+        }
+    }
+
+    @Test
+    fun `when the fields of the custom object are created, the api property will be suffixed and the source property will be set`() {
+        adminConn.use {
+            val field = it.execute(
+                """
+                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
+                        visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                    values (?,${randomFieldNameAndApi("text")}, 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
+                    """,
+                objId, *COMMON_INFO
+            )[0]
+            field["api"] as String shouldMatch ".*?__cf$".toRegex()
+            field["source_column"] as String shouldMatch "\\w+\\d{3}".toRegex()
+        }
+    }
+
+    @Test
+    fun `an exception is thrown when the number of fields reaches the maximum`() {
+        val master = createBObject()
+        val masterId = master["id"] as String
+        try {
+            adminConn.use {
+                it.execute(
+                    """
+                    insert into hymn.core_biz_object_field (ref_id,ref_list_label,biz_object_id, name, api, type, 
+                        create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                    values (?,'子对象',?,${randomFieldNameAndApi("master_slave")},  ?, ?, ?, ?, now(), now()) returning *;
+                    """,
+                    masterId, objId, *COMMON_INFO
+                )[0]
+                shouldThrow<PSQLException> {
+                    it.execute(
+                        """
+                    insert into hymn.core_biz_object_field (ref_id,ref_list_label,biz_object_id, name, api, type, 
+                        create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                    values (?,'子对象',?,${randomFieldNameAndApi("master_slave")}, ?, ?, ?, ?, now(), now()) returning *;
+                    """,
+                        masterId, objId, *COMMON_INFO
+                    )[0]
+                }.apply {
+                    sqlState shouldBe "P0001"
+                    message shouldContain "[f:inner:03600] 主从类型字段的数量已达到上限"
+                }
+            }
+        } finally {
+            deleteBObject(masterId)
         }
     }
 }

@@ -74,13 +74,13 @@ class FieldInsertSuccessTest : BaseDbTest() {
                 """
                     insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
-                    values (?,'文本字段','tfield','text',255,1,1,?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("text")},255,1,1,?,?,?,?,now(),now()) returning *;
                     """,
                 objId,
                 *COMMON_INFO
             )[0]
             (field["source_column"] as String) shouldStartWith "text"
-            it.fieldShouldExists("tfield")
+            it.fieldShouldExists((field["api"] as String).replace("__cf",""))
             it.execute(
                 """
                         insert into hymn_view.$objApi (create_date,modify_date,owner_id,create_by_id,

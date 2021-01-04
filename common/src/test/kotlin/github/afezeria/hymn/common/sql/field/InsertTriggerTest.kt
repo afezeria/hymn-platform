@@ -64,48 +64,6 @@ class InsertTriggerTest : BaseDbTest() {
         }
     }
 
-    @Test
-    fun `new field active is always true`() {
-        adminConn.use {
-            val field = it.execute(
-                """
-                    insert into hymn.core_biz_object_field (active,biz_object_id, name, api, type, max_length, min_length, 
-                        visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
-                    values (false,?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
-                    """,
-                objId, *COMMON_INFO
-            )[0]
-            field["active"] shouldBe true
-        }
-    }
-
-    @Test
-    fun `fields of remote objects are not suffixed`() {
-        adminConn.use {
-            val obj = it.execute(
-                """
-                insert into hymn.core_biz_object(name,api,type,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
-                values ('测试对象','remote_obj','remote',?,?,?,?,now(),now()) returning *;
-                """,
-                *COMMON_INFO
-            )[0]
-            val objId = obj["id"] as String
-            try {
-                val field = it.execute(
-                    """
-                    insert into hymn.core_biz_object_field (biz_object_id, name, api, type, max_length, min_length, 
-                        visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
-                    values (?, '文本字段', 'tfield', 'text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
-                    """,
-                    objId, *COMMON_INFO
-                )[0]
-                field["api"] as String shouldNotContain "__cf$".toRegex()
-                field["source_column"] shouldBe ""
-            } finally {
-                deleteBObject(objId)
-            }
-        }
-    }
 
     @Test
     fun `add suffix __cf to custom fields of non remote objects`() {

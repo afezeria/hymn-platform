@@ -164,18 +164,14 @@ class DeleteTriggerTest : BaseDbTest() {
                         and pp.proname = '${objSourceTable}' || '_mref_trigger_function'
                     """
                 ).size shouldBe 1
-                logger.info("==================================================update")
                 it.execute(
                     "update hymn.core_biz_object_field set active=false where id=?",
                     field["id"]
                 )
-                logger.info("==================================================delete")
                 val deleted = it.execute(
                     "delete from hymn.core_biz_object_field where id=? returning *",
                     field["id"]
                 )
-                logger.info(deleted[0].toFormatJson())
-                logger.info("==================================================")
 //                中间表已删除
                 it.execute(
                     """

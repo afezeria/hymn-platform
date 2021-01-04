@@ -1,6 +1,8 @@
 package github.afezeria.hymn.common
 
 import github.afezeria.hymn.common.util.execute
+import io.kotest.matchers.shouldBe
+import java.sql.Connection
 import java.time.LocalDateTime
 import java.util.*
 
@@ -27,6 +29,7 @@ fun deleteBObject(id: String) {
     adminConn.use {
         val obj = it.execute("select * from hymn.core_biz_object where id = ?", id)
         if (obj.isNotEmpty()) {
+            it.execute("update hymn.core_biz_object set active = true where id = ?", id)
 //            停用所有引用当前对象的汇总字段
             it.execute(
                 """
@@ -195,4 +198,34 @@ fun createBObject(
         obj["type_id"] = type["id"]
         return obj
     }
+}
+
+fun Connection.fieldShouldExists(schema: String, tableName: String, fieldName: String) {
+    execute(
+        """
+                select pc.relname,pa.attname
+                from pg_class pc
+                left join pg_attribute pa on pc.oid=pa.attrelid
+                left join pg_namespace pn on pc.relnamespace = pn.oid
+                where pn.nspname=?
+                and pc.relname=?
+                and pa.attname=?
+                """,
+        schema, tableName, fieldName
+    ).size shouldBe 1
+}
+
+fun Connection.fieldShouldNotExists(schema: String, tableName: String, fieldName: String) {
+    execute(
+        """
+                select pc.relname,pa.attname
+                from pg_class pc
+                left join pg_attribute pa on pc.oid=pa.attrelid
+                left join pg_namespace pn on pc.relnamespace = pn.oid
+                where pn.nspname=?
+                and pc.relname=?
+                and pa.attname=?
+                """,
+        schema, tableName, fieldName
+    ).size shouldBe 0
 }
