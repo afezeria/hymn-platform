@@ -776,11 +776,10 @@ begin
                 '    language plpgsql as\n'
                 '$$\n'
                 'declare\n'
-                '    js         jsonb                        := ''{}'';\n'
-                '    operation  text;\n'
-                '    id         text;\n'
-                '    o          text;\n'
-                '    n          text;\n'
+                '    js  jsonb := ''{}'';\n'
+                '    tmp jsonb := ''{}'';\n'
+                '    o   text;\n'
+                '    n   text;\n'
                 'begin\n'
                 '    if tg_op = ''DELETE'' then\n'
                 '        js := to_jsonb(old);\n'
@@ -804,21 +803,12 @@ begin
             fun_body := fun_body ||
                         format(
                                 E'        if old.%s != new.%s then\n'
-                                    '            if old.%s is null then\n'
-                                    '                o := ''null'';\n'
-                                    '            else\n'
-                                    '                o := to_jsonb(old.%s);\n'
-                                    '            end if;\n'
-                                    '            if new.%s is null then\n'
-                                    '                n := ''null'';\n'
-                                    '            else\n'
-                                    '                n := to_jsonb(new.%s);\n'
-                                    '            end if;\n'
-                                    '            js := jsonb_insert(js, ''{%s}'',\n'
-                                    '                               to_jsonb(''{"o":'' || o || '',"n":'' || n || ''}''));\n'
+                                    '            tmp := jsonb_insert(tmp, ''{o}'', to_jsonb(old.%s));\n'
+                                    '            tmp := jsonb_insert(tmp, ''{n}'', to_jsonb(new.%s));\n'
+                                    '            js := jsonb_insert(js, ''{%s}'', tmp);\n'
+                                    '            tmp := ''{}'';\n'
                                     '        end if;\n',
-                                field_column, field_column, field_column, field_column,
-                                field_column, field_column, field_api);
+                                field_column, field_column, field_column, field_column, field_api);
         end loop;
     if fun_body <> '' then
         fun_body := fun_body ||
