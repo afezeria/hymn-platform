@@ -794,6 +794,7 @@ begin
     for field in select *
                  from hymn.core_biz_object_field cbof
                  where cbof.biz_object_id = obj_id
+                   and cbof.source_column not like 'pl_%'
                    and cbof.active = true
                    and cbof.history = true
         loop
@@ -908,8 +909,10 @@ create or replace function hymn.object_trigger_fun_before_delete() returns trigg
     language plpgsql as
 $$
 declare
-    record_old hymn.core_biz_object := old;
-    ref_field  hymn.core_biz_object_field;
+    record_old       hymn.core_biz_object := old;
+    ref_field        hymn.core_biz_object_field;
+    trigger_fun_name text;
+    sql_str          text;
 begin
     if record_old.active = true then
         raise exception '[f:inner:03000] 无法删除启用的对象';
@@ -924,6 +927,24 @@ begin
         loop
             raise notice 'delete reference field [id:%,biz_object_id:%]',ref_field.id,ref_field.biz_object_id;
             delete from hymn.core_biz_object_field where id = ref_field.id;
+        end loop;
+--     删除所有独有的触发器函数
+    for trigger_fun_name in select proc.proname
+                            from pg_trigger pt
+                                     inner join (
+                                select pp.oid, pp.proname
+                                from pg_class pc
+                                         left join pg_namespace pn on pn.oid = pc.relnamespace
+                                         left join pg_trigger pt on pt.tgrelid = pc.oid
+                                         left join pg_proc pp on pp.oid = pt.tgfoid
+                                where pc.relname = record_old.source_table
+                                  and pn.nspname = 'hymn'
+                            ) proc on pt.tgfoid = proc.oid
+                            group by proc.proname
+                            having count(*) = 1
+        loop
+            sql_str := format('drop function hymn.%I() cascade;', trigger_fun_name);
+            execute sql_str;
         end loop;
     return record_old;
 end;
@@ -1315,7 +1336,8 @@ declare
 begin
     --     状态为停用的字段不允许修改数据
     if record_new.active = record_old.active and record_new.active = false then
-        raise exception '[f:inner:03601] 字段停用时无法修改属性';
+        raise notice '%',new;
+        raise exception '[f:inner:03601] 字段停用时无法修改属性%',new;
     end if;
     --     禁止修改type
     if record_new.type <> record_old.type then
@@ -1369,16 +1391,18 @@ declare
 begin
     select type into obj_type from hymn.core_biz_object where id = record_new.biz_object_id;
     if obj_type <> 'remote' then
-        --         启用字段时重新创建视图
-        if record_new.active <> record_old.active then
-            perform hymn.rebuild_object_view(record_new.biz_object_id);
-        end if;
+        if record_old.source_column not like 'pl_%' then
+            --         启用字段时重新创建视图
+            if record_new.active <> record_old.active then
+                perform hymn.rebuild_object_view(record_new.biz_object_id);
+            end if;
 --         历史记录状态变更时重置历史记录触发器
-        if record_new.history <> record_old.history or
-           (record_new.history = true and record_old.active <> record_new.active) then
-            perform hymn.rebuild_data_table_history_trigger(record_new.biz_object_id);
-        end if;
+            if record_new.history <> record_old.history or
+               (record_new.history = true and record_old.active <> record_new.active) then
+                perform hymn.rebuild_data_table_history_trigger(record_new.biz_object_id);
+            end if;
 
+        end if;
     end if;
     return null;
 end;
@@ -1540,8 +1564,8 @@ begin
             end if;
             if tg_op = 'DELETE' then
                 if record_old.source_column ~ 'mref\d{3}' and record_old.is_predefined = false then
-                    perform hymn.rebuild_multiple_refernece_trigger_function(
-                            record_old.biz_object_id);
+                    --                     perform hymn.rebuild_multiple_refernece_trigger_function(
+--                             record_old.biz_object_id);
 --                 删除中间表
                     sql_str := format('drop table hymn.%I cascade;',
                                       hymn.get_join_table_name(record_old.join_view_name));

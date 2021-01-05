@@ -29,9 +29,9 @@ class InsertTest : BaseDbTest() {
         adminConn.use {
             val insert = it.execute(
                 """
-                insert into hymn.core_biz_object(name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(type,name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
-                values ('测试对象','test_obj',?,?,?,?,now(),now()) returning *;
+                values ('custom','测试对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
                 *COMMON_INFO
             )[0]

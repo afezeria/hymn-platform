@@ -52,24 +52,30 @@ fun Connection.execute(
             params.forEachIndexed { index, any ->
                 it.setObject(index + 1, any)
             }
-            it.execute()
-            if (logger.isDebugEnabled) {
-                var warnings = it.warnings
-                while (warnings != null) {
-                    logger.debug(warnings.message)
-                    warnings = warnings.nextWarning
+            try{
+                it.execute()
+            }finally {
+                if (logger.isDebugEnabled) {
+                    var warnings = it.warnings
+                    while (warnings != null) {
+                        logger.debug(warnings.message)
+                        warnings = warnings.nextWarning
+                    }
                 }
             }
             it.resultSet.toList()
         }
     } else {
         createStatement().use {
-            it.execute(sql)
-            if (logger.isDebugEnabled) {
-                var warnings = it.warnings
-                while (warnings != null) {
-                    logger.debug(warnings.message)
-                    warnings = warnings.nextWarning
+            try{
+                it.execute(sql)
+            }finally {
+                if (logger.isDebugEnabled) {
+                    var warnings = it.warnings
+                    while (warnings != null) {
+                        logger.debug(warnings.message)
+                        warnings = warnings.nextWarning
+                    }
                 }
             }
             it.resultSet.toList()

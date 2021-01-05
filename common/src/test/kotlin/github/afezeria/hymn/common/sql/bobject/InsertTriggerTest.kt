@@ -45,9 +45,9 @@ class InsertTriggerTest : BaseDbTest() {
         adminConn.use {
             val data = it.execute(
                 """
-                insert into hymn.core_biz_object(active,name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(type,active,name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
-                values (false,'测试对象','test_obj',?,?,?,?,now(),now()) returning *;
+                values ('custom',false,'测试对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
                 *COMMON_INFO
             )[0]
@@ -60,9 +60,9 @@ class InsertTriggerTest : BaseDbTest() {
         adminConn.use {
             val data = it.execute(
                 """
-                insert into hymn.core_biz_object(name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(type,name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
-                values ('测试对象','test_obj',?,?,?,?,now(),now()) returning *;
+                values ('custom','测试对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
                 *COMMON_INFO
             )[0]
@@ -92,10 +92,10 @@ class InsertTriggerTest : BaseDbTest() {
                 for (i in (1..10)) {
                     it.execute(
                         """
-                insert into hymn.core_biz_object(name,api,create_by_id,create_by,modify_by_id,
-                    modify_by,create_date,modify_date)
-                values ('测试对象','ab${i}',?,?,?,?,now(),now()) returning *;
-                """,
+                        insert into hymn.core_biz_object(type,name,api,create_by_id,create_by,modify_by_id,
+                            modify_by,create_date,modify_date)
+                        values ('custom','测试对象','ab${i}',?,?,?,?,now(),now()) returning *;
+                        """,
                         *COMMON_INFO
                     )[0]
                 }
@@ -152,9 +152,9 @@ class InsertTriggerTest : BaseDbTest() {
         adminConn.use {
             var data = it.execute(
                 """
-                insert into hymn.core_biz_object(name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(type,name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
-                values ('测试对象','test_obj',?,?,?,?,now(),now()) returning *;
+                values ('custom','测试对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
                 *COMMON_INFO
             )[0]
@@ -220,9 +220,9 @@ class InsertTriggerTest : BaseDbTest() {
         adminConn.use {
             var data = it.execute(
                 """
-                insert into hymn.core_biz_object(name,api,create_by_id,create_by,modify_by_id,
+                insert into hymn.core_biz_object(type,name,api,create_by_id,create_by,modify_by_id,
                     modify_by,create_date,modify_date)
-                values ('测试对象','test_obj',?,?,?,?,now(),now()) returning *;
+                values ('custom','测试对象','test_obj',?,?,?,?,now(),now()) returning *;
                 """,
                 *COMMON_INFO
             )[0]

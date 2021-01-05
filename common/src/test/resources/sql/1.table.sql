@@ -405,7 +405,7 @@ create table hymn.core_biz_object
     api          text        not null,
     source_table text,
     active       bool                 default true not null,
-    type         text        not null default 'custom',
+    type         text        not null ,
     remote_url   text,
     remote_token text,
     module_api   text,
