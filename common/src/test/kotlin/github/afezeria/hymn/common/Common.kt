@@ -89,9 +89,126 @@ var objSeq = (1..100000).iterator()
 
 fun randomUUIDStr(): String = UUID.randomUUID().toString().replace("-", "")
 
-fun createModuleBizObject(){
-    
+data class ModuleBizObject(
+    val moduleId: String,
+    val moduleApi: String,
+    val moduleSourceTable: String
+)
+
+fun moduleBizObject(fn: ModuleBizObject.(Connection) -> Any?) {
+    adminConn.use {
+        val seq = objSeq.nextInt()
+        val sourceTable = "test_module_object_$seq"
+        it.execute(
+            """
+                create table hymn.$sourceTable(
+                    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+                    name text,
+                    atext text,
+                    aint bigint,
+                    afloat double precision,
+                    adatetime timestamptz
+                )
+            """
+        )
+        try {
+            val data = it.execute(
+                """
+                insert into hymn.core_biz_object(name,api,type,source_table,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+                values ('模块对象${seq}','$sourceTable','module','$sourceTable',?,?,?,?,now(),now()) returning *;
+                """,
+                *COMMON_INFO
+            )[0]
+            val id = data["id"] as String
+            it.execute(
+                """
+                insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, gen_rule,     
+                    standard_type, is_predefined, create_by_id, create_by, modify_by_id, modify_by, 
+                    create_date, modify_date) 
+                values ('name', ?, '编号', 'name', 'auto', '{yyyy}{mm}{000}', 'name', true, ?, ?, ?, ?,
+                    now(),now());
+                """,
+                id, *COMMON_INFO
+            )
+            try {
+                ModuleBizObject(
+                    id,
+                    data["api"] as String,
+                    data["source_table"] as String
+                ).fn(it)
+            } finally {
+                deleteBObject(id)
+            }
+        } finally {
+            it.execute("drop table hymn.$sourceTable cascade")
+        }
+    }
 }
+
+data class RemoteBizObject(val remoteId: String)
+
+fun remoteBizObject(fn: RemoteBizObject.(Connection) -> Any?) {
+    adminConn.use {
+        val seq = objSeq.nextInt()
+        val id = it.execute(
+            """
+                insert into hymn.core_biz_object(name,api,type,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
+                values ('远程对象${seq}','remote_obj_${seq}','remote',?,?,?,?,now(),now()) returning *;
+                """,
+            *COMMON_INFO
+        )[0]["id"] as String
+        try {
+            RemoteBizObject(id).fn(it)
+        } finally {
+            deleteBObject(id)
+        }
+    }
+}
+
+data class CustomBizObject(
+    val id: String,
+    val api: String,
+    val sourceTable: String,
+    val typeId: String
+)
+
+fun customBizObject(fn: CustomBizObject.(Connection) -> Any?) {
+    adminConn.use {
+        val data = createBObject()
+        try {
+            CustomBizObject(
+                data["id"] as String,
+                data["api"] as String,
+                data["source_table"] as String,
+                data["type_id"] as String
+            ).fn(it)
+        } finally {
+            deleteBObject(data["id"] as String)
+        }
+    }
+}
+
+data class RefBizObject(
+    val refId: String,
+    val refApi: String,
+    val refSourceTable: String,
+    val refTypeId: String
+)
+
+fun Connection.refBizObject(fn: RefBizObject.(Connection) -> Any?) {
+    val data = createBObject()
+    try {
+        RefBizObject(
+            data["id"] as String,
+            data["api"] as String,
+            data["source_table"] as String,
+            data["type_id"] as String
+        ).fn(this)
+    } finally {
+        deleteBObject(data["id"] as String)
+    }
+}
+
 
 fun createBObject(
     can_insert: Boolean = true,
@@ -99,10 +216,11 @@ fun createBObject(
     can_delete: Boolean = true
 ): Map<String, Any?> {
     adminConn.use {
+        val seq = objSeq.nextInt()
         val obj = it.execute(
             """
             insert into hymn.core_biz_object(type,name,api,active,can_insert,can_update,can_delete,create_by_id,create_by,modify_by_id,modify_by,create_date,modify_date)
-            values ('custom','测试对象','test_obj${objSeq.nextInt()}',true,?,?,?,?,?,?,?,?,?) returning *;
+            values ('custom','测试对象$seq','test_obj${seq}',true,?,?,?,?,?,?,?,?,?) returning *;
             """,
             can_insert, can_update, can_delete,
             DEFAULT_ACCOUNT_ID,

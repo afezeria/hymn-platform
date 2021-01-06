@@ -1,4 +1,4 @@
-package github.afezeria.hymn.app
+package github.afezeria.hymn
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

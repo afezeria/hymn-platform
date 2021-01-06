@@ -911,7 +911,6 @@ $$
 declare
     record_old       hymn.core_biz_object := old;
     ref_field        hymn.core_biz_object_field;
-    trigger_fun_name text;
     sql_str          text;
 begin
     if record_old.active = true then
@@ -928,24 +927,18 @@ begin
             raise notice 'delete reference field [id:%,biz_object_id:%]',ref_field.id,ref_field.biz_object_id;
             delete from hymn.core_biz_object_field where id = ref_field.id;
         end loop;
---     删除所有独有的触发器函数
-    for trigger_fun_name in select proc.proname
-                            from pg_trigger pt
-                                     inner join (
-                                select pp.oid, pp.proname
-                                from pg_class pc
-                                         left join pg_namespace pn on pn.oid = pc.relnamespace
-                                         left join pg_trigger pt on pt.tgrelid = pc.oid
-                                         left join pg_proc pp on pp.oid = pt.tgfoid
-                                where pc.relname = record_old.source_table
-                                  and pn.nspname = 'hymn'
-                            ) proc on pt.tgfoid = proc.oid
-                            group by proc.proname
-                            having count(*) = 1
-        loop
-            sql_str := format('drop function hymn.%I() cascade;', trigger_fun_name);
-            execute sql_str;
-        end loop;
+    --     删除所有独有的触发器函数
+    if record_old.type <> 'remote' then
+        sql_str := format('drop function if exists hymn.%s_mref_trigger_function() cascade',
+                          record_old.source_table);
+        execute sql_str;
+        sql_str := format('drop function if exists hymn.%s_auto_number_trigger_fun() cascade',
+                          record_old.api);
+        execute sql_str;
+        sql_str := format('drop function if exists hymn.%s_history_trigger_fun() cascade',
+                          record_old.source_table);
+        execute sql_str;
+    end if;
     return record_old;
 end;
 $$;
@@ -1484,9 +1477,6 @@ begin
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
                 if record_new.ref_id is null or record_new.ref_delete_policy is null then
                     raise exception '[f:inner:04600] 关联对象/关联对象删除策略不能为空';
-                end if;
-                if record_new.is_predefined = true then
-                    raise exception '[f:inner:04700] 多选关联字段不能是预定义字段';
                 end if;
                 select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
                 if not FOUND then
