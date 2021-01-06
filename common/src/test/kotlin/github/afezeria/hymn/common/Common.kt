@@ -1,5 +1,6 @@
 package github.afezeria.hymn.common
 
+import github.afezeria.hymn.common.sql.field.randomFieldNameAndApi
 import github.afezeria.hymn.common.util.execute
 import io.kotest.matchers.shouldBe
 import java.sql.Connection
@@ -166,11 +167,31 @@ fun remoteBizObject(fn: RemoteBizObject.(Connection) -> Any?) {
 }
 
 data class CustomBizObject(
-    val id: String,
-    val api: String,
-    val sourceTable: String,
-    val typeId: String
-)
+    val objId: String,
+    val objApi: String,
+    val objSourceTable: String,
+    val objTypeId: String
+) {
+    val standardField =
+        arrayOf(DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, objTypeId)
+
+    fun Connection.fieldShouldExists(fieldName: Any?, api: String? = null) {
+        execute(
+            """
+                select pc.relname,pa.attname
+                from pg_class pc
+                left join pg_attribute pa on pc.oid=pa.attrelid
+                left join pg_namespace pn on pc.relnamespace = pn.oid
+                where pc.relkind='v'
+                and pn.nspname='hymn_view'
+                and pc.relname=?
+                and pa.attname=?
+                """,
+            api ?: objApi, fieldName as String
+        ).size shouldBe 1
+    }
+
+}
 
 fun customBizObject(fn: CustomBizObject.(Connection) -> Any?) {
     adminConn.use {
@@ -192,17 +213,51 @@ data class RefBizObject(
     val refId: String,
     val refApi: String,
     val refSourceTable: String,
-    val refTypeId: String
-)
+    val refTypeId: String,
+    val masterFieldId: String?
+) {
+    val standardField =
+        arrayOf(DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, refTypeId)
 
-fun Connection.refBizObject(fn: RefBizObject.(Connection) -> Any?) {
+    fun Connection.fieldShouldExists(fieldName: Any?) {
+        execute(
+            """
+                select pc.relname,pa.attname
+                from pg_class pc
+                left join pg_attribute pa on pc.oid=pa.attrelid
+                left join pg_namespace pn on pc.relnamespace = pn.oid
+                where pc.relkind='v'
+                and pn.nspname='hymn_view'
+                and pc.relname=?
+                and pa.attname=?
+                """,
+            refApi, fieldName as String
+        ).size shouldBe 1
+    }
+
+}
+
+fun Connection.refBizObject(masterId: String = "", fn: RefBizObject.(Connection) -> Any?) {
     val data = createBObject()
     try {
+        var masterFieldId: String? = null
+        if (masterId.isNotEmpty()) {
+            val field = execute(
+                """
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
+                        create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
+                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象',?,?,?,?,now(),now()) returning *;
+                    """,
+                data["id"], masterId, *COMMON_INFO
+            )[0]
+            masterFieldId = field["id"] as String
+        }
         RefBizObject(
             data["id"] as String,
             data["api"] as String,
             data["source_table"] as String,
-            data["type_id"] as String
+            data["type_id"] as String,
+            masterFieldId
         ).fn(this)
     } finally {
         deleteBObject(data["id"] as String)

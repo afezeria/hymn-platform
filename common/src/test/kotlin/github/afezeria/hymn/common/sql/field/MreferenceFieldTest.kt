@@ -15,7 +15,7 @@ import org.postgresql.util.PSQLException
 /**
  * @author afezeria
  */
-class MreferenceFieldTriggerTest : BaseDbTest() {
+class MreferenceFieldTest : BaseDbTest() {
     companion object {
         lateinit var objId: String
         lateinit var objSourceTable: String

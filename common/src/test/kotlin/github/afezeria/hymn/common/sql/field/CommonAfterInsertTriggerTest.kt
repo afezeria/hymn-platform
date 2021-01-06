@@ -1,9 +1,7 @@
 package github.afezeria.hymn.common.sql.field
 
 import github.afezeria.hymn.common.*
-import github.afezeria.hymn.common.sql.field.FieldInsertSuccessTest.Companion.fieldShouldExists
 import github.afezeria.hymn.common.util.execute
-import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -72,7 +70,7 @@ class CommonAfterInsertTriggerTest : BaseDbTest() {
     fun `if the source_column of the new field starts with pl_ and the is_predefined is false, the view will not be modified or created`() {
         val master = createBObject()
         val masterId = master["id"] as String
-        try{
+        try {
             adminConn.use {
                 it.execute(
                     """
@@ -88,11 +86,11 @@ class CommonAfterInsertTriggerTest : BaseDbTest() {
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (?,'count',1,?,${randomFieldNameAndApi("summary")},?,?,?,?,now(),now()) returning *;
                     """,
-                    objId,masterId, *COMMON_INFO
+                    objId, masterId, *COMMON_INFO
                 )[0]
                 it.fieldShouldNotExists("hymn", objApi, field["api"] as String)
             }
-        }finally {
+        } finally {
             deleteBObject(masterId)
         }
     }

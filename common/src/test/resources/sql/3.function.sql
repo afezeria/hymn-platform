@@ -840,6 +840,33 @@ $BODY$;
 comment on function hymn.rebuild_data_table_history_trigger(obj_id text) is '重建数据表的历史记录触发器，生成触发器函数';
 
 -- 触发器函数
+create or replace function hymn.dict_before_delete_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_dict := old;
+    field_arr  text;
+begin
+    select array_agg(cbo.api || '.' || cbof.api)::text
+    into field_arr
+    from hymn.core_biz_object_field cbof
+             left join hymn.core_biz_object cbo on cbof.biz_object_id = cbo.id
+    where cbof.type in ('select', 'check_box_group')
+      and cbof.dict_id = record_old.id;
+    raise notice '%',field_arr;
+    if field_arr is not null then
+        raise exception '[f:inner:02101] 当前字典被以下字段引用，不能删除: %',field_arr;
+    end if;
+    return record_old;
+end;
+$$;
+comment on function hymn.dict_before_delete_trigger_fun() is '当字典被引用时阻止删除字典';
+create trigger c10_dict_before_delete
+    before delete
+    on hymn.core_dict
+    for each row
+execute function hymn.dict_before_delete_trigger_fun();
+
 
 -- flag:object 对象相关触发器
 create or replace function hymn.object_trigger_fun_before_insert() returns trigger
@@ -909,9 +936,9 @@ create or replace function hymn.object_trigger_fun_before_delete() returns trigg
     language plpgsql as
 $$
 declare
-    record_old       hymn.core_biz_object := old;
-    ref_field        hymn.core_biz_object_field;
-    sql_str          text;
+    record_old hymn.core_biz_object := old;
+    ref_field  hymn.core_biz_object_field;
+    sql_str    text;
 begin
     if record_old.active = true then
         raise exception '[f:inner:03000] 无法删除启用的对象';
@@ -1621,13 +1648,9 @@ begin
                         raise exception '[f:inner:05600] name字段最大长度必须小于等于255';
                     end if;
                     record_new.visible_row = 1;
-                    if record_new.is_predefined is null or record_new.is_predefined = false then
-                        raise exception '[f:inner:05700] name字段 is_predefined 属性必须为 true';
-                    end if;
                     if record_new.standard_type is null or record_new.standard_type <> 'name' then
                         raise exception '[f:inner:05800] name字段 standard_type 属性必须为 ''name''';
                     end if;
-                    record_new.is_predefined = true;
                 end if;
             end if;
         end if;
@@ -1655,6 +1678,7 @@ $$
 declare
     record_old hymn.core_biz_object_field := old;
     record_new hymn.core_biz_object_field := new;
+    dict       hymn.core_dict;
 begin
     if (record_old.type = 'check_box_group' or record_new.type = 'check_box_group') and
        (record_new.source_column <> '' or record_old.source_column <> '') then
@@ -1675,6 +1699,13 @@ begin
             end if;
         end if;
         if tg_when = 'AFTER' then
+            if tg_op = 'DELETE' then
+--                 删除字段时删除专属与该字段的字典
+                for dict in select * from hymn.core_dict where field_id = record_old.id
+                    loop
+                        delete from hymn.core_dict where id = dict.id;
+                    end loop;
+            end if;
         end if;
     end if;
     if tg_op = 'INSERT' or tg_op = 'UPDATE' then
@@ -1691,6 +1722,12 @@ create trigger c20_check_box_group_field_before
     on hymn.core_biz_object_field
     for each row
 execute function hymn.check_box_group_field_trigger_fun();
+drop trigger if exists c20_check_box_group_field_after on hymn.core_biz_object_field;
+create trigger c20_check_box_group_field_after
+    after delete
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.check_box_group_field_trigger_fun();
 
 create or replace function hymn.select_field_trigger_fun() returns trigger
     language plpgsql as
@@ -1698,6 +1735,7 @@ $$
 declare
     record_old hymn.core_biz_object_field := old;
     record_new hymn.core_biz_object_field := new;
+    dict       hymn.core_dict;
 begin
     if (record_old.type = 'select' or record_new.type = 'select') and
        (record_new.source_column <> '' or record_old.source_column <> '') then
@@ -1722,6 +1760,13 @@ begin
             end if;
         end if;
         if tg_when = 'AFTER' then
+            if tg_op = 'DELETE' then
+--                 删除字段时删除专属与该字段的字典
+                for dict in select * from hymn.core_dict where field_id = record_old.id
+                    loop
+                        delete from hymn.core_dict where id = dict.id;
+                    end loop;
+            end if;
         end if;
     end if;
     if tg_op = 'INSERT' or tg_op = 'UPDATE' then
@@ -1731,10 +1776,16 @@ begin
     end if;
 end;
 $$;
-comment on function hymn.select_field_trigger_fun() is '多选字段触发器函数';
+comment on function hymn.select_field_trigger_fun() is '下拉多选字段触发器函数';
 drop trigger if exists c20_select_field_before on hymn.core_biz_object_field;
 create trigger c20_select_field_before
     before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.select_field_trigger_fun();
+drop trigger if exists c20_select_field_after on hymn.core_biz_object_field;
+create trigger c20_select_field_after
+    after delete
     on hymn.core_biz_object_field
     for each row
 execute function hymn.select_field_trigger_fun();
@@ -1769,7 +1820,7 @@ begin
     end if;
 end;
 $$;
-comment on function hymn.integer_field_trigger_fun() is '复选框组字段触发器函数';
+comment on function hymn.integer_field_trigger_fun() is '整数字段触发器函数';
 drop trigger if exists c20_integer_field_before on hymn.core_biz_object_field;
 create trigger c20_integer_field_before
     before insert or update
@@ -1814,7 +1865,7 @@ begin
     end if;
 end;
 $$;
-comment on function hymn.float_field_trigger_fun() is '多选字段触发器函数';
+comment on function hymn.float_field_trigger_fun() is '浮点数字段触发器函数';
 drop trigger if exists c20_float_field_before on hymn.core_biz_object_field;
 create trigger c20_float_field_before
     before insert or update
@@ -1856,7 +1907,7 @@ begin
     end if;
 end;
 $$;
-comment on function hymn.money_field_trigger_fun() is '多选字段触发器函数';
+comment on function hymn.money_field_trigger_fun() is '金额字段触发器函数';
 drop trigger if exists c20_money_field_before on hymn.core_biz_object_field;
 create trigger c20_money_field_before
     before insert or update
@@ -1899,7 +1950,7 @@ begin
     end if;
 end;
 $$;
-comment on function hymn.picture_field_trigger_fun() is '多选字段触发器函数';
+comment on function hymn.picture_field_trigger_fun() is '图片字段触发器函数';
 drop trigger if exists c20_picture_field_before on hymn.core_biz_object_field;
 create trigger c20_picture_field_before
     before insert or update
@@ -1942,7 +1993,7 @@ begin
     end if;
 end;
 $$;
-comment on function hymn.files_field_trigger_fun() is '多选字段触发器函数';
+comment on function hymn.files_field_trigger_fun() is '文件字段触发器函数';
 drop trigger if exists c20_files_field_before on hymn.core_biz_object_field;
 create trigger c20_files_field_before
     before insert or update
@@ -1986,7 +2037,7 @@ begin
     end if;
 end;
 $$;
-comment on function hymn.reference_field_trigger_fun() is '多选字段触发器函数';
+comment on function hymn.reference_field_trigger_fun() is '引用字段触发器函数';
 drop trigger if exists c20_reference_field_before on hymn.core_biz_object_field;
 create trigger c20_reference_field_before
     before insert or update
@@ -2048,7 +2099,7 @@ begin
     end if;
 end;
 $$;
-comment on function hymn.master_slave_field_trigger_fun() is '多选字段触发器函数';
+comment on function hymn.master_slave_field_trigger_fun() is '主从字段触发器函数';
 drop trigger if exists c20_master_slave_field_before on hymn.core_biz_object_field;
 create trigger c20_master_slave_field_before
     before insert or update
@@ -2100,7 +2151,7 @@ begin
     end if;
 end;
 $$;
-comment on function hymn.auto_field_trigger_fun() is '多选字段触发器函数';
+comment on function hymn.auto_field_trigger_fun() is '自动编号字段触发器函数';
 drop trigger if exists c20_auto_field_before on hymn.core_biz_object_field;
 create trigger c20_auto_field_before
     before insert or update
