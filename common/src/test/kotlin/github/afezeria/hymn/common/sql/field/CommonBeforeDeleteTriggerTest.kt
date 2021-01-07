@@ -125,7 +125,7 @@ class CommonBeforeDeleteTriggerTest : BaseDbTest() {
             try {
                 val field = it.execute(
                     """
-                    insert into hymn.core_biz_object_field  (is_predefined,source_column, biz_object_id, name, api, type,  max_length, 
+                    insert into hymn.core_biz_object_field  (predefined,source_column, biz_object_id, name, api, type,  max_length, 
                         min_length,  create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (true,'idx',?,${randomFieldNameAndApi("integer")},50000,50,?,?,?,?,now(),now()) returning *;
                     """,

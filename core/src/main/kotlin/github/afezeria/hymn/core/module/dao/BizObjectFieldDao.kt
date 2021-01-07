@@ -62,7 +62,7 @@ class BizObjectFieldDao {
             set(it.help, e.help)
             set(it.joinViewName, e.joinViewName)
             set(it.standardType, e.standardType)
-            set(it.isPredefined, e.isPredefined)
+            set(it.predefined, e.predefined)
             set(it.modifyById, accountId)
             set(it.modifyBy, accountName)
             set(it.modifyDate, LocalDateTime.now())
@@ -111,7 +111,7 @@ class BizObjectFieldDao {
             set(it.help, e.help)
             set(it.joinViewName, e.joinViewName)
             set(it.standardType, e.standardType)
-            set(it.isPredefined, e.isPredefined)
+            set(it.predefined, e.predefined)
         } as String
     }
 

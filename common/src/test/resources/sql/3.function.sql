@@ -1268,20 +1268,20 @@ begin
 --         不会执行，a10_check_object_active_status_upsert 触发器已执行相同的检查
         raise exception '[f:inner:03200] 对象 [id:%] 未启用',record_new.biz_object_id;
     end if;
-    if record_new.is_predefined = true and record_new.source_column is null then
+    if record_new.predefined = true and record_new.source_column is null then
         raise exception '[f:inner:03300] 预定义字段必须指定 source_column';
     end if;
     if obj.type = 'remote' then
         --     远程对象不需要数据表中的列
         record_new.source_column = '';
-        if record_new.is_predefined = true then
+        if record_new.predefined = true then
             raise exception '[f:inner:03400] 远程对象不能创建预定义字段';
         end if;
         if record_new.type in ('picture', 'files', 'mreference', 'summary', 'master_slave') then
             raise exception '[f:inner:03500] 远程对象不能创建 图片/文件/多选关联/汇总/主从 字段';
         end if;
     end if;
-    if record_new.is_predefined = true then
+    if record_new.predefined = true then
         if record_new.type in ('mreference', 'summary', 'master_slave') then
             raise exception '[f:inner:03501] 预定义字段类型不能为 多选关联/汇总/主从';
         end if;
@@ -1289,7 +1289,7 @@ begin
 --     检查字段类型
     select hymn.field_type_2_column_prefix(record_new.type) into column_prefix;
 --     预定义字段不需要申请列
-    if record_new.is_predefined = false and obj.type <> 'remote' then
+    if record_new.predefined = false and obj.type <> 'remote' then
 --     自定义字段末尾加上 __cf
         record_new.api := record_new.api || '__cf';
 --     申请列名
@@ -1450,7 +1450,7 @@ begin
         end if;
     end if;
 --     删除预定义字段需手动处理
-    if record_old.is_predefined = false then
+    if record_old.predefined = false then
         if obj.type <> 'remote' then
             --     如果found为true说明只删除了字段，需要执行数据清理和归还字段资源
 --     如果为false说明执行的是删除对象的流程，相关的操作由对象触发器处理
@@ -1519,7 +1519,7 @@ begin
             end if;
             if tg_op = 'INSERT' then
 --                 字段不属于远程对象且不是预定义字段
-                if record_new.source_column ~ 'mref\d{3}' and record_new.is_predefined = false then
+                if record_new.source_column ~ 'mref\d{3}' and record_new.predefined = false then
 --             字段类型为多选关联字段时创建中间表及视图
                     select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
                     join_view_name := hymn.get_join_view_name(obj.api, record_new.api);
@@ -1550,14 +1550,14 @@ begin
         end if;
         if tg_when = 'AFTER' then
             if tg_op = 'INSERT' then
-                if record_new.source_column ~ 'mref\d{3}' and record_new.is_predefined = false then
+                if record_new.source_column ~ 'mref\d{3}' and record_new.predefined = false then
                     --     创建多选关联触发器
                     perform hymn.rebuild_multiple_refernece_trigger_function(
                             record_new.biz_object_id);
                 end if;
             end if;
             if tg_op = 'UPDATE' then
-                if record_new.source_column ~ 'mref\d{3}' and record_new.is_predefined = false then
+                if record_new.source_column ~ 'mref\d{3}' and record_new.predefined = false then
                     if record_old.active <> record_new.active then
 --                         启用/停用时重建触发器
                         perform hymn.rebuild_multiple_refernece_trigger_function(
@@ -1580,7 +1580,7 @@ begin
                 end if;
             end if;
             if tg_op = 'DELETE' then
-                if record_old.source_column ~ 'mref\d{3}' and record_old.is_predefined = false then
+                if record_old.source_column ~ 'mref\d{3}' and record_old.predefined = false then
                     --                     perform hymn.rebuild_multiple_refernece_trigger_function(
 --                             record_old.biz_object_id);
 --                 删除中间表

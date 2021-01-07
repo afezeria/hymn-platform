@@ -316,7 +316,7 @@ create table hymn.core_biz_object_field_history
     tmp text,
     join_view_name text,
     standard_type text,
-    is_predefined bool,
+    predefined bool,
     create_by_id text,
     create_by text,
     modify_by_id text,

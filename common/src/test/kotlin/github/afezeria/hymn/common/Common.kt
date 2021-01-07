@@ -124,7 +124,7 @@ fun moduleBizObject(fn: ModuleBizObject.(Connection) -> Any?) {
             it.execute(
                 """
                 insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, gen_rule,     
-                    standard_type, is_predefined, create_by_id, create_by, modify_by_id, modify_by, 
+                    standard_type, predefined, create_by_id, create_by, modify_by_id, modify_by, 
                     create_date, modify_date) 
                 values ('name', ?, '编号', 'name', 'auto', '{yyyy}{mm}{000}', 'name', true, ?, ?, ?, ?,
                     now(),now());
@@ -298,7 +298,7 @@ fun createBObject(
         it.execute(
             """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, gen_rule, 
-                standard_type, is_predefined, create_by_id, create_by, modify_by_id, modify_by, 
+                standard_type, predefined, create_by_id, create_by, modify_by_id, modify_by, 
                 create_date, modify_date) 
             values ('name', ?, '编号', 'name', 'auto', '{yyyy}{mm}{000}', 'name', true, ?, ?, ?, ?,
                 now(),now());
@@ -308,7 +308,7 @@ fun createBObject(
         it.execute(
             """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, ref_id, 
-                ref_delete_policy, standard_type, is_predefined, create_by_id, create_by, modify_by_id, 
+                ref_delete_policy, standard_type, predefined, create_by_id, create_by, modify_by_id, 
                 modify_by, create_date, modify_date) 
             values ('type_id', ?, '业务类型','type_id', 'reference', '09da56a7de514895aea5c596820d0ced', 
                 'null', 'type_id', true, ?,?,?,?,now(),now());
@@ -318,7 +318,7 @@ fun createBObject(
         it.execute(
             """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, standard_type, 
-                is_predefined, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                predefined, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
             values ('lock_state', ?, '锁定状态', 'lock_state', 'check_box', 'lock_state', true, 
                 ?, ?, ?, ?, now(), now());
         """,
@@ -327,7 +327,7 @@ fun createBObject(
         it.execute(
             """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, ref_id, 
-                ref_delete_policy, standard_type, is_predefined, create_by_id, create_by, modify_by_id, 
+                ref_delete_policy, standard_type, predefined, create_by_id, create_by, modify_by_id, 
                 modify_by, create_date, modify_date) 
             values ('owner_id', ?, '所有者','owner_id', 'reference', 'bcf5f00c2e6c494ea2318912a639031a', 
                 'null', 'owner_id', true, ?,?,?,?,now(),now());
@@ -337,7 +337,7 @@ fun createBObject(
         it.execute(
             """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, ref_id, 
-                ref_delete_policy, standard_type, is_predefined, create_by_id, create_by, modify_by_id, 
+                ref_delete_policy, standard_type, predefined, create_by_id, create_by, modify_by_id, 
                 modify_by, create_date, modify_date) 
             values ('create_by_id', ?, '创建人','create_by_id', 'reference', 'bcf5f00c2e6c494ea2318912a639031a', 
                 'null', 'create_by_id', true, ?,?,?,?,now(),now());
@@ -347,7 +347,7 @@ fun createBObject(
         it.execute(
             """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, ref_id, 
-                ref_delete_policy, standard_type, is_predefined, create_by_id, create_by, modify_by_id, 
+                ref_delete_policy, standard_type, predefined, create_by_id, create_by, modify_by_id, 
                 modify_by, create_date, modify_date) 
             values ('modify_by_id', ?, '修改人','modify_by_id', 'reference', 'bcf5f00c2e6c494ea2318912a639031a', 
                 'null', 'modify_by_id', true, ?,?,?,?,now(),now());
@@ -357,7 +357,7 @@ fun createBObject(
         it.execute(
             """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, standard_type, 
-                is_predefined, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                predefined, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
             values ('create_date', ?, '创建时间', 'create_date', 'datetime', 'create_date', true, 
                 ?, ?, ?, ?, now(), now());
         """,
@@ -366,7 +366,7 @@ fun createBObject(
         it.execute(
             """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, standard_type, 
-                is_predefined, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                predefined, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
             values ('modify_date', ?, '修改时间', 'modify_date', 'datetime', 'modify_date', true, 
                 ?, ?, ?, ?, now(), now());
         """,

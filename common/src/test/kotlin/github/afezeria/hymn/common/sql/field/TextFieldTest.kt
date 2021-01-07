@@ -129,7 +129,7 @@ class TextFieldTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_biz_object_field (source_column,is_predefined,biz_object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (source_column,predefined,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values ('text',true,?, '编号','name','text', 256, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -146,7 +146,7 @@ class TextFieldTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_biz_object_field (is_predefined,standard_type,biz_object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (predefined,standard_type,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (true,'abc',?,'编号','name','text', 200, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,

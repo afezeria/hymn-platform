@@ -76,7 +76,7 @@ class BizObjectFieldDto(
         value = "是否是预定义字段，区分对象中的自定义字段与预定义字段，预定义字段该值为true且source_column与api相等，后台对象管理界面中不能删除和修改",
         required = true
     )
-    var isPredefined: Boolean,
+    var predefined: Boolean,
     @ApiModelProperty(value = "字段权限")
     var permList: List<BizObjectFieldPermDto> = emptyList()
 ) {
@@ -108,7 +108,7 @@ class BizObjectFieldDto(
             help = help,
             joinViewName = joinViewName,
             standardType = standardType,
-            isPredefined = isPredefined,
+            predefined = predefined,
         )
     }
 
@@ -140,7 +140,7 @@ class BizObjectFieldDto(
             it.help = help
             it.joinViewName = joinViewName
             it.standardType = standardType
-            it.isPredefined = isPredefined
+            it.predefined = predefined
         }
     }
 }

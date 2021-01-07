@@ -125,7 +125,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                     visibleRow = 1,
                     genRule = autoRule,
                     standardType = "name",
-                    isPredefined = true,
+                    predefined = true,
                     sourceColumn = "name",
                 )
             )
@@ -138,7 +138,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                     refId = "09da56a7de514895aea5c596820d0ced",
                     refDeletePolicy = "null",
                     standardType = "type_id",
-                    isPredefined = true,
+                    predefined = true,
                     sourceColumn = "type_id",
                 )
             )
@@ -151,7 +151,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                     refId = "bcf5f00c2e6c494ea2318912a639031a",
                     refDeletePolicy = "null",
                     standardType = "owner_id",
-                    isPredefined = true,
+                    predefined = true,
                     sourceColumn = "owner_id",
                 )
             )
@@ -164,7 +164,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                     refId = "bcf5f00c2e6c494ea2318912a639031a",
                     refDeletePolicy = "null",
                     standardType = "create_by_id",
-                    isPredefined = true,
+                    predefined = true,
                     sourceColumn = "create_by_id",
                 )
             )
@@ -177,7 +177,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                     refId = "bcf5f00c2e6c494ea2318912a639031a",
                     refDeletePolicy = "null",
                     standardType = "modify_by_id",
-                    isPredefined = true,
+                    predefined = true,
                     sourceColumn = "modify_by_id",
                 )
             )
@@ -188,7 +188,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                     api = "create_date",
                     type = "datetime",
                     standardType = "create_date",
-                    isPredefined = true,
+                    predefined = true,
                     sourceColumn = "create_date",
                 )
             )
@@ -199,7 +199,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                     api = "modify_date",
                     type = "datetime",
                     standardType = "modify_date",
-                    isPredefined = true,
+                    predefined = true,
                     sourceColumn = "modify_date",
                 )
             )
@@ -210,7 +210,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                     api = "lock_state",
                     type = "check_box",
                     standardType = "lock_state",
-                    isPredefined = true,
+                    predefined = true,
                     sourceColumn = "lock_state"
                 )
             )

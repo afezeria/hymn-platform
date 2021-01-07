@@ -241,7 +241,7 @@ data class BizObjectField(
         value = "是否是预定义字段，区分对象中的自定义字段与预定义字段，预定义字段该值为true且source_column与api相等，后台对象管理界面中不能删除和修改",
         required = true
     )
-    var isPredefined: Boolean,
+    var predefined: Boolean,
     @ApiModelProperty(value = "字段对应的实际表中的列名,对象为远程对象时该字段填充空字符串")
     var sourceColumn: String? = null
 ) {

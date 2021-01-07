@@ -38,7 +38,7 @@ class CoreBizObjectFields(alias: String? = null) :
     val tmp = varchar("tmp")
     val joinViewName = varchar("join_view_name")
     val standardType = varchar("standard_type")
-    val isPredefined = boolean("is_predefined")
+    val predefined = boolean("predefined")
     val id = varchar("id")
     val createById = varchar("create_by_id")
     val createBy = varchar("create_by")
@@ -75,7 +75,7 @@ class CoreBizObjectFields(alias: String? = null) :
         help = row[this.help],
         joinViewName = row[this.joinViewName],
         standardType = row[this.standardType],
-        isPredefined = requireNotNull(row[this.isPredefined]) { "field BizObjectField.isPredefined should not be null" },
+        predefined = requireNotNull(row[this.predefined]) { "field BizObjectField.predefined should not be null" },
     ).also {
         it.id = requireNotNull(row[this.id]) { "field BizObjectField.id should not be null" }
         it.createById =

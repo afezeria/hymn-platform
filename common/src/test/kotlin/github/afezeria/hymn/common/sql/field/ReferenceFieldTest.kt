@@ -89,14 +89,14 @@ class ReferenceFieldTest : BaseDbTest() {
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,${randomFieldNameAndApi("reference")},?,'null',?,?,?,?,now(),now()) returning *;
                     """,
-                    objId, refId, *COMMON_INFO
+                    refId, objId, *COMMON_INFO
                 )[0]
                 (field["source_column"] as String) shouldContain "text"
                 it.fieldShouldExists(field["api"])
                 userConn.use {
                     it.execute(
                         """
-                        insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
+                        insert into hymn_view.${refApi} (create_date,modify_date,owner_id,create_by_id,
                             modify_by_id,type_id,${field["api"]}) 
                         values (now(), now(), ?, ?, ?, ?, ?) returning *;""",
                         *standardField, randomUUIDStr()

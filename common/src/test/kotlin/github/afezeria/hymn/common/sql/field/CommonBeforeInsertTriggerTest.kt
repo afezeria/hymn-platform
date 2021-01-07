@@ -144,7 +144,7 @@ class CommonBeforeInsertTriggerTest : BaseDbTest() {
             val e = shouldThrow<PSQLException> {
                 it.execute(
                     """
-                    insert into hymn.core_biz_object_field (is_predefined,biz_object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (predefined,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (true,?,${randomFieldNameAndApi("text")}, 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -178,7 +178,7 @@ class CommonBeforeInsertTriggerTest : BaseDbTest() {
             val e = shouldThrow<PSQLException> {
                 it.execute(
                     """
-                    insert into hymn.core_biz_object_field (is_predefined,source_column,biz_object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (predefined,source_column,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (true,'textcolumn',?,'预定义字段','text_abc','text', 255, 1, 1, ?, ?, ?, ?, now(), now()) returning *;
                     """,
@@ -217,7 +217,7 @@ class CommonBeforeInsertTriggerTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_biz_object_field (is_predefined,source_column,biz_object_id, name, api, type, max_length, min_length, 
+                    insert into hymn.core_biz_object_field (predefined,source_column,biz_object_id, name, api, type, max_length, min_length, 
                         visible_row, create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
                     values (true,'abc',?,${randomFieldNameAndApi(type)},255,1,1,?,?,?,?,now(),now()) returning *;
                     """,

@@ -67,7 +67,7 @@ class CommonAfterInsertTriggerTest : BaseDbTest() {
     }
 
     @Test
-    fun `if the source_column of the new field starts with pl_ and the is_predefined is false, the view will not be modified or created`() {
+    fun `if the source_column of the new field starts with pl_ and the predefined is false, the view will not be modified or created`() {
         val master = createBObject()
         val masterId = master["id"] as String
         try {
