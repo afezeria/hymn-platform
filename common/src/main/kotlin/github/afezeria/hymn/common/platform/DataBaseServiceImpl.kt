@@ -9,8 +9,6 @@ import kotlin.random.Random
 /**
  * @author afezeria
  */
-
-@Component
 class DataBaseServiceImpl(
     dataSourceMap: MutableMap<String, DataSource>,
 ) : DataBaseService {
