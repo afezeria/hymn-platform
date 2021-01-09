@@ -1,0 +1,82 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import  org.springframework.boot.gradle.tasks.bundling.BootJar
+
+
+plugins {
+    id("org.springframework.boot") version "2.4.1" apply false
+    id("io.spring.dependency-management") version "1.0.10.RELEASE" apply false
+    kotlin("jvm") version "1.4.21" apply false
+    kotlin("plugin.spring") version "1.4.21" apply false
+
+}
+
+group = "org.example"
+version = "1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+
+subprojects {
+    apply {
+        plugin("org.springframework.boot")
+        plugin("kotlin")
+        plugin("org.jetbrains.kotlin.plugin.spring")
+        plugin("io.spring.dependency-management")
+    }
+
+    configurations {
+        all {
+            exclude(module = "spring-boot-starter-logging")
+        }
+    }
+
+
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven(url = "http://repo.spring.io/libs-release")
+    }
+
+
+    group = "github.afezeria.hymn"
+    version = "0.0.1"
+
+    tasks.withType<KotlinCompile> {
+        kotlinOptions {
+            freeCompilerArgs = listOf("-Xjsr305=strict")
+            jvmTarget = "11"
+        }
+    }
+
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
+
+
+    tasks.getByName<BootJar>("bootJar") {
+        enabled = false
+    }
+
+    tasks.getByName<Jar>("jar") {
+        enabled = true
+    }
+
+
+}
+allprojects {
+    tasks {
+        val listrepos by registering {
+            doLast{
+                project.repositories
+                    .map { it as  MavenArtifactRepository}
+                    .forEach {
+                    println("name: ${it.name}, url: ${it.url}")
+                }
+            }
+
+        }
+    }
+}
