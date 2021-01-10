@@ -13,5 +13,5 @@ dependencies {
 
     implementation("org.ktorm:ktorm-core:3.2.0")
     implementation("org.ktorm:ktorm-support-postgresql:3.2.0")
-    testImplementation(project(":common", "testRuntime"))
+    testImplementation(project(":common", "testArtifacts"))
 }

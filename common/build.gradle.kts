@@ -1,35 +1,33 @@
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation(Deps.SpringBoot.web)
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib-jdk8"))
 
-    api("com.fasterxml.jackson.core:jackson-core")
-    api("com.fasterxml.jackson.core:jackson-databind")
-    api("com.fasterxml.jackson.core:jackson-annotations")
-    api("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
-    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    api("com.fasterxml.jackson.module:jackson-module-parameter-names")
-    api("com.fasterxml.jackson.module:jackson-module-kotlin")
+    api(Deps.Jackson.core)
+    api(Deps.Jackson.databind)
+    api(Deps.Jackson.annotations)
+    api(Deps.Jackson.datatypeJdk8)
+    api(Deps.Jackson.datatypeJsr310)
+    api(Deps.Jackson.parameterNames)
+    api(Deps.Jackson.kotlin)
 
-    api("io.github.microutils:kotlin-logging:1.12.0")
+    api(Deps.Log.kotlinLogging)
+    api(Deps.Log.slf4jApi)
+    api(Deps.Log.logback)
 
-    api("org.slf4j:slf4j-api:1.7.30")
-    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation(Deps.SpringBoot.aop)
+    implementation(Deps.Servlet.api)
 
-    implementation("org.springframework.boot:spring-boot-starter-aop")
-    implementation("javax.servlet:javax.servlet-api:4.0.1")
+    implementation(Deps.Ktorm.core)
 
-    implementation("org.ktorm:ktorm-core:3.2.0")
+    testImplementation(Deps.SpringBoot.test)
+    testCompile(Deps.Jdbc.postgresql)
+    testCompile(Deps.DataSource.hikariCP)
+    testCompile(Deps.Kotest.assertions)
+    testCompile(Deps.Mockk.spring)
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testCompile("ch.qos.logback:logback-classic:1.2.3")
-    testCompile("org.postgresql:postgresql:42.2.10")
-    testCompile("com.zaxxer:HikariCP:3.4.5")
-    testCompile("io.kotest:kotest-assertions-core-jvm:4.3.1")
-    testCompile("com.ninja-squad:springmockk:3.0.1")
-
-    testCompile(platform("org.junit:junit-bom:5.7.0"))
-    testCompile("org.junit.jupiter:junit-jupiter")
+    testCompile(platform(Deps.Junit.bom))
+    testCompile(Deps.Junit.jupiter)
 
 }
 

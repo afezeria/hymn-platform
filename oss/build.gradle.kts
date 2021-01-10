@@ -1,19 +1,21 @@
 dependencies {
 
-    compile(project(":common"))
+    implementation(project(":common"))
 
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib-jdk8"))
 
-    implementation("org.springframework.boot:spring-boot-starter-aop")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation(Deps.SpringBoot.aop)
+    implementation(Deps.SpringBoot.web)
 
-    testImplementation(project(":common", "testRuntime"))
-    testImplementation("org.springframework.boot:spring-boot-starter-test") {
-        exclude(module = "mockito-core")
-    }
+    implementation(Deps.Apache.net)
+    implementation(Deps.Apache.pool)
+    implementation(Deps.Oss.qiniu)
+    implementation(Deps.Oss.minio)
 
-    implementation("com.qiniu:qiniu-java-sdk:7.4.+")
-    implementation("io.minio:minio:8.0.3")
+
+    testImplementation(project(":common", "testArtifacts"))
+    testImplementation(Deps.SpringBoot.test)
+
 
 }
