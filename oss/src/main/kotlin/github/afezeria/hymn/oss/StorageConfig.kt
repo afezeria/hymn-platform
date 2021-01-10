@@ -22,8 +22,9 @@ class StorageConfig {
         return if (ossStr != null) {
             mapper.readValue<Config>(ossStr).run {
                 when (type) {
-                    StorageType.LOCAL -> LocalStorageService(data)
-                    StorageType.MINIO -> MinioStorageService(data)
+                    StorageType.LOCAL -> LocalStorageService(mapper.readValue(data))
+                    StorageType.FTP -> FtpStorageService(mapper.readValue(data))
+                    StorageType.MINIO -> MinioStorageService(mapper.readValue(data))
                 }
             }
         } else {
