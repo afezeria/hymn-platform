@@ -324,6 +324,9 @@ declare
 begin
     select * into obj from hymn.core_biz_object where id = obj_id;
     if FOUND then
+        if obj.type = 'custom' or (obj.type = 'module' and obj.can_soft_delete = true) then
+            column_arr := array_append(column_arr, ' deleted as deleted ');
+        end if;
         for field in select *
                      from hymn.core_biz_object_field
                      where active = true
@@ -778,8 +781,7 @@ begin
                 'declare\n'
                 '    js  jsonb := ''{}'';\n'
                 '    tmp jsonb := ''{}'';\n'
-                '    o   text;\n'
-                '    n   text;\n'
+                '    op  text;\n'
                 'begin\n'
                 '    if tg_op = ''DELETE'' then\n'
                 '        js := to_jsonb(old);\n'
@@ -808,15 +810,27 @@ begin
                                     '            tmp := jsonb_insert(tmp, ''{n}'', to_jsonb(new.%s));\n'
                                     '            js := jsonb_insert(js, ''{%s}'', tmp);\n'
                                     '            tmp := ''{}'';\n'
+                                    '            op := ''u'';\n'
                                     '        end if;\n',
                                 field_column, field_column, field_column, field_column, field_api);
         end loop;
-    if fun_body <> '' then
+    if obj.type = 'custom' then
         fun_body := fun_body ||
-                    format(E'    insert into hymn_view.%I (id, operation, stamp, change)\n'
-                               '    values (old.id, ''u'', now(), js::text);\n',
-                           history_table_name);
+                    E'        if old.deleted = false and new.deleted = true then\n'
+                        '            js := jsonb_insert(js, ''{deleted}'', ''{"o": false,"n": true}''::jsonb);\n'
+                        '            op := ''sd'';\n'
+                        '        elsif old.deleted = true and new.deleted = false then\n'
+                        '            js := jsonb_insert(js, ''{deleted}'', ''{"o": true,"n": false}''::jsonb);\n'
+                        '            op := ''r'';\n'
+                        '        end if;\n';
     end if;
+
+    fun_body := fun_body ||
+                format(E'        if op is not null then\n'
+                           '            insert into hymn_view.%I (id, operation, stamp, change)\n'
+                           '            values (old.id, op , now(), js::text);\n'
+                           '        end if;\n',
+                       history_table_name);
     execute fun_header || fun_body || fun_tail;
 
 --     如果触发器不存在则创建触发器，如果触发器已存在则跳过
@@ -1136,6 +1150,21 @@ declare
 begin
     if record_old.type = 'module' or record_new.type = 'module' then
         if tg_when = 'BEFORE' then
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+                if record_new.can_soft_delete = true then
+                    perform *
+                    from pg_class pc
+                             left join pg_attribute pa on pc.oid = pa.attrelid
+                             left join pg_namespace pn on pc.relnamespace = pn.oid
+                    where pn.nspname = 'hymn'
+                      and pc.relname = record_new.source_table
+                      and pc.relkind = 'v'
+                      and pa.attname = 'deleted';
+                    if not found then
+                        raise exception '[f:inner:02401] 模块对象数据表中缺少 deleted 字段，can_soft_delete 不能为true';
+                    end if;
+                end if;
+            end if;
             if tg_op = 'INSERT' then
 
                 if record_new.source_table is null then

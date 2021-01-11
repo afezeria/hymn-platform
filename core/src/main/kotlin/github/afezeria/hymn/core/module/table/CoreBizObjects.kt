@@ -25,6 +25,7 @@ class CoreBizObjects(alias: String? = null) :
     val canInsert = boolean("can_insert")
     val canUpdate = boolean("can_update")
     val canDelete = boolean("can_delete")
+    val canSoftDelete = boolean("can_soft_delete")
     val id = varchar("id")
     val createById = varchar("create_by_id")
     val createBy = varchar("create_by")
@@ -46,6 +47,7 @@ class CoreBizObjects(alias: String? = null) :
         canInsert = row[this.canInsert],
         canUpdate = row[this.canUpdate],
         canDelete = row[this.canDelete],
+        canSoftDelete = row[this.canSoftDelete],
     ).also {
         it.id = requireNotNull(row[this.id]) { "field BizObject.id should not be null" }
         it.createById =

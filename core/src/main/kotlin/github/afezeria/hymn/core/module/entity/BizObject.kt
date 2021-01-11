@@ -41,6 +41,8 @@ data class BizObject(
     var canUpdate: Boolean? = null,
     @ApiModelProperty(value = "模块对象是及远程对象否可以删除数据")
     var canDelete: Boolean? = null,
+    @ApiModelProperty(value = "是否支持软删除，用于标记模块对象的删除行为，模块对象表中有bool类型的deleted字段作为删除标记时 can_soft_delete 可以为true，当 can_soft_delete 为 true 时，dataService的数据删除动作为设置 deleted 的值为 true，当 can_soft_delete 为 false 时，数据删除时直接从表中删除数据")
+    var canSoftDelete: Boolean? = null,
 ) {
 
     lateinit var id: String

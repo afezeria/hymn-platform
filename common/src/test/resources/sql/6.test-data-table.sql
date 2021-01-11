@@ -1328,6 +1328,7 @@ values
 
 create table hymn.core_data_table_001(
     id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    deleted      bool        not null default false,
     owner_id     text        not null,
     create_by_id text        not null,
     modify_by_id text        not null,
@@ -1603,6 +1604,7 @@ create index core_data_table_001_modify_date_idx on hymn.core_data_table_001 (mo
 create index core_data_table_001_name_idx on hymn.core_data_table_001 (name);
 create table hymn.core_data_table_002(
     id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    deleted      bool        not null default false,
     owner_id     text        not null,
     create_by_id text        not null,
     modify_by_id text        not null,
@@ -1878,6 +1880,7 @@ create index core_data_table_002_modify_date_idx on hymn.core_data_table_002 (mo
 create index core_data_table_002_name_idx on hymn.core_data_table_002 (name);
 create table hymn.core_data_table_003(
     id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    deleted      bool        not null default false,
     owner_id     text        not null,
     create_by_id text        not null,
     modify_by_id text        not null,
@@ -2153,6 +2156,7 @@ create index core_data_table_003_modify_date_idx on hymn.core_data_table_003 (mo
 create index core_data_table_003_name_idx on hymn.core_data_table_003 (name);
 create table hymn.core_data_table_004(
     id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    deleted      bool        not null default false,
     owner_id     text        not null,
     create_by_id text        not null,
     modify_by_id text        not null,
@@ -2428,6 +2432,7 @@ create index core_data_table_004_modify_date_idx on hymn.core_data_table_004 (mo
 create index core_data_table_004_name_idx on hymn.core_data_table_004 (name);
 create table hymn.core_data_table_005(
     id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    deleted      bool        not null default false,
     owner_id     text        not null,
     create_by_id text        not null,
     modify_by_id text        not null,

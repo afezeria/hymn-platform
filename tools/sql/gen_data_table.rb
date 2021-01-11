@@ -48,6 +48,7 @@ io.write "\n"
   io.write <<EOM
 create table hymn.#{table}(
     id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    deleted      bool        not null default false,
     owner_id     text        not null,
     create_by_id text        not null,
     modify_by_id text        not null,

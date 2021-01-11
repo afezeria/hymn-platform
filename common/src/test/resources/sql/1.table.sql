@@ -400,25 +400,26 @@ comment on column hymn.core_dict_item.parent_code is '父字典中的字典项�
 drop table if exists hymn.core_biz_object cascade;
 create table hymn.core_biz_object
 (
-    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
-    name         text        not null,
-    api          text        not null,
-    source_table text,
-    active       bool                 default true not null,
-    type         text        not null ,
-    remote_url   text,
-    remote_token text,
-    module_api   text,
-    remark       text        not null default '',
-    can_insert   bool,
-    can_update   bool,
-    can_delete   bool,
-    create_by_id text        not null,
-    create_by    text        not null,
-    modify_by_id text        not null,
-    modify_by    text        not null,
-    create_date  timestamptz not null,
-    modify_date  timestamptz not null
+    id              text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    name            text        not null,
+    api             text        not null,
+    source_table    text,
+    active          bool                 default true not null,
+    type            text        not null,
+    remote_url      text,
+    remote_token    text,
+    module_api      text,
+    remark          text        not null default '',
+    can_insert      bool,
+    can_update      bool,
+    can_delete      bool,
+    can_soft_delete bool,
+    create_by_id    text        not null,
+    create_by       text        not null,
+    modify_by_id    text        not null,
+    modify_by       text        not null,
+    create_date     timestamptz not null,
+    modify_date     timestamptz not null
 );
 comment on table hymn.core_biz_object is '业务对象';
 comment on column hymn.core_biz_object.name is '业务对象名称，用于页面显示';
@@ -429,6 +430,7 @@ comment on column hymn.core_biz_object.module_api is '模块api，所有自定�
 comment on column hymn.core_biz_object.can_insert is '模块对象及远程对象是否可以新增数据';
 comment on column hymn.core_biz_object.can_update is '模块对象是及远程对象否可以更新数据';
 comment on column hymn.core_biz_object.can_delete is '模块对象是及远程对象否可以删除数据';
+comment on column hymn.core_biz_object.can_soft_delete is '是否支持软删除，用于标记模块对象的删除行为，模块对象表中有bool类型的deleted字段作为删除标记时 can_soft_delete 可以为true，当 can_soft_delete 为 true 时，dataService的数据删除动作为设置 deleted 的值为 true，当 can_soft_delete 为 false 时，数据删除时直接从表中删除数据';
 comment on column hymn.core_biz_object.type is '对象类型, 模块对象不能在系统后台进行新增删除，底层表单和相关数据需要手动创建，外部对象没有底层表，通过url调用外部接口，只能在应用层脚本中使用 ;; optional_value:[custom(自定义对象),module(模块对象),remote(远程对象)]';
 comment on column hymn.core_biz_object.remote_url is '远程rest接口地址，系统通过该地址调用远程数据';
 comment on column hymn.core_biz_object.remote_token is '远程rest验证信息';
@@ -467,7 +469,7 @@ create table hymn.core_biz_object_field
     tmp               text,
     join_view_name    text,
     standard_type     text,
-    predefined     bool        not null default false,
+    predefined        bool        not null default false,
     create_by_id      text        not null,
     create_by         text        not null,
     modify_by_id      text        not null,

@@ -233,6 +233,7 @@ create table hymn.core_biz_object_history
     can_insert bool,
     can_update bool,
     can_delete bool,
+    can_soft_delete bool,
     create_by_id text,
     create_by text,
     modify_by_id text,
