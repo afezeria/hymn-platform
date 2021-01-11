@@ -8,6 +8,7 @@ object Deps {
     object Apache {
         const val net = "commons-net:commons-net:3.7.2"
         const val pool = "org.apache.commons:commons-pool2:2.9.0"
+        const val io = "commons-io:commons-io:2.8.0"
     }
 
     object Jdbc {

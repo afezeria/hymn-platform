@@ -7,6 +7,11 @@ import java.io.InputStream
  */
 interface StorageService {
 
+    /**
+     * 文件服务器是否支持直接http访问
+     */
+    fun isRemoteServerSupportHttpAccess(): Boolean
+
 
     /**
      * 存放文件
@@ -23,8 +28,10 @@ interface StorageService {
      *
      * @param bucket  bucket  名称
      * @param fileName 文件名名
+     * @param fn 操作输入流的函数，在函数中完成数据的输出
      */
-    fun getFile(bucket: String, fileName: String): InputStream
+    fun getFile(bucket: String, fileName: String, fn: (InputStream) -> Unit)
+
 
     /**
      * 移动文件
@@ -40,6 +47,22 @@ interface StorageService {
         srcBucket: String,
         srcFileName: String
     )
+
+    /**
+     * 复制文件
+     *
+     * @param bucket  bucket  名称
+     * @param fileName 文件名称
+     * @param srcBucket  源 bucket 名称
+     * @param srcFileName 源文件名称
+     */
+    fun copyFile(
+        bucket: String,
+        fileName: String,
+        srcBucket: String,
+        srcFileName: String
+    )
+
 
     /**
      *  获取文件的URL

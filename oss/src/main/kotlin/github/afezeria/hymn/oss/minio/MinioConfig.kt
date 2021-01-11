@@ -1,4 +1,4 @@
-package github.afezeria.hymn.oss
+package github.afezeria.hymn.oss.minio
 
 /**
  * @author afezeria

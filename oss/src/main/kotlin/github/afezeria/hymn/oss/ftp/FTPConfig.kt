@@ -17,5 +17,5 @@ data class FTPConfig(
     val username: String,
     val password: String,
     val connectTimeout: Int = 30,
-    val bufferSize: Int = 1024,
+    val bufferSize: Int = 8 * 1024,
 )

@@ -1,4 +1,4 @@
-package github.afezeria.hymn.oss
+package github.afezeria.hymn.oss.local
 
 import github.afezeria.hymn.common.platform.StorageService
 import java.io.InputStream
@@ -8,6 +8,10 @@ import java.io.InputStream
  * @author afezeria
  */
 class LocalStorageService(config: Map<String, Any?> = emptyMap()) : StorageService {
+    override fun isRemoteServerSupportHttpAccess(): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override fun putFile(
         bucketName: String,
         fileName: String,
@@ -17,11 +21,21 @@ class LocalStorageService(config: Map<String, Any?> = emptyMap()) : StorageServi
         TODO("Not yet implemented")
     }
 
-    override fun getFile(bucketName: String, fileName: String): InputStream {
+
+    override fun getFile(bucket: String, fileName: String, fn: InputStream.() -> Unit) {
         TODO("Not yet implemented")
     }
 
     override fun moveFile(
+        bucket: String,
+        fileName: String,
+        srcBucket: String,
+        srcFileName: String
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun copyFile(
         bucket: String,
         fileName: String,
         srcBucket: String,

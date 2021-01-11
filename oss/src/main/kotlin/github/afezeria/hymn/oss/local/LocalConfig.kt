@@ -1,4 +1,4 @@
-package github.afezeria.hymn.oss
+package github.afezeria.hymn.oss.local
 
 /**
  * @author afezeria

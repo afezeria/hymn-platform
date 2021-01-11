@@ -32,7 +32,6 @@ class FTPClientFactory(val config: FTPConfig) : BasePooledObjectFactory<FTPClien
             }
             ftpClient.bufferSize = config.bufferSize
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE)
-
         } catch (e: IOException) {
             throw InnerException("create ftp connection failed", e)
         }
@@ -51,12 +50,12 @@ class FTPClientFactory(val config: FTPConfig) : BasePooledObjectFactory<FTPClien
                 ftpClient.logout()
             }
         } catch (io: IOException) {
-            throw InnerException("ftp client logout failed", io)
+            logger.error("ftp client logout failed...{}", io);
         } finally {
             try {
                 ftpClient.disconnect()
             } catch (io: IOException) {
-                throw InnerException("close ftp client failed", io)
+                logger.error("ftp client logout failed...{}", io);
             }
         }
     }
@@ -64,9 +63,11 @@ class FTPClientFactory(val config: FTPConfig) : BasePooledObjectFactory<FTPClien
     override fun validateObject(p: PooledObject<FTPClient>): Boolean {
         try {
             val ftpClient: FTPClient = p.`object`
+            ftpClient.isAvailable
             return ftpClient.sendNoOp()
         } catch (e: IOException) {
-            throw InnerException("Failed to validate client", e)
+            logger.error("failed to validate client: {}", e);
         }
+        return false
     }
 }

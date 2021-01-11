@@ -15,6 +15,8 @@ dependencies {
     api(Deps.Log.slf4jApi)
     api(Deps.Log.logback)
 
+    api(Deps.Apache.io)
+
     implementation(Deps.SpringBoot.aop)
     implementation(Deps.Servlet.api)
 

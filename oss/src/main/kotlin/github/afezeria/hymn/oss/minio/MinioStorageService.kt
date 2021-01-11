@@ -1,4 +1,4 @@
-package github.afezeria.hymn.oss
+package github.afezeria.hymn.oss.minio
 
 import github.afezeria.hymn.common.platform.StorageService
 import github.afezeria.hymn.common.util.BusinessException
@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit
  * @author afezeria
  */
 class MinioStorageService(config: Map<String, Any?>) : StorageService {
-    val minioClient: MinioClient
-    val prefix: String
+    private val minioClient: MinioClient
+    private val prefix: String
 
     init {
         minioClient = MinioClient.builder()
@@ -24,6 +24,10 @@ class MinioStorageService(config: Map<String, Any?>) : StorageService {
             )
             .build()
         prefix = config["prefix"] as String? ?: ""
+    }
+
+    override fun isRemoteServerSupportHttpAccess(): Boolean {
+        return true
     }
 
     override fun putFile(
@@ -47,21 +51,25 @@ class MinioStorageService(config: Map<String, Any?>) : StorageService {
         )
     }
 
-    override fun getFile(bucket: String, fileName: String): InputStream {
-        try {
-            checkBucket(prefix + bucket)
-            return minioClient.getObject(
-                GetObjectArgs.builder()
-                    .bucket(prefix + bucket)
-                    .`object`(fileName)
-                    .build()
-            )
-        } catch (e: ErrorResponseException) {
-            if (e.response().code() == 404) {
-                throw BusinessException("文件不存在")
-            }
-            throw e
-        }
+//    override fun getFile(bucket: String, fileName: String): InputStream {
+//        try {
+//            checkBucket(prefix + bucket)
+//            return minioClient.getObject(
+//                GetObjectArgs.builder()
+//                    .bucket(prefix + bucket)
+//                    .`object`(fileName)
+//                    .build()
+//            )
+//        } catch (e: ErrorResponseException) {
+//            if (e.response().code() == 404) {
+//                throw BusinessException("文件不存在")
+//            }
+//            throw e
+//        }
+//    }
+
+    override fun getFile(bucket: String, fileName: String, fn: InputStream.() -> Unit) {
+        TODO("Not yet implemented")
     }
 
     override fun moveFile(
@@ -97,6 +105,15 @@ class MinioStorageService(config: Map<String, Any?>) : StorageService {
             }
             throw e
         }
+    }
+
+    override fun copyFile(
+        bucket: String,
+        fileName: String,
+        srcBucket: String,
+        srcFileName: String
+    ) {
+        TODO("Not yet implemented")
     }
 
     override fun getFileUrl(bucket: String, fileName: String): String {
