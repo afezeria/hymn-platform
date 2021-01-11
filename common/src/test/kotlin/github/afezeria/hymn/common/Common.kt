@@ -96,7 +96,7 @@ data class ModuleBizObject(
     val moduleSourceTable: String
 )
 
-fun moduleBizObject(fn: ModuleBizObject.(Connection) -> Any?) {
+fun moduleBizObject(fn: ModuleBizObject.(Connection) -> Unit) {
     adminConn.use {
         val seq = objSeq.nextInt()
         val sourceTable = "test_module_object_$seq"
@@ -148,7 +148,7 @@ fun moduleBizObject(fn: ModuleBizObject.(Connection) -> Any?) {
 
 data class RemoteBizObject(val remoteId: String)
 
-fun remoteBizObject(fn: RemoteBizObject.(Connection) -> Any?) {
+fun remoteBizObject(fn: RemoteBizObject.(Connection) -> Unit) {
     adminConn.use {
         val seq = objSeq.nextInt()
         val id = it.execute(
@@ -193,7 +193,7 @@ data class CustomBizObject(
 
 }
 
-fun customBizObject(fn: CustomBizObject.(Connection) -> Any?) {
+fun customBizObject(fn: CustomBizObject.(Connection) -> Unit) {
     adminConn.use {
         val data = createBObject()
         try {
@@ -237,7 +237,7 @@ data class RefBizObject(
 
 }
 
-fun Connection.refBizObject(masterId: String = "", fn: RefBizObject.(Connection) -> Any?) {
+fun Connection.refBizObject(masterId: String = "", fn: RefBizObject.(Connection) -> Unit) {
     val data = createBObject()
     try {
         var masterFieldId: String? = null
