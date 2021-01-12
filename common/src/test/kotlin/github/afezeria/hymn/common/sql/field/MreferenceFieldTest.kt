@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.postgresql.util.PSQLException
+import java.math.BigDecimal
 
 /**
  * @author afezeria

@@ -61,7 +61,7 @@ insert into hymn.core_biz_object_field (id, source_column, biz_object_id, name, 
                                       history, default_value, formula, max_length, min_length,
                                       visible_row, dict_id, master_field_id, optional_number,
                                       ref_id, ref_list_label, ref_delete_policy, query_filter,
-                                      s_id, s_field_id, s_type, gen_rule, remark, help, tmp,
+                                      s_id, s_field_id, s_type, gen_rule, remark, help, filter_list,
                                       standard_type, predefined, create_by_id, create_by,
                                       modify_by_id, modify_by, create_date, modify_date)
 values ('1bad12b79d114b18a9f1b3276992886e', 'name', 'bcf5f00c2e6c494ea2318912a639031a', '姓名',

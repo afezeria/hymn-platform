@@ -460,13 +460,13 @@ create table hymn.core_biz_object_field
     ref_list_label    text,
     ref_delete_policy text,
     query_filter      text,
+    filter_list       text,
     s_id              text,
     s_field_id        text,
     s_type            text,
     gen_rule          text,
     remark            text,
     help              text,
-    tmp               text,
     join_view_name    text,
     standard_type     text,
     predefined        bool        not null default false,
@@ -491,71 +491,95 @@ optional: default_value, formula
 rule: min_length >= 0, max_length <= 50000 , visible_row > 0, min_length <= max_length, (if api = ''name'' than max_length <=255)
 
 type: 复选框 check_box
+remark: 值为 true/false
 required:
 optional: default_value
 
 type: 复选框组 check_box_group
+remark: 值为字典项代码，多个值时以英文逗号分割，顺序无关
 required: optional_number （可选个数）, dict_id （引用字典id）
 optional: default_value, formula
 rule: optional_number > 0, (dict_id is not null) or (tmp is not null)
 
 type: 下拉菜单 select
+remark: 值为字典项代码，多个值时以英文逗号分割，顺序无关
 required: optional_number （可选个数）, dict_id （引用字典id）,visible_row (显示行数）
 optional: default_value, formula, master_field_id （依赖字段id，必须是当前对象的字段，且类型为check_box/select/multiple_select）
 rule: optional_number > 0, (dict_id is not null) or (tmp is not null)
 
 type: 整型 integer
+remark: 后台类型为 Long
 required: min_length （最小值）, max_length （最大值）
 optional: default_value, formula
 rule: min_length <= max_length
 
 type: 浮点 float
+remark: 后台类型为 Double
 required: min_length （小数位长度）, max_length （整数位长度）
 optional: default_value, formula
 rule: min_length >= 0, max_length >= 1, (min_length + max_length) <= 18
 
 type: 货币 money
+remark: 后台类型为 BigDecimal
 required: min_length （小数位长度）, max_length （整数位长度）
 optional: default_value, formula
 rule: min_length >= 0, max_length >= 1
 
 type: 日期 date
+remark: 格式 yyyy-MM-dd
 required:
 optional: default_value, formula
 
 type: 日期时间 datetime
+remark: 格式 yyyy-MM-dd HH:mm:ss.SSSZ
 required:
 optional: default_value, formula
 
 type: 主详 master_slave
+remark: 值为主表数据id
 required: ref_id （引用对象id）, ref_list_label （引用对象相关列表显示的标签）
 optional: default_value, formula, query_filter
 rule:
 
 type: 关联 reference
+remark: 值为引用数据id
 required: ref_id （引用对象id）, ref_delete_policy （引用对象数据被删除时是否阻止）
 optional: default_value, formula, query_filter, ref_list_label （引用对象相关列表显示的标签）
 
 type: 多选关联 mreference
+remark: 值为引用数据id，多个id间以英文逗号分隔
 required: ref_id （引用对象id）, ref_delete_policy （引用对象数据被删除时是否阻止）
 optional: default_value, formula, query_filter, ref_list_label （引用对象相关列表显示的标签）
 
+type: 任意关联 areference
+remark: 格式为：业务对象id,数据id;对象名称,数据name字段。默认不提供任意关联字段，
+    需要增加该类型字段时自行在字段资源表中添加一行column_name 为 aref\d{3} 格式的数据
+required:
+optional:  query_filter, filter_list
+
 type: 汇总 summary
+remark: 数据库中没有实际的列，由后端实时查询后显示在页面上
 required: s_id （子对象id）, s_field_id （子对象汇总字段id）, s_type （汇总类型）, min_length （小数位长度）
 optional: query_filter
 rule: min_length >=0, min_length <= 16, s_type in (''count'',''max'',''min'',''sum'')
 
 type: 自动编号 auto
+remark: 插入数据后自动生成，前端不可修改，插入数据失败后会跳过特定编号
 required: gen_rule （编号规则）
 optional:
 rule: auto_gen_rule SIMILAR TO ''%\{0+\}%''
 
 type: 图片 picture
+remark: 上传格式：[{"file":"filename","size":24}]，filename为上传文件后服务器返回的文件名，size为文件大小，单位为kb，
+  其中filename不能包含以下字符 / \ : * ? " < > |,
+  文件上传后返回的filename格式为： 随机字符串-原始文件名
+  表单提交成功后filename格式变为： 当前对象id-当前数据id-原始文件名
 required: min_length （图片最大数量）, max_length （图片最大大小，单位：kb）
 optional:
 rule: min_length >= 1, max_length > 0
 
 type: 文件 files
+remark: 格式同picture字段相同
 required: min_length （文件最大数量）, max_length （文件最大大小，单位：kb）
 optional:
 rule: min_length >= 1, max_length > 0
@@ -565,7 +589,7 @@ comment on column hymn.core_biz_object_field.source_column is '字段对应的�
 comment on column hymn.core_biz_object_field.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade];idx';
 comment on column hymn.core_biz_object_field.api is 'api名称，用于触发器和自定义接口';
 comment on column hymn.core_biz_object_field.name is '名称，用于页面显示';
-comment on column hymn.core_biz_object_field.type is '字段类型 ;;optional_value:[text(文本),check_box(复选框),check_box_group(复选框组),select(下拉菜单),integer(整型),float(浮点型),money(货币),date(日期),datetime(日期时间),master_slave(主详),reference(关联关系),mreference(多选关联关系),summary(汇总),auto(自动编号),picture(图片),files(文件)];';
+comment on column hymn.core_biz_object_field.type is '字段类型 ;;optional_value:[text(文本),check_box(复选框),check_box_group(复选框组),select(下拉菜单),integer(整型),float(浮点型),money(货币),date(日期),datetime(日期时间),master_slave(主详),reference(关联关系),mreference(多选关联关系),areference(任意关联),summary(汇总),auto(自动编号),picture(图片),files(文件)];';
 comment on column hymn.core_biz_object_field.history is '是否启用历史记录';
 comment on column hymn.core_biz_object_field.active is '字段启用状态，false表示停用，字段停用时从视图中移除，删除时清空没一行中对应字段数据';
 comment on column hymn.core_biz_object_field.default_value is '默认值，可选择其他表中的字段，由后端处理，新建时与页面布局一起返回给前端';
@@ -584,9 +608,9 @@ comment on column hymn.core_biz_object_field.s_id is '汇总对象id';
 comment on column hymn.core_biz_object_field.s_field_id is '汇总字段id';
 comment on column hymn.core_biz_object_field.s_type is '汇总类型 ;;optional_value:[sum(求和),count(总数),min(最小值),max(最大值)]';
 comment on column hymn.core_biz_object_field.query_filter is '字段为汇总字段时表示对子表的过滤条件，字段为引用/主从字段时表示在创建当前对象时查找引用对象的过滤条件，sql where表达式';
+comment on column hymn.core_biz_object_field.filter_list is '页面中填入值时可以选择的对象的过滤列表，多个id间以英文逗号分隔，为空时可以选择所有有查看权限的对象，不为空时可以选择列表中所有有查看权限的对象';
 comment on column hymn.core_biz_object_field.help is '说明，显示在页面上的帮助信息';
 comment on column hymn.core_biz_object_field.remark is '备注';
-comment on column hymn.core_biz_object_field.tmp is '辅助列，新建与字典相关的字段时存储字典项数据';
 comment on column hymn.core_biz_object_field.standard_type is '标准类型 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型 ;; optional_value:[create_by_id(创建人id), create_by(创建人), modify_by_id(修改人id), modify_by(修改人), create_date(创建时间), modify_date(修改时间), org_id(组织id), lock_state(锁定状态), name(名称), type_id(业务类型), owner_id(所有人)]';
 comment on column hymn.core_biz_object_field.predefined is '是否是预定义字段，区分对象中的自定义字段与预定义字段，预定义字段该值为true且source_column与api相等，后台对象管理界面中不能删除和修改';
 comment on column hymn.core_biz_object_field.join_view_name is '多选字段中间表视图名，中间表名为视图名加上前缀 core_ ，表结构为（s_id,t_id)，s_id 为当前数据id， t_id为关联数据id';

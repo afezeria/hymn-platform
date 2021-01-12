@@ -50,6 +50,8 @@ class BizObjectFieldDto(
         value = "字段为汇总字段时表示对子表的过滤条件，字段为引用/主从字段时表示在创建当前对象时查找引用对象的过滤条件，sql where表达式"
     )
     var queryFilter: String? = null,
+    @ApiModelProperty(value = "页面中填入值时可以选择的对象的过滤列表，多个id间以英文逗号分隔，为空时可以选择所有有查看权限的对象，不为空时可以选择列表中所有有查看权限的对象")
+    var filterList: String? = null,
     @ApiModelProperty(value = "汇总对象id")
     var sId: String? = null,
     @ApiModelProperty(value = "汇总字段id")
@@ -100,6 +102,7 @@ class BizObjectFieldDto(
             refListLabel = refListLabel,
             refDeletePolicy = refDeletePolicy,
             queryFilter = queryFilter,
+            filterList=filterList,
             sId = sId,
             sFieldId = sFieldId,
             sType = sType,
@@ -132,6 +135,7 @@ class BizObjectFieldDto(
             it.refListLabel = refListLabel
             it.refDeletePolicy = refDeletePolicy
             it.queryFilter = queryFilter
+            it.filterList=filterList
             it.sId = sId
             it.sFieldId = sFieldId
             it.sType = sType

@@ -16,6 +16,7 @@ private val map = mutableMapOf(
     "datetime" to 0,
     "master_slave" to 0,
     "reference" to 0,
+    "areference" to 0,
     "mreference" to 0,
     "summary" to 0,
     "auto" to 0,
@@ -37,6 +38,7 @@ fun fieldTypeDescription(fieldType: String): String {
         "master_slave" -> "主详"
         "reference" -> "关联关系"
         "mreference" -> "多选关联关系"
+        "areference" -> "任意关联关系"
         "summary" -> "汇总"
         "auto" -> "自动编号"
         "picture" -> "图片"

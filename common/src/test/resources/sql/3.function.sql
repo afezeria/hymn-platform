@@ -365,6 +365,7 @@ begin
         when 'datetime','date' then return 'datetime' ;
         when 'summary' then return 'pl_summary';
         when 'mreference' then return 'mref';
+        when 'areference' then return 'aref';
         else raise exception '[f:inner:01300] 未知的字段类型 %',field_type;
     end case;
 end ;
@@ -387,6 +388,7 @@ begin
         when 'datetime' then return '日期/日期时间';
         when 'master' then return '主从';
         when 'mref' then return '多选关联';
+        when 'aref' then return '任意关联';
         when 'pl_summary' then return '汇总';
         else raise exception '[f:inner:01400] 未知的列名前缀: %',prefix;
     end case;
@@ -407,6 +409,7 @@ begin
         when 'master_slave' then return '主从';
         when 'reference' then return '关联';
         when 'mreference' then return '多选关联';
+        when 'areference' then return '任意关联';
         when 'summary' then return '汇总';
         when 'auto' then return '自动编号';
         when 'picture' then return '图片';
@@ -2073,6 +2076,51 @@ create trigger c20_reference_field_before
     on hymn.core_biz_object_field
     for each row
 execute function hymn.reference_field_trigger_fun();
+
+create or replace function hymn.areference_field_trigger_fun() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_biz_object_field := old;
+    record_new hymn.core_biz_object_field := new;
+begin
+    if (record_old.type = 'areference' or record_new.type = 'areference') and
+       (record_new.source_column <> '' or record_old.source_column <> '') then
+        if tg_when = 'BEFORE' then
+--             属性检查
+            if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+--                 过滤filter_list中错误的对象id
+                if record_new.filter_list is distinct from record_old.filter_list then
+                    raise notice 'abccc';
+                    raise notice '%',record_new.filter_list;
+                    select string_agg(id, ',')
+                    into record_new.filter_list
+                    from hymn.core_biz_object
+                    where active = true
+                      and id = any
+                          (array_remove(regexp_split_to_array(record_new.filter_list, ','), ''));
+                    raise notice '%',record_new.filter_list;
+                end if;
+            end if;
+        end if;
+        if tg_when = 'AFTER' then
+        end if;
+    end if;
+    if tg_op = 'INSERT' or tg_op = 'UPDATE' then
+        return record_new;
+    elsif tg_op = 'DELETE' then
+        return record_old;
+    end if;
+end ;
+$$;
+comment on function hymn.areference_field_trigger_fun() is '任意引用字段触发器函数';
+drop trigger if exists c20_areference_field_before on hymn.core_biz_object_field;
+create trigger c20_areference_field_before
+    before insert or update
+    on hymn.core_biz_object_field
+    for each row
+execute function hymn.areference_field_trigger_fun();
+
 
 create or replace function hymn.master_slave_field_trigger_fun() returns trigger
     language plpgsql as
