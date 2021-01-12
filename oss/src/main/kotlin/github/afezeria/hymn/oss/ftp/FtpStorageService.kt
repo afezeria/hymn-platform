@@ -3,6 +3,7 @@ package github.afezeria.hymn.oss.ftp
 import github.afezeria.hymn.common.platform.StorageService
 import github.afezeria.hymn.common.util.BusinessException
 import github.afezeria.hymn.common.util.InnerException
+import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import mu.KLogging
 import org.apache.commons.io.IOUtils
 import org.apache.commons.net.ftp.FTPClient
@@ -12,7 +13,8 @@ import java.io.InputStream
 /**
  * @author afezeria
  */
-class FtpStorageService(config: FTPConfig) : StorageService {
+class FtpStorageService(config: FTPConfig, private val controller: SimpleFileController) :
+    StorageService {
     companion object : KLogging()
 
     private val pool: FTPClientPool
@@ -39,17 +41,17 @@ class FtpStorageService(config: FTPConfig) : StorageService {
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
+            logger.info("开始上传文件，远程路径:$root/$bucket/$fileName")
             ftp.createDirIfNotExist("$root/$bucket")
-            logger.info("start upload file, path:$root/$bucket/$fileName")
             for (i in 0..3) {
                 ftp.storeFileStream("$root/$bucket/$fileName").use {
                     IOUtils.copy(inputStream, it)
                 }
                 if (FTPReply.isPositiveCompletion(ftp.replyCode)) {
-                    logger.info("upload complete")
+                    logger.info("上传完成")
                     return
                 }
-                logger.warn("upload file failure! try uploading again... {} times", i)
+                logger.warn("上传失败！重试次数：{}，replyString: {}", ftp.replyString, i)
             }
         } finally {
             pool.returnObject(ftp)
@@ -61,20 +63,21 @@ class FtpStorageService(config: FTPConfig) : StorageService {
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
+            logger.info("开始下载文件，远程路径:$root/$bucket/$fileName")
+
             ftp.listNames("$root/$bucket/$fileName")
                 ?.takeIf { it.isNotEmpty() }
-                ?: throw BusinessException("file $root/$bucket/$fileName not exist")
+                ?: throw BusinessException("文件不存在")
 
-            logger.info("start download file, path:$root/$bucket/$fileName")
             ftp.retrieveFileStream("$root/$bucket/$fileName").use {
                 fn(it)
             }
             if (!FTPReply.isPositiveCompletion(ftp.replyCode)) {
-                logger.warn("file download failure, replyCode:${ftp.replyString}")
+                logger.warn("文件下载失败，replyString: ${ftp.replyString}")
             }
         } catch (e: Throwable) {
-            logger.warn("file download failure", e)
-            throw e
+            logger.warn("文件下载失败，{}", e)
+            throw BusinessException("文件下载失败", e)
         } finally {
             pool.returnObject(ftp)
         }
@@ -86,25 +89,30 @@ class FtpStorageService(config: FTPConfig) : StorageService {
         srcBucket: String,
         srcFileName: String
     ) {
+        if (bucket == srcBucket && fileName == srcFileName) {
+            return
+        }
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
             val from = "$root/$srcBucket/$srcFileName"
             val to = "$root/$bucket/$fileName"
-            logger.info("start move file, path:$to , src path:$from")
+            logger.info("开始移动文件, 目标路径：$to , 源文件路径：$from")
 
-            ftp.listNames(to)
+            ftp.listNames(from)
                 ?.takeIf { it.isNotEmpty() }
-                ?: throw BusinessException("source file $to not exist")
+                ?: throw BusinessException("源文件不存在")
 
             ftp.createDirIfNotExist("$root/$bucket")
             ftp.rename(from, to)
 
             if (!FTPReply.isPositiveCompletion(ftp.replyCode)) {
-                logger.warn("move file failure, replyCode:${ftp.replyString}")
+                logger.warn("移动文件失败，replyCode:${ftp.replyString}")
+            } else {
+                logger.info("移动文件成功")
             }
         } catch (e: Throwable) {
-            logger.warn("move file failure", e)
+            logger.warn("移动文件失败，{}", e)
             throw e
         } finally {
             pool.returnObject(ftp)
@@ -117,6 +125,9 @@ class FtpStorageService(config: FTPConfig) : StorageService {
         srcBucket: String,
         srcFileName: String
     ) {
+        if (bucket == srcBucket && fileName == srcFileName) {
+            return
+        }
         var ftp1: FTPClient? = null
         try {
             ftp1 = pool.borrowObject()
@@ -125,11 +136,11 @@ class FtpStorageService(config: FTPConfig) : StorageService {
                 ftp2 = pool.borrowObject()
                 val from = "$root/$srcBucket/$srcFileName"
                 val to = "$root/$bucket/$fileName"
-                logger.info("start copy file, path:$to , src path:$from")
+                logger.info("开始复制文件，目标路径：$to ，源文件路径：$from")
 
                 ftp1.listNames(to)
                     ?.takeIf { it.isNotEmpty() }
-                    ?: throw BusinessException("source file $to not exist")
+                    ?: throw BusinessException("源文件不存在")
 
                 ftp1.createDirIfNotExist("$root/$bucket")
 
@@ -140,27 +151,33 @@ class FtpStorageService(config: FTPConfig) : StorageService {
                 }
 
                 if (!FTPReply.isPositiveCompletion(ftp1.replyCode)) {
-                    logger.warn("copy file failure, replyCode:${ftp1.replyString}")
+                    logger.warn("复制文件失败，replyCode:${ftp1.replyString}")
+                } else {
+                    logger.info("复制文件成功")
                 }
+
             } finally {
                 pool.returnObject(ftp2)
             }
         } catch (e: Throwable) {
-            logger.warn("copy file failure", e)
+            logger.warn("复制文件失败，{}", e)
             throw e
         } finally {
             pool.returnObject(ftp1)
         }
     }
 
-    override fun getFileUrl(bucket: String, fileName: String): String {
+    override fun getFileUrl(bucket: String, fileName: String, expiry: Int): String {
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
+            logger.info("开始获取文件下载链接，文件路径：$root/$bucket/$fileName")
+
             ftp.listNames("$root/$bucket/$fileName")
                 ?.takeIf { it.isNotEmpty() }
-                ?: throw BusinessException("file $root/$bucket/$fileName not exist")
-            return "/module/oss/public/file/$bucket/$fileName"
+                ?: throw BusinessException("文件不存在")
+
+            return controller.generateFileUrl(bucket, fileName, expiry)
         } finally {
             pool.returnObject(ftp)
         }
@@ -171,13 +188,18 @@ class FtpStorageService(config: FTPConfig) : StorageService {
         try {
             ftp = pool.borrowObject()
             val path = "$root/$bucket/$fileName"
-            logger.info("start delete file, path:$path")
-            ftp.listNames(path)
-                ?.takeIf { it.isNotEmpty() }
-                ?: throw BusinessException("file $root/$bucket/$fileName not exist")
+            logger.info("开始删除文件，路径：$path")
+            val listNames = ftp.listNames(path)
+
+            if (listNames == null || listNames.isEmpty()) {
+                logger.info("文件不存在")
+                return
+            }
 
             if (!ftp.deleteFile(path)) {
-                logger.warn("delete file failure, replyCode:${ftp.replyString}")
+                logger.warn("删除文件失败，replyCode:${ftp.replyString}")
+            } else {
+                logger.info("删除文件成功")
             }
         } finally {
             pool.returnObject(ftp)
@@ -205,11 +227,11 @@ class FtpStorageService(config: FTPConfig) : StorageService {
             if (!success) {
                 success = makeDirectory(d)
                 if (!success) {
-                    throw InnerException("failed to create $currentDir directory, replyCode:${replyString}")
+                    throw InnerException("创建远程目录 $currentDir 失败，replyCode:${replyString}")
                 }
                 success = changeWorkingDirectory(d)
                 if (!success) {
-                    throw InnerException("failed to change working directory to $currentDir, replyCode:${replyString}")
+                    throw InnerException("改变远程工作目录至 $currentDir 失败，replyCode:${replyString}")
                 }
             }
         }

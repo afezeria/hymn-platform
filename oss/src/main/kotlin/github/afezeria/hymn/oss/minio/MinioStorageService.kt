@@ -5,13 +5,15 @@ import github.afezeria.hymn.common.util.BusinessException
 import io.minio.*
 import io.minio.errors.ErrorResponseException
 import io.minio.http.Method
+import mu.KLogging
 import java.io.InputStream
-import java.util.concurrent.TimeUnit
 
 /**
  * @author afezeria
  */
 class MinioStorageService(config: Map<String, Any?>) : StorageService {
+    companion object : KLogging()
+
     private val minioClient: MinioClient
     private val prefix: String
 
@@ -51,25 +53,24 @@ class MinioStorageService(config: Map<String, Any?>) : StorageService {
         )
     }
 
-//    override fun getFile(bucket: String, fileName: String): InputStream {
-//        try {
-//            checkBucket(prefix + bucket)
-//            return minioClient.getObject(
-//                GetObjectArgs.builder()
-//                    .bucket(prefix + bucket)
-//                    .`object`(fileName)
-//                    .build()
-//            )
-//        } catch (e: ErrorResponseException) {
-//            if (e.response().code() == 404) {
-//                throw BusinessException("文件不存在")
-//            }
-//            throw e
-//        }
-//    }
-
-    override fun getFile(bucket: String, fileName: String, fn: InputStream.() -> Unit) {
-        TODO("Not yet implemented")
+    override fun getFile(bucket: String, fileName: String, fn: (InputStream) -> Unit) {
+        try {
+            checkBucket(prefix + bucket)
+            minioClient.getObject(
+                GetObjectArgs.builder()
+                    .bucket(prefix + bucket)
+                    .`object`(fileName)
+                    .build()
+            ).use {
+                fn(it)
+            }
+        } catch (e: ErrorResponseException) {
+            if (e.response().code() == 404) {
+                logger.info("文件 $bucket/$fileName 不存在")
+                throw BusinessException("文件不存在")
+            }
+            throw e
+        }
     }
 
     override fun moveFile(
@@ -86,7 +87,46 @@ class MinioStorageService(config: Map<String, Any?>) : StorageService {
         checkBucket(bucketName)
         checkBucket(srcBucketName)
         try {
+            minioClient.copyObject(
+                CopyObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(fileName)
+                    .source(
+                        CopySource.builder()
+                            .bucket(srcBucketName)
+                            .`object`(srcFileName)
+                            .build()
+                    )
+                    .build()
+            )
+            minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                    .bucket(srcBucketName)
+                    .`object`(srcFileName)
+                    .build()
+            )
+        } catch (e: ErrorResponseException) {
+            if (e.response().code() == 404) {
+                throw BusinessException("文件不存在")
+            }
+            throw e
+        }
+    }
 
+    override fun copyFile(
+        bucket: String,
+        fileName: String,
+        srcBucket: String,
+        srcFileName: String
+    ) {
+        if (bucket == srcBucket && fileName == srcFileName) {
+            return
+        }
+        val bucketName = prefix + bucket
+        val srcBucketName = prefix + srcBucket
+        checkBucket(bucketName)
+        checkBucket(srcBucketName)
+        try {
             minioClient.copyObject(
                 CopyObjectArgs.builder()
                     .bucket(bucketName)
@@ -107,16 +147,7 @@ class MinioStorageService(config: Map<String, Any?>) : StorageService {
         }
     }
 
-    override fun copyFile(
-        bucket: String,
-        fileName: String,
-        srcBucket: String,
-        srcFileName: String
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getFileUrl(bucket: String, fileName: String): String {
+    override fun getFileUrl(bucket: String, fileName: String, expiry: Int): String {
         val bucketName = prefix + bucket
         checkBucket(bucketName)
         return minioClient.getPresignedObjectUrl(
@@ -124,7 +155,7 @@ class MinioStorageService(config: Map<String, Any?>) : StorageService {
                 .bucket(bucketName)
                 .`object`(fileName)
                 .method(Method.GET)
-                .expiry(1, TimeUnit.HOURS)
+                .expiry(expiry)
                 .build()
         )
     }

@@ -7,6 +7,7 @@ import github.afezeria.hymn.common.util.mapper
 import github.afezeria.hymn.oss.ftp.FtpStorageService
 import github.afezeria.hymn.oss.local.LocalStorageService
 import github.afezeria.hymn.oss.minio.MinioStorageService
+import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,19 +20,25 @@ class StorageConfig {
     @Autowired
     lateinit var configService: ConfigService
 
+    @Autowired
+    lateinit var fileController: SimpleFileController
+
     @Bean
     fun bea(): StorageService {
         val ossStr = configService.get("oss")
         return if (ossStr != null) {
             mapper.readValue<Config>(ossStr).run {
                 when (type) {
-                    StorageType.LOCAL -> LocalStorageService(mapper.readValue(data))
-                    StorageType.FTP -> FtpStorageService(mapper.readValue(data))
+                    StorageType.LOCAL -> LocalStorageService(
+                        fileController,
+                        mapper.readValue(data),
+                    )
+                    StorageType.FTP -> FtpStorageService(mapper.readValue(data), fileController)
                     StorageType.MINIO -> MinioStorageService(mapper.readValue(data))
                 }
             }
         } else {
-            LocalStorageService()
+            LocalStorageService(fileController)
         }
     }
 }

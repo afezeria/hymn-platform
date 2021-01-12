@@ -69,8 +69,9 @@ interface StorageService {
      *
      * @param bucket  bucket  名称
      * @param fileName 文件名称
+     * @param expiry 有效时间，单位：秒
      */
-    fun getFileUrl(bucket: String, fileName: String): String
+    fun getFileUrl(bucket: String, fileName: String, expiry: Int = 3600): String
 
     /**
      *  删除文件
