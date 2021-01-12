@@ -30,6 +30,7 @@ EOM
 #{(1..3).map { |i| "       ('#{table}','picture#{'%03d' % i}',null)," }.join("\n")}
 #{(1..5).map { |i| "       ('#{table}','bool#{'%03d' % i}',null)," }.join("\n")}
 #{(1..5).map { |i| "       ('#{table}','mref#{'%03d' % i}',null)," }.join("\n")}
+#{(1..1).map { |i| "       ('#{table}','aref#{'%03d' % i}',null)," }.join("\n")}
 #{(1..5).map { |i| "       ('#{table}','pl_summary#{'%03d' % i}',null)," }.join("\n")}
 #{(1..100).map { |i| "       ('#{table}','text#{'%03d' % i}',null)," }.join("\n")}
 #{(1..50).map { |i| "       ('#{table}','bigint#{'%03d' % i}',null)," }.join("\n")}
@@ -62,6 +63,7 @@ create table hymn.#{table}(
 #{(1..3).map { |i| "    picture#{'%03d' % i}   text," }.join("\n")}
 #{(1..5).map { |i| "    bool#{'%03d' % i}      bool," }.join("\n")}
 #{(1..5).map { |i| "    mref#{'%03d' % i}      text," }.join("\n")}
+#{(1..1).map { |i| "    aref#{'%03d' % i}      text," }.join("\n")}
 #{(1..100).map { |i| "    text#{'%03d' % i}      text," }.join("\n")}
 #{(1..50).map { |i| "    bigint#{'%03d' % i}    bigint," }.join("\n")}
 #{(1..50).map { |i| "    double#{'%03d' % i}    double precision," }.join("\n")}

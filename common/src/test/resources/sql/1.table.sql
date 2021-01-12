@@ -481,7 +481,7 @@ comment on table hymn.core_biz_object_field is '业务对象字段
 
 字段类型：文本(text),复选框(check_box),复选框组(check_box_group),下拉菜单(select),整型(integer),
 浮点型(float),货币(money),日期(date),日期时间(datetime),主详(master_slave),关联关系(reference),
-多选关联(mreference),汇总(summary),自动编号(auto),图片(picture);
+多选关联(mreference),任意关联(areference),汇总(summary),自动编号(auto),图片(picture);
 公共可选字段：remark （备注，只显示在管理员界面），help （帮助文本，显示在对象详情界面）
 通用字段：default_value （默认值，后端处理，字段间不能联动），formula （前端处理）
 

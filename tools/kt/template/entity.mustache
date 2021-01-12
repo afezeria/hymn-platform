@@ -6,17 +6,14 @@ import io.swagger.annotations.ApiModelProperty
 import java.util.*
 
 /**
- *
-{{#table}}{{#comment_lines}} * {{{.}}}
-{{/comment_lines}}{{/table}}{{#fields}}{{#comment}} * @property {{field_name}} {{comment}}{{/comment}}
-{{/fields}}
+ * {{#table}}{{tag}}{{/table}}
  * @author afezeria
  */
-@ApiModel(value="{{#table}}{{tag}}{{/table}}",description = """{{#table}}{{comment}}{{/table}}""")
+@ApiModel(value="{{#table}}{{tag}}{{/table}}",description = """{{#table}}{{{comment}}}{{/table}}""")
 data class {{name}}(
 
 {{#table.fields}}
-    @ApiModelProperty(value = "{{comment}}"{{#not_null}}, required = true{{/not_null}})
+    @ApiModelProperty(value = "{{{comment}}}"{{#not_null}}, required = true{{/not_null}})
     var {{field_name}}: {{java_type}}{{^not_null}}? = null{{/not_null}},
 {{/table.fields}}
 ) {
