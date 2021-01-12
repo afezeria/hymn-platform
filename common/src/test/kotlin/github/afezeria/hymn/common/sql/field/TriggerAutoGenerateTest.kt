@@ -58,7 +58,7 @@ class TriggerAutoGenerateTest : BaseDbTest() {
                     """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'多选关联对象1','mreffield1','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("mreference")},?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
                     objId, refId1, *COMMON_INFO
                 )[0]
@@ -68,7 +68,7 @@ class TriggerAutoGenerateTest : BaseDbTest() {
                     """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'多选关联对象2','mreffield2','mreference',?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("mreference")},?,'restrict','从对象',?,?,?,?,now(),now()) returning *;
                     """,
                     objId, refId2, *COMMON_INFO
                 )[0]
@@ -77,7 +77,7 @@ class TriggerAutoGenerateTest : BaseDbTest() {
             }
             userConn.use {
                 val uuids = (1..5).map { randomUUIDStr() }
-                val refDataIds = uuids.joinToString(";")
+                val refDataIds = uuids.joinToString(",")
                 var insData = it.execute(
                     """
                         insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,

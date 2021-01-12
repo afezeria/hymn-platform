@@ -165,7 +165,7 @@ class MreferenceFieldTest : BaseDbTest() {
             }
             userConn.use {
                 val uuids = (1..5).map { randomUUIDStr() }
-                val refDataIds = uuids.joinToString(";")
+                val refDataIds = uuids.joinToString(",")
                 val insData = it.execute(
                     """
                         insert into hymn_view.${objApi} (create_date,modify_date,owner_id,create_by_id,
