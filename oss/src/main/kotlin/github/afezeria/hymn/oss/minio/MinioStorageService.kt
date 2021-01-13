@@ -2,6 +2,7 @@ package github.afezeria.hymn.oss.minio
 
 import github.afezeria.hymn.common.platform.StorageService
 import github.afezeria.hymn.common.util.BusinessException
+import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import io.minio.*
 import io.minio.errors.ErrorResponseException
 import io.minio.http.Method
@@ -11,25 +12,25 @@ import java.io.InputStream
 /**
  * @author afezeria
  */
-class MinioStorageService(config: Map<String, Any?>) : StorageService {
+class MinioStorageService(config: MinioConfig, private val controller: SimpleFileController) :
+    StorageService {
     companion object : KLogging()
 
     private val minioClient: MinioClient
     private val prefix: String
+    private val useMinioPreSignedURL: Boolean
 
     init {
         minioClient = MinioClient.builder()
-            .endpoint(requireNotNull(config["url"] as String?))
-            .credentials(
-                requireNotNull(config["accessKey"] as String?),
-                requireNotNull(config["secretKey"] as String?)
-            )
+            .endpoint(config.url)
+            .credentials(config.accessKey, config.secretKey)
             .build()
-        prefix = config["prefix"] as String? ?: ""
+        prefix = config.prefix ?: ""
+        useMinioPreSignedURL = config.useMinioPreSignedURL
     }
 
     override fun isRemoteServerSupportHttpAccess(): Boolean {
-        return true
+        return useMinioPreSignedURL
     }
 
     override fun putFile(
@@ -150,14 +151,19 @@ class MinioStorageService(config: Map<String, Any?>) : StorageService {
     override fun getFileUrl(bucket: String, fileName: String, expiry: Int): String {
         val bucketName = prefix + bucket
         checkBucket(bucketName)
-        return minioClient.getPresignedObjectUrl(
-            GetPresignedObjectUrlArgs.builder()
-                .bucket(bucketName)
-                .`object`(fileName)
-                .method(Method.GET)
-                .expiry(expiry)
-                .build()
-        )
+//        minioClient.statObject()
+        return if (useMinioPreSignedURL) {
+            minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(fileName)
+                    .method(Method.GET)
+                    .expiry(expiry)
+                    .build()
+            )
+        } else {
+            ""
+        }
     }
 
     override fun removeFile(bucket: String, fileName: String) {
@@ -178,7 +184,7 @@ class MinioStorageService(config: Map<String, Any?>) : StorageService {
                     .bucket(bucket)
                     .build()
             )
-        if (isExist) {
+        if (!isExist) {
             minioClient.makeBucket(
                 MakeBucketArgs.builder()
                     .bucket(bucket)

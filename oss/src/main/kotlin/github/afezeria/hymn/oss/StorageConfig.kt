@@ -34,7 +34,7 @@ class StorageConfig {
                         mapper.readValue(data),
                     )
                     StorageType.FTP -> FtpStorageService(mapper.readValue(data), fileController)
-                    StorageType.MINIO -> MinioStorageService(mapper.readValue(data))
+                    StorageType.MINIO -> MinioStorageService(mapper.readValue(data),fileController)
                 }
             }
         } else {
