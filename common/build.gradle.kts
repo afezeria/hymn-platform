@@ -17,6 +17,8 @@ dependencies {
 
     api(Deps.Apache.io)
 
+    api(Deps.Redssion.spring)
+
     implementation(Deps.SpringBoot.aop)
     implementation(Deps.Servlet.api)
 
@@ -30,6 +32,10 @@ dependencies {
 
     testCompile(platform(Deps.Junit.bom))
     testCompile(Deps.Junit.jupiter)
+
+    testCompile(platform(Deps.TestContainers.bom))
+    testCompile(Deps.TestContainers.junit)
+
 
 }
 

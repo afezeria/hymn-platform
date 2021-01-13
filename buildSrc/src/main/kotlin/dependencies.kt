@@ -53,6 +53,10 @@ object Deps {
         const val spring = "com.ninja-squad:springmockk:3.0.1"
     }
 
+    object Redssion {
+        const val spring = "org.redisson:redisson-spring-boot-starter:3.14.1"
+    }
+
     object Junit {
         const val bom = "org.junit:junit-bom:5.7.0"
         const val jupiter = "org.junit.jupiter:junit-jupiter"
@@ -66,5 +70,10 @@ object Deps {
     object Swagger {
         const val core = "io.springfox:springfox-swagger2:2.9.2"
         const val ui = "io.springfox:springfox-swagger-ui:2.9.2"
+    }
+
+    object TestContainers {
+        const val bom = "org.testcontainers:testcontainers-bom:1.15.1"
+        const val junit = "org.testcontainers:junit-jupiter"
     }
 }
