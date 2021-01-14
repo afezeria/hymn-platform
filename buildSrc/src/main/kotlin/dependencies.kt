@@ -63,7 +63,6 @@ object Deps {
     }
 
     object Oss {
-        const val qiniu = "com.qiniu:qiniu-java-sdk:7.4.+"
         const val minio = "io.minio:minio:8.0.3"
     }
 

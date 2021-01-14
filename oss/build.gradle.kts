@@ -10,7 +10,6 @@ dependencies {
 
     implementation(Deps.Apache.net)
     implementation(Deps.Apache.pool)
-    implementation(Deps.Oss.qiniu)
     implementation(Deps.Oss.minio)
 
 
