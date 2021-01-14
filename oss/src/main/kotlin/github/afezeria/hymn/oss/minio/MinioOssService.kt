@@ -1,7 +1,7 @@
 package github.afezeria.hymn.oss.minio
 
-import github.afezeria.hymn.common.platform.StorageService
 import github.afezeria.hymn.common.util.BusinessException
+import github.afezeria.hymn.oss.AbstractOssService
 import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import io.minio.*
 import io.minio.errors.ErrorResponseException
@@ -12,12 +12,11 @@ import java.io.InputStream
 /**
  * @author afezeria
  */
-class MinioStorageService(config: MinioConfig, private val controller: SimpleFileController) :
-    StorageService {
+class MinioOssService(config: MinioConfig, private val controller: SimpleFileController) :
+    AbstractOssService() {
     companion object : KLogging()
 
     private val minioClient: MinioClient
-    private val prefix: String
     private val useMinioPreSignedURL: Boolean
 
     init {
@@ -25,6 +24,7 @@ class MinioStorageService(config: MinioConfig, private val controller: SimpleFil
             .endpoint(config.url)
             .credentials(config.accessKey, config.secretKey)
             .build()
+
         prefix = config.prefix ?: ""
         useMinioPreSignedURL = config.useMinioPreSignedURL
     }
@@ -35,16 +35,15 @@ class MinioStorageService(config: MinioConfig, private val controller: SimpleFil
 
     override fun putFile(
         bucket: String,
-        fileName: String,
+        objectName: String,
         inputStream: InputStream,
         contentType: String
     ) {
-        val bucketName = prefix + bucket
-        checkBucket(bucketName)
+        checkBucket(bucket)
         minioClient.putObject(
             PutObjectArgs.builder()
-                .bucket(bucketName)
-                .`object`(fileName)
+                .bucket(bucket)
+                .`object`(objectName)
                 .stream(
                     inputStream,
                     -1,
@@ -54,20 +53,20 @@ class MinioStorageService(config: MinioConfig, private val controller: SimpleFil
         )
     }
 
-    override fun getFile(bucket: String, fileName: String, fn: (InputStream) -> Unit) {
+    override fun getFile(bucket: String, objectName: String, fn: (InputStream) -> Unit) {
         try {
-            checkBucket(prefix + bucket)
+            checkBucket(bucket)
             minioClient.getObject(
                 GetObjectArgs.builder()
-                    .bucket(prefix + bucket)
-                    .`object`(fileName)
+                    .bucket(bucket)
+                    .`object`(objectName)
                     .build()
             ).use {
                 fn(it)
             }
         } catch (e: ErrorResponseException) {
             if (e.response().code() == 404) {
-                logger.info("文件 $bucket/$fileName 不存在")
+                logger.info("文件 $bucket/$objectName 不存在")
                 throw BusinessException("文件不存在")
             }
             throw e
@@ -76,34 +75,32 @@ class MinioStorageService(config: MinioConfig, private val controller: SimpleFil
 
     override fun moveFile(
         bucket: String,
-        fileName: String,
+        objectName: String,
         srcBucket: String,
-        srcFileName: String
+        srcObjectName: String
     ) {
-        if (bucket == srcBucket && fileName == srcFileName) {
+        if (bucket == srcBucket && objectName == srcObjectName) {
             return
         }
-        val bucketName = prefix + bucket
-        val srcBucketName = prefix + srcBucket
-        checkBucket(bucketName)
-        checkBucket(srcBucketName)
+        checkBucket(bucket)
+        checkBucket(srcBucket)
         try {
             minioClient.copyObject(
                 CopyObjectArgs.builder()
-                    .bucket(bucketName)
-                    .`object`(fileName)
+                    .bucket(bucket)
+                    .`object`(objectName)
                     .source(
                         CopySource.builder()
-                            .bucket(srcBucketName)
-                            .`object`(srcFileName)
+                            .bucket(srcBucket)
+                            .`object`(srcObjectName)
                             .build()
                     )
                     .build()
             )
             minioClient.removeObject(
                 RemoveObjectArgs.builder()
-                    .bucket(srcBucketName)
-                    .`object`(srcFileName)
+                    .bucket(srcBucket)
+                    .`object`(srcObjectName)
                     .build()
             )
         } catch (e: ErrorResponseException) {
@@ -116,26 +113,24 @@ class MinioStorageService(config: MinioConfig, private val controller: SimpleFil
 
     override fun copyFile(
         bucket: String,
-        fileName: String,
+        objectName: String,
         srcBucket: String,
-        srcFileName: String
+        srcObjectName: String
     ) {
-        if (bucket == srcBucket && fileName == srcFileName) {
+        if (bucket == srcBucket && objectName == srcObjectName) {
             return
         }
-        val bucketName = prefix + bucket
-        val srcBucketName = prefix + srcBucket
-        checkBucket(bucketName)
-        checkBucket(srcBucketName)
+        checkBucket(bucket)
+        checkBucket(srcBucket)
         try {
             minioClient.copyObject(
                 CopyObjectArgs.builder()
-                    .bucket(bucketName)
-                    .`object`(fileName)
+                    .bucket(bucket)
+                    .`object`(objectName)
                     .source(
                         CopySource.builder()
-                            .bucket(srcBucketName)
-                            .`object`(srcFileName)
+                            .bucket(srcBucket)
+                            .`object`(srcObjectName)
                             .build()
                     )
                     .build()
@@ -148,15 +143,14 @@ class MinioStorageService(config: MinioConfig, private val controller: SimpleFil
         }
     }
 
-    override fun getFileUrl(bucket: String, fileName: String, expiry: Int): String {
-        val bucketName = prefix + bucket
-        checkBucket(bucketName)
+    override fun getFileUrl(bucket: String, objectName: String, expiry: Int): String {
+        checkBucket(bucket)
 //        minioClient.statObject()
         return if (useMinioPreSignedURL) {
             minioClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
-                    .bucket(bucketName)
-                    .`object`(fileName)
+                    .bucket(bucket)
+                    .`object`(objectName)
                     .method(Method.GET)
                     .expiry(expiry)
                     .build()
@@ -166,13 +160,12 @@ class MinioStorageService(config: MinioConfig, private val controller: SimpleFil
         }
     }
 
-    override fun removeFile(bucket: String, fileName: String) {
-        val bucketName = prefix + bucket
-        checkBucket(bucketName)
+    override fun removeFile(bucket: String, objectName: String) {
+        checkBucket(bucket)
         minioClient.removeObject(
             RemoveObjectArgs.builder()
-                .bucket(bucketName)
-                .`object`(fileName)
+                .bucket(bucket)
+                .`object`(objectName)
                 .build()
         )
     }

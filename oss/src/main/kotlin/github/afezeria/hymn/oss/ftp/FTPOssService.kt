@@ -1,8 +1,8 @@
 package github.afezeria.hymn.oss.ftp
 
-import github.afezeria.hymn.common.platform.StorageService
 import github.afezeria.hymn.common.util.BusinessException
 import github.afezeria.hymn.common.util.InnerException
+import github.afezeria.hymn.oss.AbstractOssService
 import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import mu.KLogging
 import org.apache.commons.io.IOUtils
@@ -13,8 +13,8 @@ import java.io.InputStream
 /**
  * @author afezeria
  */
-class FtpStorageService(config: FTPConfig, private val controller: SimpleFileController) :
-    StorageService {
+class FTPOssService(config: FTPConfig, private val controller: SimpleFileController) :
+    AbstractOssService() {
     companion object : KLogging()
 
     private val pool: FTPClientPool
@@ -26,6 +26,7 @@ class FtpStorageService(config: FTPConfig, private val controller: SimpleFileCon
         val client = pool.borrowObject()
         root = config.path ?: client.printWorkingDirectory()
         root.trimEnd('/')
+        prefix = config.prefix ?: ""
     }
 
     override fun isRemoteServerSupportHttpAccess(): Boolean {
@@ -34,17 +35,17 @@ class FtpStorageService(config: FTPConfig, private val controller: SimpleFileCon
 
     override fun putFile(
         bucket: String,
-        fileName: String,
+        objectName: String,
         inputStream: InputStream,
         contentType: String
     ) {
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
-            logger.info("开始上传文件，远程路径:$root/$bucket/$fileName")
+            logger.info("开始上传文件，远程路径:$root/$bucket/$objectName")
             ftp.createDirIfNotExist("$root/$bucket")
             for (i in 0..3) {
-                ftp.storeFileStream("$root/$bucket/$fileName").use {
+                ftp.storeFileStream("$root/$bucket/$objectName").use {
                     IOUtils.copy(inputStream, it)
                 }
                 if (FTPReply.isPositiveCompletion(ftp.replyCode)) {
@@ -59,17 +60,17 @@ class FtpStorageService(config: FTPConfig, private val controller: SimpleFileCon
     }
 
 
-    override fun getFile(bucket: String, fileName: String, fn: (InputStream) -> Unit) {
+    override fun getFile(bucket: String, objectName: String, fn: (InputStream) -> Unit) {
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
-            logger.info("开始下载文件，远程路径:$root/$bucket/$fileName")
+            logger.info("开始下载文件，远程路径:$root/$bucket/$objectName")
 
-            ftp.listNames("$root/$bucket/$fileName")
+            ftp.listNames("$root/$bucket/$objectName")
                 ?.takeIf { it.isNotEmpty() }
                 ?: throw BusinessException("文件不存在")
 
-            ftp.retrieveFileStream("$root/$bucket/$fileName").use {
+            ftp.retrieveFileStream("$root/$bucket/$objectName").use {
                 fn(it)
             }
             if (!FTPReply.isPositiveCompletion(ftp.replyCode)) {
@@ -85,18 +86,18 @@ class FtpStorageService(config: FTPConfig, private val controller: SimpleFileCon
 
     override fun moveFile(
         bucket: String,
-        fileName: String,
+        objectName: String,
         srcBucket: String,
-        srcFileName: String
+        srcObjectName: String
     ) {
-        if (bucket == srcBucket && fileName == srcFileName) {
+        if (bucket == srcBucket && objectName == srcObjectName) {
             return
         }
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
-            val from = "$root/$srcBucket/$srcFileName"
-            val to = "$root/$bucket/$fileName"
+            val from = "$root/$srcBucket/$srcObjectName"
+            val to = "$root/$bucket/$objectName"
             logger.info("开始移动文件, 目标路径：$to , 源文件路径：$from")
 
             ftp.listNames(from)
@@ -121,11 +122,11 @@ class FtpStorageService(config: FTPConfig, private val controller: SimpleFileCon
 
     override fun copyFile(
         bucket: String,
-        fileName: String,
+        objectName: String,
         srcBucket: String,
-        srcFileName: String
+        srcObjectName: String
     ) {
-        if (bucket == srcBucket && fileName == srcFileName) {
+        if (bucket == srcBucket && objectName == srcObjectName) {
             return
         }
         var ftp1: FTPClient? = null
@@ -134,8 +135,8 @@ class FtpStorageService(config: FTPConfig, private val controller: SimpleFileCon
             var ftp2: FTPClient? = null
             try {
                 ftp2 = pool.borrowObject()
-                val from = "$root/$srcBucket/$srcFileName"
-                val to = "$root/$bucket/$fileName"
+                val from = "$root/$srcBucket/$srcObjectName"
+                val to = "$root/$bucket/$objectName"
                 logger.info("开始复制文件，目标路径：$to ，源文件路径：$from")
 
                 ftp1.listNames(to)
@@ -167,27 +168,27 @@ class FtpStorageService(config: FTPConfig, private val controller: SimpleFileCon
         }
     }
 
-    override fun getFileUrl(bucket: String, fileName: String, expiry: Int): String {
+    override fun getFileUrl(bucket: String, objectName: String, expiry: Int): String {
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
-            logger.info("开始获取文件下载链接，文件路径：$root/$bucket/$fileName")
+            logger.info("开始获取文件下载链接，文件路径：$root/$bucket/$objectName")
 
-            ftp.listNames("$root/$bucket/$fileName")
+            ftp.listNames("$root/$bucket/$objectName")
                 ?.takeIf { it.isNotEmpty() }
                 ?: throw BusinessException("文件不存在")
 
-            return controller.generateFileUrl(bucket, fileName, expiry)
+            return controller.generateFileUrl(bucket, objectName, expiry)
         } finally {
             pool.returnObject(ftp)
         }
     }
 
-    override fun removeFile(bucket: String, fileName: String) {
+    override fun removeFile(bucket: String, objectName: String) {
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
-            val path = "$root/$bucket/$fileName"
+            val path = "$root/$bucket/$objectName"
             logger.info("开始删除文件，路径：$path")
             val listNames = ftp.listNames(path)
 

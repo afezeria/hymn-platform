@@ -6,4 +6,5 @@ package github.afezeria.hymn.oss.local
  */
 data class LocalConfig(
     val rootDir: String? = null,
+    val prefix: String,
 )

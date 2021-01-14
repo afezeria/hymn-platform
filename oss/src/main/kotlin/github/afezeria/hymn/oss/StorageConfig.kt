@@ -2,11 +2,11 @@ package github.afezeria.hymn.oss
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import github.afezeria.hymn.common.platform.ConfigService
-import github.afezeria.hymn.common.platform.StorageService
+import github.afezeria.hymn.common.platform.OssService
 import github.afezeria.hymn.common.util.mapper
-import github.afezeria.hymn.oss.ftp.FtpStorageService
-import github.afezeria.hymn.oss.local.LocalStorageService
-import github.afezeria.hymn.oss.minio.MinioStorageService
+import github.afezeria.hymn.oss.ftp.FTPOssService
+import github.afezeria.hymn.oss.local.LocalOssService
+import github.afezeria.hymn.oss.minio.MinioOssService
 import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -24,21 +24,21 @@ class StorageConfig {
     lateinit var fileController: SimpleFileController
 
     @Bean
-    fun bea(): StorageService {
+    fun bea(): OssService {
         val ossStr = configService.get("oss")
         return if (ossStr != null) {
             mapper.readValue<Config>(ossStr).run {
                 when (type) {
-                    StorageType.LOCAL -> LocalStorageService(
+                    StorageType.LOCAL -> LocalOssService(
                         fileController,
                         mapper.readValue(data),
                     )
-                    StorageType.FTP -> FtpStorageService(mapper.readValue(data), fileController)
-                    StorageType.MINIO -> MinioStorageService(mapper.readValue(data),fileController)
+                    StorageType.FTP -> FTPOssService(mapper.readValue(data), fileController)
+                    StorageType.MINIO -> MinioOssService(mapper.readValue(data),fileController)
                 }
             }
         } else {
-            LocalStorageService(fileController)
+            LocalOssService(fileController)
         }
     }
 }

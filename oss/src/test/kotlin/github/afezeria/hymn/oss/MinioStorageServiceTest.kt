@@ -1,9 +1,10 @@
 package github.afezeria.hymn.oss
 
 import github.afezeria.hymn.common.KGenericContainer
+import github.afezeria.hymn.common.platform.OssService
 import github.afezeria.hymn.common.randomUUIDStr
 import github.afezeria.hymn.oss.minio.MinioConfig
-import github.afezeria.hymn.oss.minio.MinioStorageService
+import github.afezeria.hymn.oss.minio.MinioOssService
 import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import io.kotest.matchers.shouldBe
 import io.minio.*
@@ -37,6 +38,14 @@ class MinioStorageServiceTest {
         private const val ADMIN_ACCESS_KEY = "admin"
         private const val ADMIN_SECRET_KEY = "12345678"
 
+        val lower = sequence {
+            var current = 'a'
+            while (true) {
+                yield(current)
+                if (current == 'z') current = 'a'
+                else current += 1
+            }
+        }
     }
 
     @Container
@@ -53,10 +62,10 @@ class MinioStorageServiceTest {
             HttpWaitStrategy()
                 .forPath("/minio/health/ready")
                 .forPort(port)
-                .withStartupTimeout(Duration.ofSeconds(10))
+                .withStartupTimeout(Duration.ofSeconds(20))
         )
 
-    lateinit var minioService: MinioStorageService
+    lateinit var service: OssService
     lateinit var fileController: SimpleFileController
     lateinit var minio: MinioClient
 
@@ -74,15 +83,15 @@ class MinioStorageServiceTest {
             .credentials(config.accessKey, config.secretKey)
             .build()
         fileController = mockk()
-        minioService = MinioStorageService(config, fileController)
+        service = MinioOssService(config, fileController)
     }
 
 
     @Test
-    fun `upload test`() {
+    fun upload() {
         bucketExists("test") shouldBe false
         val str = "hello"
-        minioService.putFile(
+        service.putObject(
             "test",
             "abc.text",
             ByteArrayInputStream(str.toByteArray()),
@@ -100,13 +109,36 @@ class MinioStorageServiceTest {
             this.headers().get("Content-Type") shouldBe "text/plain"
         }
     }
+    @Test
+    fun `upload with path`() {
+        bucketExists("test") shouldBe false
+        val str = "hello"
+        val file="2020/01/01/abc.text"
+        service.putObject(
+            "test",
+            file,
+            ByteArrayInputStream(str.toByteArray()),
+            "text/plain"
+        )
+        bucketExists("test") shouldBe true
+        minio.getObject(
+            GetObjectArgs.builder()
+                .bucket("test")
+                .`object`(file)
+                .build()
+        ).apply {
+            println(this.headers())
+            readAllBytes().decodeToString() shouldBe str
+            this.headers().get("Content-Type") shouldBe "text/plain"
+        }
+    }
 
     @Test
-    fun `download test`() {
-        createBucket("test")
+    fun download() {
+        val bucket = createBucket()
         minio.putObject(
             PutObjectArgs.builder()
-                .bucket("test")
+                .bucket(bucket)
                 .`object`("abc.text")
                 .stream(
                     ByteArrayInputStream("abc".toByteArray()), -1,
@@ -115,7 +147,7 @@ class MinioStorageServiceTest {
                 .build()
         )
         val stream = ByteArrayOutputStream()
-        minioService.getFile("test", "abc.text") {
+        service.getObject(bucket, "abc.text") {
             IOUtils.copy(it, stream)
         }
         stream.toByteArray().decodeToString() shouldBe "abc"
@@ -123,15 +155,64 @@ class MinioStorageServiceTest {
 
     @Test
     fun `move file in the same bucket`() {
-        val abc = createBucket("abc")
+        val bucket = createBucket()
         val srcFile = "abc.txt"
         val newFile = "def.txt"
-        val str = createFile(abc, "abc.txt")
-        minioService.moveFile(abc, newFile, abc, srcFile)
-        getFile(abc, newFile).apply {
+        val str = createFile(bucket, "abc.txt")
+        service.moveObject(bucket, newFile, bucket, srcFile)
+        getFile(bucket, newFile).apply {
             readAllBytes().decodeToString() shouldBe str
         }
-        fileExists(abc, srcFile) shouldBe false
+        fileExists(bucket, srcFile) shouldBe false
+    }
+
+    @Test
+    fun `move file between different bucket`() {
+        val bucket = createBucket()
+        val srcBucket = createBucket()
+        val srcFile = "abc.txt"
+        val newFile = "def.txt"
+        val str = createFile(srcBucket, "abc.txt")
+        service.moveObject(bucket, newFile, srcBucket, srcFile)
+        getFile(bucket, newFile).apply {
+            readAllBytes().decodeToString() shouldBe str
+        }
+        fileExists(srcBucket, srcFile) shouldBe false
+    }
+
+    @Test
+    fun `copy file in the same bucket`() {
+        val bucket = createBucket()
+        val srcFile = "abc.txt"
+        val newFile = "def.txt"
+        val str = createFile(bucket, "abc.txt")
+        service.copyObject(bucket, newFile, bucket, srcFile)
+        getFile(bucket, newFile).apply {
+            readAllBytes().decodeToString() shouldBe str
+        }
+        fileExists(bucket, srcFile) shouldBe true
+    }
+
+    @Test
+    fun `copy file between different bucket`() {
+        val bucket = createBucket()
+        val srcBucket = createBucket()
+        val srcFile = "abc.txt"
+        val newFile = "def.txt"
+        val str = createFile(srcBucket, "abc.txt")
+        service.copyObject(bucket, newFile, srcBucket, srcFile)
+        getFile(bucket, newFile).apply {
+            readAllBytes().decodeToString() shouldBe str
+        }
+        fileExists(srcBucket, srcFile) shouldBe true
+    }
+
+    @Test
+    fun delete() {
+        val bucket = createBucket()
+        val file = createFile(bucket, "tt")
+        service.removeObject(bucket, file)
+        fileExists(bucket, file) shouldBe false
     }
 
     private fun createFile(bucket: String, fileName: String): String {
@@ -181,7 +262,8 @@ class MinioStorageServiceTest {
         )
     }
 
-    private fun createBucket(bucket: String): String {
+    private fun createBucket(): String {
+        val bucket = lower.take(4).joinToString("")
         val isExist: Boolean =
             minio.bucketExists(
                 BucketExistsArgs.builder()
