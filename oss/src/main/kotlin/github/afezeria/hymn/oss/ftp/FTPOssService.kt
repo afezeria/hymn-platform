@@ -42,17 +42,28 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
-            logger.info("开始上传文件，远程路径:$root/$bucket/$objectName")
-            ftp.createDirIfNotExist("$root/$bucket")
+            val path = "$root/$bucket/$objectName".replace("//", "/")
+
+            logger.info("开始上传文件，远程路径:$path")
+
+            ftp.createDirIfNotExist(path.substring(0, path.lastIndexOf('/')))
+
             for (i in 0..3) {
-                ftp.storeFileStream("$root/$bucket/$objectName").use {
+                val output = ftp.storeFileStream(path)
+                if (!FTPReply.isPositivePreliminary(ftp.replyCode)) {
+                    logger.warn("上传失败，replyString: {}", ftp.replyString)
+                    throw InnerException("上传失败，replyString: ${ftp.replyString}")
+                }
+                output.use {
                     IOUtils.copy(inputStream, it)
                 }
-                if (FTPReply.isPositiveCompletion(ftp.replyCode)) {
+                if (ftp.completePendingCommand()) {
                     logger.info("上传完成")
                     return
                 }
-                logger.warn("上传失败！重试次数：{}，replyString: {}", ftp.replyString, i)
+                if (FTPReply.isPositiveCompletion(ftp.replyCode)) {
+                }
+                logger.warn("上传失败，重试次数：{}，replyString: {}", ftp.replyString, i)
             }
         } finally {
             pool.returnObject(ftp)
@@ -70,7 +81,12 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
                 ?.takeIf { it.isNotEmpty() }
                 ?: throw BusinessException("文件不存在")
 
-            ftp.retrieveFileStream("$root/$bucket/$objectName").use {
+            val inputStream = ftp.retrieveFileStream("$root/$bucket/$objectName")
+            if (!FTPReply.isPositiveCompletion(ftp.replyCode)) {
+                logger.warn("文件下载失败，replyString: ${ftp.replyString}")
+                throw InnerException("文件下载失败，replyString: ${ftp.replyString}")
+            }
+            inputStream.use {
                 fn(it)
             }
             if (!FTPReply.isPositiveCompletion(ftp.replyCode)) {
@@ -145,17 +161,24 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
 
                 ftp1.createDirIfNotExist("$root/$bucket")
 
-                ftp1.retrieveFileStream(from).use { i ->
-                    ftp2.storeFileStream(to).use { o ->
+                val inputStream = ftp1.retrieveFileStream(from)
+                if (!FTPReply.isPositiveCompletion(ftp1.replyCode)) {
+                    logger.warn("复制文件失败，replyCode:${ftp1.replyString}")
+                    throw InnerException("复制文件失败，replyCode:${ftp1.replyString}")
+                }
+                val outputStream = ftp2.storeFileStream(to)
+
+                if (!FTPReply.isPositiveCompletion(ftp2.replyCode)) {
+                    logger.warn("复制文件失败，replyCode:${ftp2.replyString}")
+                    throw InnerException("复制文件失败，replyCode:${ftp2.replyString}")
+                }
+                inputStream.use { i ->
+                    outputStream.use { o ->
                         IOUtils.copy(i, o)
                     }
                 }
 
-                if (!FTPReply.isPositiveCompletion(ftp1.replyCode)) {
-                    logger.warn("复制文件失败，replyCode:${ftp1.replyString}")
-                } else {
-                    logger.info("复制文件成功")
-                }
+                logger.info("复制文件成功")
 
             } finally {
                 pool.returnObject(ftp2)
@@ -208,24 +231,29 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
     }
 
     private fun FTPClient.createDirIfNotExist(path: String) {
+        logger.debug("createDirIfNotExist [path:{}]", path)
         val cpath = path.trimEnd('/')
         val workDir = printWorkingDirectory()
         if (workDir == cpath) return
         if (workDir.startsWith(cpath)) return
-        var currentDir = ""
+        var currentDir = "/"
         val dirs: List<String>
         if (cpath.startsWith(workDir)) {
-            currentDir = workDir.trimEnd('/')
+            if (workDir.length > 1) {
+                currentDir = workDir.trimEnd('/')
+            }
             dirs = cpath.removePrefix(workDir)
                 .split('/').filter { it.isNotBlank() }
         } else {
             changeWorkingDirectory("/")
             dirs = cpath.split('/').filter { it.isNotBlank() }
         }
+        logger.debug("current path: {}", currentDir)
         for (d in dirs) {
-            currentDir += "/$d"
+            currentDir += "$d/"
             var success = changeWorkingDirectory(d)
             if (!success) {
+                logger.debug("path {} note exist, start create", currentDir)
                 success = makeDirectory(d)
                 if (!success) {
                     throw InnerException("创建远程目录 $currentDir 失败，replyCode:${replyString}")

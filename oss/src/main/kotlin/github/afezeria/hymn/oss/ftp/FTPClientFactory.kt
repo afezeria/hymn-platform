@@ -28,7 +28,7 @@ class FTPClientFactory(val config: FTPConfig) : BasePooledObjectFactory<FTPClien
                 throw InnerException("FTPServer refused connection,replyCode:${replyCode}")
             }
             if (!ftpClient.login(config.username, config.password)) {
-                throw InnerException("FTPClient login failed")
+                throw InnerException("FTPClient login failed,replyString:${ftpClient.replyString}")
             }
             ftpClient.bufferSize = config.bufferSize
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE)
