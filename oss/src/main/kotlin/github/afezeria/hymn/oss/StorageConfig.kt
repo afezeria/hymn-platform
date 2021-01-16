@@ -8,6 +8,7 @@ import github.afezeria.hymn.oss.ftp.FTPOssService
 import github.afezeria.hymn.oss.local.LocalOssService
 import github.afezeria.hymn.oss.minio.MinioOssService
 import github.afezeria.hymn.oss.web.controller.SimpleFileController
+import mu.KLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Configuration
  */
 @Configuration
 class StorageConfig {
+    companion object:KLogging()
     @Autowired
     lateinit var configService: ConfigService
 

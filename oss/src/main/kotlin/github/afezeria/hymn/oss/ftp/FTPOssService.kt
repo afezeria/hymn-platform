@@ -8,7 +8,9 @@ import mu.KLogging
 import org.apache.commons.io.IOUtils
 import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPReply
+import java.io.IOException
 import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * @author afezeria
@@ -52,7 +54,7 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
                 val output = ftp.storeFileStream(path)
                 if (!FTPReply.isPositivePreliminary(ftp.replyCode)) {
                     logger.warn("上传失败，replyString: {}", ftp.replyString)
-                    throw InnerException("上传失败，replyString: ${ftp.replyString}")
+                    throw BusinessException("上传失败")
                 }
                 output.use {
                     IOUtils.copy(inputStream, it)
@@ -61,10 +63,10 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
                     logger.info("上传完成")
                     return
                 }
-                if (FTPReply.isPositiveCompletion(ftp.replyCode)) {
-                }
+
                 logger.warn("上传失败，重试次数：{}，replyString: {}", ftp.replyString, i)
             }
+            throw BusinessException("上传失败")
         } finally {
             pool.returnObject(ftp)
         }
@@ -75,25 +77,29 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
-            logger.info("开始下载文件，远程路径:$root/$bucket/$objectName")
 
-            ftp.listNames("$root/$bucket/$objectName")
+            val path = "$root/$bucket/$objectName".replace("//", "/")
+
+            logger.info("开始下载文件，远程路径:$path")
+
+            ftp.listNames(path)
                 ?.takeIf { it.isNotEmpty() }
                 ?: throw BusinessException("文件不存在")
 
-            val inputStream = ftp.retrieveFileStream("$root/$bucket/$objectName")
-            if (!FTPReply.isPositiveCompletion(ftp.replyCode)) {
+            val inputStream = ftp.retrieveFileStream(path)
+            if (!FTPReply.isPositivePreliminary(ftp.replyCode)) {
                 logger.warn("文件下载失败，replyString: ${ftp.replyString}")
-                throw InnerException("文件下载失败，replyString: ${ftp.replyString}")
+                throw BusinessException("文件下载失败")
             }
             inputStream.use {
                 fn(it)
             }
-            if (!FTPReply.isPositiveCompletion(ftp.replyCode)) {
-                logger.warn("文件下载失败，replyString: ${ftp.replyString}")
+            if (ftp.completePendingCommand()) {
+                logger.info("下载完成")
+            } else {
+                logger.warn("下载失败，replyString: ${ftp.replyString}")
             }
-        } catch (e: Throwable) {
-            logger.warn("文件下载失败，{}", e)
+        } catch (e: IOException) {
             throw BusinessException("文件下载失败", e)
         } finally {
             pool.returnObject(ftp)
@@ -112,25 +118,26 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
-            val from = "$root/$srcBucket/$srcObjectName"
-            val to = "$root/$bucket/$objectName"
+            val from = "$root/$srcBucket/$srcObjectName".replace("//", "/")
+            val to = "$root/$bucket/$objectName".replace("//", "/")
             logger.info("开始移动文件, 目标路径：$to , 源文件路径：$from")
 
             ftp.listNames(from)
                 ?.takeIf { it.isNotEmpty() }
                 ?: throw BusinessException("源文件不存在")
 
-            ftp.createDirIfNotExist("$root/$bucket")
+            ftp.createDirIfNotExist(to.substring(0, to.lastIndexOf('/')))
             ftp.rename(from, to)
 
             if (!FTPReply.isPositiveCompletion(ftp.replyCode)) {
                 logger.warn("移动文件失败，replyCode:${ftp.replyString}")
+                throw BusinessException("移动文件失败")
             } else {
                 logger.info("移动文件成功")
             }
-        } catch (e: Throwable) {
-            logger.warn("移动文件失败，{}", e)
-            throw e
+
+        } catch (e: IOException) {
+            throw BusinessException("移动文件失败", e)
         } finally {
             pool.returnObject(ftp)
         }
@@ -151,41 +158,51 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
             var ftp2: FTPClient? = null
             try {
                 ftp2 = pool.borrowObject()
-                val from = "$root/$srcBucket/$srcObjectName"
-                val to = "$root/$bucket/$objectName"
+                val from = "$root/$srcBucket/$srcObjectName".replace("//", "/")
+                val to = "$root/$bucket/$objectName".replace("//", "/")
+
                 logger.info("开始复制文件，目标路径：$to ，源文件路径：$from")
 
-                ftp1.listNames(to)
+                ftp1.listNames(from)
                     ?.takeIf { it.isNotEmpty() }
                     ?: throw BusinessException("源文件不存在")
 
-                ftp1.createDirIfNotExist("$root/$bucket")
+                ftp1.createDirIfNotExist(to.substring(0, to.lastIndexOf('/')))
 
-                val inputStream = ftp1.retrieveFileStream(from)
-                if (!FTPReply.isPositiveCompletion(ftp1.replyCode)) {
-                    logger.warn("复制文件失败，replyCode:${ftp1.replyString}")
-                    throw InnerException("复制文件失败，replyCode:${ftp1.replyString}")
-                }
-                val outputStream = ftp2.storeFileStream(to)
-
-                if (!FTPReply.isPositiveCompletion(ftp2.replyCode)) {
-                    logger.warn("复制文件失败，replyCode:${ftp2.replyString}")
-                    throw InnerException("复制文件失败，replyCode:${ftp2.replyString}")
-                }
-                inputStream.use { i ->
-                    outputStream.use { o ->
-                        IOUtils.copy(i, o)
+                ftp1.retrieveFileStream(from)?.use { inputStream: InputStream ->
+                    if (!FTPReply.isPositivePreliminary(ftp1.replyCode)) {
+                        logger.warn("复制文件失败，ftp1 replyCode:${ftp1.replyString}")
+                        throw BusinessException("复制文件失败")
+                    } else {
+                        ftp2.storeFileStream(to)?.use { outputStream: OutputStream? ->
+                            if (!FTPReply.isPositivePreliminary(ftp2.replyCode)) {
+                                logger.warn("复制文件失败，ftp2 replyCode:${ftp2.replyString}")
+                                throw BusinessException("复制文件失败")
+                            } else {
+                                IOUtils.copy(inputStream, outputStream)
+                            }
+                        }
                     }
+
                 }
 
-                logger.info("复制文件成功")
+                if (ftp1.completePendingCommand()) {
+                    if (ftp2.completePendingCommand()) {
+                        logger.info("复制文件成功")
+                    } else {
+                        logger.warn("复制文件失败，ftp2 replyCode:${ftp2.replyString}")
+                        throw BusinessException("复制文件失败")
+                    }
+                } else {
+                    logger.warn("复制文件失败，ftp1 replyCode:${ftp2.replyString}")
+                    throw BusinessException("复制文件失败")
+                }
 
             } finally {
                 pool.returnObject(ftp2)
             }
-        } catch (e: Throwable) {
-            logger.warn("复制文件失败，{}", e)
-            throw e
+        } catch (e: IOException) {
+            throw BusinessException("复制文件失败", e)
         } finally {
             pool.returnObject(ftp1)
         }
@@ -195,9 +212,11 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
-            logger.info("开始获取文件下载链接，文件路径：$root/$bucket/$objectName")
+            val path = "$root/$bucket/$objectName".replace("//", "/")
 
-            ftp.listNames("$root/$bucket/$objectName")
+            logger.info("开始获取文件下载链接，文件路径：$path")
+
+            ftp.listNames(path)
                 ?.takeIf { it.isNotEmpty() }
                 ?: throw BusinessException("文件不存在")
 
@@ -222,9 +241,12 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
 
             if (!ftp.deleteFile(path)) {
                 logger.warn("删除文件失败，replyCode:${ftp.replyString}")
+                throw BusinessException("删除文件失败")
             } else {
                 logger.info("删除文件成功")
             }
+        } catch (e: IOException) {
+            throw BusinessException("删除文件失败", e)
         } finally {
             pool.returnObject(ftp)
         }

@@ -208,7 +208,7 @@ class MinioStorageServiceTest {
     }
 
     @Test
-    fun delete() {
+    fun remove() {
         val bucket = createBucket()
         val file = createFile(bucket, "tt")
         service.removeObject(bucket, file)
