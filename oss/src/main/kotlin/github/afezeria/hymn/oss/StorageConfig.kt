@@ -18,7 +18,8 @@ import org.springframework.context.annotation.Configuration
  */
 @Configuration
 class StorageConfig {
-    companion object:KLogging()
+    companion object : KLogging()
+
     @Autowired
     lateinit var configService: ConfigService
 
@@ -36,7 +37,7 @@ class StorageConfig {
                         mapper.readValue(data),
                     )
                     StorageType.FTP -> FTPOssService(mapper.readValue(data), fileController)
-                    StorageType.MINIO -> MinioOssService(mapper.readValue(data),fileController)
+                    StorageType.MINIO -> MinioOssService(mapper.readValue(data), fileController)
                 }
             }
         } else {

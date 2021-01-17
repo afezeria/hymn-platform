@@ -1,6 +1,8 @@
 package github.afezeria.hymn.oss
 
 import github.afezeria.hymn.common.platform.OssService
+import github.afezeria.hymn.common.util.BusinessException
+import github.afezeria.hymn.common.util.InnerException
 import github.afezeria.hymn.common.util.throwIfBucketNameInvalid
 import github.afezeria.hymn.common.util.throwIfFileNameInvalid
 import java.io.InputStream
@@ -8,8 +10,13 @@ import java.io.InputStream
 /**
  * @author afezeria
  */
-abstract class AbstractOssService : OssService {
-    protected var prefix: String = ""
+abstract class AbstractOssService(val prefix: String = "") : OssService {
+    init {
+        if (!"([a-z][-a-z0-9]{0,9})?".toRegex().matches(prefix)) {
+            throw InnerException("$prefix 不是有效的 bucket 前缀")
+        }
+    }
+
     override fun isRemoteServerSupportHttpAccess(): Boolean {
         return false
     }
@@ -47,14 +54,16 @@ abstract class AbstractOssService : OssService {
         inputStream: InputStream,
         contentType: String
     ) {
-
         bucket.throwIfBucketNameInvalid()
+        val b = prefix + bucket
         objectName.split('/').last().throwIfFileNameInvalid()
-        putFile(prefix + bucket, objectName, inputStream, contentType)
+        putFile(b, objectName, inputStream, contentType)
     }
 
     override fun getObject(bucket: String, objectName: String, fn: (InputStream) -> Unit) {
-        getFile(prefix + bucket, objectName, fn)
+        bucket.throwIfBucketNameInvalid()
+        val b = prefix + bucket
+        getFile(b, objectName, fn)
     }
 
     override fun moveObject(
@@ -64,8 +73,14 @@ abstract class AbstractOssService : OssService {
         srcObjectName: String
     ) {
         bucket.throwIfBucketNameInvalid()
+        srcBucket.throwIfBucketNameInvalid()
+        val b1 = prefix + bucket
+        val b2 = prefix + srcBucket
+        if (bucket == srcBucket && objectName == srcObjectName) {
+            throw BusinessException("源对象和目标对象不能为同一个")
+        }
         objectName.split('/').last().throwIfFileNameInvalid()
-        moveFile(prefix + bucket, objectName, prefix + srcBucket, srcObjectName)
+        moveFile(b1, objectName, b2, srcObjectName)
     }
 
     override fun copyObject(
@@ -75,15 +90,30 @@ abstract class AbstractOssService : OssService {
         srcObjectName: String
     ) {
         bucket.throwIfBucketNameInvalid()
+        srcBucket.throwIfBucketNameInvalid()
+        val b1 = prefix + bucket
+        val b2 = prefix + srcBucket
+
+        if (bucket == srcBucket && objectName == srcObjectName) {
+            throw BusinessException("源对象和目标对象不能为同一个")
+        }
+
         objectName.split('/').last().throwIfFileNameInvalid()
-        copyFile(prefix + bucket, objectName, prefix + srcBucket, srcObjectName)
+        copyFile(b1, objectName, b2, srcObjectName)
+
     }
 
     override fun getObjectUrl(bucket: String, objectName: String, expiry: Int): String {
-        return getFileUrl(prefix + bucket, objectName, expiry)
+        bucket.throwIfBucketNameInvalid()
+        val b = prefix + bucket
+
+        return getFileUrl(b, objectName, expiry)
     }
 
     override fun removeObject(bucket: String, objectName: String) {
-        removeFile(prefix + bucket, objectName)
+        bucket.throwIfBucketNameInvalid()
+        val b = prefix + bucket
+
+        removeFile(b, objectName)
     }
 }

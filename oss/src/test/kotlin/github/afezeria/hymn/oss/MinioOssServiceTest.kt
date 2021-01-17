@@ -26,7 +26,7 @@ import java.time.Duration
  * @author afezeria
  */
 @Testcontainers
-class MinioStorageServiceTest {
+class MinioOssServiceTest {
 
     //    private var minioServer: GenericContainer<*>? = null
 //    private var minioServerUrl: String? = null

@@ -13,7 +13,7 @@ import java.io.InputStream
  * @author afezeria
  */
 class MinioOssService(config: MinioConfig, private val controller: SimpleFileController) :
-    AbstractOssService() {
+    AbstractOssService(prefix = config.prefix ?: "") {
     companion object : KLogging()
 
     private val minioClient: MinioClient
@@ -25,7 +25,6 @@ class MinioOssService(config: MinioConfig, private val controller: SimpleFileCon
             .credentials(config.accessKey, config.secretKey)
             .build()
 
-        prefix = config.prefix ?: ""
         useMinioPreSignedURL = config.useMinioPreSignedURL
     }
 

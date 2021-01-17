@@ -16,7 +16,7 @@ import java.io.OutputStream
  * @author afezeria
  */
 class FTPOssService(config: FTPConfig, private val controller: SimpleFileController) :
-    AbstractOssService() {
+    AbstractOssService(prefix = config.prefix ?: "") {
     companion object : KLogging()
 
     private val pool: FTPClientPool
@@ -28,7 +28,6 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
         val client = pool.borrowObject()
         root = config.path ?: client.printWorkingDirectory()
         root.trimEnd('/')
-        prefix = config.prefix ?: ""
     }
 
     override fun isRemoteServerSupportHttpAccess(): Boolean {

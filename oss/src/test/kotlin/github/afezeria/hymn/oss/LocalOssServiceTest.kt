@@ -8,7 +8,6 @@ import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import mu.KLogging
-import org.apache.commons.net.ftp.FTPClient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -26,7 +25,6 @@ import java.util.*
 class LocalOssServiceTest {
     companion object : KLogging() {
         lateinit var config: LocalConfig
-        lateinit var ftp: FTPClient
         lateinit var service: OssService
         lateinit var fileController: SimpleFileController
         lateinit var rootDir: String

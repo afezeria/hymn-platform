@@ -20,7 +20,7 @@ import java.nio.file.StandardCopyOption
 class LocalOssService(
     private val controller: SimpleFileController,
     config: LocalConfig? = null,
-) : AbstractOssService() {
+) : AbstractOssService(prefix = config?.prefix ?: "") {
     companion object : KLogging()
 
     private val root: String
@@ -31,7 +31,6 @@ class LocalOssService(
         if (!Files.exists(path)) {
             Files.createDirectories(path)
         }
-        prefix = config?.prefix ?: ""
     }
 
     override fun isRemoteServerSupportHttpAccess(): Boolean {

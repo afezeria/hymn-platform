@@ -34,7 +34,7 @@ class FTPOssServiceTest {
         lateinit var ftp: FTPClient
         lateinit var service: OssService
         lateinit var fileController: SimpleFileController
-        lateinit var rootDir: String
+        const val rootDir = "/home/vsftpd/admin/"
 
         @BeforeAll
         @JvmStatic
