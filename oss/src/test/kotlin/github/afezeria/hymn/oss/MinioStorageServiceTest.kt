@@ -109,11 +109,12 @@ class MinioStorageServiceTest {
             this.headers().get("Content-Type") shouldBe "text/plain"
         }
     }
+
     @Test
     fun `upload with path`() {
         bucketExists("test") shouldBe false
         val str = "hello"
-        val file="2020/01/01/abc.text"
+        val file = "2020/01/01/abc.text"
         service.putObject(
             "test",
             file,

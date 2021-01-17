@@ -6,7 +6,6 @@ import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import mu.KLogging
 import org.apache.commons.io.IOUtils
 import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.nio.file.Files
@@ -24,10 +23,10 @@ class LocalOssService(
 ) : AbstractOssService() {
     companion object : KLogging()
 
-    val root: String
+    private val root: String
 
     init {
-        root = config?.rootDir ?: System.getProperty("user.dir") + "/hymn_storage"
+        root = config?.rootDir ?: (System.getProperty("user.dir") + "/hymn_storage")
         val path = Paths.get(root)
         if (!Files.exists(path)) {
             Files.createDirectories(path)
@@ -46,12 +45,14 @@ class LocalOssService(
         contentType: String
     ) {
         try {
-            logger.info("开始上传文件，本地路径：$root/$bucket/$objectName")
-            val dir = Paths.get("$root/$bucket")
+            val path = Path.of("$root/$bucket/$objectName")
+            logger.info("开始上传文件，本地路径：$path")
+            val dir = path.parent
             if (!Files.exists(dir)) {
                 Files.createDirectories(dir)
             }
-            IOUtils.copy(inputStream, FileOutputStream("$root/$bucket/$objectName"))
+
+            IOUtils.copy(inputStream, path.toFile().outputStream())
             logger.info("上传完成")
         } catch (e: IOException) {
             logger.info("上传失败")
@@ -88,13 +89,19 @@ class LocalOssService(
             if (!Files.exists(from)) {
                 throw BusinessException("文件不存在")
             }
+
+            val dir = to.parent
+            if (!Files.exists(dir)) {
+                Files.createDirectories(dir)
+            }
+
             Files.move(
                 from, to,
                 StandardCopyOption.REPLACE_EXISTING
             )
             logger.info("移动文件成功")
         } catch (e: IOException) {
-            logger.warn("文件移动失败,{}", e)
+            logger.warn("文件移动失败", e)
             throw BusinessException("文件移动失败", e)
         }
     }
@@ -108,17 +115,26 @@ class LocalOssService(
         try {
             val from = Path.of("$root/$srcBucket/$srcObjectName")
             val to = Path.of("$root/$bucket/$objectName")
-            logger.info("开始复制文件，目标路径：$from，源文件路径：$to")
+
+            logger.info("开始复制文件，目标路径：$to ，源文件路径：$from")
+
             if (!Files.exists(from)) {
                 throw BusinessException("文件不存在")
             }
+
+            val dir = to.parent
+            if (!Files.exists(dir)) {
+                Files.createDirectories(dir)
+            }
+
             Files.copy(
                 from, to,
                 StandardCopyOption.REPLACE_EXISTING
             )
+
             logger.info("复制文件成功")
         } catch (e: IOException) {
-            logger.warn("复制文件失败,{}", e)
+            logger.warn("复制文件失败", e)
             throw BusinessException("复制文件失败", e)
         }
 
@@ -142,7 +158,7 @@ class LocalOssService(
                 logger.info("文件不存在")
             }
         } catch (e: IOException) {
-            logger.warn("删除文件失败,{}", e)
+            logger.warn("删除文件失败", e)
             throw BusinessException("删除文件失败", e)
         }
     }

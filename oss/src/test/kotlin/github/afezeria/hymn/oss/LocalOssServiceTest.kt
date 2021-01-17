@@ -1,11 +1,9 @@
 package github.afezeria.hymn.oss
 
-import github.afezeria.hymn.common.KGenericContainer
 import github.afezeria.hymn.common.platform.OssService
 import github.afezeria.hymn.common.randomUUIDStr
-import github.afezeria.hymn.oss.ftp.FTPClientFactory
-import github.afezeria.hymn.oss.ftp.FTPConfig
-import github.afezeria.hymn.oss.ftp.FTPOssService
+import github.afezeria.hymn.oss.local.LocalConfig
+import github.afezeria.hymn.oss.local.LocalOssService
 import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
@@ -14,75 +12,57 @@ import org.apache.commons.net.ftp.FTPClient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy
-import org.testcontainers.images.builder.Transferable
-import org.testcontainers.junit.jupiter.Testcontainers
 import java.io.ByteArrayInputStream
-import java.time.Duration
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.*
 
 /**
  * @author afezeria
  */
-@Testcontainers
-class FTPOssServiceTest {
+class LocalOssServiceTest {
     companion object : KLogging() {
-        const val USERNAME = "admin"
-        const val PASSWORD = "123456"
-        lateinit var container: KGenericContainer
-        lateinit var config: FTPConfig
+        lateinit var config: LocalConfig
         lateinit var ftp: FTPClient
         lateinit var service: OssService
         lateinit var fileController: SimpleFileController
         lateinit var rootDir: String
 
-        @BeforeAll
         @JvmStatic
-        fun beforeAll() {
-            container = KGenericContainer("fauria/vsftpd")
-                .withEnv(
-                    mapOf(
-                        "FTP_USER" to USERNAME,
-                        "FTP_PASS" to PASSWORD,
-                    )
-                )
-                .withExposedPorts(21)
-                .waitingFor(
-                    HostPortWaitStrategy()
-                        .withStartupTimeout(Duration.ofSeconds(10))
-                )
-            container.start()
-            config = FTPConfig(
-                host = container.containerInfo.networkSettings.ipAddress,
-                port = 21,
-                path = null,
-                username = USERNAME,
-                password = PASSWORD,
-                connectTimeout = 0,
-                bufferSize = 0,
-                prefix = null
+        @BeforeAll
+        fun before() {
+            rootDir = System.getProperty("user.dir") + "/test-dir/"
+            Files.createDirectories(Path.of(rootDir))
+            config = LocalConfig(
+                rootDir = rootDir, prefix = ""
             )
-            ftp = FTPClientFactory(config).create()
             fileController = mockk()
-            service = FTPOssService(config, fileController)
+            service = LocalOssService(fileController, config)
         }
 
         @AfterAll
         @JvmStatic
-        fun clear() {
-            container.use {}
+        fun after() {
+            Files.walk(Path.of(rootDir)).use { walk ->
+                walk.sorted(Comparator.reverseOrder())
+                    .map { obj: Path -> obj.toFile() }
+                    .peek { println("delete $it") }
+                    .forEach(File::delete)
+            }
         }
     }
-
 
     @Test
     fun upload() {
         val str = "abc".toByteArray()
         service.putObject(
-            "abc",
-            "abc.txt",
-            ByteArrayInputStream(str),
-            "text/plain"
+            bucket = "abc",
+            objectName = "abc.txt",
+            inputStream = ByteArrayInputStream(str),
+            contentType = "text/plain"
         )
         fileExist("abc/abc.txt") shouldBe true
         fileContent("abc/abc.txt") shouldBe str
@@ -92,16 +72,14 @@ class FTPOssServiceTest {
     fun `upload with path`() {
         val str = "abc".toByteArray()
         service.putObject(
-            "abc",
-            "/2020/01/01/abc.txt",
-            ByteArrayInputStream(str),
-            "text/plain"
+            bucket = "abc",
+            objectName = "/2020/02/01/abc.txt",
+            inputStream = ByteArrayInputStream(str),
+            contentType = "text/plain"
         )
-        val p = "abc/2020/01/01/abc.txt"
-        fileExist(p) shouldBe true
-        fileContent(p) shouldBe str
+        fileExist("/abc/2020/02/01/abc.txt") shouldBe true
+        fileContent("/abc/2020/02/01/abc.txt") shouldBe str
     }
-
 
     @Test
     fun download() {
@@ -140,6 +118,7 @@ class FTPOssServiceTest {
 
     @Test
     fun `copy file in the same bucket`() {
+
         val fa = randomUUIDStr()
         val fb = randomUUIDStr()
         val pa = "copy/$fa"
@@ -162,6 +141,7 @@ class FTPOssServiceTest {
         fileExist(pb) shouldBe true
         fileExist(pa) shouldBe true
         fileContent(pa) shouldBe byteArray
+
     }
 
     @Test
@@ -173,25 +153,26 @@ class FTPOssServiceTest {
         fileExist(pa) shouldBe false
     }
 
-
     private fun fileExist(path: String): Boolean {
-        val p = rootDir + path.trim('/')
-        val result = container.execInContainer("ls", p)
-        return result.exitCode == 0
+        val p = Path.of(rootDir + path.trim('/'))
+        return Files.exists(p)
     }
 
     private fun fileContent(path: String): ByteArray {
-        val p = rootDir + path.trim('/')
-        return container.copyFileFromContainer(p) {
-            it.readAllBytes()
-        }
+        return FileInputStream(Path.of(rootDir + path.trim('/')).toFile())
+            .readAllBytes()
     }
 
     fun createFile(path: String, length: Int = 1000): ByteArray {
         val array = ByteArray(length).apply { Random().nextBytes(this) }
-        val p = rootDir + path.trim('/')
-        container.copyFileToContainer(Transferable.of(array), p)
-        container.execInContainer("chown", "-R", "ftp:ftp", rootDir)
+        val p = Path.of(rootDir + path.trim('/'))
+        val parent = p.parent
+        if (Files.exists(p.parent).not()) {
+            Files.createDirectories(parent)
+        }
+        FileOutputStream(p.toFile()).use {
+            it.write(array)
+        }
         return array
     }
 
