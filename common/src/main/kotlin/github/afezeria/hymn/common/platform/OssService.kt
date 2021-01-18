@@ -10,7 +10,7 @@ interface OssService {
     /**
      * 对象服务器是否支持直接http访问
      */
-    fun isRemoteServerSupportHttpAccess(): Boolean
+    fun remoteServerSupportHttpAccess(): Boolean
 
 
     /**
@@ -80,5 +80,12 @@ interface OssService {
      * @param objectName 对象名称
      */
     fun removeObject(bucket: String, objectName: String)
+
+    /**
+     * 对象是否存在
+     * @param bucket bucket 名称
+     * @param objectName 对象名称
+     */
+    fun objectExist(bucket: String, objectName: String): Boolean
 
 }

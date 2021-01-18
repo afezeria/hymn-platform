@@ -114,6 +114,8 @@ class AbstractOssServiceTest {
             every {
                 service.getFileUrl(bucket = capture(slot1), objectName = any(), expiry = any())
             } returns ""
+            justRun { service.fileExist(any(), any(), any()) }
+            every { service.remoteServerSupportHttpAccess() } returns true
             service.getObjectUrl("bbc", "aa")
             slot1.captured shouldBe "test-bbc"
 

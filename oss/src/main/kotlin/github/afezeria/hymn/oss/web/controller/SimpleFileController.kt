@@ -9,18 +9,18 @@ import javax.servlet.http.HttpServletResponse
 
 /**
  * 文件上传/下载
- * 当 [github.afezeria.hymn.common.platform.OssService.isRemoteServerSupportHttpAccess] 返回值为 false 时才工作，
+ * 当 [github.afezeria.hymn.common.platform.OssService.remoteServerSupportHttpAccess] 返回值为 false 时才工作，
  * 返回值为 true 时，文件下载接口返回404
  * @author afezeria
  */
 @Controller
 @RequestMapping("oss")
 class SimpleFileController {
-    lateinit var ossService: OssService
+    private lateinit var ossService: OssService
 
     @GetMapping("public/download")
     fun download(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse) {
-        if (ossService.isRemoteServerSupportHttpAccess()) {
+        if (ossService.remoteServerSupportHttpAccess()) {
 
         }
     }

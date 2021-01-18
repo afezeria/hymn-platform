@@ -5,19 +5,26 @@ import github.afezeria.hymn.common.util.BusinessException
 import github.afezeria.hymn.common.util.InnerException
 import github.afezeria.hymn.common.util.throwIfBucketNameInvalid
 import github.afezeria.hymn.common.util.throwIfFileNameInvalid
+import github.afezeria.hymn.oss.web.controller.SimpleFileController
+import mu.KLogging
 import java.io.InputStream
 
 /**
  * @author afezeria
  */
-abstract class AbstractOssService(val prefix: String = "") : OssService {
+abstract class AbstractOssService(
+    protected val prefix: String = "",
+    protected val controller: SimpleFileController,
+) : OssService {
+    companion object : KLogging()
+
     init {
         if (!"([a-z][-a-z0-9]{0,9})?".toRegex().matches(prefix)) {
             throw InnerException("$prefix 不是有效的 bucket 前缀")
         }
     }
 
-    override fun isRemoteServerSupportHttpAccess(): Boolean {
+    override fun remoteServerSupportHttpAccess(): Boolean {
         return false
     }
 
@@ -47,6 +54,8 @@ abstract class AbstractOssService(val prefix: String = "") : OssService {
     abstract fun getFileUrl(bucket: String, objectName: String, expiry: Int): String
 
     abstract fun removeFile(bucket: String, objectName: String)
+
+    abstract fun fileExist(bucket: String, objectName: String, client: Any? = null)
 
     override fun putObject(
         bucket: String,
@@ -105,9 +114,15 @@ abstract class AbstractOssService(val prefix: String = "") : OssService {
 
     override fun getObjectUrl(bucket: String, objectName: String, expiry: Int): String {
         bucket.throwIfBucketNameInvalid()
-        val b = prefix + bucket
+        fileExist(prefix + bucket, objectName, null)
 
-        return getFileUrl(b, objectName, expiry)
+        logger.info("开始获取文件下载链接，文件路径： bucket: ${bucket}, objectName: $objectName")
+
+        return if (remoteServerSupportHttpAccess()) {
+            getFileUrl(prefix + bucket, objectName, expiry)
+        } else {
+            controller.generateFileUrl(bucket, objectName, expiry)
+        }
     }
 
     override fun removeObject(bucket: String, objectName: String) {
@@ -115,5 +130,15 @@ abstract class AbstractOssService(val prefix: String = "") : OssService {
         val b = prefix + bucket
 
         removeFile(b, objectName)
+    }
+
+    override fun objectExist(bucket: String, objectName: String): Boolean {
+        bucket.throwIfBucketNameInvalid()
+        return try {
+            fileExist(prefix + bucket, objectName, null)
+            true
+        } catch (e: BusinessException) {
+            false
+        }
     }
 }

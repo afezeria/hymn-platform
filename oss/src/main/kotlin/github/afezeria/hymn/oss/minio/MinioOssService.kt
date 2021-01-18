@@ -12,8 +12,8 @@ import java.io.InputStream
 /**
  * @author afezeria
  */
-class MinioOssService(config: MinioConfig, private val controller: SimpleFileController) :
-    AbstractOssService(prefix = config.prefix ?: "") {
+class MinioOssService(config: MinioConfig, controller: SimpleFileController) :
+    AbstractOssService(prefix = config.prefix ?: "", controller) {
     companion object : KLogging()
 
     private val minioClient: MinioClient
@@ -28,8 +28,8 @@ class MinioOssService(config: MinioConfig, private val controller: SimpleFileCon
         useMinioPreSignedURL = config.useMinioPreSignedURL
     }
 
-    override fun isRemoteServerSupportHttpAccess(): Boolean {
-        return useMinioPreSignedURL
+    override fun remoteServerSupportHttpAccess(): Boolean {
+        return !useMinioPreSignedURL
     }
 
     override fun putFile(
@@ -143,20 +143,14 @@ class MinioOssService(config: MinioConfig, private val controller: SimpleFileCon
     }
 
     override fun getFileUrl(bucket: String, objectName: String, expiry: Int): String {
-        checkBucket(bucket)
-//        minioClient.statObject()
-        return if (useMinioPreSignedURL) {
-            minioClient.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                    .bucket(bucket)
-                    .`object`(objectName)
-                    .method(Method.GET)
-                    .expiry(expiry)
-                    .build()
-            )
-        } else {
-            ""
-        }
+        return minioClient.getPresignedObjectUrl(
+            GetPresignedObjectUrlArgs.builder()
+                .bucket(bucket)
+                .`object`(objectName)
+                .method(Method.GET)
+                .expiry(expiry)
+                .build()
+        )
     }
 
     override fun removeFile(bucket: String, objectName: String) {
@@ -167,6 +161,22 @@ class MinioOssService(config: MinioConfig, private val controller: SimpleFileCon
                 .`object`(objectName)
                 .build()
         )
+    }
+
+    override fun fileExist(bucket: String, objectName: String, client: Any?) {
+        try {
+            minioClient.statObject(
+                StatObjectArgs.builder()
+                    .bucket(bucket)
+                    .`object`(objectName)
+                    .build()
+            )
+        } catch (e: ErrorResponseException) {
+            if (e.response().code() == 404) {
+                throw BusinessException("文件不存在")
+            }
+            throw e
+        }
     }
 
     private fun checkBucket(bucket: String) {

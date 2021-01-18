@@ -15,8 +15,8 @@ import java.io.OutputStream
 /**
  * @author afezeria
  */
-class FTPOssService(config: FTPConfig, private val controller: SimpleFileController) :
-    AbstractOssService(prefix = config.prefix ?: "") {
+class FTPOssService(config: FTPConfig, controller: SimpleFileController) :
+    AbstractOssService(prefix = config.prefix ?: "", controller) {
     companion object : KLogging()
 
     private val pool: FTPClientPool
@@ -28,10 +28,6 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
         val client = pool.borrowObject()
         root = config.path ?: client.printWorkingDirectory()
         root.trimEnd('/')
-    }
-
-    override fun isRemoteServerSupportHttpAccess(): Boolean {
-        return false
     }
 
     override fun putFile(
@@ -81,9 +77,10 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
 
             logger.info("开始下载文件，远程路径:$path")
 
-            ftp.listNames(path)
-                ?.takeIf { it.isNotEmpty() }
-                ?: throw BusinessException("文件不存在")
+            fileExist(bucket, objectName, ftp)
+//            ftp.listNames(path)
+//                ?.takeIf { it.isNotEmpty() }
+//                ?: throw BusinessException("文件不存在")
 
             val inputStream = ftp.retrieveFileStream(path)
             if (!FTPReply.isPositivePreliminary(ftp.replyCode)) {
@@ -121,9 +118,10 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
             val to = "$root/$bucket/$objectName".replace("//", "/")
             logger.info("开始移动文件, 目标路径：$to , 源文件路径：$from")
 
-            ftp.listNames(from)
-                ?.takeIf { it.isNotEmpty() }
-                ?: throw BusinessException("源文件不存在")
+            fileExist(srcBucket, srcObjectName, ftp)
+//            ftp.listNames(from)
+//                ?.takeIf { it.isNotEmpty() }
+//                ?: throw BusinessException("源文件不存在")
 
             ftp.createDirIfNotExist(to.substring(0, to.lastIndexOf('/')))
             ftp.rename(from, to)
@@ -162,9 +160,10 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
 
                 logger.info("开始复制文件，目标路径：$to ，源文件路径：$from")
 
-                ftp1.listNames(from)
-                    ?.takeIf { it.isNotEmpty() }
-                    ?: throw BusinessException("源文件不存在")
+                fileExist(srcBucket, srcObjectName, ftp1)
+//                ftp1.listNames(from)
+//                    ?.takeIf { it.isNotEmpty() }
+//                    ?: throw BusinessException("源文件不存在")
 
                 ftp1.createDirIfNotExist(to.substring(0, to.lastIndexOf('/')))
 
@@ -208,35 +207,23 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
     }
 
     override fun getFileUrl(bucket: String, objectName: String, expiry: Int): String {
-        var ftp: FTPClient? = null
-        try {
-            ftp = pool.borrowObject()
-            val path = "$root/$bucket/$objectName".replace("//", "/")
-
-            logger.info("开始获取文件下载链接，文件路径：$path")
-
-            ftp.listNames(path)
-                ?.takeIf { it.isNotEmpty() }
-                ?: throw BusinessException("文件不存在")
-
-            return controller.generateFileUrl(bucket, objectName, expiry)
-        } finally {
-            pool.returnObject(ftp)
-        }
+        throw NotImplementedError()
     }
 
     override fun removeFile(bucket: String, objectName: String) {
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
-            val path = "$root/$bucket/$objectName"
+            val path = "$root/$bucket/$objectName".replace("//", "/")
             logger.info("开始删除文件，路径：$path")
-            val listNames = ftp.listNames(path)
 
-            if (listNames == null || listNames.isEmpty()) {
-                logger.info("文件不存在")
-                return
-            }
+            fileExist(bucket, objectName, ftp)
+//            val listNames = ftp.listNames(path)
+//
+//            if (listNames == null || listNames.isEmpty()) {
+//                logger.info("文件不存在")
+//                return
+//            }
 
             if (!ftp.deleteFile(path)) {
                 logger.warn("删除文件失败，replyCode:${ftp.replyString}")
@@ -248,6 +235,26 @@ class FTPOssService(config: FTPConfig, private val controller: SimpleFileControl
             throw BusinessException("删除文件失败", e)
         } finally {
             pool.returnObject(ftp)
+        }
+    }
+
+    override fun fileExist(bucket: String, objectName: String, client: Any?) {
+        if (client != null) {
+            val path = "$root/$bucket/$objectName".replace("//", "/")
+            (client as FTPClient).listNames(path)
+                ?.takeIf { it.isNotEmpty() }
+                ?: throw BusinessException("文件不存在")
+        } else {
+            var ftp: FTPClient? = null
+            try {
+                ftp = pool.borrowObject()
+                val path = "$root/$bucket/$objectName".replace("//", "/")
+                ftp.listNames(path)
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: throw BusinessException("文件不存在")
+            } finally {
+                pool.returnObject(ftp)
+            }
         }
     }
 

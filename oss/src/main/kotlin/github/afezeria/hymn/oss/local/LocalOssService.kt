@@ -6,6 +6,7 @@ import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import mu.KLogging
 import org.apache.commons.io.IOUtils
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.nio.file.Files
@@ -18,9 +19,9 @@ import java.nio.file.StandardCopyOption
  * @author afezeria
  */
 class LocalOssService(
-    private val controller: SimpleFileController,
+    controller: SimpleFileController,
     config: LocalConfig? = null,
-) : AbstractOssService(prefix = config?.prefix ?: "") {
+) : AbstractOssService(prefix = config?.prefix ?: "", controller) {
     companion object : KLogging()
 
     private val root: String
@@ -31,10 +32,6 @@ class LocalOssService(
         if (!Files.exists(path)) {
             Files.createDirectories(path)
         }
-    }
-
-    override fun isRemoteServerSupportHttpAccess(): Boolean {
-        return false
     }
 
     override fun putFile(
@@ -61,14 +58,16 @@ class LocalOssService(
 
 
     override fun getFile(bucket: String, objectName: String, fn: (InputStream) -> Unit) {
+        val path = Path.of("$root/$bucket/$objectName")
         try {
-            logger.info("开始下载文件，本地路径：$root/$bucket/$objectName")
-            val dir = Paths.get("$root/$bucket")
-            if (!Files.exists(dir)) {
-                Files.createDirectories(dir)
-            }
-            FileInputStream("$root/$bucket/$objectName").use(fn)
+            logger.info("开始下载文件，本地路径：$path")
+
+            FileInputStream(path.toFile()).use(fn)
+
             logger.info("下载完成")
+        } catch (e: FileNotFoundException) {
+            logger.warn("文件 {} 不存在", path)
+            throw BusinessException("文件不存在")
         } catch (e: IOException) {
             logger.warn("文件下载失败，{}", e)
             throw BusinessException("文件下载失败", e)
@@ -140,11 +139,7 @@ class LocalOssService(
     }
 
     override fun getFileUrl(bucket: String, objectName: String, expiry: Int): String {
-        logger.info("开始获取文件下载链接，文件路径：$root/$bucket/$objectName")
-        if (!Files.exists(Path.of("$root/$bucket/$objectName"))) {
-            throw BusinessException("文件不存在")
-        }
-        return controller.generateFileUrl(bucket, objectName, expiry)
+        throw NotImplementedError()
     }
 
     override fun removeFile(bucket: String, objectName: String) {
@@ -159,6 +154,12 @@ class LocalOssService(
         } catch (e: IOException) {
             logger.warn("删除文件失败", e)
             throw BusinessException("删除文件失败", e)
+        }
+    }
+
+    override fun fileExist(bucket: String, objectName: String, client: Any?) {
+        if (!Files.exists(Path.of("$root/$bucket/$objectName"))) {
+            throw BusinessException("文件不存在")
         }
     }
 }
