@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.platform.PlatformService
+import github.afezeria.hymn.common.platform.SessionService
 import github.afezeria.hymn.core.module.entity.ButtonPerm
 import github.afezeria.hymn.core.module.table.CoreButtonPerms
 import org.ktorm.dsl.*
@@ -21,7 +21,7 @@ class ButtonPermDao {
     private lateinit var dbService: DataBaseService
 
     @Autowired
-    private lateinit var platformService: PlatformService
+    private lateinit var  sessionService: SessionService
 
     val table = CoreButtonPerms()
 
@@ -32,7 +32,7 @@ class ButtonPermDao {
 
     fun update(e: ButtonPerm): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session = platformService.getSession()
+        val session =  sessionService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         return dbService.db().update(table) {
@@ -50,7 +50,7 @@ class ButtonPermDao {
 
     fun insert(e: ButtonPerm): String {
         val now = LocalDateTime.now()
-        val session = platformService.getSession()
+        val session =  sessionService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now
@@ -136,7 +136,7 @@ class ButtonPermDao {
 
     fun insertOrUpdate(e: ButtonPerm): Int {
         val now = LocalDateTime.now()
-        val session = platformService.getSession()
+        val session =  sessionService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now
@@ -166,7 +166,7 @@ class ButtonPermDao {
 
     fun batchInsert(es: List<ButtonPerm>): MutableList<Int> {
         val now = LocalDateTime.now()
-        val session = platformService.getSession()
+        val session =  sessionService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         return dbService.db().batchInsert(table) {

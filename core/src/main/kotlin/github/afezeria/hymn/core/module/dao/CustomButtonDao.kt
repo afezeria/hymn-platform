@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.platform.DataBaseService
-import github.afezeria.hymn.common.platform.PlatformService
+import github.afezeria.hymn.common.platform.SessionService
 import github.afezeria.hymn.core.module.entity.CustomButton
 import github.afezeria.hymn.core.module.table.CoreCustomButtons
 import org.ktorm.dsl.*
@@ -20,7 +20,7 @@ class CustomButtonDao {
     private lateinit var dbService: DataBaseService
 
     @Autowired
-    private lateinit var platformService: PlatformService
+    private lateinit var  sessionService: SessionService
 
     val table = CoreCustomButtons()
 
@@ -31,7 +31,7 @@ class CustomButtonDao {
 
     fun update(e: CustomButton): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session = platformService.getSession()
+        val session =  sessionService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         return dbService.db().update(table) {
@@ -53,7 +53,7 @@ class CustomButtonDao {
 
     fun insert(e: CustomButton): String {
         val now = LocalDateTime.now()
-        val session = platformService.getSession()
+        val session =  sessionService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now
