@@ -1,3 +1,16 @@
+-- 代码生成脚本会忽略 comment 中以 ##ignore开头的字段
+-- comment中以 ;; 开始后面的部分用于代码生成，多个属性之间以 ; 分隔
+-- 当 ;; 出现在表的说明中时
+-- uk:[[field_1 field_2][field_4 field_3]] 表示在field_1和field_2上创建多列唯一索引，字段间以空格分割，一个中括号表示一个索引
+-- idx:[[field_1 field_2][field_4 field_3]] 表示在field_1和field_2上创建多列索引，字段间以空格分割，一个中括号表示一个索引
+-- 当 ;; 出现在字段的说明中时
+-- idx 表示在该字段上创建索引
+-- uk 表示在该字段上创建唯一约束
+-- fk:[table_name action] 表示在该字段上创建外键约束，table_name 为关联的表名，该表必须在hymn schema中
+--      action为删除时的动作可选值为 cascade/restrict/set null/set default
+-- optional_value:[value(desc), value(desc)] 表示在该字段上创建检查约束，约束字段可选值,
+--      value为可选值，括号中的desc为可选值的说明，多个可选值之间用英文逗号分割，空字符串不被视为可选值
+
 drop schema if exists hymn cascade;
 create schema hymn;
 
@@ -763,7 +776,7 @@ create table hymn.core_biz_object_mapping
     create_date          timestamptz not null,
     modify_date          timestamptz not null
 );
-comment on table hymn.core_biz_object_mapping is '对象映射关系 描述以一个对象的数据为基础新建其他对象的数据时字段间的映射关系，比如根据订单创建发货单时将订单中的字段映射到发货单中 ;;uk[[source_biz_object_id source_type_id target_biz_object_id target_type_id]]';
+comment on table hymn.core_biz_object_mapping is '对象映射关系 描述以一个对象的数据为基础新建其他对象的数据时字段间的映射关系，比如根据订单创建发货单时将订单中的字段映射到发货单中 ;;uk:[[source_biz_object_id source_type_id target_biz_object_id target_type_id]]';
 comment on column hymn.core_biz_object_mapping.source_biz_object_id is '源对象id ;;fk:[core_biz_object cascade];idx';
 comment on column hymn.core_biz_object_mapping.target_biz_object_id is '目标对象id ;;fk:[core_biz_object cascade]';
 comment on column hymn.core_biz_object_mapping.source_type_id is '源对象记录类型id ;;fk:[core_biz_object_type cascade]';
