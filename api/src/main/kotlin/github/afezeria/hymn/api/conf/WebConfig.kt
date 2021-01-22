@@ -23,7 +23,8 @@ class WebConfig : WebMvcConfigurer {
             Files.createDirectory(path)
         }
         val location = "file:${path}/"
-        registry.addResourceHandler("/public/**")
+        registry.addResourceHandler("/api/public/custom/**")
             .addResourceLocations(location)
     }
+
 }
