@@ -121,7 +121,7 @@ abstract class AbstractOssService(
         return if (remoteServerSupportHttpAccess()) {
             getFileUrl(prefix + bucket, objectName, expiry)
         } else {
-            controller.generateFileUrl(bucket, objectName, expiry)
+            controller.generatePreSignedFileUrl(bucket, objectName, expiry)
         }
     }
 
@@ -140,5 +140,18 @@ abstract class AbstractOssService(
         } catch (e: BusinessException) {
             false
         }
+    }
+
+
+    override fun getObjectWithPerm(objectId: String, fn: (InputStream) -> Unit) {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeObjectWithPerm(objectId: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getObjectListByBucket(bucket: String, page: Int, size: Int): List<String> {
+        TODO("Not yet implemented")
     }
 }

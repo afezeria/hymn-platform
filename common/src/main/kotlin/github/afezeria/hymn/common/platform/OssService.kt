@@ -32,6 +32,8 @@ interface OssService {
      */
     fun getObject(bucket: String, objectName: String, fn: (InputStream) -> Unit)
 
+    fun getObjectWithPerm(objectId: String, fn: (InputStream) -> Unit)
+
 
     /**
      * 移动对象
@@ -81,11 +83,15 @@ interface OssService {
      */
     fun removeObject(bucket: String, objectName: String)
 
+    fun removeObjectWithPerm(objectId: String)
+
     /**
      * 对象是否存在
      * @param bucket bucket 名称
      * @param objectName 对象名称
      */
     fun objectExist(bucket: String, objectName: String): Boolean
+
+    fun getObjectListByBucket(bucket: String, page: Int, size: Int): List<String>
 
 }
