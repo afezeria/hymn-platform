@@ -1,5 +1,6 @@
 package github.afezeria.hymn.common
 
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import java.io.File
 import java.io.InputStreamReader
 import java.util.*
@@ -15,27 +16,28 @@ open class BaseDbTest {
 
         init {
             println("========== db init start ==========")
+            val classLoader = this::class.java.classLoader
             prop.load(
-                this::class.java.classLoader.getResourceAsStream("admin-database.properties")
+                classLoader.getResourceAsStream("admin-database.properties")
             )
-            val scripts = listOf(
-                "1.table.sql",
-                "2.history-table-and-trigger.sql",
-                "3.function.sql",
-                "4.init-data.sql",
-                "5.constraint.sql",
-                "6.test-data-table.sql",
-            )
-            for (script in scripts) {
-                val temp = File.createTempFile(script, ".sql")
-                temp.deleteOnExit()
-                val stream =
-                    requireNotNull(this::class.java.classLoader.getResourceAsStream("sql/$script"))
-                temp.outputStream().use {
-                    it.write(stream.readAllBytes())
+            PathMatchingResourcePatternResolver(classLoader)
+                .getResources("classpath:/sql/**/*.sql")
+                .groupBy {
+                    "\\[sql/(\\w+)".toRegex()
+                        .find(it.description)!!.groupValues[1]
+                }.map { it.key to it.value.sortedBy { it.filename } }
+                .sortedBy { it.first != "common" }
+                .forEach { scripts ->
+                    scripts.second.forEach { res ->
+                        val temp = File.createTempFile("${scripts.first}-${res.filename}", ".sql")
+                        temp.deleteOnExit()
+                        temp.outputStream().use {
+                            it.write(res.inputStream.readAllBytes())
+                        }
+                        runSqlScript(temp.absolutePath)
+                    }
                 }
-                runSqlScript(temp.absolutePath)
-            }
+
             println("========== db init end ==========")
         }
 
@@ -55,7 +57,7 @@ open class BaseDbTest {
 
             InputStreamReader(proc.errorStream).readLines().filter {
                 regex.find(it) != null
-            }.takeIf { it.isNotEmpty() }?.apply{
+            }.takeIf { it.isNotEmpty() }?.apply {
                 println("========== error ==========")
                 throw RuntimeException(this.joinToString("\n"))
             }

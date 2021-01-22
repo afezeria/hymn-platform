@@ -45,8 +45,9 @@ val testConfig = configurations.create("testArtifacts") {
 }
 tasks.register<Jar>("testJar") {
     dependsOn("testClasses")
-    archiveClassifier.set(project.name + "test")
-    from(sourceSets["test"].output.classesDirs)
+    archiveClassifier.set("test")
+    from(sourceSets["test"].output)
+
 }
 artifacts {
     add("testArtifacts", tasks.named<Jar>("testJar"))
