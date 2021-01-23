@@ -1,6 +1,5 @@
 package github.afezeria.hymn.common
 
-import github.afezeria.hymn.common.container.Container
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import java.io.File
 import java.io.InputStreamReader
@@ -10,7 +9,7 @@ import java.util.*
 /**
  * @author afezeria
  */
-open class BaseDbTest(vararg val containers: Container) {
+open class BaseDbTest {
 
     companion object {
         private val prop = Properties()
