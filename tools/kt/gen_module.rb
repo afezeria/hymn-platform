@@ -4,7 +4,8 @@ require_relative '../config'
 require_relative '../constant'
 
 conn = PG.connect Config::DB
-table_regex = /^#{Config::MODULE}(?!_data_table).*(?<!history)$/
+# table_regex = /^#{Config::MODULE}(?!_data_table).*(?<!history)$/
+table_regex = /^#{Config::MODULE}(?!_data_table).*$/
 
 conn.exec Constant::QUERY_TABLE do |r|
   columns = conn.exec(Constant::QUERY_COLUMN).filter do |c|

@@ -28,7 +28,7 @@ class {{name}} {
     @ApiOperation
 (value = "查询全部数据", notes = "")
     @GetMapping
-    fun findAll(): ApiResp<List<{{entity_class}}>> {
+    fun findAll(): List<{{entity_class}}> {
         val all = {{service_name}}.findAll()
         return successApiResp(all)
     }
@@ -38,7 +38,7 @@ class {{name}} {
     @ApiOperation
 (value = "根据id查询", notes = "无参数时查询全部数据")
     @GetMapping("/{id}")
-    fun findById(@PathVariable("id") id: String): ApiResp<{{entity_class}}> {
+    fun findById(@PathVariable("id") id: String): {{entity_class}} {
         val entity = {{service_name}}.findById(id)
             ?: throw DataNotFoundException("CoreAccount".msgById(id))
         return successApiResp(entity)
@@ -49,7 +49,7 @@ class {{name}} {
     @ApiOperation
 (value = "新建", notes = "")
     @PostMapping
-    fun create(@RequestBody dto: {{dto_class}}): ApiResp<String> {
+    fun create(@RequestBody dto: {{dto_class}}): String {
         val id = {{service_name}}.create(dto)
         return successApiResp(id)
     }
@@ -60,7 +60,7 @@ class {{name}} {
 (value = "更新", notes = "")
     @PutMapping("/{id}")
     fun update(@PathVariable("id") id: String,
-               @RequestBody dto: {{dto_class}}): ApiResp<Int> {
+               @RequestBody dto: {{dto_class}}): Int {
         val count = {{service_name}}.update(id, dto)
         return successApiResp(count)
     }
@@ -70,7 +70,7 @@ class {{name}} {
     @ApiOperation
 (value = "根据id删除", notes = "")
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable("id") id: String): ApiResp<Int> {
+    fun delete(@PathVariable("id") id: String): Int {
         val count = {{service_name}}.removeById(id)
         return successApiResp(count)
     }
