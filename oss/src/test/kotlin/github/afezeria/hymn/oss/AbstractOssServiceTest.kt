@@ -29,10 +29,9 @@ class AbstractOssServiceTest {
         @BeforeAll
         fun beforeAll() {
             rootDir = System.getProperty("user.dir") + "/test-dir/"
-            config = LocalConfig(
-                rootDir = rootDir, prefix = "test-"
-            )
-            localOssService = LocalOssService(mockk(), config)
+            config = LocalConfig()
+            config.rootDir = rootDir
+            localOssService = LocalOssService(config)
         }
 
         @AfterAll
@@ -47,11 +46,12 @@ class AbstractOssServiceTest {
         }
     }
 
-    lateinit var service: AbstractOssService
+    lateinit var service: OssServiceImpl
 
     @BeforeEach
     fun before() {
-        service = spyk(localOssService, recordPrivateCalls = true)
+        TODO("继承关系修改后这段不再适用，OssServiceImpl的测试需要重写")
+//        service = spyk(localOssService, recordPrivateCalls = true)
     }
 
     @AfterEach
@@ -66,7 +66,7 @@ class AbstractOssServiceTest {
             val slot1 = slot<String>()
             val slot2 = slot<String>()
             justRun {
-                service.putFile(
+                localOssService.putFile(
                     capture(slot1),
                     objectName = any(),
                     inputStream = any(),
@@ -82,13 +82,13 @@ class AbstractOssServiceTest {
             slot1.captured shouldBe "test-img"
 
             justRun {
-                service.getFile(bucket = capture(slot1), objectName = any(), fn = any())
+                localOssService.getFile(bucket = capture(slot1), objectName = any(), fn = any())
             }
             service.getObject("archive", "cc.txt", {})
             slot1.captured shouldBe "test-archive"
 
             justRun {
-                service.moveFile(
+                localOssService.moveFile(
                     bucket = capture(slot1),
                     objectName = any(),
                     srcBucket = capture(slot2),
@@ -100,7 +100,7 @@ class AbstractOssServiceTest {
             slot2.captured shouldBe "test-bb2"
 
             justRun {
-                service.copyFile(
+                localOssService.copyFile(
                     bucket = capture(slot1),
                     objectName = any(),
                     srcBucket = capture(slot2),
@@ -112,15 +112,19 @@ class AbstractOssServiceTest {
             slot2.captured shouldBe "test-bb2"
 
             every {
-                service.getFileUrl(bucket = capture(slot1), objectName = any(), expiry = any())
+                localOssService.getFileUrl(
+                    bucket = capture(slot1),
+                    objectName = any(),
+                    expiry = any()
+                )
             } returns ""
-            justRun { service.fileExist(any(), any(), any()) }
-            every { service.remoteServerSupportHttpAccess() } returns true
+            justRun { localOssService.fileExist(any(), any(), any()) }
+            every { localOssService.remoteServerSupportHttpAccess() } returns true
             service.getObjectUrl("bbc", "aa")
             slot1.captured shouldBe "test-bbc"
 
             justRun {
-                service.removeFile(capture(slot1), any())
+                localOssService.removeFile(capture(slot1), any())
             }
             service.removeObject("tmp", "bb.txt")
             slot1.captured shouldBe "test-tmp"
@@ -144,11 +148,13 @@ class AbstractOssServiceTest {
     @Test
     fun `throw when invalid prefix of bucket `() {
         shouldThrow<InnerException> {
-            LocalOssService(
+            OssServiceImpl(
+                prefix = "0",
                 mockk(),
-                LocalConfig(
-                    rootDir = rootDir, prefix = "0"
-                )
+                mockk(),
+                mockk(),
+                mockk(),
+                mockk(),
             )
         }.apply {
             message shouldBe "0 不是有效的 bucket 前缀"

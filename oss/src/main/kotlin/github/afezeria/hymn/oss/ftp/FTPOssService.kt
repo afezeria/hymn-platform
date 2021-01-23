@@ -2,8 +2,7 @@ package github.afezeria.hymn.oss.ftp
 
 import github.afezeria.hymn.common.util.BusinessException
 import github.afezeria.hymn.common.util.InnerException
-import github.afezeria.hymn.oss.AbstractOssService
-import github.afezeria.hymn.oss.web.controller.SimpleFileController
+import github.afezeria.hymn.oss.FileService
 import mu.KLogging
 import org.apache.commons.io.IOUtils
 import org.apache.commons.net.ftp.FTPClient
@@ -15,8 +14,7 @@ import java.io.OutputStream
 /**
  * @author afezeria
  */
-class FTPOssService(config: FTPConfig, controller: SimpleFileController) :
-    AbstractOssService(prefix = config.prefix ?: "", controller) {
+class FTPOssService(config: FTPConfig) : FileService {
     companion object : KLogging()
 
     private val pool: FTPClientPool

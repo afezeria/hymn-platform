@@ -3,10 +3,9 @@ package github.afezeria.hymn.oss.minio
 /**
  * @author afezeria
  */
-data class MinioConfig(
-    val url: String,
-    val accessKey: String,
-    val secretKey: String,
-    val prefix: String? = null,
-    val useMinioPreSignedURL: Boolean = false,
-)
+class MinioConfig {
+    lateinit var url: String
+    lateinit var accessKey: String
+    lateinit var secretKey: String
+    var useMinioPreSignedURL: Boolean = false
+}

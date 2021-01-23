@@ -1,7 +1,6 @@
 package github.afezeria.hymn.oss
 
 import github.afezeria.hymn.common.KGenericContainer
-import github.afezeria.hymn.common.platform.OssService
 import github.afezeria.hymn.common.randomUUIDStr
 import github.afezeria.hymn.oss.minio.MinioConfig
 import github.afezeria.hymn.oss.minio.MinioOssService
@@ -65,25 +64,24 @@ class MinioOssServiceTest {
                 .withStartupTimeout(Duration.ofSeconds(20))
         )
 
-    lateinit var service: OssService
+    lateinit var service: FileService
     lateinit var fileController: SimpleFileController
     lateinit var minio: MinioClient
 
     @BeforeEach
     fun setUp() {
-        val config = MinioConfig(
-            url = "http://${container.host}:${container.firstMappedPort}",
-            accessKey = ADMIN_ACCESS_KEY,
-            secretKey = ADMIN_SECRET_KEY,
-            prefix = null,
+        val config = MinioConfig().apply {
+            url = "http://${container.host}:${container.firstMappedPort}"
+            accessKey = ADMIN_ACCESS_KEY
+            secretKey = ADMIN_SECRET_KEY
             useMinioPreSignedURL = true
-        )
+        }
         minio = MinioClient.builder()
             .endpoint(config.url)
             .credentials(config.accessKey, config.secretKey)
             .build()
         fileController = mockk()
-        service = MinioOssService(config, fileController)
+        service = MinioOssService(config)
     }
 
 
@@ -91,7 +89,7 @@ class MinioOssServiceTest {
     fun upload() {
         bucketExists("test") shouldBe false
         val str = "hello"
-        service.putObject(
+        service.putFile(
             "test",
             "abc.text",
             ByteArrayInputStream(str.toByteArray()),
@@ -115,7 +113,7 @@ class MinioOssServiceTest {
         bucketExists("test") shouldBe false
         val str = "hello"
         val file = "2020/01/01/abc.text"
-        service.putObject(
+        service.putFile(
             "test",
             file,
             ByteArrayInputStream(str.toByteArray()),
@@ -148,7 +146,7 @@ class MinioOssServiceTest {
                 .build()
         )
         val stream = ByteArrayOutputStream()
-        service.getObject(bucket, "abc.text") {
+        service.getFile(bucket, "abc.text") {
             IOUtils.copy(it, stream)
         }
         stream.toByteArray().decodeToString() shouldBe "abc"
@@ -160,7 +158,7 @@ class MinioOssServiceTest {
         val srcFile = "abc.txt"
         val newFile = "def.txt"
         val str = createFile(bucket, "abc.txt")
-        service.moveObject(bucket, newFile, bucket, srcFile)
+        service.moveFile(bucket, newFile, bucket, srcFile)
         getFile(bucket, newFile).apply {
             readAllBytes().decodeToString() shouldBe str
         }
@@ -174,7 +172,7 @@ class MinioOssServiceTest {
         val srcFile = "abc.txt"
         val newFile = "def.txt"
         val str = createFile(srcBucket, "abc.txt")
-        service.moveObject(bucket, newFile, srcBucket, srcFile)
+        service.moveFile(bucket, newFile, srcBucket, srcFile)
         getFile(bucket, newFile).apply {
             readAllBytes().decodeToString() shouldBe str
         }
@@ -187,7 +185,7 @@ class MinioOssServiceTest {
         val srcFile = "abc.txt"
         val newFile = "def.txt"
         val str = createFile(bucket, "abc.txt")
-        service.copyObject(bucket, newFile, bucket, srcFile)
+        service.copyFile(bucket, newFile, bucket, srcFile)
         getFile(bucket, newFile).apply {
             readAllBytes().decodeToString() shouldBe str
         }
@@ -201,7 +199,7 @@ class MinioOssServiceTest {
         val srcFile = "abc.txt"
         val newFile = "def.txt"
         val str = createFile(srcBucket, "abc.txt")
-        service.copyObject(bucket, newFile, srcBucket, srcFile)
+        service.copyFile(bucket, newFile, srcBucket, srcFile)
         getFile(bucket, newFile).apply {
             readAllBytes().decodeToString() shouldBe str
         }
@@ -212,7 +210,7 @@ class MinioOssServiceTest {
     fun remove() {
         val bucket = createBucket()
         val file = createFile(bucket, "tt")
-        service.removeObject(bucket, file)
+        service.removeFile(bucket, file)
         fileExists(bucket, file) shouldBe false
     }
 

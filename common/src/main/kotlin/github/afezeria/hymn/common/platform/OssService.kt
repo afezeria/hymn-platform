@@ -8,20 +8,20 @@ import java.io.InputStream
 interface OssService {
 
     /**
-     * 对象服务器是否支持直接http访问
-     */
-    fun remoteServerSupportHttpAccess(): Boolean
-
-
-    /**
      * 存储对象
      *
      * @param bucket bucket 名称
      * @param objectName 对象名
      * @param inputStream 对象的输入流
      * @param contentType http 的 MimeType 值
+     * @return 对象id
      */
-    fun putObject(bucket: String, objectName: String, inputStream: InputStream, contentType: String)
+    fun putObject(
+        bucket: String,
+        objectName: String,
+        inputStream: InputStream,
+        contentType: String
+    ): String
 
     /**
      *  获取对象字节流
@@ -33,6 +33,7 @@ interface OssService {
     fun getObject(bucket: String, objectName: String, fn: (InputStream) -> Unit)
 
     fun getObjectWithPerm(objectId: String, fn: (InputStream) -> Unit)
+    fun getObject(objectId: String, fn: (InputStream) -> Unit)
 
 
     /**
@@ -63,7 +64,7 @@ interface OssService {
         objectName: String,
         srcBucket: String,
         srcObjectName: String
-    )
+    ): String
 
 
     /**
@@ -84,6 +85,7 @@ interface OssService {
     fun removeObject(bucket: String, objectName: String)
 
     fun removeObjectWithPerm(objectId: String)
+    fun removeObject(objectId: String)
 
     /**
      * 对象是否存在
@@ -92,6 +94,17 @@ interface OssService {
      */
     fun objectExist(bucket: String, objectName: String): Boolean
 
-    fun getObjectListByBucket(bucket: String, page: Int, size: Int): List<String>
+    /**
+     * 根据bucket获取对象列表
+     * @param bucket
+     * @param pageSize
+     * @param pageNum
+     * @return pair.first 对象id，pair.second 对象名
+     */
+    fun getObjectListByBucket(
+        bucket: String,
+        pageSize: Int,
+        pageNum: Int
+    ): List<Pair<String, String>>
 
 }

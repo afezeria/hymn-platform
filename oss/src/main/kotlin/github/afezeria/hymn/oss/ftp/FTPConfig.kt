@@ -10,13 +10,13 @@ package github.afezeria.hymn.oss.ftp
  * @param bufferSize 缓冲大小
  * @author afezeria
  */
-data class FTPConfig(
-    val host: String,
-    val port: Int = 21,
-    val path: String? = null,
-    val username: String,
-    val password: String,
-    val connectTimeout: Int = 30,
-    val bufferSize: Int = 8 * 1024,
-    val prefix: String? = null,
-)
+class FTPConfig {
+    lateinit var host: String
+    var port: Int = 21
+    var path: String? = null
+    lateinit var username: String
+    lateinit var password: String
+    var connectTimeout: Int = 30
+    var bufferSize: Int = 8 * 1024
+    var prefix: String? = null
+}

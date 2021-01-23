@@ -1,19 +1,19 @@
 package github.afezeria.hymn.oss.minio
 
 import github.afezeria.hymn.common.util.BusinessException
-import github.afezeria.hymn.oss.AbstractOssService
+import github.afezeria.hymn.oss.FileService
 import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import io.minio.*
 import io.minio.errors.ErrorResponseException
 import io.minio.http.Method
 import mu.KLogging
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 /**
  * @author afezeria
  */
-class MinioOssService(config: MinioConfig, controller: SimpleFileController) :
-    AbstractOssService(prefix = config.prefix ?: "", controller) {
+class MinioOssService(config: MinioConfig) : FileService {
     companion object : KLogging()
 
     private val minioClient: MinioClient
@@ -148,7 +148,7 @@ class MinioOssService(config: MinioConfig, controller: SimpleFileController) :
                 .bucket(bucket)
                 .`object`(objectName)
                 .method(Method.GET)
-                .expiry(expiry)
+                .expiry(expiry, TimeUnit.SECONDS)
                 .build()
         )
     }

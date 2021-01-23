@@ -1,7 +1,7 @@
 package github.afezeria.hymn.oss.local
 
 import github.afezeria.hymn.common.util.BusinessException
-import github.afezeria.hymn.oss.AbstractOssService
+import github.afezeria.hymn.oss.FileService
 import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import mu.KLogging
 import org.apache.commons.io.IOUtils
@@ -19,9 +19,8 @@ import java.nio.file.StandardCopyOption
  * @author afezeria
  */
 class LocalOssService(
-    controller: SimpleFileController,
     config: LocalConfig? = null,
-) : AbstractOssService(prefix = config?.prefix ?: "", controller) {
+) : FileService {
     companion object : KLogging()
 
     private val root: String

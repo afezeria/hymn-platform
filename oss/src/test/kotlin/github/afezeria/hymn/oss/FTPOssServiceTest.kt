@@ -1,7 +1,6 @@
 package github.afezeria.hymn.oss
 
 import github.afezeria.hymn.common.KGenericContainer
-import github.afezeria.hymn.common.platform.OssService
 import github.afezeria.hymn.common.randomUUIDStr
 import github.afezeria.hymn.oss.ftp.FTPClientFactory
 import github.afezeria.hymn.oss.ftp.FTPConfig
@@ -32,7 +31,7 @@ class FTPOssServiceTest {
         lateinit var container: KGenericContainer
         lateinit var config: FTPConfig
         lateinit var ftp: FTPClient
-        lateinit var service: OssService
+        lateinit var service: FileService
         lateinit var fileController: SimpleFileController
         const val rootDir = "/home/vsftpd/admin/"
 
@@ -52,19 +51,18 @@ class FTPOssServiceTest {
                         .withStartupTimeout(Duration.ofSeconds(10))
                 )
             container.start()
-            config = FTPConfig(
-                host = container.containerInfo.networkSettings.ipAddress,
-                port = 21,
-                path = null,
-                username = USERNAME,
-                password = PASSWORD,
-                connectTimeout = 0,
-                bufferSize = 0,
-                prefix = null
-            )
+            config = FTPConfig().apply {
+                host = container.containerInfo.networkSettings.ipAddress
+                port = 21
+                path = null
+                username = USERNAME
+                password = PASSWORD
+                connectTimeout = 0
+                bufferSize = 0
+            }
             ftp = FTPClientFactory(config).create()
             fileController = mockk()
-            service = FTPOssService(config, fileController)
+            service = FTPOssService(config)
         }
 
         @AfterAll
@@ -78,7 +76,7 @@ class FTPOssServiceTest {
     @Test
     fun upload() {
         val str = "abc".toByteArray()
-        service.putObject(
+        service.putFile(
             "abc",
             "abc.txt",
             ByteArrayInputStream(str),
@@ -91,7 +89,7 @@ class FTPOssServiceTest {
     @Test
     fun `upload with path`() {
         val str = "abc".toByteArray()
-        service.putObject(
+        service.putFile(
             "abc",
             "/2020/01/01/abc.txt",
             ByteArrayInputStream(str),
@@ -108,7 +106,7 @@ class FTPOssServiceTest {
         val path = "dow/abc.txt"
         val byteArray = createFile(path)
         var array: ByteArray? = null
-        service.getObject("dow", "abc.txt") {
+        service.getFile("dow", "abc.txt") {
             array = it.readAllBytes()
         }
         byteArray shouldBe array
@@ -119,7 +117,7 @@ class FTPOssServiceTest {
         val path = "move/abc.txt"
         val byteArray = createFile(path)
         val bucket = "move"
-        service.moveObject(bucket, "bcd.txt", bucket, "abc.txt")
+        service.moveFile(bucket, "bcd.txt", bucket, "abc.txt")
         fileExist("move/abc.txt") shouldBe false
         fileExist("move/bcd.txt") shouldBe true
         fileContent("move/bcd.txt") shouldBe byteArray
@@ -132,7 +130,7 @@ class FTPOssServiceTest {
         val pa = "move/$fa"
         val pb = "move2/$fb"
         val byteArray = createFile(pb)
-        service.moveObject("move", fa, "move2", fb)
+        service.moveFile("move", fa, "move2", fb)
         fileExist(pb) shouldBe false
         fileExist(pa) shouldBe true
         fileContent(pa) shouldBe byteArray
@@ -145,7 +143,7 @@ class FTPOssServiceTest {
         val pa = "copy/$fa"
         val pb = "copy/$fb"
         val byteArray = createFile(pb)
-        service.copyObject("copy", fa, "copy", fb)
+        service.copyFile("copy", fa, "copy", fb)
         fileExist(pb) shouldBe true
         fileExist(pa) shouldBe true
         fileContent(pa) shouldBe byteArray
@@ -158,7 +156,7 @@ class FTPOssServiceTest {
         val pa = "copy/$fa"
         val pb = "copy2/$fb"
         val byteArray = createFile(pb)
-        service.copyObject("copy", fa, "copy2", fb)
+        service.copyFile("copy", fa, "copy2", fb)
         fileExist(pb) shouldBe true
         fileExist(pa) shouldBe true
         fileContent(pa) shouldBe byteArray
@@ -169,7 +167,7 @@ class FTPOssServiceTest {
         val fa = randomUUIDStr()
         val pa = "copy/$fa"
         val byteArray = createFile(pa)
-        service.removeObject("copy", fa)
+        service.removeFile("copy", fa)
         fileExist(pa) shouldBe false
     }
 
