@@ -23,8 +23,10 @@ open class BaseDbTest {
             PathMatchingResourcePatternResolver(classLoader)
                 .getResources("classpath:/sql/**/*.sql")
                 .groupBy {
-                    "\\[sql/(\\w+)".toRegex()
-                        .find(it.description)!!.groupValues[1]
+                    "/sql/(((?<=/)(?!sql/)[-a-z]+/)+)[^/]+\\.sql$".toRegex()
+                        .find(it.uri.toString())!!.groupValues[1]
+                        .split("/").filterNot { it.isEmpty() }
+                        .joinToString("-")
                 }.map { it.key to it.value.sortedBy { it.filename } }
                 .sortedBy { it.first != "common" }
                 .forEach { scripts ->
