@@ -870,7 +870,6 @@ begin
              left join hymn.core_biz_object cbo on cbof.biz_object_id = cbo.id
     where cbof.type in ('select', 'check_box_group')
       and cbof.dict_id = record_old.id;
-    raise notice '%',field_arr;
     if field_arr is not null then
         raise exception '[f:inner:02101] 当前字典被以下字段引用，不能删除: %',field_arr;
     end if;
@@ -1388,7 +1387,6 @@ declare
 begin
     --     状态为停用的字段不允许修改数据
     if record_new.active = record_old.active and record_new.active = false then
-        raise notice '%',new;
         raise exception '[f:inner:03601] 字段停用时无法修改属性%',new;
     end if;
     --     禁止修改type
@@ -2091,15 +2089,12 @@ begin
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
 --                 过滤filter_list中错误的对象id
                 if record_new.filter_list is distinct from record_old.filter_list then
-                    raise notice 'abccc';
-                    raise notice '%',record_new.filter_list;
                     select string_agg(id, ',')
                     into record_new.filter_list
                     from hymn.core_biz_object
                     where active = true
                       and id = any
                           (array_remove(regexp_split_to_array(record_new.filter_list, ','), ''));
-                    raise notice '%',record_new.filter_list;
                 end if;
             end if;
         end if;
