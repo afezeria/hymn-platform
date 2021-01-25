@@ -75,4 +75,8 @@ fun Any.toFormatJson(): String {
     return formatMapper.writeValueAsString(this)
 }
 
+inline fun <reified T> String?.toClass(): T? {
+    if (this == null) return null
+    return mapper.readValue(this, T::class.java)
+}
 

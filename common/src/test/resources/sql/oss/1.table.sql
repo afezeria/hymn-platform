@@ -1,7 +1,7 @@
 drop table if exists hymn.oss_file_record cascade;
 create table hymn.oss_file_record
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     bucket       text        not null,
     file_name    text        not null,
     content_type text,
@@ -9,7 +9,8 @@ create table hymn.oss_file_record
     object_id    text,
     field_id     text,
     data_id      text,
-    size         int,
+    size         int         not null default -1,
+    tmp          boolean              default true,
     remark       text,
     create_by_id text        not null,
     create_by    text        not null,
@@ -26,6 +27,7 @@ comment on column hymn.oss_file_record.object_id is '所属自定义对象id';
 comment on column hymn.oss_file_record.field_id is '所属自定义对像中的字段的id';
 comment on column hymn.oss_file_record.data_id is '所属数据id';
 comment on column hymn.oss_file_record.size is '文件大小';
+comment on column hymn.oss_file_record.tmp is '是否为临时文件';
 
 
 

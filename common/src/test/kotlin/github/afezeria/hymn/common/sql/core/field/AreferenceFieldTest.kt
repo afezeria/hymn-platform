@@ -1,7 +1,11 @@
 package github.afezeria.hymn.common.sql.core.field
 
-import github.afezeria.hymn.common.*
+import github.afezeria.hymn.common.BaseDbTest
+import github.afezeria.hymn.common.COMMON_INFO
+import github.afezeria.hymn.common.customBizObject
+import github.afezeria.hymn.common.userConn
 import github.afezeria.hymn.common.util.execute
+import github.afezeria.hymn.common.util.randomUUIDStr
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import org.junit.jupiter.api.Test

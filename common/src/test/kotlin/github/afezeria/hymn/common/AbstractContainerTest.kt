@@ -1,7 +1,5 @@
 package github.afezeria.hymn.common
 
-import org.junit.jupiter.api.Test
-
 /**
  * @author afezeria
  */

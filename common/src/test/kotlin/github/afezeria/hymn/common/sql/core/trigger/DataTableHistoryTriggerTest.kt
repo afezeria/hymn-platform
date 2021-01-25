@@ -44,7 +44,7 @@ class DataTableHistoryTriggerTest : BaseDbTest() {
     }
 
     @Test
-    fun `recover data`(){
+    fun `recover data`() {
         customBizObject {
             val field = it.execute(
                 """

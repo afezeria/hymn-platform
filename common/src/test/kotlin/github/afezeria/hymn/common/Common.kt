@@ -5,7 +5,6 @@ import github.afezeria.hymn.common.util.execute
 import io.kotest.matchers.shouldBe
 import java.sql.Connection
 import java.time.LocalDateTime
-import java.util.*
 
 /**
  * @author afezeria
@@ -88,7 +87,6 @@ fun clearBObject() {
 
 var objSeq = (1..100000).iterator()
 
-fun randomUUIDStr(): String = UUID.randomUUID().toString().replace("-", "")
 
 data class ModuleBizObject(
     val moduleId: String,

@@ -2,6 +2,7 @@ package github.afezeria.hymn.common.sql.core.bobject
 
 import github.afezeria.hymn.common.*
 import github.afezeria.hymn.common.util.execute
+import github.afezeria.hymn.common.util.randomUUIDStr
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
