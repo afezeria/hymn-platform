@@ -28,7 +28,7 @@ open class BaseDbTest {
                         .split("/").filterNot { it.isEmpty() }
                         .joinToString("-")
                 }.map { it.key to it.value.sortedBy { it.filename } }
-                .sortedBy { it.first != "common" }
+                .sortedBy { it.first != "core" }
                 .forEach { scripts ->
                     scripts.second.forEach { res ->
                         val temp = File.createTempFile("${scripts.first}-${res.filename}", ".sql")

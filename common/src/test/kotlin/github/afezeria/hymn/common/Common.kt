@@ -1,6 +1,6 @@
 package github.afezeria.hymn.common
 
-import github.afezeria.hymn.common.sql.field.randomFieldNameAndApi
+import github.afezeria.hymn.common.sql.core.field.randomFieldNameAndApi
 import github.afezeria.hymn.common.util.execute
 import io.kotest.matchers.shouldBe
 import java.sql.Connection
