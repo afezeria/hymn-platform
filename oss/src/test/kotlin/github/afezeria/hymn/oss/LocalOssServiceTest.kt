@@ -1,9 +1,12 @@
 package github.afezeria.hymn.oss
 
 import github.afezeria.hymn.common.randomUUIDStr
+import github.afezeria.hymn.common.util.BusinessException
 import github.afezeria.hymn.oss.local.LocalConfig
 import github.afezeria.hymn.oss.local.LocalOssService
-import github.afezeria.hymn.oss.web.controller.SimpleFileController
+import github.afezeria.hymn.oss.web.controller.PreSignedUrlController
+import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import mu.KLogging
@@ -24,8 +27,7 @@ import java.util.*
 class LocalOssServiceTest {
     companion object : KLogging() {
         lateinit var config: LocalConfig
-        lateinit var service: FileService
-        lateinit var fileController: SimpleFileController
+        lateinit var service: StorageService
         lateinit var rootDir: String
 
         @JvmStatic
@@ -36,7 +38,6 @@ class LocalOssServiceTest {
             config = LocalConfig()
             config.rootDir = rootDir
 
-            fileController = mockk()
             service = LocalOssService(config)
         }
 
@@ -148,6 +149,49 @@ class LocalOssServiceTest {
         val byteArray = createFile(pa)
         service.removeFile("copy", fa)
         fileExist(pa) shouldBe false
+    }
+
+    @Test
+    fun fileExist() {
+        val bucket = "fileexist"
+        val file = "abc"
+        createFile("fileexist/abc")
+        shouldNotThrow<BusinessException> {
+            service.fileExist(bucket, file)
+        }
+        shouldThrow<BusinessException> {
+            service.getFile("abc242", "abc", {})
+        }.apply {
+            message shouldBe "文件不存在"
+        }
+
+    }
+
+    @Test
+    fun `get a file that does not exist`() {
+        shouldThrow<BusinessException> {
+            service.getFile("abc", "abc", {})
+        }.apply {
+            message shouldBe "文件不存在"
+        }
+    }
+
+    @Test
+    fun `move nonexistent files`() {
+        shouldThrow<BusinessException> {
+            service.moveFile("abc", "abc", "bcd", "bcd")
+        }.apply {
+            message shouldBe "文件不存在"
+        }
+    }
+
+    @Test
+    fun `copy nonexistent files`() {
+        shouldThrow<BusinessException> {
+            service.copyFile("abc", "abc", "bcd", "bcd")
+        }.apply {
+            message shouldBe "文件不存在"
+        }
     }
 
     private fun fileExist(path: String): Boolean {

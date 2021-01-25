@@ -1,8 +1,7 @@
 package github.afezeria.hymn.oss.minio
 
 import github.afezeria.hymn.common.util.BusinessException
-import github.afezeria.hymn.oss.FileService
-import github.afezeria.hymn.oss.web.controller.SimpleFileController
+import github.afezeria.hymn.oss.StorageService
 import io.minio.*
 import io.minio.errors.ErrorResponseException
 import io.minio.http.Method
@@ -13,7 +12,7 @@ import java.util.concurrent.TimeUnit
 /**
  * @author afezeria
  */
-class MinioOssService(config: MinioConfig) : FileService {
+class MinioOssService(config: MinioConfig) : StorageService {
     companion object : KLogging()
 
     private val minioClient: MinioClient

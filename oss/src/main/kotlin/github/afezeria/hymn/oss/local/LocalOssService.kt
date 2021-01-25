@@ -1,8 +1,7 @@
 package github.afezeria.hymn.oss.local
 
 import github.afezeria.hymn.common.util.BusinessException
-import github.afezeria.hymn.oss.FileService
-import github.afezeria.hymn.oss.web.controller.SimpleFileController
+import github.afezeria.hymn.oss.StorageService
 import mu.KLogging
 import org.apache.commons.io.IOUtils
 import java.io.FileInputStream
@@ -20,7 +19,7 @@ import java.nio.file.StandardCopyOption
  */
 class LocalOssService(
     config: LocalConfig? = null,
-) : FileService {
+) : StorageService {
     companion object : KLogging()
 
     private val root: String
@@ -50,7 +49,7 @@ class LocalOssService(
             IOUtils.copy(inputStream, path.toFile().outputStream())
             logger.info("上传完成")
         } catch (e: IOException) {
-            logger.info("上传失败")
+            logger.warn("上传失败",e)
             throw BusinessException("上传失败", e)
         }
     }
@@ -68,7 +67,7 @@ class LocalOssService(
             logger.warn("文件 {} 不存在", path)
             throw BusinessException("文件不存在")
         } catch (e: IOException) {
-            logger.warn("文件下载失败，{}", e)
+            logger.warn("文件下载失败", e)
             throw BusinessException("文件下载失败", e)
         }
     }
@@ -96,7 +95,7 @@ class LocalOssService(
                 from, to,
                 StandardCopyOption.REPLACE_EXISTING
             )
-            logger.info("移动文件成功")
+            logger.info("移动完成")
         } catch (e: IOException) {
             logger.warn("文件移动失败", e)
             throw BusinessException("文件移动失败", e)
@@ -129,7 +128,7 @@ class LocalOssService(
                 StandardCopyOption.REPLACE_EXISTING
             )
 
-            logger.info("复制文件成功")
+            logger.info("复制完成")
         } catch (e: IOException) {
             logger.warn("复制文件失败", e)
             throw BusinessException("复制文件失败", e)
@@ -146,7 +145,7 @@ class LocalOssService(
             val path = Path.of("$root/$bucket/$objectName")
             logger.info("开始删除文件，路径：$path")
             if (Files.deleteIfExists(path)) {
-                logger.info("删除文件成功")
+                logger.info("删除完成")
             } else {
                 logger.info("文件不存在")
             }

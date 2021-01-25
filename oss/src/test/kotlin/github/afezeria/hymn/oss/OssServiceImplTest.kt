@@ -4,6 +4,7 @@ import github.afezeria.hymn.common.util.BusinessException
 import github.afezeria.hymn.common.util.InnerException
 import github.afezeria.hymn.oss.local.LocalConfig
 import github.afezeria.hymn.oss.local.LocalOssService
+import github.afezeria.hymn.oss.platform.OssServiceImpl
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -19,7 +20,7 @@ import java.util.*
 /**
  * @author afezeria
  */
-class AbstractOssServiceTest {
+class OssServiceImplTest {
     companion object : KLogging() {
         lateinit var config: LocalConfig
         lateinit var localOssService: LocalOssService

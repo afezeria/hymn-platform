@@ -5,7 +5,7 @@ import java.io.InputStream
 /**
  * @author afezeria
  */
-interface FileService {
+interface StorageService {
 
     fun remoteServerSupportHttpAccess(): Boolean {
         return false

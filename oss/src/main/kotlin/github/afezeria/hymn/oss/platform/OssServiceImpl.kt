@@ -1,4 +1,4 @@
-package github.afezeria.hymn.oss
+package github.afezeria.hymn.oss.platform
 
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.OssService
@@ -7,10 +7,10 @@ import github.afezeria.hymn.common.util.BusinessException
 import github.afezeria.hymn.common.util.InnerException
 import github.afezeria.hymn.common.util.throwIfBucketNameInvalid
 import github.afezeria.hymn.common.util.throwIfFileNameInvalid
+import github.afezeria.hymn.oss.StorageService
 import github.afezeria.hymn.oss.module.dto.FileRecordDto
 import github.afezeria.hymn.oss.module.service.FileRecordService
 import github.afezeria.hymn.oss.module.service.PreSignedHistoryService
-import github.afezeria.hymn.oss.web.controller.SimpleFileController
 import mu.KLogging
 import java.io.InputStream
 
@@ -23,7 +23,7 @@ class OssServiceImpl(
     private val preSignedHistoryService: PreSignedHistoryService,
     private val dataBaseService: DataBaseService,
     private val permService: PermService,
-    private val fileService: FileService
+    private val storageService: StorageService,
 ) : OssService {
 
     companion object : KLogging()
@@ -38,7 +38,8 @@ class OssServiceImpl(
         bucket: String,
         objectName: String,
         inputStream: InputStream,
-        contentType: String
+        contentType: String,
+        tmp: Boolean,
     ): String {
         return dataBaseService.db().useTransaction {
             val id = fileRecordService.create(
@@ -56,7 +57,7 @@ class OssServiceImpl(
             bucket.throwIfBucketNameInvalid()
             val b = prefix + bucket
             objectName.split('/').last().throwIfFileNameInvalid()
-            fileService.putFile(b, objectName, inputStream, contentType)
+            storageService.putFile(b, objectName, inputStream, contentType)
             id
         }
     }
@@ -64,7 +65,7 @@ class OssServiceImpl(
     override fun getObject(bucket: String, objectName: String, fn: (InputStream) -> Unit) {
         bucket.throwIfBucketNameInvalid()
         val b = prefix + bucket
-        fileService.getFile(b, objectName, fn)
+        storageService.getFile(b, objectName, fn)
     }
 
     override fun moveObject(
@@ -81,7 +82,7 @@ class OssServiceImpl(
             throw BusinessException("源对象和目标对象不能为同一个")
         }
         objectName.split('/').last().throwIfFileNameInvalid()
-        fileService.moveFile(b1, objectName, b2, srcObjectName)
+        storageService.moveFile(b1, objectName, b2, srcObjectName)
 
     }
 
@@ -117,7 +118,7 @@ class OssServiceImpl(
                     remark = srcRecord.remark
                 )
             )
-            fileService.copyFile(
+            storageService.copyFile(
                 b1,
                 objectName.replace("$fileName$".toRegex(), "$newId-$fileName"),
                 b2,
@@ -129,14 +130,15 @@ class OssServiceImpl(
 
     override fun getObjectUrl(bucket: String, objectName: String, expiry: Int): String {
         bucket.throwIfBucketNameInvalid()
-        fileService.fileExist(prefix + bucket, objectName, null)
+        storageService.fileExist(prefix + bucket, objectName, null)
 
         logger.info("开始获取文件下载链接，文件路径： bucket: ${bucket}, objectName: $objectName")
 
-        return if (fileService.remoteServerSupportHttpAccess()) {
-            fileService.getFileUrl(prefix + bucket, objectName, expiry)
+        return if (storageService.remoteServerSupportHttpAccess()) {
+            storageService.getFileUrl(prefix + bucket, objectName, expiry)
         } else {
-            SimpleFileController.generatePreSignedFileUrl(bucket, objectName, expiry)
+            TODO()
+//            preSignedUrlController.generatePreSignedFileUrl(bucket, objectName, expiry)
         }
     }
 
@@ -144,14 +146,14 @@ class OssServiceImpl(
         bucket.throwIfBucketNameInvalid()
         val b = prefix + bucket
 
-        fileService.removeFile(b, objectName)
+        storageService.removeFile(b, objectName)
         fileRecordService.removeByBucketAndPath(bucket, objectName)
     }
 
     override fun objectExist(bucket: String, objectName: String): Boolean {
         bucket.throwIfBucketNameInvalid()
         return try {
-            fileService.fileExist(prefix + bucket, objectName, null)
+            storageService.fileExist(prefix + bucket, objectName, null)
             true
         } catch (e: BusinessException) {
             false

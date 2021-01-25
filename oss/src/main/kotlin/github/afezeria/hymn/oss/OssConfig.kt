@@ -1,5 +1,6 @@
 package github.afezeria.hymn.oss
 
+import github.afezeria.hymn.common.platform.ConfigService
 import github.afezeria.hymn.common.platform.DataBaseService
 import github.afezeria.hymn.common.platform.OssService
 import github.afezeria.hymn.common.platform.PermService
@@ -9,20 +10,20 @@ import github.afezeria.hymn.oss.local.LocalOssService
 import github.afezeria.hymn.oss.minio.MinioOssService
 import github.afezeria.hymn.oss.module.service.FileRecordService
 import github.afezeria.hymn.oss.module.service.PreSignedHistoryService
+import github.afezeria.hymn.oss.platform.OssServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.DependsOn
 
 /**
  * @author afezeria
  */
 @Configuration
-@EnableConfigurationProperties(OssConfigProperties::class)
 class OssConfig {
 
     @Autowired
-    lateinit var config: OssConfigProperties
+    lateinit var configService: ConfigService
 
     @Autowired
     lateinit var fileRecordService: FileRecordService
@@ -34,31 +35,35 @@ class OssConfig {
     lateinit var dataBaseService: DataBaseService
 
     @Autowired
-    lateinit var fileService: FileService
+    lateinit var storageService: StorageService
 
     @Autowired
     lateinit var permService: PermService
 
+    lateinit var config: OssConfigProperties
+
     @Bean
-    fun fileService(): FileService {
+    fun fileService(): StorageService {
+        config = configService.get<OssConfigProperties>("oss")
+            ?: OssConfigProperties()
         return when (config.type) {
             LOCAL -> LocalOssService(config.local)
-            FTP -> FTPOssService(config.ftp)
-            MINIO -> MinioOssService(config.minio)
+            FTP -> FTPOssService(requireNotNull(config.ftp))
+            MINIO -> MinioOssService(requireNotNull(config.minio))
         }
     }
 
     @Bean
+    @DependsOn("fileService")
     fun ossService(): OssService {
         return OssServiceImpl(
             prefix = config.prefix,
             fileRecordService = fileRecordService,
             preSignedHistoryService = preSignedHistoryService,
             dataBaseService = dataBaseService,
-            fileService = fileService,
+            storageService= storageService,
             permService = permService,
-
-            )
+        )
 
     }
 }
