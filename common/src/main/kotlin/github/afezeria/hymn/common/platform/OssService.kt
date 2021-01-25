@@ -14,13 +14,15 @@ interface OssService {
      * @param objectName 对象名
      * @param inputStream 对象的输入流
      * @param contentType http 的 MimeType 值
+     * @param tmp 是否为临时对象，默认为 true
      * @return 对象id
      */
     fun putObject(
         bucket: String,
         objectName: String,
         inputStream: InputStream,
-        contentType: String
+        contentType: String,
+        tmp: Boolean = true
     ): String
 
     /**
