@@ -16,7 +16,7 @@ interface StorageService {
         objectName: String,
         inputStream: InputStream,
         contentType: String
-    )
+    ): Long
 
     fun getFile(bucket: String, objectName: String, fn: (InputStream) -> Unit)
 

@@ -36,7 +36,7 @@ class MinioOssService(config: MinioConfig) : StorageService {
         objectName: String,
         inputStream: InputStream,
         contentType: String
-    ) {
+    ):Long {
         checkBucket(bucket)
         minioClient.putObject(
             PutObjectArgs.builder()
@@ -49,6 +49,13 @@ class MinioOssService(config: MinioConfig) : StorageService {
                 )
                 .contentType(contentType).build()
         )
+        val statObject = minioClient.statObject(
+            StatObjectArgs.builder()
+                .bucket(bucket)
+                .`object`(objectName)
+                .build()
+        )
+        return statObject.size()
     }
 
     override fun getFile(bucket: String, objectName: String, fn: (InputStream) -> Unit) {

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.DependsOn
+import org.springframework.data.redis.core.RedisTemplate
 
 /**
  * @author afezeria
@@ -40,6 +41,9 @@ class OssConfig {
     @Autowired
     lateinit var permService: PermService
 
+    @Autowired
+    lateinit var redisTemplate: RedisTemplate<String, String>
+
     lateinit var config: OssConfigProperties
 
     @Bean
@@ -61,9 +65,9 @@ class OssConfig {
             fileRecordService = fileRecordService,
             preSignedHistoryService = preSignedHistoryService,
             dataBaseService = dataBaseService,
-            storageService= storageService,
+            storageService = storageService,
             permService = permService,
+            redisTemplate = RedisTemplate()
         )
-
     }
 }

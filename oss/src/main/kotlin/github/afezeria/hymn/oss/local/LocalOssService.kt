@@ -37,7 +37,7 @@ class LocalOssService(
         objectName: String,
         inputStream: InputStream,
         contentType: String
-    ) {
+    ): Long {
         try {
             val path = Path.of("$root/$bucket/$objectName")
             logger.info("开始上传文件，本地路径：$path")
@@ -46,10 +46,11 @@ class LocalOssService(
                 Files.createDirectories(dir)
             }
 
-            IOUtils.copy(inputStream, path.toFile().outputStream())
+            val size = IOUtils.copyLarge(inputStream, path.toFile().outputStream())
             logger.info("上传完成")
+            return size
         } catch (e: IOException) {
-            logger.warn("上传失败",e)
+            logger.warn("上传失败", e)
             throw BusinessException("上传失败", e)
         }
     }

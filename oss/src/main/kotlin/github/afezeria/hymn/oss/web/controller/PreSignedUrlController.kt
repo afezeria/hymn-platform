@@ -1,9 +1,15 @@
 package github.afezeria.hymn.oss.web.controller
 
+import github.afezeria.hymn.common.platform.OssService
+import github.afezeria.hymn.common.util.BusinessException
+import github.afezeria.hymn.oss.OssCacheKey
 import github.afezeria.hymn.oss.StorageService
+import github.afezeria.hymn.oss.module.service.FileRecordService
+import org.apache.commons.io.IOUtils
 import org.redisson.api.RedissonClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
@@ -29,43 +35,36 @@ class PreSignedUrlController {
     private lateinit var redisTemplate: RedisTemplate<String, String>
 
     @Autowired
-    private lateinit var redissonClient: RedissonClient
+    private lateinit var ossService: OssService
+
+    @Autowired
+    private lateinit var fileRecordService: FileRecordService
 
 
-    @GetMapping("public/download")
+    @GetMapping("public/pre-signed/{id}")
     fun download(
-        @PathVariable fileId: String,
+        @PathVariable id: String,
         request: HttpServletRequest,
         response: HttpServletResponse
     ): StreamingResponseBody {
         if (storageService.remoteServerSupportHttpAccess()) {
             throw ResponseStatusException(HttpStatus.NOT_IMPLEMENTED)
-        } else {
-//            val str = redisTemplate.boundValueOps("oss:download:$fileId").get()
-//            if (str == null) {
-//                throw ResponseStatusException(HttpStatus.NOT_FOUND)
-//            }
-            val bucket = redissonClient.getBucket<String>("oss:presigned:$fileId")
-            val str = bucket.get()
-            bucket.expire()
-//
-//            val fileInfo: FileInfo = fileService.findFileInfo(fileId)
-//            response.setContentType(fileInfo.getContentType())
-//            response.setHeader(
-//                HttpHeaders.CONTENT_DISPOSITION,
-//                "attachment;filename=\"" + fileInfo.getFilename().toString() + "\""
-//            )
-//
-//            return Unit { outputStream ->
-//                var bytesRead: Int
-//                val buffer = ByteArray(BUFFER_SIZE)
-//                val inputStream: InputStream = fileInfo.getInputStream()
-//                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-//                    outputStream.write(buffer, 0, bytesRead)
-//                }
-//            }
         }
-        TODO()
+        val fileId = redisTemplate.boundValueOps(OssCacheKey.preSigned(id)).get()
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+        val record = fileRecordService.findById(fileId)
+            ?: throw BusinessException("文件不存在")
+        response.contentType = "application/octet-stream"
+        response.setHeader(
+            HttpHeaders.CONTENT_DISPOSITION,
+            "attachment;filename=\"${record.fileName}\""
+        )
+        response.setContentLength(record.size)
+        return StreamingResponseBody { o ->
+            ossService.getObject(record.bucket, record.path) { i ->
+                IOUtils.copy(i, o)
+            }
+        }
     }
 
 

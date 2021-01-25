@@ -33,7 +33,7 @@ class FTPOssService(config: FTPConfig) : StorageService {
         objectName: String,
         inputStream: InputStream,
         contentType: String
-    ) {
+    ): Long {
         var ftp: FTPClient? = null
         try {
             ftp = pool.borrowObject()
@@ -49,12 +49,12 @@ class FTPOssService(config: FTPConfig) : StorageService {
                     logger.warn("上传失败，replyString: {}", ftp.replyString)
                     throw BusinessException("上传失败")
                 }
-                output.use {
-                    IOUtils.copy(inputStream, it)
+                val size = output.use {
+                    IOUtils.copyLarge(inputStream, it)
                 }
                 if (ftp.completePendingCommand()) {
                     logger.info("上传完成")
-                    return
+                    return size
                 }
 
                 logger.warn("上传失败，重试次数：{}，replyString: {}", ftp.replyString, i)

@@ -16,3 +16,14 @@ fun String.isValidBucketName(): Boolean = matches(BUCKET_REGEX)
 fun String.throwIfBucketNameInvalid() =
     takeIf { matches(BUCKET_REGEX) } ?: throw InnerException("$this 不是有效的bucket名称")
 
+fun String.msgById(value: Any): String {
+    return "$this [id:$value]"
+}
+
+fun String.msgByPairs(vararg pairs: Pair<String, Any?>): String {
+    return "$this [${pairs.joinToString(separator = ",") { "${it.first}:${it.second}" }}]"
+}
+
+fun String.msgByPair(field: String, value: Any?): String {
+    return "$this [$field:$value]"
+}

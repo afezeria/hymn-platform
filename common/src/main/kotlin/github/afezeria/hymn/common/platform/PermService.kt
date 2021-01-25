@@ -5,5 +5,8 @@ package github.afezeria.hymn.common.platform
  */
 interface PermService {
     fun hasFunctionPerm(roleId: String, name: String): Boolean
+    fun hasDataPerm(objectId: String, dataId: String): Boolean
+    fun hasObjectPerm(objectId: String): Boolean
+    fun hasFieldPerm(objectId: String, fieldId: String): Boolean
 
 }

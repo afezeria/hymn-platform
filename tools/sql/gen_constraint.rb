@@ -1,10 +1,11 @@
 require 'pg'
 require 'stringio'
-require_relative  '../constant'
-require_relative  '../config'
+require_relative '../constant'
+require_relative '../config'
 
 conn = PG.connect Config::DB
-table_regex = /^core(?!_data_table).*(?<!history)$/
+# table_regex = /^#{Config::MODULE}(?!_data_table).*(?<!history)$/
+table_regex = /^#{Config::MODULE}(?!_data_table).*$/
 io = StringIO.new
 
 def index_name(postfix, table, *column)
@@ -54,7 +55,9 @@ io.write "\n"
 io.write "\n"
 io.write "-- column constraint\n"
 conn.exec Constant::QUERY_COLUMN do |res|
-  res.each do |i|
+  res
+    .select { |i| i['table_name'] =~ table_regex }
+    .each do |i|
     if i['comment'] =~ /;;(.*)/
       declare = $1
       if declare.sub! /fk:\[(\w+)\s+([^\]]+)\]/, ''
