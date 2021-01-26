@@ -1,10 +1,9 @@
-package github.afezeria.hymn.oss
+package github.afezeria.hymn.oss.platform
 
 import github.afezeria.hymn.common.util.BusinessException
 import github.afezeria.hymn.common.util.InnerException
 import github.afezeria.hymn.oss.local.LocalConfig
 import github.afezeria.hymn.oss.local.LocalOssService
-import github.afezeria.hymn.oss.platform.OssServiceImpl
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -151,6 +150,7 @@ class OssServiceImplTest {
         shouldThrow<InnerException> {
             OssServiceImpl(
                 prefix = "0",
+                mockk(),
                 mockk(),
                 mockk(),
                 mockk(),

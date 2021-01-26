@@ -1,8 +1,8 @@
 package github.afezeria.hymn.oss
 
 import github.afezeria.hymn.common.KGenericContainer
-import github.afezeria.hymn.common.randomUUIDStr
 import github.afezeria.hymn.common.util.BusinessException
+import github.afezeria.hymn.common.util.randomUUIDStr
 import github.afezeria.hymn.oss.minio.MinioConfig
 import github.afezeria.hymn.oss.minio.MinioOssService
 import io.kotest.assertions.throwables.shouldNotThrow

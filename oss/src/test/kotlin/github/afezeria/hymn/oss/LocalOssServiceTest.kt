@@ -1,14 +1,12 @@
 package github.afezeria.hymn.oss
 
-import github.afezeria.hymn.common.randomUUIDStr
 import github.afezeria.hymn.common.util.BusinessException
+import github.afezeria.hymn.common.util.randomUUIDStr
 import github.afezeria.hymn.oss.local.LocalConfig
 import github.afezeria.hymn.oss.local.LocalOssService
-import github.afezeria.hymn.oss.web.controller.PreSignedUrlController
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.mockk.mockk
 import mu.KLogging
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -146,7 +144,7 @@ class LocalOssServiceTest {
     fun remove() {
         val fa = randomUUIDStr()
         val pa = "copy/$fa"
-        val byteArray = createFile(pa)
+        createFile(pa)
         service.removeFile("copy", fa)
         fileExist(pa) shouldBe false
     }

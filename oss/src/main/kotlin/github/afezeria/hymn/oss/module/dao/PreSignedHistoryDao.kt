@@ -36,9 +36,6 @@ class PreSignedHistoryDao {
         return dbService.db().update(table) {
             set(it.fileId, e.fileId)
             set(it.expiry, e.expiry)
-            set(it.modifyById, accountId)
-            set(it.modifyBy, accountName)
-            set(it.modifyDate, LocalDateTime.now())
             where {
                 it.id eq e.id
             }
@@ -51,11 +48,8 @@ class PreSignedHistoryDao {
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now
-        e.modifyDate = now
         e.createById = accountId
-        e.modifyById = accountId
         e.createBy = accountName
-        e.modifyBy = accountName
         return dbService.db().insertAndGenerateKey(table) {
             set(it.fileId, e.fileId)
             set(it.expiry, e.expiry)
