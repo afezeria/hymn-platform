@@ -3,6 +3,7 @@ package github.afezeria.hymn.common.testconfiguration
 import github.afezeria.hymn.common.KGenericContainer
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.RedisPassword
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
@@ -39,7 +40,7 @@ class RedisTestConfig {
     }
 
     @Bean
-    fun redisConnectionFactory(): LettuceConnectionFactory {
+    fun redisConnectionFactory(): RedisConnectionFactory {
         val configuration = RedisStandaloneConfiguration(host, port)
         configuration.password = RedisPassword.of(password)
         return LettuceConnectionFactory(configuration)

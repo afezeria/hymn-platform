@@ -13,7 +13,7 @@ values ('b18245e9d690461190172b6cb90c46ac', '根组织', null, null, null,
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00');
 insert into hymn.core_role (id, name, remark, create_by_id, create_by, modify_by_id,
                             modify_by, create_date, modify_date)
-values ('301c35c23be449abb5bdf6c80b6878af', '管理员权限', '', '911c60ea5d62420794d86eeecfddce7c',
+values ('301c35c23be449abb5bdf6c80b6878af', '管理员角色', '', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '911c60ea5d62420794d86eeecfddce7c', 'system admin', '2020-01-01 00:00:00',
         '2020-01-01 00:00:00');
 
