@@ -6,7 +6,6 @@ import github.afezeria.hymn.oss.OssCacheKey
 import github.afezeria.hymn.oss.StorageService
 import github.afezeria.hymn.oss.module.service.FileRecordService
 import org.apache.commons.io.IOUtils
-import org.redisson.api.RedissonClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.http.HttpHeaders
