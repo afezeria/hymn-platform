@@ -17,10 +17,12 @@ dependencies {
 
     api(Deps.Apache.io)
 
-    api(Deps.Redssion.spring)
+    api(Deps.SpringBoot.redis)
+//    api(Deps.Redssion.spring)
 
     implementation(Deps.SpringBoot.aop)
     implementation(Deps.Servlet.api)
+    implementation(Deps.DataSource.hikariCP)
 
     implementation(Deps.Ktorm.core)
 

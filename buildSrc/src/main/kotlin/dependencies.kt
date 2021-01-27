@@ -39,6 +39,7 @@ object Deps {
         const val web = "org.springframework.boot:spring-boot-starter-web"
         const val aop = "org.springframework.boot:spring-boot-starter-aop"
         const val test = "org.springframework.boot:spring-boot-starter-test"
+        const val redis = "org.springframework.boot:spring-boot-starter-data-redis"
     }
 
     object Servlet {
