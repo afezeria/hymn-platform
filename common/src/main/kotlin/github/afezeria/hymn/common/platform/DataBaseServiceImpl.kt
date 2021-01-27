@@ -2,38 +2,49 @@ package github.afezeria.hymn.common.platform
 
 import github.afezeria.hymn.common.db.ReadOnlyInterceptor
 import org.ktorm.database.Database
-import org.springframework.stereotype.Component
-import javax.sql.DataSource
-import kotlin.random.Random
+import org.springframework.stereotype.Service
+
 
 /**
  * @author afezeria
  */
+@Service
 class DataBaseServiceImpl(
-    dataSourceMap: MutableMap<String, DataSource>,
+    databaseList: List<Database>,
 ) : DataBaseService {
 
-    private val databases: List<Database>
-    private lateinit var default: Database
-    private val random = Random(System.currentTimeMillis())
+    private val write: Database
+    private val iterator: Iterator<Database>?
 
     init {
-        val write = dataSourceMap.remove("write") ?: throw RuntimeException("缺少 write 数据源")
-        default = Database.connectWithSpringSupport(write)
-        databases = dataSourceMap.map {
-            Database.connect(it.value)
+        write = databaseList[0]
+        iterator = when (databaseList.size) {
+            1 -> null
+            2 -> sequence {
+                val database = databaseList[1]
+                while (true) yield(database)
+            }.iterator()
+            else -> sequence {
+                val slice = databaseList.slice(1 until databaseList.size)
+                var i = 0
+                while (true) {
+                    yield(slice[i])
+                    i++
+                    if (i == slice.size) i = 0
+                }
+            }.iterator()
         }
     }
 
     override fun db(): Database {
-        return if (!ReadOnlyInterceptor.isReadOnly()) {
-            default
+        return if (ReadOnlyInterceptor.isReadOnly()) {
+            iterator?.next() ?: write
         } else {
-            if (databases.isNotEmpty()) {
-                databases[random.nextInt(databases.size)]
-            } else {
-                default
-            }
+            write
         }
+    }
+
+    override fun readOnly(): Database {
+        return iterator?.next() ?: write
     }
 }

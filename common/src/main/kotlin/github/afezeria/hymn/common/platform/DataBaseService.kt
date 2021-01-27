@@ -10,4 +10,6 @@ interface DataBaseService {
 
     fun db(): Database
 
+    fun readOnly(): Database
+
 }
