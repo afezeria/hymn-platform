@@ -1,7 +1,7 @@
 package github.afezeria.hymn.oss
 
 import github.afezeria.hymn.common.platform.ConfigService
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.OssService
 import github.afezeria.hymn.common.platform.PermService
 import github.afezeria.hymn.oss.OssType.*
@@ -33,7 +33,7 @@ class OssConfig {
     lateinit var preSignedHistoryService: PreSignedHistoryService
 
     @Autowired
-    lateinit var dataBaseService: DataBaseService
+    lateinit var dataBaseService: DatabaseService
 
     @Autowired
     lateinit var storageService: StorageService

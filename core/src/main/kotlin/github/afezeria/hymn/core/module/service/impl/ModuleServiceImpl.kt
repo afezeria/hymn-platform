@@ -1,6 +1,6 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.core.module.entity.Module
 import github.afezeria.hymn.core.module.entity.ModuleFunction
 import github.afezeria.hymn.core.module.service.ModuleService
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 @Service
 class ModuleServiceImpl : ModuleService {
     @Autowired
-    private lateinit var dbService: DataBaseService
+    private lateinit var dbService: DatabaseService
 
     val module = Modules()
     val function = ModuleFunctions()

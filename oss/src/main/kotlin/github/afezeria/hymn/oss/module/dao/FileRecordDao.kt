@@ -1,6 +1,6 @@
 package github.afezeria.hymn.oss.module.dao
 
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.SessionService
 import github.afezeria.hymn.oss.module.entity.FileRecord
 import github.afezeria.hymn.oss.module.table.OssFileRecords
@@ -17,7 +17,7 @@ import java.util.*
 class FileRecordDao {
 
     @Autowired
-    private lateinit var dbService: DataBaseService
+    private lateinit var dbService: DatabaseService
 
     @Autowired
     private lateinit var sessionService: SessionService

@@ -1,6 +1,6 @@
 package github.afezeria.hymn.core.module.dao
 
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.SessionService
 import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
 import github.afezeria.hymn.core.module.table.CoreBizObjectTypePerms
@@ -18,7 +18,7 @@ import java.util.*
 class BizObjectTypePermDao {
 
     @Autowired
-    private lateinit var dbService: DataBaseService
+    private lateinit var dbService: DatabaseService
 
     @Autowired
     private lateinit var  sessionService: SessionService
@@ -148,7 +148,7 @@ class BizObjectTypePermDao {
     }
 
     fun batchInsertOrUpdate(es: List<BizObjectTypePerm>): MutableList<Int> {
-        dbService.db().useTransaction {
+        dbService.useTransaction {
             return es.mapTo(ArrayList()) { insertOrUpdate(it) }
         }
     }

@@ -1,6 +1,6 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.InnerException
 import github.afezeria.hymn.common.util.msgById
@@ -39,7 +39,7 @@ class BizObjectServiceImpl : BizObjectService {
     private lateinit var roleService: RoleService
 
     @Autowired
-    private lateinit var dbService: DataBaseService
+    private lateinit var dbService: DatabaseService
 
 
     override fun removeById(id: String): Int {
@@ -52,7 +52,7 @@ class BizObjectServiceImpl : BizObjectService {
     }
 
     override fun update(id: String, dto: BizObjectDto): Int {
-        dbService.db().useTransaction {
+        dbService.useTransaction {
 
             val e = bizObjectDao.selectById(id)
                 ?: throw DataNotFoundException("BizObject".msgById(id))

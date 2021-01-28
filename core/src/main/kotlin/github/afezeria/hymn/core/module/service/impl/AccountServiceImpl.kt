@@ -1,6 +1,6 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.constant.ROOT_ACCOUNT_ID
@@ -21,7 +21,7 @@ class AccountServiceImpl : AccountService {
     private lateinit var accountDao: AccountDao
 
     @Autowired
-    private lateinit var dbService: DataBaseService
+    private lateinit var dbService: DatabaseService
 
 
     override fun removeById(id: String): Int {

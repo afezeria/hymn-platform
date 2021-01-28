@@ -1,6 +1,6 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.InnerException
 import github.afezeria.hymn.common.util.msgById
@@ -30,7 +30,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
     private lateinit var roleService: RoleService
 
     @Autowired
-    private lateinit var dbService: DataBaseService
+    private lateinit var dbService: DatabaseService
 
 
     override fun removeById(id: String): Int {
@@ -41,7 +41,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
     }
 
     override fun update(id: String, dto: BizObjectFieldDto): Int {
-        dbService.db().useTransaction {
+        dbService.useTransaction {
             val e = bizObjectFieldDao.selectById(id)
                 ?: throw DataNotFoundException("BizObjectField".msgById(id))
             dto.update(e)
@@ -59,7 +59,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
     }
 
     override fun create(dto: BizObjectFieldDto): String {
-        dbService.db().useTransaction {
+        dbService.useTransaction {
             val e = dto.toEntity()
             val id = bizObjectFieldDao.insert(e)
 
@@ -110,7 +110,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
     }
 
     override fun createDefaultField(objId: String, fieldName: String, autoRule: String?) {
-        dbService.db().useTransaction {
+        dbService.useTransaction {
             if (bizObjectFieldDao.selectByBizObjectId(objId).isNotEmpty()) {
                 throw InnerException("对象[id:${objId}]不是新对象，无法创建默认字段")
             }

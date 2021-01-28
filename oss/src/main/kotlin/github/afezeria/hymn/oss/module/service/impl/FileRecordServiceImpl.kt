@@ -4,7 +4,7 @@ import github.afezeria.hymn.oss.module.entity.FileRecord
 import github.afezeria.hymn.oss.module.dao.FileRecordDao
 import github.afezeria.hymn.oss.module.dto.FileRecordDto
 import github.afezeria.hymn.oss.module.service.FileRecordService
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
@@ -20,7 +20,7 @@ class FileRecordServiceImpl : FileRecordService {
     private lateinit var fileRecordDao: FileRecordDao
 
     @Autowired
-    private lateinit var dbService: DataBaseService
+    private lateinit var dbService: DatabaseService
 
 
     override fun removeById(id: String): Int {

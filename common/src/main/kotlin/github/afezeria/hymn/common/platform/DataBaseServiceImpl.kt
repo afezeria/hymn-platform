@@ -2,6 +2,7 @@ package github.afezeria.hymn.common.platform
 
 import github.afezeria.hymn.common.db.ReadOnlyInterceptor
 import org.ktorm.database.Database
+import org.ktorm.database.Transaction
 import org.springframework.stereotype.Service
 
 
@@ -11,13 +12,13 @@ import org.springframework.stereotype.Service
 @Service
 class DataBaseServiceImpl(
     databaseList: List<Database>,
-) : DataBaseService {
+) : DatabaseService {
 
-    private val write: Database
+    private val writeable: Database
     private val iterator: Iterator<Database>?
 
     init {
-        write = databaseList[0]
+        writeable = databaseList[0]
         iterator = when (databaseList.size) {
             1 -> null
             2 -> sequence {
@@ -37,14 +38,23 @@ class DataBaseServiceImpl(
     }
 
     override fun db(): Database {
+        writeable.useTransaction { }
         return if (ReadOnlyInterceptor.isReadOnly()) {
-            iterator?.next() ?: write
+            iterator?.next() ?: writeable
         } else {
-            write
+            writeable
         }
     }
 
+    override fun primary(): Database {
+        return writeable
+    }
+
     override fun readOnly(): Database {
-        return iterator?.next() ?: write
+        return iterator?.next() ?: writeable
+    }
+
+    override fun <T> useTransaction(fn: (Transaction) -> T?): T? {
+        return writeable.useTransaction(func = fn)
     }
 }

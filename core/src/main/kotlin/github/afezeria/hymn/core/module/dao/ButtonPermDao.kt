@@ -1,6 +1,6 @@
 package github.afezeria.hymn.core.module.dao
 
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.SessionService
 import github.afezeria.hymn.core.module.entity.ButtonPerm
 import github.afezeria.hymn.core.module.table.CoreButtonPerms
@@ -18,7 +18,7 @@ import java.util.*
 class ButtonPermDao {
 
     @Autowired
-    private lateinit var dbService: DataBaseService
+    private lateinit var dbService: DatabaseService
 
     @Autowired
     private lateinit var  sessionService: SessionService
@@ -129,7 +129,7 @@ class ButtonPermDao {
     }
 
     fun batchInsertOrUpdate(es: List<ButtonPerm>): MutableList<Int> {
-        dbService.db().useTransaction {
+        dbService.useTransaction {
             return es.mapTo(ArrayList()) { insertOrUpdate(it) }
         }
     }

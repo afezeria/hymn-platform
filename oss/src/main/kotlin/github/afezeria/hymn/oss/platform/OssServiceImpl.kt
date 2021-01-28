@@ -1,6 +1,6 @@
 package github.afezeria.hymn.oss.platform
 
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.OssService
 import github.afezeria.hymn.common.platform.PermService
 import github.afezeria.hymn.common.util.*
@@ -22,7 +22,7 @@ class OssServiceImpl(
     private val prefix: String,
     private val fileRecordService: FileRecordService,
     private val preSignedHistoryService: PreSignedHistoryService,
-    private val dataBaseService: DataBaseService,
+    private val dataBaseService: DatabaseService,
     private val permService: PermService,
     private val storageService: StorageService,
     private val redisTemplate: RedisTemplate<String, String>,
@@ -43,7 +43,7 @@ class OssServiceImpl(
         contentType: String,
         tmp: Boolean,
     ): String {
-        return dataBaseService.db().useTransaction {
+        return dataBaseService.useTransaction {
             bucket.throwIfBucketNameInvalid()
             val b = prefix + bucket
             val fileName = objectName.split('/').last()

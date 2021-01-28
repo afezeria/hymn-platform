@@ -2,7 +2,7 @@ package github.afezeria.hymn.oss.module.dao
 
 import github.afezeria.hymn.oss.module.entity.PreSignedHistory
 import github.afezeria.hymn.oss.module.table.OssPreSignedHistorys
-import github.afezeria.hymn.common.platform.DataBaseService
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.SessionService
 import org.springframework.stereotype.Component
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,7 +17,7 @@ import java.util.*
 class PreSignedHistoryDao {
 
     @Autowired
-    private lateinit var dbService: DataBaseService
+    private lateinit var dbService: DatabaseService
     @Autowired
     private lateinit var sessionService:SessionService
 
