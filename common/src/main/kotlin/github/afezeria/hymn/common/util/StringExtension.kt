@@ -1,6 +1,7 @@
 package github.afezeria.hymn.common.util
 
-import java.util.*
+import github.afezeria.hymn.common.exception.BusinessException
+import github.afezeria.hymn.common.exception.InnerException
 
 /**
  * @author afezeria

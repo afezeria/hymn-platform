@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.util.DataNotFoundException
+import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.constant.ROOT_ACCOUNT_ID
 import github.afezeria.hymn.core.module.dao.AccountDao

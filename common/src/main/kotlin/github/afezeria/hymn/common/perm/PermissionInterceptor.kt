@@ -4,8 +4,8 @@ import github.afezeria.hymn.common.ann.Function
 import github.afezeria.hymn.common.constant.AccountType.ANONYMOUS
 import github.afezeria.hymn.common.platform.PermService
 import github.afezeria.hymn.common.platform.SessionService
-import github.afezeria.hymn.common.util.PermissionDeniedException
-import github.afezeria.hymn.common.util.UnauthorizedException
+import github.afezeria.hymn.common.exception.PermissionDeniedException
+import github.afezeria.hymn.common.exception.UnauthorizedException
 import mu.KLogging
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around

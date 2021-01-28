@@ -1,7 +1,7 @@
 package github.afezeria.hymn.common.platform
 
 import github.afezeria.hymn.common.lazy.LazyAction
-import github.afezeria.hymn.common.util.InnerException
+import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.common.util.mapper
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit

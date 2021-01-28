@@ -1,5 +1,6 @@
 package github.afezeria.hymn.common.util
 
+import github.afezeria.hymn.common.exception.BusinessException
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
