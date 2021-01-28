@@ -26,7 +26,7 @@ dependencies {
 
     implementation(Deps.Ktorm.core)
 
-    testImplementation(Deps.SpringBoot.test)
+    testCompile(Deps.SpringBoot.test)
     testCompile(Deps.Jdbc.postgresql)
     testCompile(Deps.DataSource.hikariCP)
     testCompile(Deps.Kotest.assertions)

@@ -53,3 +53,4 @@ fun contentType2Bucket(contentType: String): String = when (contentType) {
     else -> "other"
 }
 
+internal var remoteServerSupportHttpAccess: Boolean = false
