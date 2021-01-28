@@ -40,7 +40,7 @@ class CustomButtonServiceImpl : CustomButtonService {
     }
 
     override fun update(id: String, dto: CustomButtonDto): Int {
-        dbService.useTransaction {
+        return dbService.useTransaction {
             val e = customButtonDao.selectById(id)
                 ?: throw DataNotFoundException("CustomButton".msgById(id))
             dto.update(e)
@@ -53,12 +53,12 @@ class CustomButtonServiceImpl : CustomButtonService {
                 .onEach { it.buttonId = id }
             buttonPermService.batchSave(buttonPermDtoList)
 
-            return i
+            i
         }
     }
 
     override fun create(dto: CustomButtonDto): String {
-        dbService.useTransaction {
+        return dbService.useTransaction {
             val e = dto.toEntity()
             val id = customButtonDao.insert(e)
 
@@ -77,7 +77,7 @@ class CustomButtonServiceImpl : CustomButtonService {
             }
             buttonPermService.batchCreate(buttonPermDtoList)
 
-            return id
+            id
         }
     }
 

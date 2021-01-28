@@ -148,8 +148,8 @@ class BizObjectTypePermDao {
     }
 
     fun batchInsertOrUpdate(es: List<BizObjectTypePerm>): MutableList<Int> {
-        dbService.useTransaction {
-            return es.mapTo(ArrayList()) { insertOrUpdate(it) }
+        return dbService.useTransaction {
+            es.mapTo(ArrayList()) { insertOrUpdate(it) }
         }
     }
 

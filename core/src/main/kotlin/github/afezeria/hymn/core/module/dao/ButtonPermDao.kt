@@ -129,8 +129,8 @@ class ButtonPermDao {
     }
 
     fun batchInsertOrUpdate(es: List<ButtonPerm>): MutableList<Int> {
-        dbService.useTransaction {
-            return es.mapTo(ArrayList()) { insertOrUpdate(it) }
+        return dbService.useTransaction {
+            es.mapTo(ArrayList()) { insertOrUpdate(it) }
         }
     }
 

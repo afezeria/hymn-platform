@@ -54,7 +54,7 @@ class DataBaseServiceImpl(
         return iterator?.next() ?: writeable
     }
 
-    override fun <T> useTransaction(fn: (Transaction) -> T?): T? {
+    override fun <T> useTransaction(fn: (Transaction) -> T): T {
         return writeable.useTransaction(func = fn)
     }
 }

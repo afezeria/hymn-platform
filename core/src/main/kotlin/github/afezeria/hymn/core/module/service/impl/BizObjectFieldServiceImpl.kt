@@ -41,7 +41,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
     }
 
     override fun update(id: String, dto: BizObjectFieldDto): Int {
-        dbService.useTransaction {
+        return dbService.useTransaction {
             val e = bizObjectFieldDao.selectById(id)
                 ?: throw DataNotFoundException("BizObjectField".msgById(id))
             dto.update(e)
@@ -54,12 +54,12 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                 .onEach { it.fieldId = id }
             fieldPermService.batchSave(fieldPermDtoList)
 
-            return i
+            i
         }
     }
 
     override fun create(dto: BizObjectFieldDto): String {
-        dbService.useTransaction {
+        return dbService.useTransaction {
             val e = dto.toEntity()
             val id = bizObjectFieldDao.insert(e)
 
@@ -78,7 +78,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
             }
             fieldPermService.batchCreate(fieldPermDtoList)
 
-            return id
+            id
         }
     }
 
@@ -112,7 +112,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
     override fun createDefaultField(objId: String, fieldName: String, autoRule: String?) {
         dbService.useTransaction {
             if (bizObjectFieldDao.selectByBizObjectId(objId).isNotEmpty()) {
-                throw InnerException("对象[id:${objId}]不是新对象，无法创建默认字段")
+                throw InnerException("对象 [id:${objId}] 不是新对象，无法创建默认字段")
             }
             val namefid = bizObjectFieldDao.insert(
                 BizObjectField(

@@ -20,7 +20,7 @@ class BizObjectPermDao {
     private lateinit var dbService: DatabaseService
 
     @Autowired
-    private lateinit var  sessionService: SessionService
+    private lateinit var sessionService: SessionService
 
     val table = CoreBizObjectPerms()
 
@@ -31,7 +31,7 @@ class BizObjectPermDao {
 
     fun update(e: BizObjectPerm): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session =  sessionService.getSession()
+        val session = sessionService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         return dbService.db().update(table) {
@@ -57,7 +57,7 @@ class BizObjectPermDao {
 
     fun insert(e: BizObjectPerm): String {
         val now = LocalDateTime.now()
-        val session =  sessionService.getSession()
+        val session = sessionService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now
@@ -89,7 +89,7 @@ class BizObjectPermDao {
 
     fun batchInsert(es: List<BizObjectPerm>): MutableList<Int> {
         val now = LocalDateTime.now()
-        val session =  sessionService.getSession()
+        val session = sessionService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         return dbService.db().batchInsert(table) {
@@ -125,14 +125,14 @@ class BizObjectPermDao {
     }
 
     fun batchInsertOrUpdate(es: List<BizObjectPerm>): MutableList<Int> {
-        dbService.useTransaction {
-            return es.mapTo(ArrayList()) { insertOrUpdate(it) }
+        return dbService.useTransaction {
+            es.mapTo(ArrayList()) { insertOrUpdate(it) }
         }
     }
 
     fun insertOrUpdate(e: BizObjectPerm): Int {
         val now = LocalDateTime.now()
-        val session =  sessionService.getSession()
+        val session = sessionService.getSession()
         val accountId = session.accountId
         val accountName = session.accountName
         e.createDate = now

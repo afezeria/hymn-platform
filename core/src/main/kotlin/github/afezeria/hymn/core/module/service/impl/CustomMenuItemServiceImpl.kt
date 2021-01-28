@@ -40,7 +40,7 @@ class CustomMenuItemServiceImpl : CustomMenuItemService {
     }
 
     override fun update(id: String, dto: CustomMenuItemDto): Int {
-        dbService.useTransaction {
+        return dbService.useTransaction {
             val e = customMenuItemDao.selectById(id)
                 ?: throw DataNotFoundException("CustomMenuItem".msgById(id))
             dto.update(e)
@@ -52,12 +52,12 @@ class CustomMenuItemServiceImpl : CustomMenuItemService {
                 .filter { roleIdSet.contains(it.roleId) }
                 .onEach { it.menuItemId = id }
             menuItemPermService.batchSave(menuItemPermDtoList)
-            return i
+            i
         }
     }
 
     override fun create(dto: CustomMenuItemDto): String {
-        dbService.useTransaction {
+        return dbService.useTransaction {
             val e = dto.toEntity()
             val id = customMenuItemDao.insert(e)
 
@@ -76,7 +76,7 @@ class CustomMenuItemServiceImpl : CustomMenuItemService {
             }
             menuItemPermService.batchCreate(menuItemPermDtoList)
 
-            return id
+            id
         }
     }
 

@@ -52,7 +52,7 @@ class BizObjectServiceImpl : BizObjectService {
     }
 
     override fun update(id: String, dto: BizObjectDto): Int {
-        dbService.useTransaction {
+        return dbService.useTransaction {
 
             val e = bizObjectDao.selectById(id)
                 ?: throw DataNotFoundException("BizObject".msgById(id))
@@ -66,7 +66,7 @@ class BizObjectServiceImpl : BizObjectService {
                 .onEach { it.bizObjectId = id }
             objectPermService.batchSave(objPermDtoList)
 
-            return i
+            i
         }
     }
 

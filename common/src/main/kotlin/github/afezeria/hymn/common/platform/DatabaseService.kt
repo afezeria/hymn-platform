@@ -2,6 +2,7 @@ package github.afezeria.hymn.common.platform
 
 import org.ktorm.database.Database
 import org.ktorm.database.Transaction
+import org.ktorm.database.TransactionIsolation
 
 /**
  * 数据源接口

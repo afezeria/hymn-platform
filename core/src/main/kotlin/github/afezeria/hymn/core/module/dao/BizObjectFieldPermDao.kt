@@ -161,8 +161,8 @@ class BizObjectFieldPermDao {
     }
 
     fun batchInsertOrUpdate(es: List<BizObjectFieldPerm>): MutableList<Int> {
-        dbService.useTransaction {
-            return es.mapTo(ArrayList()) { insertOrUpdate(it) }
+        return dbService.useTransaction {
+            es.mapTo(ArrayList()) { insertOrUpdate(it) }
         }
     }
 

@@ -152,8 +152,8 @@ class ModuleFunctionPermDao {
     }
 
     fun batchInsertOrUpdate(es: List<ModuleFunctionPerm>): MutableList<Int> {
-        dbService.useTransaction {
-            return es.mapTo(ArrayList()) { insertOrUpdate(it) }
+        return dbService.useTransaction {
+            es.mapTo(ArrayList()) { insertOrUpdate(it) }
         }
     }
 

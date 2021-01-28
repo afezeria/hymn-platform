@@ -40,7 +40,7 @@ class BizObjectTypeServiceImpl : BizObjectTypeService {
     }
 
     override fun update(id: String, dto: BizObjectTypeDto): Int {
-        dbService.useTransaction {
+        return dbService.useTransaction {
             val e = bizObjectTypeDao.selectById(id)
                 ?: throw DataNotFoundException("BizObjectType".msgById(id))
             dto.update(e)
@@ -52,12 +52,12 @@ class BizObjectTypeServiceImpl : BizObjectTypeService {
                 .onEach { it.typeId = id }
             typePermService.batchSave(typePermDtoList)
 
-            return i
+            i
         }
     }
 
     override fun create(dto: BizObjectTypeDto): String {
-        dbService.useTransaction {
+        return dbService.useTransaction {
             val e = dto.toEntity()
             val id = bizObjectTypeDao.insert(e)
 
@@ -76,7 +76,7 @@ class BizObjectTypeServiceImpl : BizObjectTypeService {
             }
             typePermService.batchCreate(typePermDtoList)
 
-            return id
+            id
         }
     }
 
