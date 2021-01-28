@@ -45,7 +45,7 @@ create table hymn.oss_pre_signed_history
 );
 comment on table hymn.oss_pre_signed_history is '创建文件预签url记录，预签url不需要任何权限验证';
 comment on column hymn.oss_pre_signed_history.file_id is '文件id ;; idx';
-comment on column hymn.oss_pre_signed_history.expiry is '有效时间，单位：秒'
+comment on column hymn.oss_pre_signed_history.expiry is '有效时间，单位：秒';
 
 
 -- column constraint
