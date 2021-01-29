@@ -1,8 +1,8 @@
 object Deps {
 
     object Ktorm {
-        const val core = "org.ktorm:ktorm-core:3.2.0"
-        const val postgresql = "org.ktorm:ktorm-support-postgresql:3.2.0"
+        const val core = "org.ktorm:ktorm-core:3.3.0"
+        const val postgresql = "org.ktorm:ktorm-support-postgresql:3.3.0"
     }
 
     object Apache {

@@ -14,8 +14,8 @@ dependencies {
 
     implementation("io.springfox:springfox-swagger2:2.9.2")
 
-    implementation("org.ktorm:ktorm-core:3.2.0")
-    implementation("org.ktorm:ktorm-support-postgresql:3.2.0")
+    implementation(Deps.Ktorm.core)
+    implementation(Deps.Ktorm.postgresql)
 
     testImplementation(project(":common", "testArtifacts"))
     testImplementation(Deps.SpringBoot.test)
