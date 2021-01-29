@@ -29,12 +29,13 @@ class BusinessCodeRefDao {
         return dbService.db().delete(table) { it.id eq id }
     }
 
-    fun update(e: BusinessCodeRef): Int {
+   fun update(e: BusinessCodeRef): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session =  sessionService.getSession()
-        val accountId = session.accountId
-        val accountName = session.accountName
-        return dbService.db().update(table) {
+        val session = sessionService.getSession()
+        e.modifyDate = LocalDateTime.now()
+        e.modifyById = session.accountId
+        e.modifyBy = session.accountName
+        return  dbService.db().update(table) {
             set(it.triggerId, e.triggerId)
             set(it.interfaceId, e.interfaceId)
             set(it.sharedCodeId, e.sharedCodeId)
@@ -43,9 +44,9 @@ class BusinessCodeRefDao {
             set(it.orgId, e.orgId)
             set(it.roleId, e.roleId)
             set(it.refSharedCodeId, e.refSharedCodeId)
-            set(it.modifyById, accountId)
-            set(it.modifyBy, accountName)
-            set(it.modifyDate, LocalDateTime.now())
+            set(it.modifyById, e.modifyById)
+            set(it.modifyBy, e.modifyBy)
+            set(it.modifyDate, e.modifyDate)
             where {
                 it.id eq e.id
             }
@@ -71,7 +72,7 @@ class BusinessCodeRefDao {
             set(it.fieldId, e.fieldId)
             set(it.orgId, e.orgId)
             set(it.roleId, e.roleId)
-            set(it.createDate, e.createBy)
+            set(it.createDate, e.createDate)
             set(it.modifyDate, e.modifyDate)
             set(it.createById, e.createById)
             set(it.modifyById, e.modifyById)

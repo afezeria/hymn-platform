@@ -29,12 +29,13 @@ class CustomButtonDao {
         return dbService.db().delete(table) { it.id eq id }
     }
 
-    fun update(e: CustomButton): Int {
+   fun update(e: CustomButton): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session =  sessionService.getSession()
-        val accountId = session.accountId
-        val accountName = session.accountName
-        return dbService.db().update(table) {
+        val session = sessionService.getSession()
+        e.modifyDate = LocalDateTime.now()
+        e.modifyById = session.accountId
+        e.modifyBy = session.accountName
+        return  dbService.db().update(table) {
             set(it.remark, e.remark)
             set(it.bizObjectId, e.bizObjectId)
             set(it.name, e.name)
@@ -42,9 +43,9 @@ class CustomButtonDao {
             set(it.clientType, e.clientType)
             set(it.action, e.action)
             set(it.content, e.content)
-            set(it.modifyById, accountId)
-            set(it.modifyBy, accountName)
-            set(it.modifyDate, LocalDateTime.now())
+            set(it.modifyById, e.modifyById)
+            set(it.modifyBy, e.modifyBy)
+            set(it.modifyDate, e.modifyDate)
             where {
                 it.id eq e.id
             }
@@ -70,7 +71,7 @@ class CustomButtonDao {
             set(it.clientType, e.clientType)
             set(it.action, e.action)
             set(it.content, e.content)
-            set(it.createDate, e.createBy)
+            set(it.createDate, e.createDate)
             set(it.modifyDate, e.modifyDate)
             set(it.createById, e.createById)
             set(it.modifyById, e.modifyById)

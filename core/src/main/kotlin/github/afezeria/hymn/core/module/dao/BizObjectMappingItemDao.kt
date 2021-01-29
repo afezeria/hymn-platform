@@ -29,12 +29,13 @@ class BizObjectMappingItemDao {
         return dbService.db().delete(table) { it.id eq id }
     }
 
-    fun update(e: BizObjectMappingItem): Int {
+   fun update(e: BizObjectMappingItem): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session =  sessionService.getSession()
-        val accountId = session.accountId
-        val accountName = session.accountName
-        return dbService.db().update(table) {
+        val session = sessionService.getSession()
+        e.modifyDate = LocalDateTime.now()
+        e.modifyById = session.accountId
+        e.modifyBy = session.accountName
+        return  dbService.db().update(table) {
             set(it.mappingId, e.mappingId)
             set(it.sourceFieldId, e.sourceFieldId)
             set(it.targetFieldId, e.targetFieldId)
@@ -46,9 +47,9 @@ class BizObjectMappingItemDao {
             set(it.refField3BizObjectId, e.refField3BizObjectId)
             set(it.refField4Id, e.refField4Id)
             set(it.refField4BizObjectId, e.refField4BizObjectId)
-            set(it.modifyById, accountId)
-            set(it.modifyBy, accountName)
-            set(it.modifyDate, LocalDateTime.now())
+            set(it.modifyById, e.modifyById)
+            set(it.modifyBy, e.modifyBy)
+            set(it.modifyDate, e.modifyDate)
             where {
                 it.id eq e.id
             }
@@ -78,7 +79,7 @@ class BizObjectMappingItemDao {
             set(it.refField3BizObjectId, e.refField3BizObjectId)
             set(it.refField4Id, e.refField4Id)
             set(it.refField4BizObjectId, e.refField4BizObjectId)
-            set(it.createDate, e.createBy)
+            set(it.createDate, e.createDate)
             set(it.modifyDate, e.modifyDate)
             set(it.createById, e.createById)
             set(it.modifyById, e.modifyById)

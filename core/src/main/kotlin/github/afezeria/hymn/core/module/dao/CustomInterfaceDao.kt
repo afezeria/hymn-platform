@@ -29,12 +29,13 @@ class CustomInterfaceDao {
         return dbService.db().delete(table) { it.id eq id }
     }
 
-    fun update(e: CustomInterface): Int {
+   fun update(e: CustomInterface): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
-        val session =  sessionService.getSession()
-        val accountId = session.accountId
-        val accountName = session.accountName
-        return dbService.db().update(table) {
+        val session = sessionService.getSession()
+        e.modifyDate = LocalDateTime.now()
+        e.modifyById = session.accountId
+        e.modifyBy = session.accountName
+        return  dbService.db().update(table) {
             set(it.api, e.api)
             set(it.name, e.name)
             set(it.code, e.code)
@@ -42,9 +43,9 @@ class CustomInterfaceDao {
             set(it.lang, e.lang)
             set(it.optionText, e.optionText)
             set(it.remark, e.remark)
-            set(it.modifyById, accountId)
-            set(it.modifyBy, accountName)
-            set(it.modifyDate, LocalDateTime.now())
+            set(it.modifyById, e.modifyById)
+            set(it.modifyBy, e.modifyBy)
+            set(it.modifyDate, e.modifyDate)
             where {
                 it.id eq e.id
             }
@@ -70,7 +71,7 @@ class CustomInterfaceDao {
             set(it.lang, e.lang)
             set(it.optionText, e.optionText)
             set(it.remark, e.remark)
-            set(it.createDate, e.createBy)
+            set(it.createDate, e.createDate)
             set(it.modifyDate, e.modifyDate)
             set(it.createById, e.createById)
             set(it.modifyById, e.modifyById)
