@@ -1,4 +1,4 @@
-package github.afezeria.hymn.common.db
+package github.afezeria.hymn.common.aspect
 
 import github.afezeria.hymn.common.ann.ReadOnly
 import mu.KLogging

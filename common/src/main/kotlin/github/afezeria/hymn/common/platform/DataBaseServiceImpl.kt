@@ -1,6 +1,6 @@
 package github.afezeria.hymn.common.platform
 
-import github.afezeria.hymn.common.db.ReadOnlyInterceptor
+import github.afezeria.hymn.common.aspect.ReadOnlyInterceptor
 import org.ktorm.database.Database
 import org.ktorm.database.Transaction
 import org.springframework.stereotype.Service
