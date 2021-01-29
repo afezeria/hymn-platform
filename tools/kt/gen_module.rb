@@ -4,8 +4,8 @@ require_relative '../config'
 require_relative '../constant'
 
 conn = PG.connect Config::DB
-# table_regex = /^#{Config::MODULE}(?!_data_table).*(?<!history)$/
-table_regex = /^#{Config::MODULE}(?!_data_table).*$/
+table_regex = /^#{Config::MODULE}(?!_data_table).*(?<!history)$/
+# table_regex = /^#{Config::MODULE}(?!_data_table).*$/
 
 conn.exec Constant::QUERY_TABLE do |r|
   columns = conn.exec(Constant::QUERY_COLUMN).filter do |c|
@@ -32,12 +32,16 @@ conn.exec Constant::QUERY_TABLE do |r|
     x.column_arr.find { |c| c.column_name == 'id' }
   end
   tables.each { |t|
+    t.column_arr.each { |i|
+      p i.to_json
+    }
     # Controller.new(t).write_file
-    Service.new(t).write_file
-    ServiceImpl.new(t).write_file
+    # Service.new(t).write_file
+    # ServiceImpl.new(t).write_file
     Dao.new(t).write_file
-    Entity.new(t).write_file
-    Table.new(t).write_file
-    Dto.new(t).write_file
+    # Entity.new(t).write_file
+    # Table.new(t).write_file
+    # Dto.new(t).write_file
   }
 end
+

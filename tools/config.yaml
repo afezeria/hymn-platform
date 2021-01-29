@@ -6,4 +6,4 @@ db:
   options: '-c search_path=hymn'
 
 package: github.afezeria.hymn.core.module
-module_name: oss
+module_name: core

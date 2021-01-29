@@ -31,15 +31,16 @@ class {{name}} {
     fun update(e: {{entity_class}}): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
         val session = sessionService.getSession()
-        val accountId = session.accountId
-        val accountName = session.accountName
+        e.modifyDate = LocalDateTime.now()
+        e.modifyById = session.accountId
+        e.modifyBy = session.accountName
         return dbService.db().update(table) {
 {{#table.fields}}
             set(it.{{field_name}}, e.{{field_name}})
 {{/table.fields}}
-            set(it.modifyById, accountId)
-            set(it.modifyBy, accountName)
-            set(it.modifyDate, LocalDateTime.now())
+            set(it.modifyById, e.modifyById)
+            set(it.modifyBy, e.modifyBy)
+            set(it.modifyDate, e.modifyDate)
             where {
                 it.id eq e.id
             }
@@ -61,6 +62,12 @@ class {{name}} {
 {{#table.fields}}
             set(it.{{field_name}}, e.{{field_name}})
 {{/table.fields}}
+            set(it.createDate, e.createDate)
+            set(it.modifyDate, e.modifyDate)
+            set(it.createById, e.createById)
+            set(it.modifyById, e.modifyById)
+            set(it.createBy, e.createBy)
+            set(it.modifyBy, e.modifyBy)
         } as String
     }
 
