@@ -1,7 +1,7 @@
 package github.afezeria.hymn.oss
 
 import github.afezeria.hymn.common.KGenericContainer
-import github.afezeria.hymn.common.util.BusinessException
+import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.util.randomUUIDStr
 import github.afezeria.hymn.oss.minio.MinioConfig
 import github.afezeria.hymn.oss.minio.MinioOssService

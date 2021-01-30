@@ -43,7 +43,7 @@ open class BaseDbTest {
             println("========== db init end ==========")
         }
 
-        private fun runSqlScript(path: String) {
+        fun runSqlScript(path: String) {
             val proc = prop.run {
                 println("run script $path")
                 val command =

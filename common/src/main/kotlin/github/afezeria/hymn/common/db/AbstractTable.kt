@@ -6,10 +6,11 @@ import org.ktorm.dsl.QueryRowSet
 import org.ktorm.schema.BaseTable
 import org.ktorm.schema.Column
 import org.ktorm.schema.varchar
-import java.lang.reflect.Constructor
 import java.util.*
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
 
 /**
@@ -31,7 +32,6 @@ abstract class AbstractTable<E : AbstractEntity>(
         }
     }
 
-    val id = varchar("id")
     private val _history = history
 
 
@@ -39,13 +39,18 @@ abstract class AbstractTable<E : AbstractEntity>(
     private val fieldName2Field: MutableMap<String, EntityField> = mutableMapOf()
     private val entityFieldList: MutableList<EntityField> = mutableListOf()
     private val fieldName2Column: MutableMap<String, Column<*>> = mutableMapOf()
-    private val entityParameterlessConstructor: Constructor<E>
+
+    //    private val entityParameterlessConstructor: Constructor<E>
+    private val primaryConstructor: KFunction<E>
 
     init {
         val columns = BaseTable::class.java.getDeclaredField("_columns")
         columns.isAccessible = true
         val kClass = this.entityClass ?: throw RuntimeException("无法获取表 $tableName 的实体类的Class实例")
-        entityParameterlessConstructor = kClass.java.getConstructor()
+        primaryConstructor =
+            kClass.primaryConstructor
+                ?: throw RuntimeException("无法获取类 ${kClass.qualifiedName} 的主构造器")
+//        entityParameterlessConstructor = kClass.java.getConstructor()
         columns.set(this, InnerMap { columnName, column ->
             val fieldName = columnName.lCamelize()
             kClass.memberProperties
@@ -67,6 +72,8 @@ abstract class AbstractTable<E : AbstractEntity>(
                 }
         })
     }
+
+    val id = varchar("id")
 
     val fieldCount: Int
         get() = entityFieldList.size
@@ -96,22 +103,28 @@ abstract class AbstractTable<E : AbstractEntity>(
     }
 
     override fun doCreateEntity(row: QueryRowSet, withReferences: Boolean): E {
-        val newInstance = entityParameterlessConstructor.newInstance()
-        for (entityField in fieldName2Field.values) {
-            if (entityField.nullable) {
-                entityField.field.set(newInstance, row[entityField.column])
-            } else {
-                val value = row[entityField.column]
-                    ?: throw IllegalArgumentException(
-                        "field ${entityClass!!.qualifiedName}.${entityField.field.name} of data with id ${
-                            row.getString(
-                                "id"
-                            )
-                        }  should not be null"
-                    )
-                entityField.field.set(newInstance, value)
+        val args = primaryConstructor.parameters.map {
+            val entityField = requireNotNull(fieldName2Field[it.name])
+            val value = row[entityField.column]
+            if (value == null && !it.isOptional) {
+                throw IllegalArgumentException(
+                    "field ${entityClass!!.qualifiedName}.${entityField.field.name} of data with id ${
+                        row.getString(id.label)
+                    }  should not be null"
+                )
             }
+            value
+        }.toTypedArray()
+        val instance = primaryConstructor.call(*args)
+        for (entityField in entityFieldList.filter { it.lazy }) {
+            val value = row[entityField.column]
+                ?: throw IllegalArgumentException(
+                    "field ${entityClass!!.qualifiedName}.${entityField.field.name} of data with id ${
+                        row.getString(id.label)
+                    }  should not be null"
+                )
+            entityField.field.set(instance, value)
         }
-        return newInstance
+        return instance
     }
 }

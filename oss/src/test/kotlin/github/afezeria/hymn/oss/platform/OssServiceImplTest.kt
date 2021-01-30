@@ -1,7 +1,7 @@
 package github.afezeria.hymn.oss.platform
 
-import github.afezeria.hymn.common.util.BusinessException
-import github.afezeria.hymn.common.util.InnerException
+import github.afezeria.hymn.common.exception.BusinessException
+import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.oss.local.LocalConfig
 import github.afezeria.hymn.oss.local.LocalOssService
 import io.kotest.assertions.assertSoftly

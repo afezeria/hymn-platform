@@ -38,9 +38,9 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             entityField.field.set(e, current)
         }
         return databaseService.primary().update(table) {
-            table.getEntityFieldList().asSequence().filter { it.field.name == "id" }
-                .forEach {
-                    set(it.column, it.field.get(e))
+            table.getEntityFieldList().asSequence().filter { it.field.name != "id" }
+                .forEach { field ->
+                    set(field.column, field.field.get(e))
                 }
             where {
                 it.id eq e.id
@@ -65,7 +65,7 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
                 }
             }
             for (entityField in entityFields.filter { it.autoFill?.fillOnUpdate ?: false }) {
-                entityField.field.set(
+                set(
                     entityField.column,
                     selector.getCurrent(entityField.autoFill!!.type)
                 )

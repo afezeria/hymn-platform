@@ -25,6 +25,7 @@ dependencies {
     implementation(Deps.DataSource.hikariCP)
 
     implementation(Deps.Ktorm.core)
+    implementation(Deps.Ktorm.postgresql)
 
     testCompile(Deps.SpringBoot.test)
     testCompile(Deps.Jdbc.postgresql)

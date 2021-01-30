@@ -1,6 +1,6 @@
 package github.afezeria.hymn.oss
 
-import github.afezeria.hymn.common.util.BusinessException
+import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.util.randomUUIDStr
 import github.afezeria.hymn.oss.local.LocalConfig
 import github.afezeria.hymn.oss.local.LocalOssService
