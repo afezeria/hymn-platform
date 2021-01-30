@@ -38,9 +38,7 @@ fun String.camelize(): String {
 }
 
 fun String.lCamelize(): String {
-    return this.replace(camelizeRegex) {
-        it.value.last().toUpperCase().toString()
-    }
+    return camelize().decapitalize()
 }
 
 private val underscoreRegex = Regex("([a-z]+|[A-Z][a-z]+|[A-Z]+|[0-9]+)")
