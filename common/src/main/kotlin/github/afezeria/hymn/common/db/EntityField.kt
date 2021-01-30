@@ -1,14 +1,15 @@
 package github.afezeria.hymn.common.db
 
+import org.ktorm.schema.Column
 import java.lang.reflect.Field
 
 /**
  * @author afezeria
  */
 class EntityField(
-    val name: String,
+    val field: Field,
+    val column: Column<*>,
     val nullable: Boolean,
     val lazy: Boolean,
-    val field: Field,
-    val autoFill: AutoFillField?
+    val autoFill: AutoFill?,
 )
