@@ -1,5 +1,6 @@
 package github.afezeria.hymn.common.db
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.Session
 import github.afezeria.hymn.common.util.execute
@@ -193,6 +194,11 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             .firstOrNull()
     }
 
+    fun selectByIdThrowIfNotExist(id: String): E {
+        return selectById(id)
+            ?: throw DataNotFoundException("${table.entityClass!!.simpleName} [id:$id]")
+    }
+
     fun selectByIds(ids: List<String>): MutableList<E> {
         return databaseService.db().from(table)
             .select(table.columns)
@@ -210,6 +216,12 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             query = query.where(condition)
         }
         return query.asIterable().first().getLong(1)
+    }
+
+    fun exist(id: String, throwException: Boolean = false): Boolean {
+        val res = count(null, { table.id eq id }).toInt() == 1
+        if (throwException && !res) throw DataNotFoundException("${table.entityClass!!.qualifiedName} [id:$id]")
+        return res
     }
 
     fun history(

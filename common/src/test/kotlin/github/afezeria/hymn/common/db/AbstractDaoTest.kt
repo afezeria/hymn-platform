@@ -3,6 +3,7 @@ package github.afezeria.hymn.common.db
 import github.afezeria.hymn.common.adminConn
 import github.afezeria.hymn.common.constant.AccountType
 import github.afezeria.hymn.common.constant.ClientType
+import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.Session
 import github.afezeria.hymn.common.util.execute
 import github.afezeria.hymn.common.util.randomUUIDStr
@@ -367,6 +368,20 @@ internal class AbstractDaoTest {
         history.size shouldBe 3
         history[0].keys.size shouldBe 19
         history.map { it["operation"] } shouldContainExactlyInAnyOrder listOf("u", "i", "d")
+    }
 
+    @Test
+    fun dataExist() {
+        val id = "abcd"
+        shouldThrow<DataNotFoundException> {
+            dao.selectByIdThrowIfNotExist(id)
+        }.apply {
+            message shouldBe "github.afezeria.hymn.common.db.TestTable [id:$id] 不存在"
+        }
+        shouldThrow<DataNotFoundException> {
+            dao.exist(id, true)
+        }.apply {
+            message shouldBe "github.afezeria.hymn.common.db.TestTable [id:$id] 不存在"
+        }
     }
 }
