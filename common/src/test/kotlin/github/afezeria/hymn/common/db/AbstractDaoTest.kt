@@ -10,6 +10,7 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.*
@@ -44,14 +45,14 @@ internal class AbstractDaoTest {
         @JvmStatic
         @BeforeAll
         fun before() {
-            Sql.init()
+            SimpleOrmTestHelper.init()
             Session.current.set(session)
         }
 
         @JvmStatic
         @AfterAll
         fun after() {
-            Sql.clear()
+            SimpleOrmTestHelper.clear()
             Session.current.remove()
         }
     }
@@ -123,6 +124,7 @@ internal class AbstractDaoTest {
     fun afterEach() {
         adminConn.use {
             it.execute("delete from test_dao.test_table")
+            it.execute("delete from test_dao.test_table_history")
         }
     }
 
@@ -333,4 +335,17 @@ internal class AbstractDaoTest {
         dao.selectByIds(listOf(ea.id, eb.id)) shouldContainAll listOf(ea, eb)
     }
 
+    @Test
+    fun history() {
+        val copy = ea.copy()
+        val insert = dao.insert(copy)
+        copy.inta = 5
+        dao.update(copy)
+        dao.deleteById(insert)
+        val history = dao.history(insert)
+        history.size shouldBe 3
+        history[0].keys.size shouldBe 19
+        history.map { it["operation"] } shouldContainExactlyInAnyOrder listOf("u", "i", "d")
+
+    }
 }

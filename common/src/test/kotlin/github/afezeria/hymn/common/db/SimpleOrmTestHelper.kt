@@ -8,7 +8,7 @@ import java.io.File
 /**
  * @author afezeria
  */
-object Sql {
+object SimpleOrmTestHelper {
     fun init() {
         val sql = """
 drop schema if exists test_dao cascade;
@@ -66,7 +66,7 @@ begin
     elseif tg_op = 'UPDATE' then
         insert into test_dao.test_table_history select 'u', now(), new.*;
     elseif tg_op = 'DELETE' then
-        insert into test_dao.test_table_history select 'd', now(), new.*;
+        insert into test_dao.test_table_history select 'd', now(), old.*;
     end if;
     return null;
 end

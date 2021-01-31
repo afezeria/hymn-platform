@@ -29,13 +29,13 @@ internal class AbstractTableTest {
         @JvmStatic
         @BeforeAll
         fun before() {
-            Sql.init()
+            SimpleOrmTestHelper.init()
         }
 
         @JvmStatic
         @AfterAll
         fun after() {
-            Sql.clear()
+            SimpleOrmTestHelper.clear()
         }
     }
 
