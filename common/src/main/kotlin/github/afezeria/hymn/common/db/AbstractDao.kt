@@ -4,6 +4,7 @@ import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.Session
 import github.afezeria.hymn.common.util.execute
 import org.ktorm.dsl.*
+import org.ktorm.expression.BinaryExpression
 import org.ktorm.expression.OrderByExpression
 import org.ktorm.schema.Column
 import org.ktorm.schema.ColumnDeclaring
@@ -19,6 +20,11 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
     val databaseService: DatabaseService,
 ) {
     private val entityFields = table.getEntityFieldList().asSequence()
+
+    companion object {
+        val and: (ColumnDeclaring<Boolean>, ColumnDeclaring<Boolean>) -> BinaryExpression<Boolean> =
+            ColumnDeclaring<Boolean>::and
+    }
 
     fun delete(condition: (T) -> ColumnDeclaring<Boolean>): Int {
         return databaseService.primary().delete(table, condition)
@@ -77,18 +83,19 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
     }
 
     fun insert(e: E): String {
-        requireNotNull(e.id) { "missing id, unable to update data" }
         val selector = AutoFillSelector()
         for (entityField in entityFields.filter { it.autoFill?.fillOnInsert ?: false }) {
             val current = selector.getCurrent(entityField.autoFill!!.type)
             entityField.field.set(e, current)
         }
-        return databaseService.primary().insertAndGenerateKey(table) {
-            table.getEntityFieldList().asSequence().filter { it.field.name == "id" }
+        val id = databaseService.primary().insertAndGenerateKey(table) {
+            table.getEntityFieldList().asSequence().filter { it.field.name != "id" }
                 .forEach {
                     set(it.column, it.field.get(e))
                 }
         } as String
+        table.setValueByFieldName(e, "id", id)
+        return id
     }
 
     fun select(
@@ -96,81 +103,73 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         condition: (() -> ColumnDeclaring<Boolean>)? = null,
         offset: Int? = null,
         limit: Int? = null,
-        orderBy: List<OrderByExpression>? = null,
-    ): Sequence<QueryRowSet> {
+        orderBy: List<OrderByExpression> = emptyList(),
+    ): MutableList<MutableMap<String, Any?>> {
         var query = databaseService.db().from(table)
             .select(columns)
         if (condition != null) {
             query = query.where(condition)
         }
-        if (orderBy != null) {
-            query = query.orderBy(orderBy)
-
-        }
-        query.limit(offset, limit)
-        return query
-            .asIterable()
-            .asSequence()
+        return query.limit(offset, limit)
+            .orderBy(orderBy)
+            .mapTo(ArrayList()) {
+                val map: MutableMap<String, Any?> = mutableMapOf()
+                for (column in columns) {
+                    val entityField =
+                        table.getEntityFieldByColumnName(column.name) ?: continue
+                    map[entityField.field.name] = it[column]
+                }
+                map
+            }
     }
 
     fun select(
         condition: (() -> ColumnDeclaring<Boolean>)? = null,
         offset: Int? = null,
         limit: Int? = null,
-        orderBy: List<OrderByExpression>? = null,
-    ): Sequence<QueryRowSet> {
+        orderBy: List<OrderByExpression> = emptyList(),
+    ): MutableList<E> {
         var query = databaseService.db().from(table)
             .select(table.columns)
         if (condition != null) {
             query = query.where(condition)
         }
-        if (orderBy != null) {
-            query = query.orderBy(orderBy)
-
-        }
-        query.limit(offset, limit)
-        return query
-            .asIterable()
-            .asSequence()
+        return query.limit(offset, limit)
+            .orderBy(orderBy)
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun singleRowSelect(
         condition: () -> ColumnDeclaring<Boolean>,
-        orderBy: List<OrderByExpression>? = null,
+        orderBy: List<OrderByExpression> = emptyList(),
     ): E? {
-        return select(table.columns, condition, 0, 1, orderBy)
+        return select(condition, 0, 1, orderBy)
             .firstOrNull()
-            ?.let { table.createEntity(it) }
     }
 
     fun select(
         conditions: List<ColumnDeclaring<Boolean>> = emptyList(),
         offset: Int? = null,
         limit: Int? = null,
-        orderBy: List<OrderByExpression>? = null,
+        orderBy: List<OrderByExpression> = emptyList(),
     ): MutableList<E> {
         return select(
-            conditions.takeIf { it.isNotEmpty() }?.run {
-                { reduce { a, b -> a and b } }
-            },
+            conditions.takeIf { it.isNotEmpty() }?.run { { reduce(and) } },
             limit,
             offset,
             orderBy
-        ).map { table.createEntity(it) }
-            .toMutableList()
+        )
     }
 
     fun pageSelect(
         condition: (() -> ColumnDeclaring<Boolean>)? = null,
         pageSize: Int,
         pageNumber: Int,
-        orderBy: List<OrderByExpression>? = null,
+        orderBy: List<OrderByExpression> = emptyList(),
     ): MutableList<E> {
-        if (pageSize < 0) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
-        if (pageNumber < 0) throw IllegalArgumentException("pageNumber must be greater than 0, current value $pageSize")
-        return select(condition, pageNumber * pageSize, pageSize, orderBy)
-            .map { table.createEntity(it) }
-            .toMutableList()
+        if (pageSize < 1) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
+        if (pageNumber < 1) throw IllegalArgumentException("pageNumber must be greater than 0, current value $pageNumber")
+        return select(condition, (pageNumber - 1) * pageSize, pageSize, orderBy)
     }
 
     fun selectAll(): MutableList<E> {
@@ -198,8 +197,8 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             }.mapTo(ArrayList()) { table.createEntity(it) }
     }
 
-    fun <C : Any> count(
-        column: Column<C>? = null,
+    fun count(
+        column: Column<*>? = null,
         condition: (() -> ColumnDeclaring<Boolean>)? = null
     ): Long {
         var query = databaseService.db().from(table).select(ktormDslCount(column))

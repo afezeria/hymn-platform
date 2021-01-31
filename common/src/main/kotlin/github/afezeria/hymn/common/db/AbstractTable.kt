@@ -73,7 +73,7 @@ abstract class AbstractTable<E : AbstractEntity>(
         })
     }
 
-    val id = varchar("id")
+    val id = varchar("id").primaryKey()
 
     val fieldCount: Int
         get() = entityFieldList.size
@@ -84,6 +84,10 @@ abstract class AbstractTable<E : AbstractEntity>(
 
     fun getColumnByFieldName(fieldName: String): Column<*>? {
         return fieldName2Column[fieldName]
+    }
+
+    fun getEntityFieldByColumnName(columnName: String): EntityField? {
+        return columnName2Field[columnName]
     }
 
     fun getEntityFieldList(): List<EntityField> {
@@ -100,6 +104,15 @@ abstract class AbstractTable<E : AbstractEntity>(
         val entityField = columnName2Field[columnName]
             ?: throw InnerException("column $schema.$tableName.$columnName does not exist")
         return entityField.field.get(e)
+    }
+
+    fun setValueByFieldName(e: E, fieldName: String, value: Any?) {
+        val entityField = fieldName2Field[fieldName]
+            ?: throw InnerException("field ${entityClass!!.qualifiedName}.$fieldName does not exist")
+        if (value == null && !entityField.nullable) {
+            throw IllegalArgumentException("field ${entityClass!!.qualifiedName}.$fieldName can not be null")
+        }
+        return entityField.field.set(e, value)
     }
 
     override fun doCreateEntity(row: QueryRowSet, withReferences: Boolean): E {
