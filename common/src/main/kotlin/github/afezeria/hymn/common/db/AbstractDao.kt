@@ -44,7 +44,7 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             entityField.field.set(e, current)
         }
         return databaseService.primary().update(table) {
-            table.getEntityFieldList().asSequence().filter { it.field.name != "id" }
+            entityFields.filter { it.field.name != "id" && it.mutable }
                 .forEach { field ->
                     set(field.column, field.field.get(e))
                 }
@@ -54,21 +54,16 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         }
     }
 
-    fun update(id: String, data: Map<String, Any?>): Int {
+    fun update(id: String, params: Map<String, Any?>): Int {
+        val data = params.map { (k, v) ->
+            table.getEntityFieldByFieldName(k)?.takeIf { it.field.name != "id" && it.mutable }
+                ?.run { this.column to v }
+        }.filterNotNull()
+        if (data.isEmpty()) return 0
         val selector = AutoFillSelector()
         return databaseService.primary().update(table) {
-            if (data.size > table.fieldCount) {
-                for (entityField in entityFields) {
-                    if (data.containsKey(entityField.field.name)) {
-                        set(entityField.column, data[entityField.field.name])
-                    }
-                }
-            } else {
-                for (entry in data.entries) {
-                    table.getColumnByFieldName(entry.key)?.also {
-                        set(it, entry.value)
-                    }
-                }
+            data.forEach { (column, value) ->
+                set(column, value)
             }
             for (entityField in entityFields.filter { it.autoFill?.fillOnUpdate ?: false }) {
                 set(
@@ -89,7 +84,7 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             entityField.field.set(e, current)
         }
         val id = databaseService.primary().insertAndGenerateKey(table) {
-            table.getEntityFieldList().asSequence().filter { it.field.name != "id" }
+            entityFields.filter { it.field.name != "id" }
                 .forEach {
                     set(it.column, it.field.get(e))
                 }
@@ -139,14 +134,6 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
-    fun singleRowSelect(
-        condition: () -> ColumnDeclaring<Boolean>,
-        orderBy: List<OrderByExpression> = emptyList(),
-    ): E? {
-        return select(condition, 0, 1, orderBy)
-            .firstOrNull()
-    }
-
     fun select(
         conditions: List<ColumnDeclaring<Boolean>> = emptyList(),
         offset: Int? = null,
@@ -160,6 +147,23 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             orderBy
         )
     }
+
+    fun singleRowSelect(
+        conditions: List<ColumnDeclaring<Boolean>> = emptyList(),
+        orderBy: List<OrderByExpression> = emptyList(),
+    ): E? {
+        return select(conditions, 0, 1, orderBy)
+            .firstOrNull()
+    }
+
+    fun singleRowSelect(
+        condition: () -> ColumnDeclaring<Boolean>,
+        orderBy: List<OrderByExpression> = emptyList(),
+    ): E? {
+        return select(condition, 0, 1, orderBy)
+            .firstOrNull()
+    }
+
 
     fun pageSelect(
         condition: (() -> ColumnDeclaring<Boolean>)? = null,

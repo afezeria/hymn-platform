@@ -51,10 +51,10 @@ internal class AbstractTableTest {
 
     @Test
     fun getColumnByFieldName() {
-        val column = table.getColumnByFieldName("longa")
-        column shouldNotBe null
-        column!!.name shouldBe "longa"
-        column.sqlType shouldBe LongSqlType
+        val entityField = table.getEntityFieldByColumnName("longa")
+        entityField shouldNotBe null
+        entityField!!.column.name shouldBe "longa"
+        entityField.column.sqlType shouldBe LongSqlType
     }
 
     @Test

@@ -9,6 +9,7 @@ import java.lang.reflect.Field
 class EntityField(
     val field: Field,
     val column: Column<*>,
+    val mutable: Boolean,
     val nullable: Boolean,
     val lazy: Boolean,
     val autoFill: AutoFill?,

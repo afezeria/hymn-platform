@@ -9,6 +9,7 @@ import org.ktorm.schema.varchar
 import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
@@ -40,7 +41,6 @@ abstract class AbstractTable<E : AbstractEntity>(
     private val entityFieldList: MutableList<EntityField> = mutableListOf()
     private val fieldName2Column: MutableMap<String, Column<*>> = mutableMapOf()
 
-    //    private val entityParameterlessConstructor: Constructor<E>
     private val primaryConstructor: KFunction<E>
 
     init {
@@ -50,7 +50,6 @@ abstract class AbstractTable<E : AbstractEntity>(
         primaryConstructor =
             kClass.primaryConstructor
                 ?: throw RuntimeException("无法获取类 ${kClass.qualifiedName} 的主构造器")
-//        entityParameterlessConstructor = kClass.java.getConstructor()
         columns.set(this, InnerMap { columnName, column ->
             val fieldName = columnName.lCamelize()
             kClass.memberProperties
@@ -61,6 +60,7 @@ abstract class AbstractTable<E : AbstractEntity>(
                     val entityField = EntityField(
                         field = javaField,
                         column = column,
+                        mutable = this is KMutableProperty1,
                         nullable = this.returnType.isMarkedNullable,
                         lazy = this.isLateinit,
                         autoFill = javaField.getAnnotation(AutoFill::class.java),
@@ -82,8 +82,12 @@ abstract class AbstractTable<E : AbstractEntity>(
         return _history
     }
 
-    fun getColumnByFieldName(fieldName: String): Column<*>? {
-        return fieldName2Column[fieldName]
+    fun containsField(fieldName: String): Boolean {
+        return fieldName2Field.containsKey(fieldName)
+    }
+
+    fun getEntityFieldByFieldName(fieldName: String): EntityField? {
+        return fieldName2Field[fieldName]
     }
 
     fun getEntityFieldByColumnName(columnName: String): EntityField? {

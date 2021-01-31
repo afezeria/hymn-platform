@@ -139,6 +139,7 @@ internal class AbstractDaoTest {
         dao.deleteById("cc25e3c045390139d47e1cb6d0c265af") shouldBe 1
     }
 
+
     @Test
     fun updateEntity() {
         var entity = dao.selectById("cc25e3c045390139d47e1cb6d0c265af")!!
@@ -204,6 +205,26 @@ internal class AbstractDaoTest {
                 orgName shouldBe session.orgName
             }
         }
+    }
+
+    @Test
+    fun `map update will ignore unmutable field`() {
+        val id = "cc25e3c045390139d47e1cb6d0c265af"
+        val entity = dao.selectById(id)!!
+        val boola = entity.boola
+        dao.update(id, mapOf("boola" to entity.boola.not()))
+        val new = dao.selectById(id)!!
+        new.boola shouldBe boola
+    }
+
+    @Test
+    fun `entity update will ignore unmutable field`() {
+        val entity = dao.selectById("cc25e3c045390139d47e1cb6d0c265af")!!
+        val boola = entity.boola
+        table.setValueByFieldName(entity, "boola", entity.boola.not())
+        dao.update(entity) shouldBe 1
+        val new = dao.selectById("cc25e3c045390139d47e1cb6d0c265af")!!
+        new.boola shouldBe boola
     }
 
     @Test

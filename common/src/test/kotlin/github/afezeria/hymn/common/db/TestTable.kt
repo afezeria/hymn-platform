@@ -12,7 +12,7 @@ data class TestTable(
     var longa: Long? = null,
     var doublea: Double,
     var decimala: BigDecimal,
-    var boola: Boolean,
+    val boola: Boolean,
 ) : AbstractEntity() {
     lateinit var lazya: String
 
