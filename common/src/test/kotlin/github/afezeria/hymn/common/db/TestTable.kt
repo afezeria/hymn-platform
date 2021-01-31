@@ -16,34 +16,34 @@ data class TestTable(
 ) : AbstractEntity() {
     lateinit var lazya: String
 
-    @field:AutoFill(fillOnInsert = true, fillOnUpdate = true, type = AutoFillType.ROLE_ID)
+    @field:AutoFill(fillOnUpdate = true, type = AutoFillType.ROLE_ID)
     lateinit var roleId: String
 
-    @field:AutoFill(fillOnInsert = true, fillOnUpdate = true, type = AutoFillType.ROLE_NAME)
+    @field:AutoFill(fillOnUpdate = true, type = AutoFillType.ROLE_NAME)
     lateinit var roleName: String
 
-    @field:AutoFill(fillOnInsert = true, fillOnUpdate = true, type = AutoFillType.ORG_ID)
+    @field:AutoFill(fillOnUpdate = true, type = AutoFillType.ORG_ID)
     lateinit var orgId: String
 
-    @field:AutoFill(fillOnInsert = true, fillOnUpdate = true, type = AutoFillType.ORG_NAME)
+    @field:AutoFill(fillOnUpdate = true, type = AutoFillType.ORG_NAME)
     lateinit var orgName: String
 
-    @field:AutoFill(fillOnInsert = true, fillOnUpdate = false, type = AutoFillType.ACCOUNT_ID)
+    @field:AutoFill(type = AutoFillType.ACCOUNT_ID)
     lateinit var createById: String
 
-    @field:AutoFill(fillOnInsert = true, fillOnUpdate = false, type = AutoFillType.ACCOUNT_NAME)
+    @field:AutoFill(type = AutoFillType.ACCOUNT_NAME)
     lateinit var createBy: String
 
-    @field:AutoFill(fillOnInsert = true, fillOnUpdate = true, type = AutoFillType.ACCOUNT_ID)
+    @field:AutoFill(fillOnUpdate = true, type = AutoFillType.ACCOUNT_ID)
     lateinit var modifyById: String
 
-    @field:AutoFill(fillOnInsert = true, fillOnUpdate = true, type = AutoFillType.ACCOUNT_NAME)
+    @field:AutoFill(fillOnUpdate = true, type = AutoFillType.ACCOUNT_NAME)
     lateinit var modifyBy: String
 
-    @field:AutoFill(fillOnInsert = true, fillOnUpdate = false, type = AutoFillType.DATETIME)
+    @field:AutoFill(type = AutoFillType.DATETIME)
     lateinit var createDate: LocalDateTime
 
-    @field:AutoFill(fillOnInsert = true, fillOnUpdate = true, type = AutoFillType.DATETIME)
+    @field:AutoFill(fillOnUpdate = true, type = AutoFillType.DATETIME)
     lateinit var modifyDate: LocalDateTime
 
 }

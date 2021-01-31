@@ -6,7 +6,7 @@ package github.afezeria.hymn.common.db
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class AutoFill(
-    val fillOnInsert: Boolean,
-    val fillOnUpdate: Boolean,
+    val fillOnInsert: Boolean = true,
+    val fillOnUpdate: Boolean = false,
     val type: AutoFillType,
 )
