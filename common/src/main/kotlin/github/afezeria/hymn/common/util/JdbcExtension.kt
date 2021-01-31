@@ -47,14 +47,27 @@ fun Connection.execute(
     @Language("sql") sql: String,
     vararg params: Any?
 ): MutableList<MutableMap<String, Any?>> {
+    logger.debug {
+        """
+            
+            SQL: $sql
+            Parameters: ${
+            params.map { "$it(${it?.javaClass?.typeName})" }.joinToString(
+                separator = ", ",
+                prefix = "[",
+                postfix = "]",
+            )
+        }
+        """.trimIndent()
+    }
     return if (params.isNotEmpty()) {
         prepareStatement(sql).use {
             params.forEachIndexed { index, any ->
                 it.setObject(index + 1, any)
             }
-            try{
+            try {
                 it.execute()
-            }finally {
+            } finally {
                 if (logger.isDebugEnabled) {
                     var warnings = it.warnings
                     while (warnings != null) {
@@ -67,9 +80,9 @@ fun Connection.execute(
         }
     } else {
         createStatement().use {
-            try{
+            try {
                 it.execute(sql)
-            }finally {
+            } finally {
                 if (logger.isDebugEnabled) {
                     var warnings = it.warnings
                     while (warnings != null) {
