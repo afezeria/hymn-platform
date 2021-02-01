@@ -1,15 +1,11 @@
 package github.afezeria.hymn.oss
 
-import github.afezeria.hymn.common.platform.ConfigService
-import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.platform.OssService
-import github.afezeria.hymn.common.platform.PermService
+import github.afezeria.hymn.common.platform.*
 import github.afezeria.hymn.oss.OssType.*
 import github.afezeria.hymn.oss.ftp.FTPOssService
 import github.afezeria.hymn.oss.local.LocalOssService
 import github.afezeria.hymn.oss.minio.MinioOssService
 import github.afezeria.hymn.oss.module.service.FileRecordService
-import github.afezeria.hymn.oss.module.service.PreSignedHistoryService
 import github.afezeria.hymn.oss.platform.OssServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -30,19 +26,16 @@ class OssConfig {
     lateinit var fileRecordService: FileRecordService
 
     @Autowired
-    lateinit var preSignedHistoryService: PreSignedHistoryService
+    lateinit var cacheService: CacheService
 
     @Autowired
-    lateinit var dataBaseService: DatabaseService
+    lateinit var databaseService: DatabaseService
 
     @Autowired
     lateinit var storageService: StorageService
 
     @Autowired
     lateinit var permService: PermService
-
-    @Autowired
-    lateinit var redisTemplate: RedisTemplate<String, String>
 
     lateinit var config: OssConfigProperties
 
@@ -63,11 +56,10 @@ class OssConfig {
         return OssServiceImpl(
             prefix = config.prefix,
             fileRecordService = fileRecordService,
-            preSignedHistoryService = preSignedHistoryService,
-            dataBaseService = dataBaseService,
+            databaseService = databaseService,
             storageService = storageService,
             permService = permService,
-            redisTemplate = RedisTemplate()
+            cacheService = cacheService,
         )
     }
 }

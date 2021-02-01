@@ -1,6 +1,6 @@
 package github.afezeria.hymn.oss.ftp
 
-import github.afezeria.hymn.common.util.InnerException
+import github.afezeria.hymn.common.exception.InnerException
 import mu.KLogging
 import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPClient

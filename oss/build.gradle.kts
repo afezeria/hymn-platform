@@ -18,6 +18,7 @@ dependencies {
     implementation(Deps.Ktorm.postgresql)
 
     testImplementation(project(":common", "testArtifacts"))
+    testImplementation(project(":cache-redis"))
     testImplementation(Deps.SpringBoot.test)
 
 

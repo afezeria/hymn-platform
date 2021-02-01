@@ -1,7 +1,7 @@
 package github.afezeria.hymn.oss.ftp
 
-import github.afezeria.hymn.common.util.BusinessException
-import github.afezeria.hymn.common.util.InnerException
+import github.afezeria.hymn.common.exception.BusinessException
+import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.oss.StorageService
 import mu.KLogging
 import org.apache.commons.io.IOUtils

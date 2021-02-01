@@ -1,10 +1,24 @@
 package github.afezeria.hymn.oss
 
+import github.afezeria.hymn.common.exception.BusinessException
+import github.afezeria.hymn.common.exception.InnerException
+
 /**
  * @author afezeria
  */
-fun postfix2ContentType(postfix: String) =
-    when (postfix.substringAfterLast('.', "").toLowerCase()) {
+private val FILE_NAME_REGEX = "[^\\x00-\\x1f\\x7f\\\\?*<\":>/]{1,199}".toRegex()
+fun String.isValidFileName(): Boolean = matches(FILE_NAME_REGEX)
+fun String.throwIfFileNameInvalid() =
+    takeIf { matches(FILE_NAME_REGEX) } ?: throw BusinessException("$this 不是有效的文件名")
+
+
+private val BUCKET_REGEX = "[-a-z0-9.]{3,40}".toRegex()
+fun String.isValidBucketName(): Boolean = matches(BUCKET_REGEX)
+fun String.throwIfBucketNameInvalid() =
+    takeIf { matches(BUCKET_REGEX) } ?: throw InnerException("$this 不是有效的bucket名称")
+
+fun filename2ContentType(filename: String) =
+    when (filename.substringAfterLast('.', "").toLowerCase()) {
         "tif" -> "image/tiff"
         "tiff" -> "image/tiff"
         "fax" -> "image/fax"

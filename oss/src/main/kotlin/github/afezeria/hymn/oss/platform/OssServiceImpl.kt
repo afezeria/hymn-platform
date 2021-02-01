@@ -1,19 +1,20 @@
 package github.afezeria.hymn.oss.platform
 
-import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.platform.OssService
-import github.afezeria.hymn.common.platform.PermService
-import github.afezeria.hymn.common.util.*
-import github.afezeria.hymn.oss.OssCacheKey
+import github.afezeria.hymn.common.exception.BusinessException
+import github.afezeria.hymn.common.exception.InnerException
+import github.afezeria.hymn.common.exception.PermissionDeniedException
+import github.afezeria.hymn.common.platform.*
+import github.afezeria.hymn.common.util.randomUUIDStr
+import github.afezeria.hymn.oss.OssFileNotFoundException
 import github.afezeria.hymn.oss.StorageService
 import github.afezeria.hymn.oss.module.dto.FileRecordDto
 import github.afezeria.hymn.oss.module.entity.FileRecord
 import github.afezeria.hymn.oss.module.service.FileRecordService
-import github.afezeria.hymn.oss.module.service.PreSignedHistoryService
+import github.afezeria.hymn.oss.throwIfBucketNameInvalid
+import github.afezeria.hymn.oss.throwIfFileNameInvalid
+import github.afezeria.hymn.oss.web.controller.PreSignedUrlController
 import mu.KLogging
-import org.springframework.data.redis.core.RedisTemplate
 import java.io.InputStream
-import java.util.concurrent.TimeUnit
 
 /**
  * @author afezeria
@@ -21,11 +22,10 @@ import java.util.concurrent.TimeUnit
 class OssServiceImpl(
     private val prefix: String,
     private val fileRecordService: FileRecordService,
-    private val preSignedHistoryService: PreSignedHistoryService,
-    private val dataBaseService: DatabaseService,
+    private val databaseService: DatabaseService,
     private val permService: PermService,
     private val storageService: StorageService,
-    private val redisTemplate: RedisTemplate<String, String>,
+    private val cacheService: CacheService,
 ) : OssService {
 
     companion object : KLogging()
@@ -43,14 +43,14 @@ class OssServiceImpl(
         contentType: String,
         tmp: Boolean,
     ): String {
-        return dataBaseService.useTransaction {
+        return databaseService.useTransaction {
             bucket.throwIfBucketNameInvalid()
             val b = prefix + bucket
             val fileName = objectName.split('/').last()
             fileName.throwIfFileNameInvalid()
             val path = objectName.replace(
                 "$fileName$".toRegex(),
-                "${System.currentTimeMillis()}-$fileName"
+                "${System.currentTimeMillis()}-${randomUUIDStr()}-$fileName"
             )
 
             val id = fileRecordService.create(
@@ -58,6 +58,7 @@ class OssServiceImpl(
                     bucket, fileName,
                     contentType = contentType,
                     path = path,
+                    tmp = tmp,
                 )
             )
             val size = storageService.putFile(b, path, inputStream, contentType)
@@ -73,6 +74,13 @@ class OssServiceImpl(
         storageService.getFile(b, objectName, fn)
     }
 
+    override fun getObject(objectId: String, fn: (InputStream) -> Unit) {
+        val record =
+            fileRecordService.findById(objectId) ?: throw OssFileNotFoundException("id:$objectId")
+        val b = prefix + record.bucket
+        storageService.getFile(b, record.path, fn)
+    }
+
     override fun moveObject(
         bucket: String,
         objectName: String,
@@ -82,7 +90,7 @@ class OssServiceImpl(
         bucket.throwIfBucketNameInvalid()
         srcBucket.throwIfBucketNameInvalid()
         if (bucket == srcBucket && objectName == srcObjectName) {
-            throw BusinessException("源对象和目标对象不能为同一个")
+            throw BusinessException("源文件路径和目标文件路径不能为同一个")
         }
         val fileName = objectName.split('/').last()
         fileName.throwIfFileNameInvalid()
@@ -107,7 +115,7 @@ class OssServiceImpl(
         bucket.throwIfBucketNameInvalid()
         srcBucket.throwIfBucketNameInvalid()
         if (bucket == srcBucket && objectName == srcObjectName) {
-            throw BusinessException("源对象和目标对象不能为同一个")
+            throw BusinessException("源文件路径和目标文件路径不能为同一个")
         }
         val b1 = prefix + bucket
         val b2 = prefix + srcBucket
@@ -140,20 +148,15 @@ class OssServiceImpl(
         val fileId = fileRecordExist(bucket, objectName).id
         storageService.fileExist(prefix + bucket, objectName, null)
 
-        logger.info("开始获取文件下载链接，文件路径： bucket: ${bucket}, objectName: $objectName")
+        logger.info("开始获取文件下载链接，文件路径： bucket: $bucket, objectName: $objectName")
 
         return if (storageService.remoteServerSupportHttpAccess()) {
             storageService.getFileUrl(prefix + bucket, objectName, expiry)
         } else {
             val random = randomUUIDStr()
-            val result = redisTemplate.opsForValue().setIfAbsent(
-                OssCacheKey.preSigned(random),
-                fileId,
-                expiry.toLong(),
-                TimeUnit.SECONDS
-            )!!
+            val result = cacheService.setIfAbsent(random, fileId, expiry.toLong())
             if (result) {
-                "/module/oss/public/pre-signed/$random"
+                PreSignedUrlController.generatePreSignedObjectUrl(random)
             } else {
                 ""
             }
@@ -179,9 +182,29 @@ class OssServiceImpl(
         }
     }
 
+    override fun getObjectInfoById(id: String): ObjectInfo? {
+        return fileRecordService.findById(id)?.run {
+            ObjectInfo(
+                bucket = bucket,
+                fileName = fileName,
+                contentType = contentType,
+                path = path,
+                objectId = objectId,
+                fieldId = fieldId,
+                dataId = dataId,
+                size = size,
+                tmp = tmp,
+                visibility = visibility,
+                remark = remark,
+                createById = createById,
+                createDate = createDate,
+            )
+        }
+    }
+
     override fun getObjectWithPerm(objectId: String, fn: (InputStream) -> Unit) {
         val record = fileRecordService.findById(objectId)
-            ?: throw BusinessException("对象不存在".msgById(objectId))
+            ?: throw OssFileNotFoundException("id:$objectId")
         record.apply {
             if (visibility == "normal" || visibility == "anonymous") {
                 storageService.getFile(bucket, path, fn)
@@ -198,9 +221,6 @@ class OssServiceImpl(
         }
     }
 
-    override fun getObject(objectId: String, fn: (InputStream) -> Unit) {
-        TODO("Not yet implemented")
-    }
 
     override fun removeObjectWithPerm(objectId: String) {
         TODO("Not yet implemented")
@@ -220,6 +240,6 @@ class OssServiceImpl(
 
     private fun fileRecordExist(bucket: String, objectName: String): FileRecord {
         return fileRecordService.findByBucketAndPath(bucket, objectName)
-            ?: throw BusinessException("对象 bucket:$bucket,objectName:$objectName 不存在")
+            ?: throw OssFileNotFoundException("bucket:$bucket, objectName:$objectName")
     }
 }

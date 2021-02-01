@@ -5,7 +5,7 @@ import github.afezeria.hymn.oss.module.dao.FileRecordDao
 import github.afezeria.hymn.oss.module.dto.FileRecordDto
 import github.afezeria.hymn.oss.module.service.FileRecordService
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.util.DataNotFoundException
+import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.util.*
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired

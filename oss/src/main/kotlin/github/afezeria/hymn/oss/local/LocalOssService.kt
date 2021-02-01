@@ -1,6 +1,6 @@
 package github.afezeria.hymn.oss.local
 
-import github.afezeria.hymn.common.util.BusinessException
+import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.oss.StorageService
 import mu.KLogging
 import org.apache.commons.io.IOUtils

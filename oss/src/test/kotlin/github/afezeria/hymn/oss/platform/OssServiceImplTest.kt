@@ -155,7 +155,6 @@ class OssServiceImplTest {
                 mockk(),
                 mockk(),
                 mockk(),
-                mockk(),
             )
         }.apply {
             message shouldBe "0 不是有效的 bucket 前缀"
@@ -173,7 +172,8 @@ class OssServiceImplTest {
                 "txt",
             )
         }.apply {
-            message shouldBe "源对象和目标对象不能为同一个"
+
+            message shouldBe "源文件路径和目标文件路径不能为同一个"
         }
         shouldThrow<BusinessException> {
             service.copyObject(
@@ -183,7 +183,7 @@ class OssServiceImplTest {
                 "txt",
             )
         }.apply {
-            message shouldBe "源对象和目标对象不能为同一个"
+            message shouldBe "源文件路径和目标文件路径不能为同一个"
         }
     }
 

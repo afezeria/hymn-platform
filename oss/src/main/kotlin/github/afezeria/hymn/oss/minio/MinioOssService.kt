@@ -1,6 +1,6 @@
 package github.afezeria.hymn.oss.minio
 
-import github.afezeria.hymn.common.util.BusinessException
+import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.oss.StorageService
 import io.minio.*
 import io.minio.errors.ErrorResponseException
