@@ -6,7 +6,8 @@ import java.util.*
 /**
  * @author afezeria
  */
-@ConfigurationProperties(prefix = "spring")
+@ConfigurationProperties(prefix = "spring.db")
 class DataBaseProperties {
-    var db: List<Properties> = mutableListOf()
+    var admin: List<Properties> = mutableListOf()
+    var user: Properties = Properties()
 }

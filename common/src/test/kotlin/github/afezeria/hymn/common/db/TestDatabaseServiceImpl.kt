@@ -24,6 +24,10 @@ object TestDatabaseServiceImpl : DatabaseService {
         return database
     }
 
+    override fun user(): Database {
+        return database
+    }
+
     override fun <T> useTransaction(fn: (Transaction) -> T): T {
         return database.useTransaction(func = fn)
     }
