@@ -143,8 +143,8 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
     ): MutableList<E> {
         return select(
             conditions.takeIf { it.isNotEmpty() }?.run { { reduce(and) } },
-            limit,
             offset,
+            limit,
             orderBy
         )
     }

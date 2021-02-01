@@ -1,7 +1,11 @@
 package github.afezeria.hymn.common
 
+import github.afezeria.hymn.common.constant.AccountType
+import github.afezeria.hymn.common.constant.ClientType
+import github.afezeria.hymn.common.platform.Session
 import github.afezeria.hymn.common.sql.core.field.randomFieldNameAndApi
 import github.afezeria.hymn.common.util.execute
+import github.afezeria.hymn.common.util.randomUUIDStr
 import io.kotest.matchers.shouldBe
 import java.sql.Connection
 import java.time.LocalDateTime
@@ -13,6 +17,9 @@ const val DEFAULT_ACCOUNT_NAME = "system admin"
 const val DEFAULT_ACCOUNT_ID = "911c60ea5d62420794d86eeecfddce7c"
 const val DEFAULT_ORG_ID = "b18245e9d690461190172b6cb90c46ac"
 const val DEFAULT_ROLE_ID = "301c35c23be449abb5bdf6c80b6878af"
+const val DEFAULT_ROLE_NAME = "系统管理员"
+const val DEFAULT_ORG_NAME = "根组织"
+
 
 val BASE_ARRAY = arrayOf<Any>(
     DEFAULT_ACCOUNT_ID,
@@ -24,6 +31,29 @@ val BASE_ARRAY = arrayOf<Any>(
 )
 val COMMON_INFO =
     arrayOf(DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME)
+
+val adminSession = Session(
+    id = randomUUIDStr(),
+    accountType = AccountType.ADMIN,
+    accountId = DEFAULT_ACCOUNT_ID,
+    accountName = DEFAULT_ACCOUNT_NAME,
+    clientType = ClientType.BROWSER,
+    roleId = DEFAULT_ROLE_ID,
+    roleName = DEFAULT_ROLE_NAME,
+    orgId = DEFAULT_ORG_ID,
+    orgName = DEFAULT_ORG_NAME,
+)
+val userSession = Session(
+    id = randomUUIDStr(),
+    accountType = AccountType.NORMAL,
+    accountId = randomUUIDStr(),
+    accountName = "normal_user",
+    clientType = ClientType.BROWSER,
+    roleId = randomUUIDStr(),
+    roleName = "普通角色",
+    orgId = randomUUIDStr(),
+    orgName = "a部门",
+)
 
 fun deleteBObject(id: String) {
     adminConn.use {

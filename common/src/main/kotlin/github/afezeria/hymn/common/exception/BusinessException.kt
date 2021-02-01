@@ -8,4 +8,5 @@ open class BusinessException(
     msg: String,
     cause: Throwable? = null,
     code: String = "",
-) : PlatformException(400, code, msg, cause)
+    httpCode: Int = 400
+) : PlatformException(httpCode, code, msg, cause)
