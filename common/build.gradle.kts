@@ -15,7 +15,13 @@ dependencies {
     api(Deps.Log.slf4jApi)
     api(Deps.Log.logback)
 
+    api(Deps.Jwt.api)
+    runtimeOnly(Deps.Jwt.impl)
+    implementation(Deps.Jwt.jackson)
+
     api(Deps.Apache.io)
+
+    api(Deps.OkHttp3.okhttp)
 
     api(Deps.SpringBoot.redis)
 //    api(Deps.Redssion.spring)

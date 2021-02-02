@@ -29,10 +29,21 @@ object Deps {
         const val kotlin = "com.fasterxml.jackson.module:jackson-module-kotlin"
     }
 
+    object Jwt {
+        const val api = "io.jsonwebtoken:jjwt-api:0.11.2"
+        const val impl = "io.jsonwebtoken:jjwt-impl:0.11.2"
+        const val jackson = "io.jsonwebtoken:jjwt-jackson:0.11.2"
+    }
+
     object Log {
         const val slf4jApi = "org.slf4j:slf4j-api:1.7.30"
         const val logback = "ch.qos.logback:logback-classic:1.2.3"
         const val kotlinLogging = "io.github.microutils:kotlin-logging:1.12.0"
+    }
+
+    object OkHttp3 {
+        const val okhttp = "com.squareup.okhttp3:okhttp:4.9.1"
+
     }
 
     object SpringBoot {
