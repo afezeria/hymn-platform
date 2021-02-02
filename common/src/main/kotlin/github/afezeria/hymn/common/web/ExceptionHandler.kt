@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import java.io.PrintWriter
 import java.io.StringWriter
 import javax.servlet.ServletException
+import javax.servlet.http.HttpServletResponse
 
 /**
  * @author afezeria
@@ -25,6 +26,7 @@ class ExceptionHandler {
     @ExceptionHandler(PlatformException::class)
     fun platformExceptionHandler(
         ex: PlatformException,
+        response: HttpServletResponse,
     ): ResponseEntity<ErrorResponse> {
         logger.warn(ex.message, ex)
         val session = Session.getInstance()
@@ -42,6 +44,7 @@ class ExceptionHandler {
                 ErrorResponse(message = "内部错误")
             }
         }
+        response.setHeader("ex-flag", "t")
         return ResponseEntity(resp, HttpStatus.valueOf(ex.httpCode))
     }
 

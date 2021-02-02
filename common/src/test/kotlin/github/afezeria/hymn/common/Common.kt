@@ -20,6 +20,18 @@ const val DEFAULT_ROLE_ID = "301c35c23be449abb5bdf6c80b6878af"
 const val DEFAULT_ROLE_NAME = "系统管理员"
 const val DEFAULT_ORG_NAME = "根组织"
 
+var stopFlag = true
+fun stop() {
+    while (true) {
+        if (!stopFlag) {
+            stopFlag = true
+            break
+        }
+        println("wait")
+        Thread.sleep(1000)
+    }
+}
+
 
 val BASE_ARRAY = arrayOf<Any>(
     DEFAULT_ACCOUNT_ID,

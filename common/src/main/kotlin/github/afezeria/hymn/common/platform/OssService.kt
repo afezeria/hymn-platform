@@ -8,14 +8,14 @@ import java.io.InputStream
 interface OssService {
 
     /**
-     * 存储文件
+     * 存储对象
      *
      * @param bucket bucket 名称
-     * @param objectName 文件名
-     * @param inputStream 文件的输入流
+     * @param objectName 对象名
+     * @param inputStream 对象的输入流
      * @param contentType http 的 MimeType 值
-     * @param tmp 是否为临时文件，默认为 true
-     * @return 文件id
+     * @param tmp 是否为临时对象，默认为 true
+     * @return 对象id
      */
     fun putObject(
         bucket: String,
@@ -26,10 +26,10 @@ interface OssService {
     ): String
 
     /**
-     *  获取文件字节流
+     *  获取对象字节流
      *
      * @param bucket bucket 名称
-     * @param objectName 文件名名
+     * @param objectName 对象名名
      * @param fn 操作输入流的函数，在函数中完成数据的输出
      */
     fun getObject(bucket: String, objectName: String, fn: (InputStream) -> Unit)
@@ -39,12 +39,12 @@ interface OssService {
 
 
     /**
-     * 移动文件
+     * 移动对象
      *
      * @param bucket bucket 名称
-     * @param objectName 文件名称
+     * @param objectName 对象名称
      * @param srcBucket  源 bucket 名称
-     * @param srcObjectName 源文件名称
+     * @param srcObjectName 源对象名称
      */
     fun moveObject(
         bucket: String,
@@ -54,12 +54,12 @@ interface OssService {
     )
 
     /**
-     * 复制文件
+     * 复制对象
      *
      * @param bucket bucket 名称
-     * @param objectName 文件名称
+     * @param objectName 对象名称
      * @param srcBucket  源 bucket 名称
-     * @param srcObjectName 源文件名称
+     * @param srcObjectName 源对象名称
      */
     fun copyObject(
         bucket: String,
@@ -70,19 +70,19 @@ interface OssService {
 
 
     /**
-     *  获取文件的URL
+     *  获取对象的URL
      *
      * @param bucket bucket 名称
-     * @param objectName 文件名称
+     * @param objectName 对象名称
      * @param expiry 有效时间，单位：秒
      */
     fun getObjectUrl(bucket: String, objectName: String, expiry: Int = 3600): String
 
     /**
-     *  删除文件
+     *  删除对象
      *
      * @param bucket bucket 名称
-     * @param objectName 文件名称
+     * @param objectName 对象名称
      */
     fun removeObject(bucket: String, objectName: String)
 
@@ -90,23 +90,23 @@ interface OssService {
     fun removeObject(objectId: String)
 
     /**
-     * 文件是否存在
+     * 对象是否存在
      * @param bucket bucket 名称
-     * @param objectName 文件名称
+     * @param objectName 对象名称
      */
     fun objectExist(bucket: String, objectName: String): Boolean
 
     /**
-     * 根据id获取文件信息
+     * 根据id获取对象信息
      */
     fun getObjectInfoById(id: String): ObjectInfo?
 
     /**
-     * 根据bucket获取文件列表
+     * 根据bucket获取对象列表
      * @param bucket
      * @param pageSize
      * @param pageNum
-     * @return pair.first 文件id，pair.second 文件名
+     * @return pair.first 对象id，pair.second 对象名
      */
     fun getObjectListByBucket(
         bucket: String,
