@@ -1,10 +1,7 @@
 package github.afezeria.hymn.common.web
 
 import github.afezeria.hymn.common.constant.AccountType
-import github.afezeria.hymn.common.exception.BusinessException
-import github.afezeria.hymn.common.exception.PermissionDeniedException
-import github.afezeria.hymn.common.exception.PlatformException
-import github.afezeria.hymn.common.exception.UnauthorizedException
+import github.afezeria.hymn.common.exception.*
 import github.afezeria.hymn.common.platform.Session
 import mu.KLogging
 import org.springframework.http.HttpStatus
@@ -37,7 +34,8 @@ class ExceptionHandler {
         } else {
             if (ex is BusinessException ||
                 ex is PermissionDeniedException ||
-                ex is UnauthorizedException
+                ex is UnauthorizedException ||
+                ex is ResourceNotFoundException
             ) {
                 ErrorResponse(ex.code, ex.message)
             } else {

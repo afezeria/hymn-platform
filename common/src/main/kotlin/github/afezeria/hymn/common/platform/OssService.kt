@@ -84,10 +84,10 @@ interface OssService {
      * @param bucket bucket 名称
      * @param objectName 对象名称
      */
-    fun removeObject(bucket: String, objectName: String)
+    fun removeObject(bucket: String, objectName: String): Int
 
-    fun removeObjectWithPerm(objectId: String)
-    fun removeObject(objectId: String)
+    fun removeObjectWithPerm(objectId: String): Int
+    fun removeObject(objectId: String): Int
 
     /**
      * 对象是否存在
@@ -106,12 +106,11 @@ interface OssService {
      * @param bucket
      * @param pageSize
      * @param pageNum
-     * @return pair.first 对象id，pair.second 对象名
      */
     fun getObjectListByBucket(
         bucket: String,
         pageSize: Int,
         pageNum: Int
-    ): List<Pair<String, String>>
+    ): List<ObjectInfo>
 
 }

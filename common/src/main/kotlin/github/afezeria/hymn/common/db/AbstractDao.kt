@@ -37,6 +37,12 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         }
     }
 
+    fun deleteByIds(ids: List<String>): Int {
+        return databaseService.primary().delete(table) {
+            it.id inList ids
+        }
+    }
+
     fun update(e: E): Int {
         requireNotNull(e.id) { "missing id, unable to update data" }
         val selector = AutoFillSelector()
