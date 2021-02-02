@@ -1,6 +1,7 @@
 package github.afezeria.hymn.cache.platform
 
 import github.afezeria.hymn.common.platform.CacheService
+import github.afezeria.hymn.common.util.toClass
 import github.afezeria.hymn.common.util.toJson
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -15,7 +16,7 @@ class RedisCacheService : CacheService {
     @Autowired
     lateinit var template: StringRedisTemplate
     override fun get(key: String): String? {
-        return template.opsForValue().get(key)
+        return template.opsForValue().get(key)?.toClass()
     }
 
     override fun multiGet(keys: Collection<String>): List<String> {
