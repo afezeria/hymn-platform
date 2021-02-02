@@ -3,6 +3,7 @@ package github.afezeria.hymn.oss.module.entity
 import github.afezeria.hymn.common.db.AbstractEntity
 import github.afezeria.hymn.common.db.AutoFill
 import github.afezeria.hymn.common.db.AutoFillType
+import github.afezeria.hymn.common.platform.ObjectInfo
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
@@ -56,4 +57,21 @@ data class FileRecord(
     @field:AutoFill(fillOnUpdate = true, type = AutoFillType.DATETIME)
     lateinit var modifyDate: LocalDateTime
 
+    fun toObjectInfo(): ObjectInfo {
+        return ObjectInfo(
+            bucket = bucket,
+            fileName = fileName,
+            contentType = contentType,
+            path = path,
+            objectId = objectId,
+            fieldId = fieldId,
+            dataId = dataId,
+            size = size,
+            tmp = tmp,
+            visibility = visibility,
+            remark = remark,
+            createById = createById,
+            createDate = createDate,
+        )
+    }
 }

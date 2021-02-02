@@ -3,18 +3,19 @@ package github.afezeria.hymn.oss.web.controller
 import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.platform.CacheService
 import github.afezeria.hymn.common.platform.OssService
+import github.afezeria.hymn.common.util.Jwt
+import github.afezeria.hymn.common.util.randomUUIDStr
 import github.afezeria.hymn.oss.OssCacheKey
 import github.afezeria.hymn.oss.StorageService
 import github.afezeria.hymn.oss.module.service.FileRecordService
 import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import javax.servlet.http.HttpServletRequest
@@ -33,9 +34,6 @@ class PreSignedUrlController {
     private lateinit var storageService: StorageService
 
     @Autowired
-    private lateinit var redisTemplate: RedisTemplate<String, String>
-
-    @Autowired
     private lateinit var cacheService: CacheService
 
     @Autowired
@@ -44,24 +42,28 @@ class PreSignedUrlController {
     @Autowired
     private lateinit var fileRecordService: FileRecordService
 
-    companion object {
-
-        fun generatePreSignedObjectUrl(id: String): String {
-            return "module/oss/public/pre-signed/$id"
-        }
+    internal fun generatePreSignedObjectUrl(fileId: String, expiry: Long): String {
+        val id = randomUUIDStr()
+        val token = Jwt.createJwtToken(mapOf("id" to id), expiry)
+        val res = cacheService.setIfAbsent(OssCacheKey.preSigned(id), fileId, expiry)
+        if (!res) throw BusinessException("生成对象预签名链接失败")
+        return "module/oss/public/pre-signed?token=$token"
     }
 
-    @GetMapping("public/pre-signed/{id}")
+    @GetMapping("public/pre-signed")
     fun download(
-        @PathVariable id: String,
+        @RequestParam("token") token: String,
         request: HttpServletRequest,
         response: HttpServletResponse
     ): StreamingResponseBody {
         if (storageService.remoteServerSupportHttpAccess()) {
             throw ResponseStatusException(HttpStatus.NOT_IMPLEMENTED)
         }
+        if (token.isBlank()) throw BusinessException("无效的token")
+        val id = requireNotNull(Jwt.parseToken(token)["id"]) as String
+
         val fileId = cacheService.get(OssCacheKey.preSigned(id))
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+            ?: throw BusinessException("token已过期")
         val record = fileRecordService.findById(fileId)
             ?: throw BusinessException("文件不存在")
         response.contentType = "application/octet-stream"

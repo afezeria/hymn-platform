@@ -1,34 +1,55 @@
 package github.afezeria.hymn.oss.platform
 
+import github.afezeria.hymn.common.constant.AccountType
 import github.afezeria.hymn.common.exception.BusinessException
+import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.common.exception.PermissionDeniedException
 import github.afezeria.hymn.common.platform.*
 import github.afezeria.hymn.common.util.randomUUIDStr
-import github.afezeria.hymn.oss.OssFileNotFoundException
+import github.afezeria.hymn.oss.OssConfigProperties
 import github.afezeria.hymn.oss.StorageService
 import github.afezeria.hymn.oss.module.dto.FileRecordDto
+import github.afezeria.hymn.oss.module.dto.PreSignedHistoryDto
 import github.afezeria.hymn.oss.module.entity.FileRecord
 import github.afezeria.hymn.oss.module.service.FileRecordService
+import github.afezeria.hymn.oss.module.service.PreSignedHistoryService
 import github.afezeria.hymn.oss.throwIfBucketNameInvalid
 import github.afezeria.hymn.oss.throwIfFileNameInvalid
 import github.afezeria.hymn.oss.web.controller.PreSignedUrlController
 import mu.KLogging
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 import java.io.InputStream
 
 /**
  * @author afezeria
  */
+@Service
 class OssServiceImpl(
-    private val prefix: String,
-    private val fileRecordService: FileRecordService,
-    private val databaseService: DatabaseService,
-    private val permService: PermService,
-    private val storageService: StorageService,
-    private val cacheService: CacheService,
+    config: OssConfigProperties,
 ) : OssService {
+    @Autowired
+    private lateinit var fileRecordService: FileRecordService
+
+    @Autowired
+    private lateinit var preSignedHistoryService: PreSignedHistoryService
+
+    @Autowired
+    private lateinit var databaseService: DatabaseService
+
+    @Autowired
+    private lateinit var permService: PermService
+
+    @Autowired
+    private lateinit var storageService: StorageService
+
+    @Autowired
+    private lateinit var preSignedUrlController: PreSignedUrlController
 
     companion object : KLogging()
+
+    val prefix = config.prefix
 
     init {
         if (!"([a-z][-a-z0-9]{0,9})?".toRegex().matches(prefix)) {
@@ -76,7 +97,7 @@ class OssServiceImpl(
 
     override fun getObject(objectId: String, fn: (InputStream) -> Unit) {
         val record =
-            fileRecordService.findById(objectId) ?: throw OssFileNotFoundException("id:$objectId")
+            fileRecordService.findById(objectId) ?: throw DataNotFoundException("id:$objectId")
         val b = prefix + record.bucket
         storageService.getFile(b, record.path, fn)
     }
@@ -90,7 +111,7 @@ class OssServiceImpl(
         bucket.throwIfBucketNameInvalid()
         srcBucket.throwIfBucketNameInvalid()
         if (bucket == srcBucket && objectName == srcObjectName) {
-            throw BusinessException("源文件路径和目标文件路径不能为同一个")
+            throw BusinessException("源对象路径和目标对象路径不能为同一个")
         }
         val fileName = objectName.split('/').last()
         fileName.throwIfFileNameInvalid()
@@ -115,7 +136,7 @@ class OssServiceImpl(
         bucket.throwIfBucketNameInvalid()
         srcBucket.throwIfBucketNameInvalid()
         if (bucket == srcBucket && objectName == srcObjectName) {
-            throw BusinessException("源文件路径和目标文件路径不能为同一个")
+            throw BusinessException("源对象路径和目标对象路径不能为同一个")
         }
         val b1 = prefix + bucket
         val b2 = prefix + srcBucket
@@ -145,30 +166,26 @@ class OssServiceImpl(
 
     override fun getObjectUrl(bucket: String, objectName: String, expiry: Int): String {
         bucket.throwIfBucketNameInvalid()
-        val fileId = fileRecordExist(bucket, objectName).id
+        val record = fileRecordExist(bucket, objectName)
         storageService.fileExist(prefix + bucket, objectName, null)
 
-        logger.info("开始获取文件下载链接，文件路径： bucket: $bucket, objectName: $objectName")
+        logger.info("开始获取对象下载链接，对象路径：bucket:$bucket, objectName:$objectName")
 
-        return if (storageService.remoteServerSupportHttpAccess()) {
+        val url = if (storageService.remoteServerSupportHttpAccess()) {
             storageService.getFileUrl(prefix + bucket, objectName, expiry)
         } else {
-            val random = randomUUIDStr()
-            val result = cacheService.setIfAbsent(random, fileId, expiry.toLong())
-            if (result) {
-                PreSignedUrlController.generatePreSignedObjectUrl(random)
-            } else {
-                ""
-            }
+            preSignedUrlController.generatePreSignedObjectUrl(record.id, expiry.toLong())
         }
+        preSignedHistoryService.create(PreSignedHistoryDto(fileId = record.id, expiry = expiry))
+        return url
     }
 
-    override fun removeObject(bucket: String, objectName: String) {
+    override fun removeObject(bucket: String, objectName: String): Int {
         bucket.throwIfBucketNameInvalid()
         val b = prefix + bucket
 
         storageService.removeFile(b, objectName)
-        fileRecordService.removeByBucketAndPath(bucket, objectName)
+        return fileRecordService.removeByBucketAndPath(bucket, objectName)
     }
 
     override fun objectExist(bucket: String, objectName: String): Boolean {
@@ -183,29 +200,17 @@ class OssServiceImpl(
     }
 
     override fun getObjectInfoById(id: String): ObjectInfo? {
-        return fileRecordService.findById(id)?.run {
-            ObjectInfo(
-                bucket = bucket,
-                fileName = fileName,
-                contentType = contentType,
-                path = path,
-                objectId = objectId,
-                fieldId = fieldId,
-                dataId = dataId,
-                size = size,
-                tmp = tmp,
-                visibility = visibility,
-                remark = remark,
-                createById = createById,
-                createDate = createDate,
-            )
-        }
+        return fileRecordService.findById(id)?.toObjectInfo()
     }
 
     override fun getObjectWithPerm(objectId: String, fn: (InputStream) -> Unit) {
         val record = fileRecordService.findById(objectId)
-            ?: throw OssFileNotFoundException("id:$objectId")
+            ?: throw DataNotFoundException("id:$objectId")
         record.apply {
+            if (Session.getInstance().accountType == AccountType.ADMIN) {
+                storageService.getFile(bucket, path, fn)
+                return
+            }
             if (visibility == "normal" || visibility == "anonymous") {
                 storageService.getFile(bucket, path, fn)
                 return
@@ -222,24 +227,40 @@ class OssServiceImpl(
     }
 
 
-    override fun removeObjectWithPerm(objectId: String) {
-        TODO("Not yet implemented")
+    override fun removeObjectWithPerm(objectId: String): Int {
+        val record = fileRecordService.findById(objectId) ?: return 0
+        if (record.objectId == null || record.fieldId == null || record.dataId == null) {
+            if (Session.getInstance().accountType != AccountType.ADMIN) {
+                throw PermissionDeniedException()
+            }
+        }
+        if (permService.hasDataPerm(record.objectId!!, record.dataId!!)
+            && permService.hasFieldPerm(record.objectId!!, record.fieldId!!)
+        ) {
+            storageService.removeFile(prefix + record.bucket, record.path)
+            return fileRecordService.removeById(objectId)
+        } else {
+            throw PermissionDeniedException()
+        }
     }
 
-    override fun removeObject(objectId: String) {
-        TODO("Not yet implemented")
+    override fun removeObject(objectId: String): Int {
+        val record = fileRecordService.findById(objectId) ?: return 0
+        storageService.removeFile(prefix + record.bucket, record.path)
+        return fileRecordService.removeById(objectId)
     }
 
     override fun getObjectListByBucket(
         bucket: String,
         pageSize: Int,
         pageNum: Int
-    ): List<Pair<String, String>> {
-        TODO("Not yet implemented")
+    ): List<ObjectInfo> {
+        return fileRecordService.pageFindByBucket(bucket, pageSize, pageNum)
+            .map { it.toObjectInfo() }
     }
 
     private fun fileRecordExist(bucket: String, objectName: String): FileRecord {
         return fileRecordService.findByBucketAndPath(bucket, objectName)
-            ?: throw OssFileNotFoundException("bucket:$bucket, objectName:$objectName")
+            ?: throw DataNotFoundException("文件记录 [bucket:$bucket, objectName:$objectName]")
     }
 }

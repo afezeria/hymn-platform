@@ -3,7 +3,7 @@ package github.afezeria.hymn.oss.web.controller
 import github.afezeria.hymn.common.BaseDbTest
 import github.afezeria.hymn.common.TestApplication
 import github.afezeria.hymn.common.adminSession
-import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.platform.OssService
 import github.afezeria.hymn.common.platform.Session
 import github.afezeria.hymn.common.testconfiguration.RedisTestConfig
 import github.afezeria.hymn.common.util.toClass
@@ -11,12 +11,15 @@ import github.afezeria.hymn.oss.OssTestConfiguration
 import github.afezeria.hymn.oss.contentType2Bucket
 import github.afezeria.hymn.oss.filename2ContentType
 import github.afezeria.hymn.oss.module.service.FileRecordService
+import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldMatch
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -31,6 +34,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -45,7 +49,7 @@ import java.util.*
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = [TestApplication::class, OssTestConfiguration::class, RedisTestConfig::class],
 )
-internal class OssControllerTest : BaseDbTest() {
+internal class FileControllerTest : BaseDbTest() {
 
     companion object {
 
@@ -84,7 +88,10 @@ internal class OssControllerTest : BaseDbTest() {
     }
 
     @Autowired
-    lateinit var databaseService: DatabaseService
+    lateinit var ossService: OssService
+
+    @Autowired
+    lateinit var client: OkHttpClient
 
     @Test
     fun tmpFileUpload() {
@@ -132,6 +139,32 @@ internal class OssControllerTest : BaseDbTest() {
         fileRecord.bucket shouldBe bucket
         fileRecord.path shouldMatch "${now.year}/${now.monthValue}/${now.dayOfMonth}/.*?$filename".toRegex()
         fileRecord.tmp shouldBe false
+    }
+
+    @Test
+    fun download() {
+        val bucket = "other"
+        val path = "2021/01/01/abc.txt"
+        val fileId = ossService.putObject(
+            bucket = bucket,
+            objectName = path,
+            inputStream = ByteArrayInputStream("abc".toByteArray()),
+            contentType = "application/octet-stream",
+            tmp = false
+        )
+        val url = "http://localhost:$port/module/oss/file/$fileId"
+
+        val request = Request.Builder().url(url).build()
+        client.newCall(request).execute().use {
+            val body = it.body()?.string()
+            assertSoftly {
+                it.code() shouldBe 200
+                body shouldNotBe null
+                body shouldBe "abc"
+                it.header("Content-Disposition") shouldBe "attachment;filename=\"abc.txt\""
+            }
+        }
+
     }
 
     fun createRequestEntity(

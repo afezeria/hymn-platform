@@ -7,10 +7,10 @@ import github.afezeria.hymn.oss.minio.MinioConfig
 /**
  * @author afezeria
  */
-class OssConfigProperties {
-    var type: OssType = OssType.LOCAL
-    var prefix: String = ""
-    var ftp: FTPConfig? = null
-    var local: LocalConfig? = null
-    var minio: MinioConfig? = null
-}
+data class OssConfigProperties(
+    var type: OssType = OssType.LOCAL,
+    var prefix: String = "",
+    var ftp: FTPConfig? = null,
+    var local: LocalConfig? = null,
+    var minio: MinioConfig? = null,
+)

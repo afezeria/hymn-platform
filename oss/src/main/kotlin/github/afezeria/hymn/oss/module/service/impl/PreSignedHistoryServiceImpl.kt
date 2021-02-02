@@ -1,14 +1,16 @@
 package github.afezeria.hymn.oss.module.service.impl
 
-import github.afezeria.hymn.oss.module.entity.PreSignedHistory
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.oss.module.dao.PreSignedHistoryDao
 import github.afezeria.hymn.oss.module.dto.PreSignedHistoryDto
+import github.afezeria.hymn.oss.module.entity.PreSignedHistory
 import github.afezeria.hymn.oss.module.service.PreSignedHistoryService
-import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.exception.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
+import org.ktorm.dsl.desc
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 /**
  * @author afezeria
@@ -20,7 +22,7 @@ class PreSignedHistoryServiceImpl : PreSignedHistoryService {
     private lateinit var preSignedHistoryDao: PreSignedHistoryDao
 
     @Autowired
-    private lateinit var dbService: DatabaseService
+    private lateinit var databaseService: DatabaseService
 
 
     override fun removeById(id: String): Int {
@@ -61,7 +63,33 @@ class PreSignedHistoryServiceImpl : PreSignedHistoryService {
     override fun findByFileId(
         fileId: String,
     ): MutableList<PreSignedHistory> {
-        return preSignedHistoryDao.selectByFileId(fileId,)
+        return preSignedHistoryDao.selectByFileId(fileId)
+    }
+
+    override fun pageFindBetweenCreateDate(
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        pageSize: Int,
+        pageNum: Int
+    ): List<PreSignedHistory> {
+        return preSignedHistoryDao.pageSelectBetweenCreateDateOrderByCreateDateDesc(
+            startDate,
+            endDate,
+            pageSize,
+            pageNum
+        )
+    }
+
+    override fun pageFindByFileId(
+        fileId: String,
+        pageSize: Int,
+        pageNum: Int
+    ): List<PreSignedHistory> {
+        return preSignedHistoryDao.pageSelectByFileId(fileId, pageSize, pageNum)
+    }
+
+    override fun removeByIds(ids: List<String>): Int {
+        return preSignedHistoryDao.deleteByIds(ids)
     }
 
 

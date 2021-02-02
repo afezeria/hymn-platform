@@ -1,14 +1,14 @@
 package github.afezeria.hymn.oss.module.service.impl
 
-import github.afezeria.hymn.oss.module.entity.FileRecord
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.*
 import github.afezeria.hymn.oss.module.dao.FileRecordDao
 import github.afezeria.hymn.oss.module.dto.FileRecordDto
+import github.afezeria.hymn.oss.module.entity.FileRecord
 import github.afezeria.hymn.oss.module.service.FileRecordService
-import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.exception.DataNotFoundException
-import github.afezeria.hymn.common.util.*
-import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
@@ -39,7 +39,7 @@ class FileRecordServiceImpl : FileRecordService {
     }
 
     override fun update(id: String, data: Map<String, Any?>): Int {
-        return fileRecordDao.update(id,data)
+        return fileRecordDao.update(id, data)
     }
 
     override fun create(dto: FileRecordDto): String {
@@ -68,6 +68,18 @@ class FileRecordServiceImpl : FileRecordService {
 
     override fun removeByBucketAndPath(bucket: String, path: String): Int {
         return fileRecordDao.deleteByBucketAndPath(bucket, path)
+    }
+
+    override fun pageFindByBucket(bucket: String, pageSize: Int, pageNum: Int): List<FileRecord> {
+        return fileRecordDao.pageSelectByBucket(bucket, pageSize, pageNum)
+    }
+
+    override fun pageFindByContainFileName(
+        fileName: Int,
+        pageSize: Int,
+        pageNum: Int
+    ): List<FileRecord> {
+        return fileRecordDao.pageSelectByContainFileName(fileName,pageSize,pageNum)
     }
 
 

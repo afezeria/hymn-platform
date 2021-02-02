@@ -1,12 +1,8 @@
 package github.afezeria.hymn.oss.module.service
 
-import github.afezeria.hymn.oss.module.entity.PreSignedHistory
 import github.afezeria.hymn.oss.module.dto.PreSignedHistoryDto
-import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.platform.SessionService
-import org.springframework.stereotype.Component
+import github.afezeria.hymn.oss.module.entity.PreSignedHistory
 import java.time.LocalDateTime
-import java.util.*
 
 /**
  * @author afezeria
@@ -28,6 +24,17 @@ interface PreSignedHistoryService {
     fun findByFileId(
         fileId: String,
     ): MutableList<PreSignedHistory>
+
+    fun pageFindBetweenCreateDate(
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        pageSize: Int,
+        pageNum: Int
+    ): List<PreSignedHistory>
+
+    fun pageFindByFileId(fileId: String, pageSize: Int, pageNum: Int): List<PreSignedHistory>
+
+    fun removeByIds(ids: List<String>): Int
 
 
 }
