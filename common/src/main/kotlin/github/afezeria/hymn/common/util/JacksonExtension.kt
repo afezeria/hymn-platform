@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule
 import java.io.IOException
 import java.time.LocalDate
@@ -77,6 +78,6 @@ fun Any.toFormatJson(): String {
 
 inline fun <reified T> String?.toClass(): T? {
     if (this == null) return null
-    return mapper.readValue(this, T::class.java)
+    return mapper.readValue(this)
 }
 
