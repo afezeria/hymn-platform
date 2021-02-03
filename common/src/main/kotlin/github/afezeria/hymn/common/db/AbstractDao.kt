@@ -100,6 +100,9 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         return id
     }
 
+    /**
+     * 如果table有createDate字段则默认按该字段逆序
+     */
     fun select(
         columns: List<Column<*>>,
         condition: (() -> ColumnDeclaring<Boolean>)? = null,
@@ -112,8 +115,13 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         if (condition != null) {
             query = query.where(condition)
         }
+        var order = orderBy
+        if (order.isEmpty() && table.containsField("createDate")) {
+            order = listOf(table["create_date"].desc())
+        }
+
         return query.limit(offset, limit)
-            .orderBy(orderBy)
+            .orderBy(order)
             .mapTo(ArrayList()) {
                 val map: MutableMap<String, Any?> = mutableMapOf()
                 for (column in columns) {
@@ -125,6 +133,9 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             }
     }
 
+    /**
+     * 如果table有createDate字段则默认按该字段逆序
+     */
     fun select(
         condition: (() -> ColumnDeclaring<Boolean>)? = null,
         offset: Int? = null,
@@ -136,8 +147,13 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         if (condition != null) {
             query = query.where(condition)
         }
+        var order = orderBy
+        if (order.isEmpty() && table.containsField("createDate")) {
+            order = listOf(table["create_date"].desc())
+        }
+
         return query.limit(offset, limit)
-            .orderBy(orderBy)
+            .orderBy(order)
             .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
@@ -180,7 +196,8 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
     ): MutableList<E> {
         if (pageSize < 1) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
         if (pageNumber < 1) throw IllegalArgumentException("pageNumber must be greater than 0, current value $pageNumber")
-        return select(condition, (pageNumber - 1) * pageSize, pageSize, orderBy)
+        var order = orderBy
+        return select(condition, (pageNumber - 1) * pageSize, pageSize, order)
     }
 
     fun selectAll(): MutableList<E> {
