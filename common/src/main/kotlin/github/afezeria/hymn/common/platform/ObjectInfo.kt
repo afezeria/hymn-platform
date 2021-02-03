@@ -6,6 +6,7 @@ import java.time.LocalDateTime
  * @author afezeria
  */
 data class ObjectInfo(
+    val recordId: String,
     val bucket: String,
     val fileName: String,
     val contentType: String? = null,

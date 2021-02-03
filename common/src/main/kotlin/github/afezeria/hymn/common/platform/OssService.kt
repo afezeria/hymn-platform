@@ -29,13 +29,26 @@ interface OssService {
      *  获取对象字节流
      *
      * @param bucket bucket 名称
-     * @param objectName 对象名名
+     * @param objectName 对象名
      * @param fn 操作输入流的函数，在函数中完成数据的输出
      */
-    fun getObject(bucket: String, objectName: String, fn: (InputStream) -> Unit)
+    fun getObject(bucket: String, objectName: String, fn: ObjectInfo.(InputStream) -> Unit)
 
-    fun getObjectWithPerm(objectId: String, fn: (InputStream) -> Unit)
-    fun getObject(objectId: String, fn: (InputStream) -> Unit)
+    /**
+     *  获取对象字节流，权限不满足时抛出异常
+     *
+     * @param objectId 对象id
+     * @param fn 操作输入流的函数，在函数中完成数据的输出
+     */
+    fun getObjectWithPerm(objectId: String, fn: ObjectInfo.(InputStream) -> Unit)
+
+    /**
+     *  获取对象字节流，权限不满足时抛出异常
+     *
+     * @param objectId 对象id
+     * @param fn 操作输入流的函数，在函数中完成数据的输出
+     */
+    fun getObject(objectId: String, fn: ObjectInfo.(InputStream) -> Unit)
 
 
     /**
@@ -86,7 +99,18 @@ interface OssService {
      */
     fun removeObject(bucket: String, objectName: String): Int
 
+    /**
+     *  删除对象，权限不满足时抛出异常
+     *
+     * @param objectId 对象id
+     */
     fun removeObjectWithPerm(objectId: String): Int
+
+    /**
+     *  删除对象
+     *
+     * @param objectId 对象id
+     */
     fun removeObject(objectId: String): Int
 
     /**
