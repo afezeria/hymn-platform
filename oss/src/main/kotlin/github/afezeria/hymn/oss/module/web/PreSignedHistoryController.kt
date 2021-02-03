@@ -7,6 +7,7 @@ import github.afezeria.hymn.oss.module.service.PreSignedHistoryService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
@@ -27,8 +28,12 @@ class PreSignedHistoryController {
     @GetMapping
     fun find(
         @RequestParam("fileId", required = false) fileId: String?,
-        @RequestParam("startDate", required = false) startDate: LocalDateTime?,
-        @RequestParam("endDate", required = false) endDate: LocalDateTime?,
+        @RequestParam("startDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        startDate: LocalDateTime?,
+        @RequestParam("endDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        endDate: LocalDateTime?,
         @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
         @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
     ): List<PreSignedHistory> {

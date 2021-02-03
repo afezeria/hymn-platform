@@ -34,8 +34,17 @@ class FileRecordDao(
         )
     }
 
-    fun pageSelectByContainFileName(fileName: Int, pageSize: Int, pageNum: Int): List<FileRecord> {
-        return pageSelect({ table.fileName like "%$fileName%" }, pageSize, pageNum)
+    fun pageSelectByContainFileName(
+        fileName: String?,
+        pageSize: Int,
+        pageNum: Int
+    ): List<FileRecord> {
+        val condition = if (fileName != null) {
+            { table.fileName like "%$fileName%" }
+        } else {
+            null
+        }
+        return pageSelect(condition, pageSize, pageNum)
     }
 
 }

@@ -59,6 +59,7 @@ data class FileRecord(
 
     fun toObjectInfo(): ObjectInfo {
         return ObjectInfo(
+            recordId = id,
             bucket = bucket,
             fileName = fileName,
             contentType = contentType,

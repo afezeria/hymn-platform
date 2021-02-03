@@ -75,7 +75,7 @@ class FileRecordServiceImpl : FileRecordService {
     }
 
     override fun pageFindByContainFileName(
-        fileName: Int,
+        fileName: String?,
         pageSize: Int,
         pageNum: Int
     ): List<FileRecord> {

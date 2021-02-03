@@ -28,6 +28,6 @@ interface FileRecordService {
 
     fun pageFindByBucket(bucket: String, pageSize: Int, pageNum: Int): List<FileRecord>
 
-    fun pageFindByContainFileName(fileName: Int, pageSize: Int, pageNum: Int): List<FileRecord>
+    fun pageFindByContainFileName(fileName: String?, pageSize: Int, pageNum: Int): List<FileRecord>
 
 }

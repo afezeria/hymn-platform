@@ -6,7 +6,6 @@ import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.common.exception.PermissionDeniedException
 import github.afezeria.hymn.common.platform.*
-import github.afezeria.hymn.common.util.randomUUIDStr
 import github.afezeria.hymn.oss.OssConfigProperties
 import github.afezeria.hymn.oss.StorageService
 import github.afezeria.hymn.oss.module.dto.FileRecordDto
@@ -71,7 +70,7 @@ class OssServiceImpl(
             fileName.throwIfFileNameInvalid()
             val path = objectName.replace(
                 "$fileName$".toRegex(),
-                "${System.currentTimeMillis()}-${randomUUIDStr()}-$fileName"
+                "${System.currentTimeMillis()}-$fileName"
             )
 
             val id = fileRecordService.create(
@@ -88,18 +87,62 @@ class OssServiceImpl(
         }
     }
 
-    override fun getObject(bucket: String, objectName: String, fn: (InputStream) -> Unit) {
+    override fun getObject(
+        bucket: String,
+        objectName: String,
+        fn: ObjectInfo.(InputStream) -> Unit
+    ) {
         bucket.throwIfBucketNameInvalid()
-        fileRecordExist(bucket, objectName)
+        val record = fileRecordExist(bucket, objectName)
+
         val b = prefix + bucket
-        storageService.getFile(b, objectName, fn)
+        storageService.getFile(b, objectName) { i -> fn(record.toObjectInfo(), i) }
     }
 
-    override fun getObject(objectId: String, fn: (InputStream) -> Unit) {
+    override fun getObject(
+        objectId: String,
+        fn: ObjectInfo.(InputStream) -> Unit
+    ) {
         val record =
             fileRecordService.findById(objectId) ?: throw DataNotFoundException("id:$objectId")
         val b = prefix + record.bucket
-        storageService.getFile(b, record.path, fn)
+        storageService.getFile(b, record.path) { i -> fn(record.toObjectInfo(), i) }
+    }
+
+
+    override fun getObjectWithPerm(objectId: String, fn: ObjectInfo.(InputStream) -> Unit) {
+        val record = fileRecordService.findById(objectId)
+            ?: throw DataNotFoundException("id:$objectId")
+        val func = { i: InputStream -> fn(record.toObjectInfo(), i) }
+        record.apply {
+            val bucket = prefix + bucket
+            val accountType = Session.getInstance().accountType
+
+            when (accountType) {
+                AccountType.ANONYMOUS -> {
+                    if (record.visibility != "anonymous")
+                        throw PermissionDeniedException()
+                }
+                AccountType.NORMAL -> {
+                    if (record.visibility == null) {
+                        if (dataId == null
+                            || this.objectId == null
+                            || fieldId == null
+                        ) {
+                            throw PermissionDeniedException()
+                        }
+                        if (!permService.hasFieldPerm(this.objectId!!, this.fieldId!!)
+                            || !permService.hasDataPerm(this.objectId!!, this.dataId!!)
+                        ) {
+                            throw PermissionDeniedException()
+                        }
+                    }
+                }
+                AccountType.ADMIN -> {
+                }
+            }
+            storageService.getFile(bucket, path, func)
+        }
     }
 
     override fun moveObject(
@@ -145,7 +188,10 @@ class OssServiceImpl(
         fileName.throwIfFileNameInvalid()
         val srcRecord = fileRecordExist(srcBucket, srcObjectName)
         val newObjectName =
-            objectName.replace("$fileName$".toRegex(), "${System.currentTimeMillis()}-$fileName")
+            objectName.replace(
+                "$fileName$".toRegex(),
+                "${System.currentTimeMillis()}-$fileName"
+            )
         storageService.copyFile(
             b1, newObjectName, b2, srcObjectName
         )
@@ -169,6 +215,28 @@ class OssServiceImpl(
         val record = fileRecordExist(bucket, objectName)
         storageService.fileExist(prefix + bucket, objectName, null)
 
+        val accountType = Session.getInstance().accountType
+        when (accountType) {
+            AccountType.ANONYMOUS -> throw PermissionDeniedException()
+            AccountType.NORMAL -> {
+                if (record.dataId == null
+                    || record.fieldId == null
+                    || record.objectId == null
+                ) {
+                    throw PermissionDeniedException()
+                } else {
+                    if (!(permService.hasFieldPerm(record.objectId!!, record.fieldId!!)
+                            && permService.hasDataPerm(record.objectId!!, record.dataId!!))
+                    ) {
+                        throw PermissionDeniedException()
+                    }
+                }
+            }
+            AccountType.ADMIN -> {
+            }
+        }
+
+
         logger.info("开始获取对象下载链接，对象路径：bucket:$bucket, objectName:$objectName")
 
         val url = if (storageService.remoteServerSupportHttpAccess()) {
@@ -188,12 +256,47 @@ class OssServiceImpl(
         return fileRecordService.removeByBucketAndPath(bucket, objectName)
     }
 
+    override fun removeObjectWithPerm(objectId: String): Int {
+        val record = fileRecordService.findById(objectId) ?: return 0
+        val accountType = Session.getInstance().accountType
+        when (accountType) {
+            AccountType.ANONYMOUS -> throw PermissionDeniedException()
+            AccountType.NORMAL -> {
+                if (record.dataId == null
+                    || record.fieldId == null
+                    || record.objectId == null
+                ) {
+                    throw PermissionDeniedException()
+                } else {
+                    if (!(permService.hasFieldPerm(record.objectId!!, record.fieldId!!)
+                            && permService.hasDataPerm(record.objectId!!, record.dataId!!))
+                    ) {
+                        throw PermissionDeniedException()
+                    }
+                }
+            }
+            AccountType.ADMIN -> {
+            }
+        }
+
+        storageService.removeFile(prefix + record.bucket, record.path)
+        return fileRecordService.removeById(objectId)
+    }
+
+    override fun removeObject(objectId: String): Int {
+        val record = fileRecordService.findById(objectId) ?: return 0
+        storageService.removeFile(prefix + record.bucket, record.path)
+        return fileRecordService.removeById(objectId)
+    }
+
     override fun objectExist(bucket: String, objectName: String): Boolean {
         bucket.throwIfBucketNameInvalid()
         return try {
             fileRecordExist(bucket, objectName)
             storageService.fileExist(prefix + bucket, objectName, null)
             true
+        } catch (e: DataNotFoundException) {
+            false
         } catch (e: BusinessException) {
             false
         }
@@ -203,52 +306,6 @@ class OssServiceImpl(
         return fileRecordService.findById(id)?.toObjectInfo()
     }
 
-    override fun getObjectWithPerm(objectId: String, fn: (InputStream) -> Unit) {
-        val record = fileRecordService.findById(objectId)
-            ?: throw DataNotFoundException("id:$objectId")
-        record.apply {
-            if (Session.getInstance().accountType == AccountType.ADMIN) {
-                storageService.getFile(bucket, path, fn)
-                return
-            }
-            if (visibility == "normal" || visibility == "anonymous") {
-                storageService.getFile(bucket, path, fn)
-                return
-            }
-            if ((dataId != null && this.objectId != null && this.fieldId != null)
-                && permService.hasFieldPerm(this.objectId!!, fieldId!!)
-                && permService.hasDataPerm(this.objectId!!, dataId!!)
-            ) {
-                storageService.getFile(bucket, path, fn)
-                return
-            }
-            throw PermissionDeniedException()
-        }
-    }
-
-
-    override fun removeObjectWithPerm(objectId: String): Int {
-        val record = fileRecordService.findById(objectId) ?: return 0
-        if (record.objectId == null || record.fieldId == null || record.dataId == null) {
-            if (Session.getInstance().accountType != AccountType.ADMIN) {
-                throw PermissionDeniedException()
-            }
-        }
-        if (permService.hasDataPerm(record.objectId!!, record.dataId!!)
-            && permService.hasFieldPerm(record.objectId!!, record.fieldId!!)
-        ) {
-            storageService.removeFile(prefix + record.bucket, record.path)
-            return fileRecordService.removeById(objectId)
-        } else {
-            throw PermissionDeniedException()
-        }
-    }
-
-    override fun removeObject(objectId: String): Int {
-        val record = fileRecordService.findById(objectId) ?: return 0
-        storageService.removeFile(prefix + record.bucket, record.path)
-        return fileRecordService.removeById(objectId)
-    }
 
     override fun getObjectListByBucket(
         bucket: String,

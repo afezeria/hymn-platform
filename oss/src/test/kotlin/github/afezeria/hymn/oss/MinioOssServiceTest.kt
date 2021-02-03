@@ -29,10 +29,6 @@ import java.time.Duration
 @Testcontainers
 class MinioOssServiceTest {
 
-    //    private var minioServer: GenericContainer<*>? = null
-//    private var minioServerUrl: String? = null
-
-
     companion object : KLogging() {
         private const val port = 9000
 

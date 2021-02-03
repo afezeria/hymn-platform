@@ -11,6 +11,9 @@ interface StorageService {
         return false
     }
 
+    /**
+     * @return 文件大小，单位 byte
+     */
     fun putFile(
         bucket: String,
         objectName: String,

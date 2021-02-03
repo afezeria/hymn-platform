@@ -31,11 +31,12 @@ class FileRecordController {
     @ApiOperation(value = "查询全部数据", notes = "")
     @GetMapping
     fun find(
-        @RequestParam("pageSize") pageSize: Int,
-        @RequestParam("pageNum") pageNum: Int,
-        @RequestParam("fileName") fileName: Int,
+        @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
+        @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
+        @RequestParam("fileName", required = false) fileName: String?,
     ): List<FileRecord> {
-        return fileRecordService.pageFindByContainFileName(fileName, pageSize, pageNum)
+        val list= fileRecordService.pageFindByContainFileName(fileName, pageSize, pageNum)
+        return list
     }
 
 
@@ -61,8 +62,7 @@ class FileRecordController {
 
 
     @Function(AccountType.ADMIN)
-    @ApiOperation
-        (value = "根据id删除", notes = "")
+    @ApiOperation(value = "根据id删除", notes = "")
     @DeleteMapping("/{id}")
     fun delete(@PathVariable("id") id: String): Int {
         return ossService.removeObjectWithPerm(id)

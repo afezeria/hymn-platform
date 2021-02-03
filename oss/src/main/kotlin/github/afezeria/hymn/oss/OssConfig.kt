@@ -22,9 +22,6 @@ class OssConfig {
     fun ossConfigProperties(): OssConfigProperties {
         val config = configService.get<OssConfigProperties>("oss")
             ?: OssConfigProperties()
-//        if (!"([a-z][-a-z0-9]{0,9})?".toRegex().matches(config.prefix)) {
-//            throw InnerException("${config.prefix} 不是有效的 bucket 前缀")
-//        }
         return config
     }
 
@@ -38,17 +35,4 @@ class OssConfig {
         }
     }
 
-//    @Bean
-//    @DependsOn("fileService")
-//    fun ossService(): OssService {
-//        return OssServiceImpl(
-//            prefix = config.prefix,
-//            fileRecordService = fileRecordService,
-//            preSignedHistoryService = preSignedHistoryService,
-//            databaseService = databaseService,
-//            storageService = storageService,
-//            permService = permService,
-//            preSignedUrlController = preSignedUrlController,
-//        )
-//    }
 }
