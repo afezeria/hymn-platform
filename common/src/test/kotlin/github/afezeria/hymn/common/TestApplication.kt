@@ -21,16 +21,12 @@ class TestApplication {
         val client =
             OkHttpClient.Builder()
                 .connectTimeout(600, TimeUnit.SECONDS)
+                .readTimeout(600,TimeUnit.SECONDS)
+                .writeTimeout(600,TimeUnit.SECONDS)
                 .build()
         return client
     }
 
-    @Bean
-    fun configService(): ConfigService {
-        val mock = mockk<ConfigService>()
-        every { mock.getAsString("oss") } returns null
-        return mock
-    }
 
     @Bean
     fun permService(): PermService {

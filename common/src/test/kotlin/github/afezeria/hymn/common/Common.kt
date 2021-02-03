@@ -66,6 +66,17 @@ val userSession = Session(
     orgId = randomUUIDStr(),
     orgName = "a部门",
 )
+val anonymousSession = Session(
+    id = "",
+    accountType = AccountType.ANONYMOUS,
+    accountId = "",
+    accountName = "",
+    clientType = ClientType.BROWSER,
+    roleId = "",
+    roleName = "",
+    orgId = "",
+    orgName = ""
+)
 
 fun deleteBObject(id: String) {
     adminConn.use {
