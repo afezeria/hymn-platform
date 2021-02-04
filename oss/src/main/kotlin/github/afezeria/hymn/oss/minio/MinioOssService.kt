@@ -36,7 +36,7 @@ class MinioOssService(config: MinioConfig) : StorageService {
         objectName: String,
         inputStream: InputStream,
         contentType: String
-    ):Long {
+    ): Long {
         checkBucket(bucket)
         minioClient.putObject(
             PutObjectArgs.builder()

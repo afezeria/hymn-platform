@@ -7,7 +7,6 @@ import github.afezeria.hymn.oss.module.dao.PreSignedHistoryDao
 import github.afezeria.hymn.oss.module.dto.PreSignedHistoryDto
 import github.afezeria.hymn.oss.module.entity.PreSignedHistory
 import github.afezeria.hymn.oss.module.service.PreSignedHistoryService
-import org.ktorm.dsl.desc
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

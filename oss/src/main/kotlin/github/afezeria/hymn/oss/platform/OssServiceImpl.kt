@@ -48,7 +48,7 @@ class OssServiceImpl(
 
     companion object : KLogging()
 
-    val prefix = config.prefix
+    private val prefix = config.prefix
 
     init {
         if (!"([a-z][-a-z0-9]{0,9})?".toRegex().matches(prefix)) {
@@ -131,8 +131,12 @@ class OssServiceImpl(
                         ) {
                             throw PermissionDeniedException()
                         }
-                        if (!permService.hasFieldPerm(this.objectId!!, this.fieldId!!)
-                            || !permService.hasDataPerm(this.objectId!!, this.dataId!!)
+                        val oid = this.objectId!!
+                        val fid = this.fieldId!!
+                        val did = this.dataId!!
+                        if (!(permService.hasObjectPerm(oid, query = true)
+                                && permService.hasFieldPerm(oid, fid, read = true)
+                                && permService.hasDataPerm(oid, did, read = true))
                         ) {
                             throw PermissionDeniedException()
                         }
@@ -225,8 +229,12 @@ class OssServiceImpl(
                 ) {
                     throw PermissionDeniedException()
                 } else {
-                    if (!(permService.hasFieldPerm(record.objectId!!, record.fieldId!!)
-                            && permService.hasDataPerm(record.objectId!!, record.dataId!!))
+                    val oid = record.objectId!!
+                    val fid = record.fieldId!!
+                    val did = record.dataId!!
+                    if (!(permService.hasObjectPerm(oid, query = true)
+                            && permService.hasFieldPerm(oid, fid, read = true)
+                            && permService.hasDataPerm(oid, did, read = true))
                     ) {
                         throw PermissionDeniedException()
                     }
@@ -268,8 +276,12 @@ class OssServiceImpl(
                 ) {
                     throw PermissionDeniedException()
                 } else {
-                    if (!(permService.hasFieldPerm(record.objectId!!, record.fieldId!!)
-                            && permService.hasDataPerm(record.objectId!!, record.dataId!!))
+                    val oid = record.objectId!!
+                    val fid = record.fieldId!!
+                    val did = record.dataId!!
+                    if (!(permService.hasObjectPerm(oid, query = true, update = true)
+                            && permService.hasFieldPerm(oid, fid, read = true, edit = true)
+                            && permService.hasDataPerm(oid, did, read = true, update = true))
                     ) {
                         throw PermissionDeniedException()
                     }

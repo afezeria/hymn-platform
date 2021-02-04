@@ -1,9 +1,7 @@
 package github.afezeria.hymn.oss.module.dto
 
 import github.afezeria.hymn.oss.module.entity.PreSignedHistory
-import java.time.LocalDateTime
-import io.swagger.annotations.*
-import java.util.*
+import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
@@ -13,7 +11,7 @@ class PreSignedHistoryDto(
     var fileId: String,
     @ApiModelProperty(value = "有效时间，单位：秒", required = true)
     var expiry: Int,
-){
+) {
     fun toEntity(): PreSignedHistory {
         return PreSignedHistory(
             fileId = fileId,

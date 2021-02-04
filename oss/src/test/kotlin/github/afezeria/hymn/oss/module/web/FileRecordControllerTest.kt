@@ -157,9 +157,9 @@ internal class FileRecordControllerTest {
         )
 
         val url = "http://localhost:$port/module/oss/api/file-record/${aid}"
-        val mediaType = MediaType.parse("application/json; charset=utf-8");
+        val mediaType = MediaType.parse("application/json; charset=utf-8")
 
-        val body = RequestBody.create(mediaType, dto.toJson()); // new
+        val body = RequestBody.create(mediaType, dto.toJson()) // new
         val request = Request.Builder()
             .url(url)
             .put(body)

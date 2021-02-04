@@ -2,7 +2,7 @@ package github.afezeria.hymn.oss.module.service.impl
 
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.util.*
+import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.oss.module.dao.FileRecordDao
 import github.afezeria.hymn.oss.module.dto.FileRecordDto
 import github.afezeria.hymn.oss.module.entity.FileRecord
@@ -79,7 +79,7 @@ class FileRecordServiceImpl : FileRecordService {
         pageSize: Int,
         pageNum: Int
     ): List<FileRecord> {
-        return fileRecordDao.pageSelectByContainFileName(fileName,pageSize,pageNum)
+        return fileRecordDao.pageSelectByContainFileName(fileName, pageSize, pageNum)
     }
 
 

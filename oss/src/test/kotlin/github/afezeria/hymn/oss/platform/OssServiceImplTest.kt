@@ -29,6 +29,7 @@ import io.kotest.matchers.string.shouldMatch
 import io.mockk.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -106,20 +107,10 @@ internal class OssServiceImplTest {
     @AfterEach
     fun afterEach() {
         clearAllMocks()
-        every { permService.hasFieldPerm(any(), any()) } returns true
-        every { permService.hasFunctionPerm(any(), any()) } returns true
-        every { permService.hasDataPerm(any(), any()) } returns true
-        every { permService.hasObjectPerm(any()) } returns true
-
         databaseService.primary().useConnection {
             it.execute("delete from hymn.oss_file_record")
             it.execute("delete from hymn.oss_pre_signed_history")
         }
-    }
-
-    @Test
-    fun getPrefix() {
-        OssServiceImpl(OssConfigProperties(prefix = "abc")).prefix shouldBe "abc"
     }
 
     @Test
@@ -159,52 +150,94 @@ internal class OssServiceImplTest {
         verify(exactly = 1) { storageService.getFile(any(), any(), any()) }
     }
 
-    @Test
-    fun getObjectWithPerm() {
-        val bucketSlot = slot<String>()
-        justRun { storageService.getFile(capture(bucketSlot), any(), any()) }
-        every { fileRecordService.findById(any()) } returns defaultRecord
-        shouldNotThrow<PermissionDeniedException> {
-            service.getObjectWithPerm(defaultRecord.id, {})
-        }
-        bucketSlot.captured shouldBe "${ossConfigProperties.prefix}$defaultBucket"
-        verify(exactly = 1) { storageService.getFile(any(), any(), any()) }
-
-        every { Session.getInstance() } returns anonymousSession
-//        匿名用户获取普通文件
-        shouldThrow<PermissionDeniedException> {
-            service.getObjectWithPerm(defaultRecord.id, {})
-        }
-//        匿名用户获取可见性为anonymous的文件
-        defaultRecord.visibility = "anonymous"
-        shouldNotThrow<PermissionDeniedException> {
-            service.getObjectWithPerm(defaultRecord.id, {})
+    @Nested
+    inner class GetObjectWithPerm {
+        @BeforeEach
+        fun before() {
+            justRun { storageService.getFile(any(), any(), any()) }
+            every { fileRecordService.findById(any()) } returns defaultRecord
         }
 
-//        普通用户
-        defaultRecord.visibility = null
-        every { Session.getInstance() } returns userSession
-        shouldThrow<PermissionDeniedException> {
-            service.getObjectWithPerm(defaultRecord.id, {})
-        }
-        verify(exactly = 0) { permService.hasFieldPerm(any(), any()) }
-
-        defaultRecord.objectId = randomUUIDStr()
-        defaultRecord.fieldId = randomUUIDStr()
-        defaultRecord.dataId = randomUUIDStr()
-        shouldNotThrow<PermissionDeniedException> {
-            service.getObjectWithPerm(defaultRecord.id, {})
-        }
-        verify(exactly = 1) {
-            permService.hasFieldPerm(any(), any())
-            permService.hasDataPerm(any(), any())
+        @Test
+        fun admin() {
+            val bucketSlot = slot<String>()
+            justRun { storageService.getFile(capture(bucketSlot), any(), any()) }
+            shouldNotThrow<PermissionDeniedException> {
+                service.getObjectWithPerm(defaultRecord.id, {})
+            }
+            bucketSlot.captured shouldBe "${ossConfigProperties.prefix}$defaultBucket"
+            verify(exactly = 1) { storageService.getFile(any(), any(), any()) }
         }
 
-        every { permService.hasFieldPerm(any(), any()) } returns false
-        shouldThrow<PermissionDeniedException> {
-            service.getObjectWithPerm(defaultRecord.id, {})
+        @Test
+        fun `anonymous users get files visible to normal users`() {
+            every { Session.getInstance() } returns anonymousSession
+            shouldThrow<PermissionDeniedException> {
+                service.getObjectWithPerm(defaultRecord.id, {})
+            }
         }
 
+        @Test
+        fun `anonymous users get files visible to anonymous users`() {
+            every { Session.getInstance() } returns anonymousSession
+            defaultRecord.visibility = "anonymous"
+            shouldNotThrow<PermissionDeniedException> {
+                service.getObjectWithPerm(defaultRecord.id, {})
+            }
+        }
+
+        @Test
+        fun `normal users get files visible to anonymous users`() {
+            defaultRecord.visibility = "anonymous"
+            every { Session.getInstance() } returns userSession
+            shouldNotThrow<PermissionDeniedException> {
+                service.getObjectWithPerm(defaultRecord.id, {})
+            }
+
+        }
+
+        @Test
+        fun `normal users get files visible to normal users`() {
+            defaultRecord.visibility = "normal"
+            every { Session.getInstance() } returns userSession
+            shouldNotThrow<PermissionDeniedException> {
+                service.getObjectWithPerm(defaultRecord.id, {})
+            }
+            verify(exactly = 0) {
+                permService.hasObjectPerm(any(), any(), query = true)
+                permService.hasFieldPerm(any(), any(), read = true)
+                permService.hasDataPerm(any(), any(), read = true)
+            }
+        }
+
+        @Test
+        fun `normal users get files visible to admin users`() {
+            every { Session.getInstance() } returns userSession
+            shouldThrow<PermissionDeniedException> {
+                service.getObjectWithPerm(defaultRecord.id, {})
+            }
+            verify(exactly = 0) {
+                permService.hasObjectPerm(any(), any(), query = true)
+                permService.hasFieldPerm(any(), any(), read = true)
+                permService.hasDataPerm(any(), any(), read = true)
+            }
+        }
+
+        @Test
+        fun `normal users get attachments belonging to data`() {
+            every { Session.getInstance() } returns userSession
+            defaultRecord.objectId = randomUUIDStr()
+            defaultRecord.fieldId = randomUUIDStr()
+            defaultRecord.dataId = randomUUIDStr()
+            shouldNotThrow<PermissionDeniedException> {
+                service.getObjectWithPerm(defaultRecord.id, {})
+            }
+            verify(exactly = 1) {
+                permService.hasObjectPerm(any(), query = true)
+                permService.hasFieldPerm(any(), any(), read = true)
+                permService.hasDataPerm(any(), any(), read = true)
+            }
+        }
     }
 
     @Test
@@ -261,38 +294,60 @@ internal class OssServiceImplTest {
         bucketSlot.captured shouldBe "${ossConfigProperties.prefix}$defaultBucket"
     }
 
-    @Test
-    fun getObjectUrl() {
-        every { fileRecordService.findByBucketAndPath(any(), any()) } returns defaultRecord
-        justRun { storageService.fileExist(any(), any(), any()) }
-        every { storageService.remoteServerSupportHttpAccess() } returns false
+    @Nested
+    inner class GetObjectUrl {
         val url = "abc"
-        every { preSignedUrlController.generatePreSignedObjectUrl(any(), any()) } returns url
-        every { preSignedHistoryService.create(any()) } returns randomUUIDStr()
-        service.getObjectUrl(defaultBucket, defaultPath) shouldBe url
 
-        every { Session.getInstance() } returns anonymousSession
+        @BeforeEach
+        fun before() {
+            every { fileRecordService.findByBucketAndPath(any(), any()) } returns defaultRecord
+            justRun { storageService.fileExist(any(), any(), any()) }
+            every { storageService.remoteServerSupportHttpAccess() } returns false
+            every { preSignedUrlController.generatePreSignedObjectUrl(any(), any()) } returns url
+            every { preSignedHistoryService.create(any()) } returns randomUUIDStr()
+        }
+
+        @Test
+        fun admin() {
+            service.getObjectUrl(defaultBucket, defaultPath) shouldBe url
+        }
+
+        @Test
+        fun `anonymous users create object url`() {
+            every { Session.getInstance() } returns anonymousSession
 //        匿名帐号创建url
-        shouldThrow<PermissionDeniedException> {
-            service.getObjectUrl(defaultBucket, defaultPath)
+            shouldThrow<PermissionDeniedException> {
+                service.getObjectUrl(defaultBucket, defaultPath)
+            }
         }
 
-        every { Session.getInstance() } returns userSession
+        @Test
+        fun `normal users create public object url`() {
+            every { Session.getInstance() } returns userSession
 //        普通用户对公共对象创建url
-        shouldThrow<PermissionDeniedException> {
-            service.getObjectUrl(defaultBucket, defaultPath)
+            shouldThrow<PermissionDeniedException> {
+                service.getObjectUrl(defaultBucket, defaultPath)
+            }
         }
-        defaultRecord.apply {
-            objectId = randomUUIDStr()
-            fieldId = randomUUIDStr()
-            dataId = randomUUIDStr()
+
+        @Test
+        fun `normal users create attachment url`() {
+            every { Session.getInstance() } returns userSession
+            defaultRecord.apply {
+                objectId = randomUUIDStr()
+                fieldId = randomUUIDStr()
+                dataId = randomUUIDStr()
+            }
+            shouldNotThrow<PermissionDeniedException> {
+                service.getObjectUrl(defaultBucket, defaultPath)
+            }
+            verify(exactly = 1) {
+                permService.hasObjectPerm(any(), query = true)
+                permService.hasFieldPerm(any(), any(), read = true)
+                permService.hasDataPerm(any(), any(), read = true)
+            }
+
         }
-//        普通用户对数据专属文件创建url
-        shouldNotThrow<PermissionDeniedException> {
-            service.getObjectUrl(defaultBucket, defaultPath)
-        }
-        verify(exactly = 1) { permService.hasFieldPerm(any(), any()) }
-        verify(exactly = 1) { permService.hasDataPerm(any(), any()) }
 
     }
 
@@ -376,39 +431,58 @@ internal class OssServiceImplTest {
         }
     }
 
-    @Test
-    fun removeObjectWithPerm() {
-        val bucketSlot = slot<String>()
-        every { fileRecordService.findById(any()) } returns defaultRecord
-        every { fileRecordService.removeById(any()) } returns 1
-        justRun { storageService.removeFile(capture(bucketSlot), any()) }
-        service.removeObjectWithPerm(defaultRecord.id) shouldBe 1
-        bucketSlot.captured shouldBe "${ossConfigProperties.prefix}${defaultRecord.bucket}"
-
-
-        every { Session.getInstance() } returns anonymousSession
-//        匿名用户删除
-        shouldThrow<PermissionDeniedException> {
-            service.removeObjectWithPerm(defaultRecord.id)
+    @Nested
+    inner class RemoveObjectWithPerm {
+        @BeforeEach
+        fun before() {
+            every { fileRecordService.findById(any()) } returns defaultRecord
+            every { fileRecordService.removeById(any()) } returns 1
+            justRun { storageService.removeFile(any(), any()) }
         }
 
-        every { Session.getInstance() } returns userSession
-//        普通用户删除公共对象
-        shouldThrow<PermissionDeniedException> {
-            service.removeObjectWithPerm(defaultRecord.id)
+        @Test
+        fun admin() {
+            val bucketSlot = slot<String>()
+            justRun { storageService.removeFile(capture(bucketSlot), any()) }
+            service.removeObjectWithPerm(defaultRecord.id) shouldBe 1
+            bucketSlot.captured shouldBe "${ossConfigProperties.prefix}${defaultRecord.bucket}"
         }
-        defaultRecord.apply {
-            objectId = randomUUIDStr()
-            fieldId = randomUUIDStr()
-            dataId = randomUUIDStr()
-        }
-//        普通用户删除属于个人数据的文件
-        shouldNotThrow<PermissionDeniedException> {
-            service.removeObjectWithPerm(defaultRecord.id)
-        }
-        verify(exactly = 1) { permService.hasFieldPerm(any(), any()) }
-        verify(exactly = 1) { permService.hasDataPerm(any(), any()) }
 
+        @Test
+        fun `anonymous users remove object`() {
+            every { Session.getInstance() } returns anonymousSession
+            shouldThrow<PermissionDeniedException> {
+                service.removeObjectWithPerm(defaultRecord.id)
+            }
+        }
+
+        @Test
+        fun `normal users remove public object`() {
+            every { Session.getInstance() } returns userSession
+            shouldThrow<PermissionDeniedException> {
+                service.removeObjectWithPerm(defaultRecord.id)
+            }
+
+        }
+
+        @Test
+        fun `ordinary users remove data attachments`() {
+            every { Session.getInstance() } returns userSession
+            defaultRecord.apply {
+                objectId = randomUUIDStr()
+                fieldId = randomUUIDStr()
+                dataId = randomUUIDStr()
+            }
+            shouldNotThrow<PermissionDeniedException> {
+                service.removeObjectWithPerm(defaultRecord.id)
+            }
+            verify(exactly = 1) {
+                permService.hasObjectPerm(any(), query = true, update = true)
+                permService.hasFieldPerm(any(), any(), read = true, edit = true)
+                permService.hasDataPerm(any(), any(), read = true, update = true)
+            }
+
+        }
 
     }
 

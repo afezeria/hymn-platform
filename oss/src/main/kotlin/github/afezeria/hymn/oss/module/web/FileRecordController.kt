@@ -35,7 +35,7 @@ class FileRecordController {
         @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
         @RequestParam("fileName", required = false) fileName: String?,
     ): List<FileRecord> {
-        val list= fileRecordService.pageFindByContainFileName(fileName, pageSize, pageNum)
+        val list = fileRecordService.pageFindByContainFileName(fileName, pageSize, pageNum)
         return list
     }
 
