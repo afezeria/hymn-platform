@@ -113,7 +113,7 @@ internal class AbstractDaoTest {
                             '2020-01-01 00:00:00'),
                            ('d2dbcc6045390139d47f1cb6d0c265af', 2, null, 3.2, 42.42420913, true, 'abc',
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin',
-                            'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin', '2020-01-01 00:00:00',
+                            'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin', '2020-01-02 00:00:00',
                             '2021-01-01 00:00:00')
             """
             )
@@ -261,15 +261,26 @@ internal class AbstractDaoTest {
     }
 
     @Test
+    fun `query default order test`() {
+        val ids = listOf("cc25e3c045390139d47e1cb6d0c265af", "d2dbcc6045390139d47f1cb6d0c265af")
+    }
+
+    @Test
     fun `query order test`() {
         val ids = listOf("cc25e3c045390139d47e1cb6d0c265af", "d2dbcc6045390139d47f1cb6d0c265af")
         assertSoftly {
             var res = dao.select(null, 0, 2, listOf(table.id.asc()))
             res.map { it.id } shouldContainExactly ids
+//            default order
+            res = dao.select(null, 0, 2)
+            res.map { it.id } shouldContainExactly ids.reversed()
+
             res = dao.select(null, 0, 2, listOf(table.id.desc()))
             res.map { it.id } shouldContainExactly ids.reversed()
+
             res = dao.select(null, 0, 2, listOf(table.roleName.asc(), table.id.desc()))
             res.map { it.id } shouldContainExactly ids.reversed()
+
             res = dao.select(null, 0, 2, listOf(table.modifyDate.asc(), table.id.desc()))
             res.map { it.id } shouldContainExactly ids
         }
@@ -277,7 +288,7 @@ internal class AbstractDaoTest {
 
     @Test
     fun `entity query`() {
-        val select = dao.select({ table.id eq "cc25e3c045390139d47e1cb6d0c265af" })
+        val select = dao.select({ it.id eq "cc25e3c045390139d47e1cb6d0c265af" })
         select.size shouldBe 1
         select[0] shouldBe ea
     }
@@ -306,9 +317,9 @@ internal class AbstractDaoTest {
 
     @Test
     fun singleRowSelectTest() {
-        var select = dao.singleRowSelect({ table.modifyDate eq eb.modifyDate })
+        var select = dao.singleRowSelect({ it.modifyDate eq eb.modifyDate })
         select shouldBe eb
-        select = dao.singleRowSelect({ table.id eq "abc" })
+        select = dao.singleRowSelect({ it.id eq "abc" })
         select shouldBe null
     }
 
@@ -320,6 +331,10 @@ internal class AbstractDaoTest {
         res = dao.pageSelect(null, 1, 2, listOf(table.id.asc()))
         res.size shouldBe 1
         res[0] shouldBe eb
+
+        res = dao.pageSelect({ it.inta eq 2 }, 10, 1, listOf(table.id.asc()))
+        res.size shouldBe 2
+        res[0] shouldBe ea
 
         shouldThrow<IllegalArgumentException> {
             dao.pageSelect(null, 0, 2, listOf(table.id.asc()))
@@ -338,7 +353,7 @@ internal class AbstractDaoTest {
         val count = dao.count()
         count shouldBe 2
         dao.count(table.longa) shouldBe 1
-        dao.count(table.longa, { table.id eq eb.id }) shouldBe 0
+        dao.count(table.longa, { it.id eq eb.id }) shouldBe 0
     }
 
     @Test
@@ -376,12 +391,12 @@ internal class AbstractDaoTest {
         shouldThrow<DataNotFoundException> {
             dao.selectByIdThrowIfNotExist(id)
         }.apply {
-            message shouldBe "github.afezeria.hymn.common.db.TestTable [id:$id] 不存在"
+            message shouldBe "TestTable [id:$id] 不存在"
         }
         shouldThrow<DataNotFoundException> {
             dao.exist(id, true)
         }.apply {
-            message shouldBe "github.afezeria.hymn.common.db.TestTable [id:$id] 不存在"
+            message shouldBe "TestTable [id:$id] 不存在"
         }
     }
 }

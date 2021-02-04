@@ -137,7 +137,7 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
      * 如果table有createDate字段则默认按该字段逆序
      */
     fun select(
-        condition: (() -> ColumnDeclaring<Boolean>)? = null,
+        condition: ((T) -> ColumnDeclaring<Boolean>)? = null,
         offset: Int? = null,
         limit: Int? = null,
         orderBy: List<OrderByExpression> = emptyList(),
@@ -145,7 +145,7 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         var query = databaseService.db().from(table)
             .select(table.columns)
         if (condition != null) {
-            query = query.where(condition)
+            query = query.where { condition.invoke(table) }
         }
         var order = orderBy
         if (order.isEmpty() && table.containsField("createDate")) {
@@ -180,7 +180,7 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
     }
 
     fun singleRowSelect(
-        condition: () -> ColumnDeclaring<Boolean>,
+        condition: (T) -> ColumnDeclaring<Boolean>,
         orderBy: List<OrderByExpression> = emptyList(),
     ): E? {
         return select(condition, 0, 1, orderBy)
@@ -189,15 +189,14 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
 
 
     fun pageSelect(
-        condition: (() -> ColumnDeclaring<Boolean>)? = null,
+        condition: ((T) -> ColumnDeclaring<Boolean>)? = null,
         pageSize: Int,
         pageNumber: Int,
         orderBy: List<OrderByExpression> = emptyList(),
     ): MutableList<E> {
         if (pageSize < 1) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
         if (pageNumber < 1) throw IllegalArgumentException("pageNumber must be greater than 0, current value $pageNumber")
-        var order = orderBy
-        return select(condition, (pageNumber - 1) * pageSize, pageSize, order)
+        return select(condition, (pageNumber - 1) * pageSize, pageSize, orderBy)
     }
 
     fun selectAll(): MutableList<E> {
@@ -232,18 +231,18 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
 
     fun count(
         column: Column<*>? = null,
-        condition: (() -> ColumnDeclaring<Boolean>)? = null
+        condition: ((T) -> ColumnDeclaring<Boolean>)? = null,
     ): Long {
         var query = databaseService.db().from(table).select(ktormDslCount(column))
         if (condition != null) {
-            query = query.where(condition)
+            query = query.where { condition.invoke(table) }
         }
         return query.asIterable().first().getLong(1)
     }
 
     fun exist(id: String, throwException: Boolean = false): Boolean {
         val res = count(null, { table.id eq id }).toInt() == 1
-        if (throwException && !res) throw DataNotFoundException("${table.entityClass!!.qualifiedName} [id:$id]")
+        if (throwException && !res) throw DataNotFoundException("${table.entityClass!!.simpleName} [id:$id]")
         return res
     }
 

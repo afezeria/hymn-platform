@@ -62,7 +62,6 @@ class DatabaseServiceImpl(
     }
 
     override fun db(): Database {
-        writeable.useTransaction { }
         return if (ReadOnlyInterceptor.isReadOnly()) {
             iterator.next()
         } else {
