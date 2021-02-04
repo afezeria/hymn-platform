@@ -88,7 +88,7 @@ internal class PreSignedHistoryControllerTest {
 
     @Test
     fun findByFileId() {
-        val url = "http://localhost:$port/module/oss/api/pre-signed-history"
+        val url = "http://localhost:$port/module/oss/api/v2104/pre-signed-history"
         val httpUrl = HttpUrl.parse(url)!!.newBuilder()
             .addQueryParameter("fileId", aid)
             .build()
@@ -104,7 +104,7 @@ internal class PreSignedHistoryControllerTest {
 
     @Test
     fun findByDate() {
-        val url = "http://localhost:$port/module/oss/api/pre-signed-history"
+        val url = "http://localhost:$port/module/oss/api/v2104/pre-signed-history"
         val httpUrl = HttpUrl.parse(url)!!.newBuilder()
             .addQueryParameter("startDate", "2021-01-02T14:34:55")
             .build()
@@ -120,7 +120,7 @@ internal class PreSignedHistoryControllerTest {
 
     @Test
     fun deleteByIds() {
-        val url = "http://localhost:$port/module/oss/api/pre-signed-history"
+        val url = "http://localhost:$port/module/oss/api/v2104/pre-signed-history"
         val httpUrl = HttpUrl.parse(url)!!.newBuilder()
             .addQueryParameter("ids", listOf(id1, id2).joinToString(","))
             .build()

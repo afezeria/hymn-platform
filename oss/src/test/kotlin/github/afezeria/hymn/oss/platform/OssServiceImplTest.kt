@@ -466,7 +466,7 @@ internal class OssServiceImplTest {
         }
 
         @Test
-        fun `ordinary users remove data attachments`() {
+        fun `normal users remove data attachments`() {
             every { Session.getInstance() } returns userSession
             defaultRecord.apply {
                 objectId = randomUUIDStr()

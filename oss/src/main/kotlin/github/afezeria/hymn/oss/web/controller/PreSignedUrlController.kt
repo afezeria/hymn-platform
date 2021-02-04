@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse
  * @author afezeria
  */
 @Controller
-@RequestMapping("oss")
+@RequestMapping("oss/api/{version}")
 class PreSignedUrlController {
     @Autowired
     private lateinit var storageService: StorageService
@@ -42,12 +42,14 @@ class PreSignedUrlController {
     @Autowired
     private lateinit var fileRecordService: FileRecordService
 
+    private val version = 2104
+
     internal fun generatePreSignedObjectUrl(fileId: String, expiry: Long): String {
         val id = randomUUIDStr()
         val token = Jwt.createJwtToken(mapOf("id" to id), expiry)
         val res = cacheService.setIfAbsent(OssCacheKey.preSigned(id), fileId, expiry)
         if (!res) throw BusinessException("生成对象预签名链接失败")
-        return "module/oss/public/pre-signed?token=$token"
+        return "module/oss/api/v$version/public/pre-signed?token=$token"
     }
 
     @GetMapping("public/pre-signed")

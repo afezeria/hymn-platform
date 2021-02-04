@@ -76,7 +76,7 @@ internal class FileRecordControllerTest {
 
     @Test
     fun findAll() {
-        val url = "http://localhost:$port/module/oss/api/file-record"
+        val url = "http://localhost:$port/module/oss/api/v2104/file-record"
         val httpUrl = HttpUrl.parse(url)!!.newBuilder()
             .build()
         val request = Request.Builder().url(httpUrl)
@@ -91,7 +91,7 @@ internal class FileRecordControllerTest {
 
     @Test
     fun pageFind() {
-        val url = "http://localhost:$port/module/oss/api/file-record"
+        val url = "http://localhost:$port/module/oss/api/v2104/file-record"
         val httpUrl = HttpUrl.parse(url)!!.newBuilder()
             .addQueryParameter("pageSize", "2")
             .addQueryParameter("pageNum", "2")
@@ -108,7 +108,7 @@ internal class FileRecordControllerTest {
 
     @Test
     fun findById() {
-        val url = "http://localhost:$port/module/oss/api/file-record/${aid}"
+        val url = "http://localhost:$port/module/oss/api/v2104/file-record/${aid}"
         val httpUrl = HttpUrl.parse(url)!!.newBuilder()
             .build()
         val request = Request.Builder().url(httpUrl)
@@ -125,7 +125,7 @@ internal class FileRecordControllerTest {
 
     @Test
     fun `find by a nonexistent id`() {
-        val url = "http://localhost:$port/module/oss/api/file-record/${randomUUIDStr()}"
+        val url = "http://localhost:$port/module/oss/api/v2104/file-record/${randomUUIDStr()}"
         val httpUrl = HttpUrl.parse(url)!!.newBuilder()
             .build()
         val request = Request.Builder().url(httpUrl)
@@ -156,7 +156,7 @@ internal class FileRecordControllerTest {
             remark = null
         )
 
-        val url = "http://localhost:$port/module/oss/api/file-record/${aid}"
+        val url = "http://localhost:$port/module/oss/api/v2104/file-record/${aid}"
         val mediaType = MediaType.parse("application/json; charset=utf-8")
 
         val body = RequestBody.create(mediaType, dto.toJson()) // new
@@ -177,7 +177,7 @@ internal class FileRecordControllerTest {
 
     @Test
     fun delete() {
-        val url = "http://localhost:$port/module/oss/api/file-record/${aid}"
+        val url = "http://localhost:$port/module/oss/api/v2104/file-record/${aid}"
 
         val request = Request.Builder()
             .url(url)

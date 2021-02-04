@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse
  * @author afezeria
  */
 @Controller
-@RequestMapping("oss")
+@RequestMapping("oss/api/{version}")
 @Api(tags = ["文件上传/下载接口"])
 class FileController {
     companion object : KLogging()

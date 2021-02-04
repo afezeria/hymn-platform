@@ -16,7 +16,7 @@ import java.time.LocalDateTime
  * @author afezeria
  */
 @RestController
-@RequestMapping("oss/api/pre-signed-history")
+@RequestMapping("oss/api/{version}/pre-signed-history")
 @Api(tags = ["创建文件预签url记录接口"])
 class PreSignedHistoryController {
 

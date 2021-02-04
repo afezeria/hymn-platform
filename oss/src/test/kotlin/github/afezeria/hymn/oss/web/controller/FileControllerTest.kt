@@ -97,7 +97,7 @@ internal class FileControllerTest : BaseDbTest() {
     fun tmpFileUpload() {
         val now = LocalDateTime.now()
         val requestEntity = createRequestEntity()
-        val serverUrl = "http://localhost:$port/module/oss/tmp-file"
+        val serverUrl = "http://localhost:$port/module/oss/api/v2104/tmp-file"
         val resp = restTemplate.postForEntity(serverUrl, requestEntity, String::class.java)
         resp.statusCodeValue shouldBe 200
         resp.body!!.length shouldBe 32
@@ -115,7 +115,7 @@ internal class FileControllerTest : BaseDbTest() {
     @Test
     fun `upload empty tmp file`() {
         val requestEntity = createRequestEntity(ByteArray(0))
-        val serverUrl = "http://localhost:$port/module/oss/tmp-file"
+        val serverUrl = "http://localhost:$port/module/oss/api/v2104/tmp-file"
         val resp = restTemplate.postForEntity(serverUrl, requestEntity, String::class.java)
         resp.statusCodeValue shouldBe 400
         resp.body shouldNotBe null
@@ -126,7 +126,7 @@ internal class FileControllerTest : BaseDbTest() {
     fun fileUpload() {
         val now = LocalDateTime.now()
         val requestEntity = createRequestEntity()
-        val serverUrl = "http://localhost:$port/module/oss/file"
+        val serverUrl = "http://localhost:$port/module/oss/api/v2104/file"
         val resp = restTemplate.postForEntity(serverUrl, requestEntity, String::class.java)
         resp.statusCodeValue shouldBe 200
         resp.body!!.length shouldBe 32
@@ -152,7 +152,7 @@ internal class FileControllerTest : BaseDbTest() {
             contentType = "application/octet-stream",
             tmp = false
         )
-        val url = "http://localhost:$port/module/oss/file/$fileId"
+        val url = "http://localhost:$port/module/oss/api/v2104/file/$fileId"
 
         val request = Request.Builder().url(url).build()
         client.newCall(request).execute().use {

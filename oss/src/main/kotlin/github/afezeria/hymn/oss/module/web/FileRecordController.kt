@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*
  * @author afezeria
  */
 @RestController
-@RequestMapping("oss/api/file-record")
+@RequestMapping("oss/api/{version}/file-record")
 @Api(tags = ["文件存储列表接口"])
 class FileRecordController {
 
