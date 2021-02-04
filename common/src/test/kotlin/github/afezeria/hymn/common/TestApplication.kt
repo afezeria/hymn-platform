@@ -28,13 +28,4 @@ class TestApplication {
     }
 
 
-    @Bean
-    fun permService(): PermService {
-        val mock = mockk<PermService>()
-        every { mock.hasFieldPerm(any(), any()) } returns true
-        every { mock.hasFunctionPerm(any(), any()) } returns true
-        every { mock.hasDataPerm(any(), any()) } returns true
-        every { mock.hasObjectPerm(any()) } returns true
-        return mock
-    }
 }
