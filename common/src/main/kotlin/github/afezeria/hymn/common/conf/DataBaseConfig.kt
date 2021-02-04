@@ -15,7 +15,7 @@ import javax.sql.DataSource
  */
 @Configuration
 @EnableConfigurationProperties(DataBaseProperties::class)
-class DataBaseConfiguration {
+class DataBaseConfig {
 
     @Autowired
     lateinit var dataBaseProperties: DataBaseProperties
