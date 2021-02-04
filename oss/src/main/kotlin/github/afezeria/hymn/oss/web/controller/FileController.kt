@@ -1,5 +1,6 @@
 package github.afezeria.hymn.oss.web.controller
 
+import github.afezeria.hymn.common.ann.ApiVersion
 import github.afezeria.hymn.common.ann.Function
 import github.afezeria.hymn.common.constant.AccountType
 import github.afezeria.hymn.common.exception.BusinessException
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletResponse
 /**
  * @author afezeria
  */
+@ApiVersion
 @Controller
 @RequestMapping("oss/api/{version}")
 @Api(tags = ["文件上传/下载接口"])

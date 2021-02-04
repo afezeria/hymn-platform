@@ -1,5 +1,6 @@
 package github.afezeria.hymn.oss.module.web
 
+import github.afezeria.hymn.common.ann.ApiVersion
 import github.afezeria.hymn.common.ann.Function
 import github.afezeria.hymn.common.constant.AccountType
 import github.afezeria.hymn.common.exception.ResourceNotFoundException
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*
 /**
  * @author afezeria
  */
+@ApiVersion
 @RestController
 @RequestMapping("oss/api/{version}/file-record")
 @Api(tags = ["文件存储列表接口"])

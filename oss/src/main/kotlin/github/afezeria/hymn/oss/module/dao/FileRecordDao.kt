@@ -8,6 +8,7 @@ import org.ktorm.dsl.and
 import org.ktorm.dsl.desc
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.like
+import org.ktorm.expression.BinaryExpression
 import org.springframework.stereotype.Component
 
 /**
@@ -39,7 +40,7 @@ class FileRecordDao(
         pageSize: Int,
         pageNum: Int
     ): List<FileRecord> {
-        val condition = if (fileName != null) {
+        val condition: ((OssFileRecords) -> BinaryExpression<Boolean>)? = if (fileName != null) {
             { table.fileName like "%$fileName%" }
         } else {
             null

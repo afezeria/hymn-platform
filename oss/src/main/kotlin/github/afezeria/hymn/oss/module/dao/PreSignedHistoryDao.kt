@@ -5,6 +5,7 @@ import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.oss.module.entity.PreSignedHistory
 import github.afezeria.hymn.oss.module.table.OssPreSignedHistorys
 import org.ktorm.dsl.*
+import org.ktorm.expression.ScalarExpression
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -31,7 +32,7 @@ class PreSignedHistoryDao(
         pageSize: Int,
         pageNum: Int
     ): List<PreSignedHistory> {
-        val condition = if (startDate == null) {
+        val condition: ((OssPreSignedHistorys) -> ScalarExpression<Boolean>)? = if (startDate == null) {
             if (endDate == null) {
                 null
             } else {

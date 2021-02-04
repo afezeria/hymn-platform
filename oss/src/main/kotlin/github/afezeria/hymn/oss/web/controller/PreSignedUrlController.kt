@@ -1,5 +1,6 @@
 package github.afezeria.hymn.oss.web.controller
 
+import github.afezeria.hymn.common.ann.ApiVersion
 import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.platform.CacheService
 import github.afezeria.hymn.common.platform.OssService
@@ -27,6 +28,7 @@ import javax.servlet.http.HttpServletResponse
  * 当 [StorageService.remoteServerSupportHttpAccess] 返回值为 true 时不处理请求，
  * @author afezeria
  */
+@ApiVersion
 @Controller
 @RequestMapping("oss/api/{version}")
 class PreSignedUrlController {
