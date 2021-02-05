@@ -1,5 +1,6 @@
 package github.afezeria.hymn.common.platform
 
+import com.p6spy.engine.spy.P6DataSource
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import github.afezeria.hymn.common.aspect.ReadOnlyInterceptor
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
 /**
  * @author afezeria
  */
+@Service
 class DatabaseServiceImpl(
     dataBaseProperties: DataBaseProperties
 ) : DatabaseService {
@@ -28,6 +30,7 @@ class DatabaseServiceImpl(
             throw IllegalArgumentException("缺少数据源配置")
         val adminDatabase = dataBaseProperties.admin.map {
             Database.connect(
+//                P6DataSource(HikariDataSource(HikariConfig(it))),
                 HikariDataSource(HikariConfig(it)),
                 logger = Slf4jLoggerAdapter(logger),
             )
@@ -53,9 +56,9 @@ class DatabaseServiceImpl(
                 return db
             }
         }
-        user = dataBaseProperties.user.takeIf { it.isNotEmpty() }?.run {
+        user = dataBaseProperties.user.takeIf { it.isNotEmpty() }?.let {
             Database.connect(
-                HikariDataSource(HikariConfig(this)),
+                P6DataSource(HikariDataSource(HikariConfig(it))),
                 logger = Slf4jLoggerAdapter(logger),
             )
         } ?: adminDatabase[0]

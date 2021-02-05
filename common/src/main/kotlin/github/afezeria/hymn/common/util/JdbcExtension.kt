@@ -47,19 +47,6 @@ fun Connection.execute(
     @Language("sql") sql: String,
     vararg params: Any?
 ): MutableList<MutableMap<String, Any?>> {
-    logger.debug {
-        """
-            
-            SQL: $sql
-            Parameters: ${
-            params.map { "$it(${it?.javaClass?.typeName})" }.joinToString(
-                separator = ", ",
-                prefix = "[",
-                postfix = "]",
-            )
-        }
-        """.trimIndent()
-    }
     return if (params.isNotEmpty()) {
         prepareStatement(sql).use {
             params.forEachIndexed { index, any ->

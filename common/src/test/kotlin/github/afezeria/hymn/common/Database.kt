@@ -14,3 +14,4 @@ val adminConn: Connection
 val ds2 = HikariDataSource(HikariConfig("/user-database.properties"))
 val userConn: Connection
     get() = ds2.connection
+

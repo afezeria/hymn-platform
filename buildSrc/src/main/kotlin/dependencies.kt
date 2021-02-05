@@ -13,9 +13,7 @@ object Deps {
 
     object Jdbc {
         const val postgresql = "org.postgresql:postgresql:42.2.10"
-    }
-
-    object DataSource {
+        const val p6spy="p6spy:p6spy:3.9.1"
         const val hikariCP = "com.zaxxer:HikariCP:3.4.5"
     }
 

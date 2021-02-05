@@ -28,14 +28,16 @@ dependencies {
 
     implementation(Deps.SpringBoot.aop)
     implementation(Deps.Servlet.api)
-    implementation(Deps.DataSource.hikariCP)
+
+    implementation(Deps.Jdbc.hikariCP)
+    implementation(Deps.Jdbc.p6spy)
 
     implementation(Deps.Ktorm.core)
     implementation(Deps.Ktorm.postgresql)
 
     testCompile(Deps.SpringBoot.test)
     testCompile(Deps.Jdbc.postgresql)
-    testCompile(Deps.DataSource.hikariCP)
+    testCompile(Deps.Jdbc.hikariCP)
     testCompile(Deps.Kotest.assertions)
     testCompile(Deps.Mockk.spring)
 
