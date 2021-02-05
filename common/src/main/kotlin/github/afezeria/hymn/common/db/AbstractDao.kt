@@ -1,16 +1,22 @@
 package github.afezeria.hymn.common.db
 
+import github.afezeria.hymn.common.db.AutoFillType.*
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.Session
 import github.afezeria.hymn.common.util.execute
 import org.ktorm.dsl.*
 import org.ktorm.expression.BinaryExpression
+import org.ktorm.expression.ColumnAssignmentExpression
 import org.ktorm.expression.OrderByExpression
 import org.ktorm.schema.Column
 import org.ktorm.schema.ColumnDeclaring
-import java.time.LocalDate
+import org.ktorm.support.postgresql.bulkInsert
+import org.ktorm.support.postgresql.bulkInsertOrUpdate
+import org.ktorm.support.postgresql.insertOrUpdate
 import java.time.LocalDateTime
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.javaField
 import org.ktorm.dsl.count as ktormDslCount
 
 /**
@@ -98,6 +104,94 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         } as String
         table.setValueByFieldName(e, "id", id)
         return id
+    }
+
+    fun bulkInsert(es: List<E>): Int {
+        val selector = AutoFillSelector()
+        for (entityField in entityFields.filter { it.autoFill?.fillOnInsert ?: false }) {
+            val current = selector.getCurrent(entityField.autoFill!!.type)
+            for (e in es) {
+                entityField.field.set(e, current)
+            }
+        }
+        return databaseService.primary().bulkInsert(table) {
+            for (e in es) {
+                item {
+                    entityFields.filter { it.field.name != "id" }
+                        .forEach {
+                            set(it.column, it.field.get(e))
+                        }
+                }
+            }
+        }
+    }
+
+    fun insertOrUpdate(e: E, vararg conflictColumns: Column<*>): Int {
+        val selector = AutoFillSelector()
+        for (entityField in entityFields.filter { it.autoFill != null }) {
+            val current = selector.getCurrent(entityField.autoFill!!.type)
+            entityField.field.set(e, current)
+        }
+        val idEntityField = table.getEntityFieldByFieldName("id")!!
+
+        return databaseService.primary().insertOrUpdate(table) {
+            entityFields.filter { it.field.name != "id" }
+                .forEach {
+                    set(it.column, it.field.get(e))
+                }
+            if (conflictColumns.isEmpty()) {
+                set(idEntityField.column, idEntityField.field.get(e))
+            }
+            onConflict(*conflictColumns) {
+                entityFields.filter { it.field.name != "id" }
+                    .forEach {
+//                        冲突时不对字段非null但值为null的字段设置值
+                        val value = it.field.get(e)
+                        if (!it.nullable && value == null) return@forEach
+                        set(it.column, value)
+                    }
+            }
+        }
+
+    }
+
+    fun bulkInsertOrUpdate(es: List<E>, vararg conflictColumns: Column<*>): Int {
+        if (conflictColumns.isEmpty()) throw IllegalArgumentException("conflictColumns can not be empty")
+        val selector = AutoFillSelector()
+        for (entityField in entityFields.filter { it.autoFill != null }) {
+            val current = selector.getCurrent(entityField.autoFill!!.type)
+            for (e in es) {
+                entityField.field.set(e, current)
+            }
+        }
+        val fields = entityFields.filter { it.field.name != "id" }
+            .filter {
+                val e = es[0]
+                !(!it.nullable && it.field.get(e) == null)
+            }
+
+        return databaseService.primary().bulkInsertOrUpdate(table) {
+            for (e in es) {
+                item {
+                    fields.forEach {
+                        set(it.column, it.field.get(e))
+                    }
+                }
+            }
+            onConflict(*conflictColumns) {
+                fields.forEach {
+                    setc(it.column as Column<Any>, excluded(it.column))
+                }
+            }
+        }
+    }
+
+    private fun AssignmentsBuilder.setc(column: Column<Any>, expr: ColumnDeclaring<Any>) {
+        val field =
+            AssignmentsBuilder::class.memberProperties.find { it.name == "_assignments" }?.javaField!!
+        field.isAccessible = true
+        val assignments = field.get(this) as ArrayList<ColumnAssignmentExpression<*>>
+        assignments += ColumnAssignmentExpression(column.asExpression(), expr.asExpression())
     }
 
     /**
@@ -274,17 +368,15 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
     inner class AutoFillSelector {
         private val session = Session.getInstance()
         private val now = LocalDateTime.now()
-        private val today = LocalDate.now()
         fun getCurrent(type: AutoFillType): Any {
             return when (type) {
-                AutoFillType.ACCOUNT_ID -> session.accountId
-                AutoFillType.ACCOUNT_NAME -> session.accountName
-                AutoFillType.DATE -> today
-                AutoFillType.DATETIME -> now
-                AutoFillType.ROLE_ID -> session.roleId
-                AutoFillType.ROLE_NAME -> session.roleName
-                AutoFillType.ORG_ID -> session.orgId
-                AutoFillType.ORG_NAME -> session.orgName
+                ACCOUNT_ID -> session.accountId
+                ACCOUNT_NAME -> session.accountName
+                DATETIME -> now
+                ROLE_ID -> session.roleId
+                ROLE_NAME -> session.roleName
+                ORG_ID -> session.orgId
+                ORG_NAME -> session.orgName
             }
         }
     }

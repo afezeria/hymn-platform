@@ -138,7 +138,7 @@ abstract class AbstractTable<E : AbstractEntity>(
                 ?: throw IllegalArgumentException(
                     "field ${entityClass!!.qualifiedName}.${entityField.field.name} of data with id ${
                         row.getString(id.label)
-                    }  should not be null"
+                    } should not be null"
                 )
             entityField.field.set(instance, value)
         }

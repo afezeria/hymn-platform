@@ -34,6 +34,8 @@ create table test_dao.test_table
     create_date  timestamptz,
     modify_date  timestamptz
 );
+create unique index test_table_inta_uk on test_dao.test_table (inta);
+
 drop table if exists test_dao.test_table_history;
 create table test_dao.test_table_history
 (

@@ -79,7 +79,7 @@ internal class AbstractDaoTest {
         modifyDate = LocalDateTime.of(2020, 1, 1, 0, 0, 0)
     }
     val eb = TestTable(
-        inta = 2,
+        inta = 3,
         longa = null,
         doublea = 3.2,
         decimala = BigDecimal("42.42420913"),
@@ -111,7 +111,7 @@ internal class AbstractDaoTest {
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin',
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin', '2020-01-01 00:00:00',
                             '2020-01-01 00:00:00'),
-                           ('d2dbcc6045390139d47f1cb6d0c265af', 2, null, 3.2, 42.42420913, true, 'abc',
+                           ('d2dbcc6045390139d47f1cb6d0c265af', 3, null, 3.2, 42.42420913, true, 'abc',
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin',
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin', '2020-01-02 00:00:00',
                             '2021-01-01 00:00:00')
@@ -132,7 +132,7 @@ internal class AbstractDaoTest {
     @Test
     fun delete() {
         val res = dao.delete { it.inta eq 2 }
-        res shouldBe 2
+        res shouldBe 1
     }
 
     @Test
@@ -230,7 +230,7 @@ internal class AbstractDaoTest {
 
     @Test
     fun insert() {
-        val copy = ea.copy()
+        val copy = ea.copy(inta = 52)
         val insert = dao.insert(copy)
         copy.apply {
             assertSoftly {
@@ -248,6 +248,81 @@ internal class AbstractDaoTest {
 
             }
         }
+    }
+
+
+    @Test
+    fun bulkInsert() {
+        val list = listOf(
+            TestTable(
+                inta = 4,
+                longa = null,
+                doublea = 0.0,
+                decimala = BigDecimal("2"),
+                boola = false
+            ),
+            TestTable(
+                inta = 5,
+                longa = null,
+                doublea = 0.0,
+                decimala = BigDecimal("2"),
+                boola = false
+            ),
+        )
+        dao.bulkInsert(list) shouldBe 2
+        dao.count() shouldBe 4
+    }
+
+    @Test
+    fun `insertOrUpdate conflict on id`() {
+        ea.inta = 50
+        dao.insertOrUpdate(ea) shouldBe 1
+        dao.count() shouldBe 2
+        val new = dao.selectById(ea.id)!!
+        new.inta = 50
+    }
+
+    @Test
+    fun `insertOrUpdate conflict on specify column`() {
+        val new = TestTable(
+            inta = 2,
+            longa = null,
+            doublea = 0.0,
+            decimala = BigDecimal("22"),
+            boola = false
+        )
+        new shouldNotBe ea
+        dao.insertOrUpdate(new, table.inta) shouldBe 1
+        val nea = dao.selectById(ea.id)!!
+        new shouldBe nea
+        nea.lazya shouldBe ea.lazya
+    }
+
+    @Test
+    fun bulkInsertOrUpdate() {
+        val list = listOf(
+            TestTable(
+                inta = 2,
+                longa = null,
+                doublea = 0.0,
+                decimala = BigDecimal("2"),
+                boola = false
+            ),
+            TestTable(
+                inta = 3,
+                longa = null,
+                doublea = 0.0,
+                decimala = BigDecimal("2"),
+                boola = false
+            ),
+        )
+        ea shouldNotBe list[0]
+        eb shouldNotBe list[1]
+        dao.bulkInsertOrUpdate(list, table.inta)
+        val nea = dao.selectById(ea.id)!!
+        val neb = dao.selectById(eb.id)!!
+        nea shouldBe list[0]
+        neb shouldBe list[1]
     }
 
     @Test
@@ -332,7 +407,7 @@ internal class AbstractDaoTest {
         res.size shouldBe 1
         res[0] shouldBe eb
 
-        res = dao.pageSelect({ it.inta eq 2 }, 10, 1, listOf(table.id.asc()))
+        res = dao.pageSelect({ it.boola eq true }, 10, 1, listOf(table.id.asc()))
         res.size shouldBe 2
         res[0] shouldBe ea
 
@@ -374,7 +449,7 @@ internal class AbstractDaoTest {
 
     @Test
     fun history() {
-        val copy = ea.copy()
+        val copy = ea.copy(inta = 72)
         val insert = dao.insert(copy)
         copy.inta = 5
         dao.update(copy)
