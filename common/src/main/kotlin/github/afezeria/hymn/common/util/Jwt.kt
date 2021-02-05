@@ -8,6 +8,7 @@ import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.io.Encoders
 import io.jsonwebtoken.jackson.io.JacksonSerializer
 import io.jsonwebtoken.security.Keys
+import mu.KotlinLogging
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import java.security.Key
 import java.time.LocalDateTime
@@ -21,15 +22,21 @@ import javax.crypto.SecretKey
  */
 
 object Jwt {
-    val key: SecretKey = Keys.hmacShaKeyFor(
-        Decoders.BASE64URL.decode(
-            PathMatchingResourcePatternResolver(this.javaClass.classLoader)
-                .getResource("classpath:/jwt-key")
-                .inputStream
-                .readAllBytes()
-                .decodeToString()
-        )
-    )
+    private val logger = KotlinLogging.logger {}
+
+    private const val DEFAULT_KEY = "LbQ47OZ9CeD4RaNSwSHO2rGdOvmXj7vy_5fuI4KFUjc"
+    val key: SecretKey = PathMatchingResourcePatternResolver(this.javaClass.classLoader)
+        .getResource("classpath:/jwt-key")
+        .inputStream
+        .readAllBytes()
+        .decodeToString().let {
+            if (it == DEFAULT_KEY) {
+                logger.warn("当前正在使用默认密钥！！！")
+            }
+            Keys.hmacShaKeyFor(
+                Decoders.BASE64URL.decode(it)
+            )
+        }
 
     val zoneId = ZoneId.systemDefault()
 
@@ -69,7 +76,7 @@ object Jwt {
     }
 
     fun createKey(): String {
-        val key: Key = Keys.secretKeyFor(SignatureAlgorithm.HS512)!!
+        val key: Key = Keys.secretKeyFor(SignatureAlgorithm.HS256)!!
         return Encoders.BASE64URL.encode(key.encoded)
     }
 }

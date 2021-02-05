@@ -17,9 +17,6 @@ class OssTestConfiguration {
     fun config(): ConfigService {
         val mock = mockk<ConfigService>()
         every { mock.getAsString("oss") } returns OssConfigProperties(prefix = "abc").toJson()
-        println("================")
-        println(mock)
         return mock
-
     }
 }
