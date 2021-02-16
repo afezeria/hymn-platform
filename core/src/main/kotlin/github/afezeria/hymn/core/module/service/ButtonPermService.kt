@@ -33,9 +33,10 @@ internal interface ButtonPermService {
         buttonId: String,
     ): MutableList<ButtonPerm>
 
-    fun batchCreate(dtoList: List<ButtonPermDto>): MutableList<Int>
+    fun batchCreate(dtoList: List<ButtonPermDto>): Int
 
-    fun batchSave(dtoList: List<ButtonPermDto>): MutableList<Int>
+    fun batchSave(dtoList: List<ButtonPermDto>): Int
+    fun pageFind(pageSize: Int, pageNum: Int): List<ButtonPerm>
 
 
 }

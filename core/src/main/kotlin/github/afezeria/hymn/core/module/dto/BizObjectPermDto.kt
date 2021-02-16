@@ -25,9 +25,9 @@ class BizObjectPermDto(
     @ApiModelProperty(value = "查看本人及直接下属")
     var queryWithAccountTree: Boolean = false,
     @ApiModelProperty(value = "查看本部门")
-    var queryWithDept: Boolean = false,
+    var queryWithOrg: Boolean = false,
     @ApiModelProperty(value = "查看本部门及下级部门")
-    var queryWithDeptTree: Boolean = false,
+    var queryWithOrgTree: Boolean = false,
     @ApiModelProperty(value = "查看全部")
     var queryAll: Boolean = false,
     @ApiModelProperty(value = "编辑全部")
@@ -42,8 +42,8 @@ class BizObjectPermDto(
             del = del,
             que = que,
             queryWithAccountTree = queryWithAccountTree,
-            queryWithDept = queryWithDept,
-            queryWithDeptTree = queryWithDeptTree,
+            queryWithOrg = queryWithOrg,
+            queryWithOrgTree = queryWithOrgTree,
             queryAll = queryAll,
             editAll = editAll,
         )
@@ -58,8 +58,8 @@ class BizObjectPermDto(
             it.del = del
             it.que = que
             it.queryWithAccountTree = queryWithAccountTree
-            it.queryWithDept = queryWithDept
-            it.queryWithDeptTree = queryWithDeptTree
+            it.queryWithOrg = queryWithOrg
+            it.queryWithOrgTree = queryWithOrgTree
             it.queryAll = queryAll
             it.editAll = editAll
         }

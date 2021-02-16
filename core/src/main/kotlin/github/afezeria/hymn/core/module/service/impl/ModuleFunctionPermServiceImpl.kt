@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.ModuleFunctionPermDao
 import github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
@@ -77,11 +77,15 @@ class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
     }
 
 
-    override fun batchCreate(dtoList: List<ModuleFunctionPermDto>): MutableList<Int> {
-        return moduleFunctionPermDao.batchInsert(dtoList.map { it.toEntity() })
+    override fun batchCreate(dtoList: List<ModuleFunctionPermDto>): Int {
+        return moduleFunctionPermDao.bulkInsert(dtoList.map { it.toEntity() })
     }
 
-    override fun batchSave(dtoList: List<ModuleFunctionPermDto>): MutableList<Int> {
-        return moduleFunctionPermDao.batchInsertOrUpdate(dtoList.map { it.toEntity() })
+    override fun batchSave(dtoList: List<ModuleFunctionPermDto>): Int {
+        return moduleFunctionPermDao.bulkInsertOrUpdate(dtoList.map { it.toEntity() })
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<ModuleFunctionPerm> {
+        return moduleFunctionPermDao.pageSelect(null, pageSize, pageNum)
     }
 }

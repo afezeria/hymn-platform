@@ -14,12 +14,12 @@ internal interface BizObjectPermService {
 
     fun create(dto: BizObjectPermDto): String
 
-    fun batchCreate(dtoList: List<BizObjectPermDto>): MutableList<Int>
+    fun batchCreate(dtoList: List<BizObjectPermDto>): Int
 
     /**
      * insert or update on conflict (roleId,bizObjectId)
      */
-    fun batchSave(dtoList: List<BizObjectPermDto>): MutableList<Int>
+    fun batchSave(dtoList: List<BizObjectPermDto>): Int
 
     fun findAll(): MutableList<BizObjectPerm>
 
@@ -39,6 +39,8 @@ internal interface BizObjectPermService {
     fun findByBizObjectId(
         bizObjectId: String,
     ): MutableList<BizObjectPerm>
+
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectPerm>
 
 
 }

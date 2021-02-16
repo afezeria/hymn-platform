@@ -29,5 +29,7 @@ internal interface DictItemService {
         dictId: String,
     ): MutableList<DictItem>
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<DictItem>
+
 
 }

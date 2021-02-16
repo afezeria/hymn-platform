@@ -24,5 +24,7 @@ internal interface CronJobService {
         sharedCodeId: String,
     ): MutableList<CronJob>
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<CronJob>
+
 
 }

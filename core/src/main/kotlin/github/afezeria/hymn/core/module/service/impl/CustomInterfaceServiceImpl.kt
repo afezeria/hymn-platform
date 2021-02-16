@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.CustomInterfaceDao
 import github.afezeria.hymn.core.module.dto.CustomInterfaceDto
@@ -62,6 +62,10 @@ class CustomInterfaceServiceImpl : CustomInterfaceService {
         api: String,
     ): CustomInterface? {
         return customInterfaceDao.selectByApi(api)
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<CustomInterface> {
+        return customInterfaceDao.pageSelect(null, pageSize, pageNum)
     }
 
 

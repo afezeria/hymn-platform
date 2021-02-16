@@ -24,5 +24,7 @@ internal interface OrgService {
         parentId: String,
     ): MutableList<Org>
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<Org>
+
 
 }

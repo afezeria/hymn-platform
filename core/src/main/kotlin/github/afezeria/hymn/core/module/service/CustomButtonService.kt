@@ -24,5 +24,7 @@ internal interface CustomButtonService {
         api: String,
     ): CustomButton?
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<CustomButton>
+
 
 }

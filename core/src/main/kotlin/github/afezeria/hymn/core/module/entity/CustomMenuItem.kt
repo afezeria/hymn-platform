@@ -1,5 +1,7 @@
 package github.afezeria.hymn.core.module.entity
 
+import github.afezeria.hymn.common.db.AbstractEntity
+
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
@@ -30,9 +32,8 @@ data class CustomMenuItem(
     var clientType: String,
     @ApiModelProperty(value = "图标", required = true)
     var icon: String,
-) {
+) : AbstractEntity() {
 
-    lateinit var id: String
     lateinit var createById: String
     lateinit var createBy: String
     lateinit var modifyById: String

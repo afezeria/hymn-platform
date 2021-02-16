@@ -1,5 +1,7 @@
 package github.afezeria.hymn.core.module.entity
 
+import github.afezeria.hymn.common.db.AbstractEntity
+
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
@@ -20,9 +22,8 @@ data class ModuleFunctionPerm(
     var functionApi: String,
     @ApiModelProperty(value = "是否有访问权限")
     var perm: Boolean? = null,
-) {
+) : AbstractEntity() {
 
-    lateinit var id: String
     lateinit var createById: String
     lateinit var createBy: String
     lateinit var modifyById: String

@@ -33,8 +33,9 @@ internal interface BizObjectFieldPermService {
         fieldId: String,
     ): MutableList<BizObjectFieldPerm>
 
-    fun batchCreate(dtoList: List<BizObjectFieldPermDto>): MutableList<Int>
+    fun batchCreate(dtoList: List<BizObjectFieldPermDto>): Int
 
-    fun batchSave(dtoList: List<BizObjectFieldPermDto>): MutableList<Int>
+    fun batchSave(dtoList: List<BizObjectFieldPermDto>): Int
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectFieldPerm>
 
 }

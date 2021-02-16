@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.SharedCodeDao
 import github.afezeria.hymn.core.module.dto.SharedCodeDto
@@ -62,6 +62,10 @@ class SharedCodeServiceImpl : SharedCodeService {
         api: String,
     ): SharedCode? {
         return sharedCodeDao.selectByApi(api)
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<SharedCode> {
+        return sharedCodeDao.pageSelect(null, pageSize, pageNum)
     }
 
 

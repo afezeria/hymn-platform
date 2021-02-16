@@ -32,5 +32,7 @@ internal interface AccountService {
         roleId: String,
     ): MutableList<Account>
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<Account>
+
 
 }

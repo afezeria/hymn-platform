@@ -27,5 +27,6 @@ internal interface RoleService {
      * @return id列表
      */
     fun findIdList(ids: List<String>? = null): MutableList<String>
+    fun pageFind(pageSize: Int, pageNum: Int): List<Role>
 
 }

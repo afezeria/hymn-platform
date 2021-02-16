@@ -24,5 +24,7 @@ internal interface DictService {
         api: String,
     ): Dict?
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<Dict>
+
 
 }

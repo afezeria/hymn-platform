@@ -1,5 +1,7 @@
 package github.afezeria.hymn.core.module.entity
 
+import github.afezeria.hymn.common.db.AbstractEntity
+
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
@@ -37,9 +39,8 @@ data class BizObjectMappingItem(
     var refField4Id: String? = null,
     @ApiModelProperty(value = "ref_field4_api 表示的字段所属的对象api，也是 ref_field3_api 关联的对象的api ;;fk:[core_biz_object cascade]")
     var refField4BizObjectId: String? = null,
-) {
+) : AbstractEntity() {
 
-    lateinit var id: String
     lateinit var createById: String
     lateinit var createBy: String
     lateinit var modifyById: String

@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.DictItemDao
 import github.afezeria.hymn.core.module.dto.DictItemDto
@@ -69,6 +69,10 @@ class DictItemServiceImpl : DictItemService {
         dictId: String,
     ): MutableList<DictItem> {
         return dictItemDao.selectByDictId(dictId)
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<DictItem> {
+        return dictItemDao.pageSelect(null, pageSize, pageNum)
     }
 
 

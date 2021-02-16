@@ -1,5 +1,7 @@
 package github.afezeria.hymn.core.module.entity
 
+import github.afezeria.hymn.common.db.AbstractEntity
+
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
@@ -18,9 +20,8 @@ data class BizObjectTypePerm(
     var typeId: String,
     @ApiModelProperty(value = "创建数据时选择特定记录类型的权限", required = true)
     var visible: Boolean,
-) {
+) : AbstractEntity() {
 
-    lateinit var id: String
     lateinit var createById: String
     lateinit var createBy: String
     lateinit var modifyById: String

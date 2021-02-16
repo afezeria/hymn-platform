@@ -24,5 +24,7 @@ internal interface SharedCodeService {
         api: String,
     ): SharedCode?
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<SharedCode>
+
 
 }

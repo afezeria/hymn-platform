@@ -24,5 +24,7 @@ internal interface CustomComponentService {
         api: String,
     ): CustomComponent?
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<CustomComponent>
+
 
 }

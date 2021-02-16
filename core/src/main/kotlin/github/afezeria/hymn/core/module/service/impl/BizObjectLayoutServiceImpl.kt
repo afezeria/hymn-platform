@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
@@ -63,6 +63,10 @@ class BizObjectLayoutServiceImpl : BizObjectLayoutService {
         name: String,
     ): BizObjectLayout? {
         return bizObjectLayoutDao.selectByBizObjectIdAndName(bizObjectId, name)
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectLayout> {
+        return bizObjectLayoutDao.pageSelect(null, pageSize, pageNum)
     }
 
 

@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.CustomComponentDao
 import github.afezeria.hymn.core.module.dto.CustomComponentDto
@@ -62,6 +62,10 @@ class CustomComponentServiceImpl : CustomComponentService {
         api: String,
     ): CustomComponent? {
         return customComponentDao.selectByApi(api)
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<CustomComponent> {
+        return customComponentDao.pageSelect(null, pageSize, pageNum)
     }
 
 

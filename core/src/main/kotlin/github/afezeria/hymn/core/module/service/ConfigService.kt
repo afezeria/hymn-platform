@@ -24,5 +24,7 @@ internal interface ConfigService {
         key: String,
     ): MutableList<Config>
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<Config>
+
 
 }

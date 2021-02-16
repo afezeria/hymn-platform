@@ -31,12 +31,13 @@ internal interface ModuleFunctionPermService {
     ): MutableList<ModuleFunctionPerm>
 
 
-    fun batchCreate(dtoList: List<ModuleFunctionPermDto>): MutableList<Int>
+    fun batchCreate(dtoList: List<ModuleFunctionPermDto>): Int
 
     /**
      * insert or update on conflict (roleId,functionApi)
      */
-    fun batchSave(dtoList: List<ModuleFunctionPermDto>): MutableList<Int>
+    fun batchSave(dtoList: List<ModuleFunctionPermDto>): Int
+    fun pageFind(pageSize: Int, pageNum: Int): List<ModuleFunctionPerm>
 
 
 }

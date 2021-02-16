@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.MenuItemPermDao
 import github.afezeria.hymn.core.module.dto.MenuItemPermDto
@@ -70,12 +70,16 @@ class MenuItemPermServiceImpl : MenuItemPermService {
         return menuItemPermDao.selectByMenuItemId(menuItemId)
     }
 
-    override fun batchCreate(dtoList: List<MenuItemPermDto>): MutableList<Int> {
-        return menuItemPermDao.batchInsert(dtoList.map { it.toEntity() })
+    override fun batchCreate(dtoList: List<MenuItemPermDto>): Int {
+        return menuItemPermDao.bulkInsert(dtoList.map { it.toEntity() })
     }
 
-    override fun batchSave(dtoList: List<MenuItemPermDto>): MutableList<Int> {
-        return menuItemPermDao.batchInsertOrUpdate(dtoList.map { it.toEntity() })
+    override fun batchSave(dtoList: List<MenuItemPermDto>): Int {
+        return menuItemPermDao.bulkInsertOrUpdate(dtoList.map { it.toEntity() })
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<MenuItemPerm> {
+        return menuItemPermDao.pageSelect(null, pageSize, pageNum)
     }
 
 }

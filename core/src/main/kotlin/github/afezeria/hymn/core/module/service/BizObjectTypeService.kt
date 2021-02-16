@@ -25,5 +25,7 @@ internal interface BizObjectTypeService {
         name: String,
     ): BizObjectType?
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectType>
+
 
 }

@@ -24,5 +24,7 @@ internal interface CustomInterfaceService {
         api: String,
     ): CustomInterface?
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<CustomInterface>
+
 
 }

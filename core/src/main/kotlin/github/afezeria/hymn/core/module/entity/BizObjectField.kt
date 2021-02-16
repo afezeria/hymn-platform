@@ -1,5 +1,7 @@
 package github.afezeria.hymn.core.module.entity
 
+import github.afezeria.hymn.common.db.AbstractEntity
+
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
@@ -197,9 +199,8 @@ data class BizObjectField(
     var predefined: Boolean,
     @ApiModelProperty(value = "字段对应的实际表中的列名,对象为远程对象时该字段填充空字符串")
     var sourceColumn: String? = null
-) {
+) : AbstractEntity() {
 
-    lateinit var id: String
     lateinit var createById: String
     lateinit var createBy: String
     lateinit var modifyById: String

@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectTriggerDao
 import github.afezeria.hymn.core.module.dto.BizObjectTriggerDto
@@ -63,6 +63,10 @@ class BizObjectTriggerServiceImpl : BizObjectTriggerService {
         api: String,
     ): BizObjectTrigger? {
         return bizObjectTriggerDao.selectByBizObjectIdAndApi(bizObjectId, api)
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectTrigger> {
+        return bizObjectTriggerDao.pageSelect(null, pageSize, pageNum)
     }
 
 

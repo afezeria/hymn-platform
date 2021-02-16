@@ -29,11 +29,12 @@ internal interface MenuItemPermService {
     ): MutableList<MenuItemPerm>
 
 
-    fun batchCreate(dtoList: List<MenuItemPermDto>): MutableList<Int>
+    fun batchCreate(dtoList: List<MenuItemPermDto>): Int
 
     /**
      * insert or update on conflict (roleId,typeId)
      */
-    fun batchSave(dtoList: List<MenuItemPermDto>): MutableList<Int>
+    fun batchSave(dtoList: List<MenuItemPermDto>): Int
+    fun pageFind(pageSize: Int, pageNum: Int): List<MenuItemPerm>
 
 }

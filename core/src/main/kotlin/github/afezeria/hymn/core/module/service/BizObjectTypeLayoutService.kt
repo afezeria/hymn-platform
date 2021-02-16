@@ -34,7 +34,8 @@ internal interface BizObjectTypeLayoutService {
         bizObjectId: String,
     ): MutableList<BizObjectTypeLayout>
 
-    fun batchCreate(dtoList: List<BizObjectTypeLayoutDto>): MutableList<Int>
+    fun batchCreate(dtoList: List<BizObjectTypeLayoutDto>): Int
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectTypeLayout>
 
 
 }

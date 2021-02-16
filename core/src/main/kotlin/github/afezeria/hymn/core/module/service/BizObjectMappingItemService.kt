@@ -19,6 +19,7 @@ internal interface BizObjectMappingItemService {
     fun findById(id: String): BizObjectMappingItem?
 
     fun findByIds(ids: List<String>): MutableList<BizObjectMappingItem>
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectMappingItem>
 
 
 }

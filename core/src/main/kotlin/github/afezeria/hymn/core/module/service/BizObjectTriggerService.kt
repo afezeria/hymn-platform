@@ -25,5 +25,7 @@ internal interface BizObjectTriggerService {
         api: String,
     ): BizObjectTrigger?
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectTrigger>
+
 
 }

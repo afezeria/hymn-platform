@@ -1,8 +1,8 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.exception.InnerException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectFieldDao
 import github.afezeria.hymn.core.module.dto.BizObjectFieldDto
@@ -234,5 +234,9 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
             }
             fieldPermService.batchCreate(permList)
         }
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectField> {
+        return bizObjectFieldDao.pageSelect(null, pageSize, pageNum)
     }
 }

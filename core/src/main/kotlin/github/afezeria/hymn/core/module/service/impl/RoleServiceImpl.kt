@@ -1,12 +1,13 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.RoleDao
 import github.afezeria.hymn.core.module.dto.RoleDto
 import github.afezeria.hymn.core.module.entity.Role
 import github.afezeria.hymn.core.module.service.RoleService
+import org.ktorm.dsl.inList
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -58,8 +59,16 @@ class RoleServiceImpl : RoleService {
     }
 
     override fun findIdList(ids: List<String>?): MutableList<String> {
-        if (ids != null && ids.isEmpty()) return ArrayList()
-        return roleDao.selectIds(ids)
+        return if (ids != null && ids.isEmpty()) {
+            ArrayList()
+        } else {
+            roleDao.select(listOf(roleDao.table.id), ids?.let { { roleDao.table.id inList it } })
+                .mapTo(ArrayList()) { it[roleDao.table.id.name]!! as String }
+        }
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<Role> {
+        return roleDao.pageSelect(null, pageSize, pageNum)
     }
 
 

@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.ConfigDao
 import github.afezeria.hymn.core.module.dto.ConfigDto
@@ -61,7 +61,11 @@ class ConfigServiceImpl : ConfigService {
     override fun findByKey(
         key: String,
     ): MutableList<Config> {
-        return configDao.selectByKey(key)
+        return configDao.selectByKeyPattern(key)
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<Config> {
+        return configDao.pageSelect(null, pageSize, pageNum)
     }
 
 

@@ -1,5 +1,7 @@
 package github.afezeria.hymn.core.module.entity
 
+import github.afezeria.hymn.common.db.AbstractEntity
+
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
@@ -27,16 +29,15 @@ data class BizObjectPerm(
     @ApiModelProperty(value = "查看本人及直接下属", required = true)
     var queryWithAccountTree: Boolean,
     @ApiModelProperty(value = "查看本部门", required = true)
-    var queryWithDept: Boolean,
+    var queryWithOrg: Boolean,
     @ApiModelProperty(value = "查看本部门及下级部门", required = true)
-    var queryWithDeptTree: Boolean,
+    var queryWithOrgTree: Boolean,
     @ApiModelProperty(value = "查看全部", required = true)
     var queryAll: Boolean,
     @ApiModelProperty(value = "编辑全部", required = true)
     var editAll: Boolean,
-) {
+) : AbstractEntity() {
 
-    lateinit var id: String
     lateinit var createById: String
     lateinit var createBy: String
     lateinit var modifyById: String

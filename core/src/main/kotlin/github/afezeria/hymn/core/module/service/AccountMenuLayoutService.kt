@@ -24,5 +24,7 @@ interface AccountMenuLayoutService {
         accountId: String,
     ): MutableList<AccountMenuLayout>
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<AccountMenuLayout>
+
 
 }

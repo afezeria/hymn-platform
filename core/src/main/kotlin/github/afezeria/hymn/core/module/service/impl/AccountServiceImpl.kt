@@ -1,6 +1,5 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.constant.ROOT_ACCOUNT_ID
@@ -20,10 +19,6 @@ class AccountServiceImpl : AccountService {
     @Autowired
     private lateinit var accountDao: AccountDao
 
-    @Autowired
-    private lateinit var dbService: DatabaseService
-
-
     override fun removeById(id: String): Int {
         if (id == ROOT_ACCOUNT_ID) {
             return 0
@@ -32,6 +27,10 @@ class AccountServiceImpl : AccountService {
             ?: throw DataNotFoundException("Account".msgById(id))
         val i = accountDao.deleteById(id)
         return i
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<Account> {
+        return accountDao.pageSelect(null, pageSize, pageNum)
     }
 
     override fun update(id: String, dto: AccountDto): Int {

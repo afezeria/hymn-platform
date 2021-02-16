@@ -1,5 +1,7 @@
 package github.afezeria.hymn.core.module.entity
 
+import github.afezeria.hymn.common.db.AbstractEntity
+
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
@@ -28,9 +30,8 @@ data class BusinessCodeRef(
     var roleId: String? = null,
     @ApiModelProperty(value = "被引用共享代码id ;;fk:[core_shared_code cascade];idx")
     var refSharedCodeId: String? = null,
-) {
+) : AbstractEntity() {
 
-    lateinit var id: String
     lateinit var createById: String
     lateinit var createBy: String
     lateinit var modifyById: String

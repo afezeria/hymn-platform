@@ -28,5 +28,7 @@ internal interface BizObjectTypeOptionsService {
         typeId: String,
     ): MutableList<BizObjectTypeOptions>
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectTypeOptions>
+
 
 }

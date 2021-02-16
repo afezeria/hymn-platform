@@ -102,7 +102,7 @@ class BizObjectFieldDto(
             refListLabel = refListLabel,
             refDeletePolicy = refDeletePolicy,
             queryFilter = queryFilter,
-            filterList=filterList,
+            filterList = filterList,
             sId = sId,
             sFieldId = sFieldId,
             sType = sType,
@@ -135,7 +135,7 @@ class BizObjectFieldDto(
             it.refListLabel = refListLabel
             it.refDeletePolicy = refDeletePolicy
             it.queryFilter = queryFilter
-            it.filterList=filterList
+            it.filterList = filterList
             it.sId = sId
             it.sFieldId = sFieldId
             it.sType = sType

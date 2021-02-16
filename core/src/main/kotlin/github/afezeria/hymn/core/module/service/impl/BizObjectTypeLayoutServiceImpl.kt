@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectTypeLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
@@ -78,8 +78,12 @@ class BizObjectTypeLayoutServiceImpl : BizObjectTypeLayoutService {
         return bizObjectTypeLayoutDao.selectByBizObjectId(bizObjectId)
     }
 
-    override fun batchCreate(dtoList: List<BizObjectTypeLayoutDto>): MutableList<Int> {
-        return bizObjectTypeLayoutDao.batchInsert(dtoList.map { it.toEntity() })
+    override fun batchCreate(dtoList: List<BizObjectTypeLayoutDto>): Int {
+        return bizObjectTypeLayoutDao.bulkInsert(dtoList.map { it.toEntity() })
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectTypeLayout> {
+        return bizObjectTypeLayoutDao.pageSelect(null, pageSize, pageNum)
     }
 
 

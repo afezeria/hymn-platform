@@ -28,5 +28,7 @@ interface AccountObjectViewService {
         bizObjectId: String,
     ): MutableList<AccountObjectView>
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<AccountObjectView>
+
 
 }

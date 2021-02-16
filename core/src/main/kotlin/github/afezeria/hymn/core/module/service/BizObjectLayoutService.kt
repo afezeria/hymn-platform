@@ -25,5 +25,7 @@ internal interface BizObjectLayoutService {
         name: String,
     ): BizObjectLayout?
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectLayout>
+
 
 }

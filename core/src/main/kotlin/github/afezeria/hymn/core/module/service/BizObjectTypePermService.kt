@@ -30,11 +30,12 @@ internal interface BizObjectTypePermService {
     ): MutableList<BizObjectTypePerm>
 
 
-    fun batchCreate(dtoList: List<BizObjectTypePermDto>): MutableList<Int>
+    fun batchCreate(dtoList: List<BizObjectTypePermDto>): Int
 
     /**
      * insert or update on conflict (roleId,typeId)
      */
-    fun batchSave(dtoList: List<BizObjectTypePermDto>): MutableList<Int>
+    fun batchSave(dtoList: List<BizObjectTypePermDto>): Int
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectTypePerm>
 
 }

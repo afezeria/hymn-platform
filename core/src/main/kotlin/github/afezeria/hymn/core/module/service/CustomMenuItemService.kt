@@ -19,6 +19,7 @@ internal interface CustomMenuItemService {
     fun findById(id: String): CustomMenuItem?
 
     fun findByIds(ids: List<String>): MutableList<CustomMenuItem>
+    fun pageFind(pageSize: Int, pageNum: Int): List<CustomMenuItem>
 
 
 }

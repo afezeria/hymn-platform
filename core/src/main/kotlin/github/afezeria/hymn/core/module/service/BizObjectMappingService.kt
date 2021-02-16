@@ -24,5 +24,7 @@ internal interface BizObjectMappingService {
         sourceBizObjectId: String,
     ): MutableList<BizObjectMapping>
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectMapping>
+
 
 }

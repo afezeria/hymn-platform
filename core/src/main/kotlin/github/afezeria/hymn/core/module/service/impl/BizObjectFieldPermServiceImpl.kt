@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectFieldPermDao
 import github.afezeria.hymn.core.module.dto.BizObjectFieldPermDto
@@ -77,12 +77,16 @@ class BizObjectFieldPermServiceImpl : BizObjectFieldPermService {
         return bizObjectFieldPermDao.selectByFieldId(fieldId)
     }
 
-    override fun batchCreate(dtoList: List<BizObjectFieldPermDto>): MutableList<Int> {
-        return bizObjectFieldPermDao.batchInsert(dtoList.map { it.toEntity() })
+    override fun batchCreate(dtoList: List<BizObjectFieldPermDto>): Int {
+        return bizObjectFieldPermDao.bulkInsert(dtoList.map { it.toEntity() })
     }
 
-    override fun batchSave(dtoList: List<BizObjectFieldPermDto>): MutableList<Int> {
-        return bizObjectFieldPermDao.batchInsertOrUpdate(dtoList.map { it.toEntity() })
+    override fun batchSave(dtoList: List<BizObjectFieldPermDto>): Int {
+        return bizObjectFieldPermDao.bulkInsertOrUpdate(dtoList.map { it.toEntity() })
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectFieldPerm> {
+        return bizObjectFieldPermDao.pageSelect(null, pageSize, pageNum)
     }
 
 

@@ -32,5 +32,7 @@ internal interface BusinessCodeRefService {
         roleId: String,
     ): MutableList<BusinessCodeRef>
 
+    fun pageFind(pageSize: Int, pageNum: Int): List<BusinessCodeRef>
+
 
 }

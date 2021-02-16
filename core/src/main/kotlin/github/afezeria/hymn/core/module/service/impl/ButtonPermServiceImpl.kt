@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.module.service.impl
 
-import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.ButtonPermDao
 import github.afezeria.hymn.core.module.dto.ButtonPermDto
@@ -77,12 +77,16 @@ class ButtonPermServiceImpl : ButtonPermService {
         return buttonPermDao.selectByButtonId(buttonId)
     }
 
-    override fun batchCreate(dtoList: List<ButtonPermDto>): MutableList<Int> {
-        return buttonPermDao.batchInsert(dtoList.map { it.toEntity() })
+    override fun batchCreate(dtoList: List<ButtonPermDto>): Int {
+        return buttonPermDao.bulkInsert(dtoList.map { it.toEntity() })
     }
 
-    override fun batchSave(dtoList: List<ButtonPermDto>): MutableList<Int> {
-        return buttonPermDao.batchInsertOrUpdate(dtoList.map { it.toEntity() })
+    override fun batchSave(dtoList: List<ButtonPermDto>): Int {
+        return buttonPermDao.bulkInsertOrUpdate(dtoList.map { it.toEntity() })
+    }
+
+    override fun pageFind(pageSize: Int, pageNum: Int): List<ButtonPerm> {
+        return buttonPermDao.pageSelect(null, pageSize, pageNum)
     }
 
 

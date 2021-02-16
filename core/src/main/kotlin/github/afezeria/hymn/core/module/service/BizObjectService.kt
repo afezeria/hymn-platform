@@ -34,5 +34,6 @@ internal interface BizObjectService {
      * 启用对象
      */
     fun activateObjectById(id: String): Int
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObject>
 
 }
