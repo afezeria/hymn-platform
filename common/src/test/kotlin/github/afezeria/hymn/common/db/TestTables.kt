@@ -10,7 +10,6 @@ class TestTables : AbstractTable<TestTable>(
     alias = null,
     catalog = null,
     schema = "test_dao",
-    history = true,
 ) {
     val inta = int("inta")
     val longa = long("longa")

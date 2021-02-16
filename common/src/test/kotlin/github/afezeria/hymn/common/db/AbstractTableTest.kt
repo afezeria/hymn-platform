@@ -45,11 +45,6 @@ internal class AbstractTableTest {
     }
 
     @Test
-    fun hasHistory() {
-        table.hasHistory() shouldBe true
-    }
-
-    @Test
     fun getColumnByFieldName() {
         val entityField = table.getEntityFieldByColumnName("longa")
         entityField shouldNotBe null

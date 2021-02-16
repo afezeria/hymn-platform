@@ -11,6 +11,7 @@ import org.ktorm.expression.ColumnAssignmentExpression
 import org.ktorm.expression.OrderByExpression
 import org.ktorm.schema.Column
 import org.ktorm.schema.ColumnDeclaring
+import org.ktorm.support.postgresql.BulkInsertOrUpdateOnConflictClauseBuilder
 import org.ktorm.support.postgresql.bulkInsert
 import org.ktorm.support.postgresql.bulkInsertOrUpdate
 import org.ktorm.support.postgresql.insertOrUpdate
@@ -31,6 +32,15 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
     companion object {
         val and: (ColumnDeclaring<Boolean>, ColumnDeclaring<Boolean>) -> BinaryExpression<Boolean> =
             ColumnDeclaring<Boolean>::and
+        private val field=
+            AssignmentsBuilder::class.memberProperties.find { it.name == "_assignments" }?.javaField!!.apply {
+                isAccessible=true
+            }
+
+        private fun BulkInsertOrUpdateOnConflictClauseBuilder.setExclude(column: Column<Any>) {
+            val assignments = field.get(this) as ArrayList<ColumnAssignmentExpression<*>>
+            assignments += ColumnAssignmentExpression(column.asExpression(), excluded(column).asExpression())
+        }
     }
 
     fun delete(condition: (T) -> ColumnDeclaring<Boolean>): Int {
@@ -180,18 +190,11 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             }
             onConflict(*conflictColumns) {
                 fields.forEach {
-                    setc(it.column as Column<Any>, excluded(it.column))
+                    setExclude(it.column as Column<Any>)
+//                    setc(it.column as Column<Any>, excluded(it.column))
                 }
             }
         }
-    }
-
-    private fun AssignmentsBuilder.setc(column: Column<Any>, expr: ColumnDeclaring<Any>) {
-        val field =
-            AssignmentsBuilder::class.memberProperties.find { it.name == "_assignments" }?.javaField!!
-        field.isAccessible = true
-        val assignments = field.get(this) as ArrayList<ColumnAssignmentExpression<*>>
-        assignments += ColumnAssignmentExpression(column.asExpression(), expr.asExpression())
     }
 
     /**
@@ -340,30 +343,7 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         return res
     }
 
-    fun history(
-        id: String,
-        startTime: LocalDateTime? = null,
-        endTime: LocalDateTime = LocalDateTime.now()
-    ): MutableList<MutableMap<String, Any?>> {
-        if (!table.hasHistory()) throw NotImplementedError("table ${table.schema}.${table.tableName} has no history")
-        databaseService.db().useConnection {
-            val qualifiedTableName = "${table.schema}.\"${table.tableName}_history\""
-            return if (startTime != null) {
-                it.execute(
-                    "select * from $qualifiedTableName where id = ? and stamp between ? and ?",
-                    id,
-                    startTime,
-                    endTime
-                )
-            } else {
-                it.execute(
-                    "select * from $qualifiedTableName where id = ? and stamp < ?",
-                    id,
-                    endTime
-                )
-            }
-        }
-    }
+
 
     inner class AutoFillSelector {
         private val session = Session.getInstance()

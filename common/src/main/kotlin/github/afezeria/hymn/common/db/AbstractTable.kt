@@ -1,7 +1,7 @@
 package github.afezeria.hymn.common.db
 
 import github.afezeria.hymn.common.exception.InnerException
-import github.afezeria.hymn.common.util.lCamelize
+import github.afezeria.hymn.common.util.camelCase
 import org.ktorm.dsl.QueryRowSet
 import org.ktorm.schema.BaseTable
 import org.ktorm.schema.Column
@@ -22,7 +22,6 @@ abstract class AbstractTable<E : AbstractEntity>(
     alias: String? = null,
     catalog: String? = null,
     schema: String? = null,
-    history: Boolean = false,
     entityClass: KClass<E>? = null,
 ) : BaseTable<E>(tableName, alias, catalog, schema, entityClass) {
 
@@ -32,9 +31,6 @@ abstract class AbstractTable<E : AbstractEntity>(
             return super.put(key, value)
         }
     }
-
-    private val _history = history
-
 
     private val columnName2Field: MutableMap<String, EntityField> = mutableMapOf()
     private val fieldName2Field: MutableMap<String, EntityField> = mutableMapOf()
@@ -51,7 +47,7 @@ abstract class AbstractTable<E : AbstractEntity>(
             kClass.primaryConstructor
                 ?: throw RuntimeException("无法获取类 ${kClass.qualifiedName} 的主构造器")
         columns.set(this, InnerMap { columnName, column ->
-            val fieldName = columnName.lCamelize()
+            val fieldName = columnName.camelCase()
             kClass.memberProperties
                 .find { it.name == fieldName }
                 ?.apply {
@@ -78,9 +74,6 @@ abstract class AbstractTable<E : AbstractEntity>(
     val fieldCount: Int
         get() = entityFieldList.size
 
-    fun hasHistory(): Boolean {
-        return _history
-    }
 
     fun containsField(fieldName: String): Boolean {
         return fieldName2Field.containsKey(fieldName)
