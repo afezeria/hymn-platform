@@ -30,8 +30,7 @@ class DatabaseServiceImpl(
             throw IllegalArgumentException("缺少数据源配置")
         val adminDatabase = dataBaseProperties.admin.map {
             Database.connect(
-//                P6DataSource(HikariDataSource(HikariConfig(it))),
-                HikariDataSource(HikariConfig(it)),
+                P6DataSource(HikariDataSource(HikariConfig(it))),
                 logger = Slf4jLoggerAdapter(logger),
             )
         }
