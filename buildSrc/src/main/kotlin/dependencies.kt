@@ -13,7 +13,7 @@ object Deps {
 
     object Jdbc {
         const val postgresql = "org.postgresql:postgresql:42.2.10"
-        const val p6spy="p6spy:p6spy:3.9.1"
+        const val p6spy = "p6spy:p6spy:3.9.1"
         const val hikariCP = "com.zaxxer:HikariCP:3.4.5"
     }
 
@@ -38,6 +38,11 @@ object Deps {
         const val logback = "ch.qos.logback:logback-classic:1.2.3"
         const val kotlinLogging = "io.github.microutils:kotlin-logging:1.12.0"
     }
+
+    object Job {
+        const val quartz = "org.quartz-scheduler:quartz:2.3.2"
+    }
+
 
     object OkHttp3 {
         const val okhttp = "com.squareup.okhttp3:okhttp:4.9.1"

@@ -5,11 +5,10 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib-jdk8"))
 
-    implementation("org.springframework.boot:spring-boot-starter-aop")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation(Deps.SpringBoot.aop)
+    implementation(Deps.SpringBoot.web)
 
-    implementation("io.springfox:springfox-swagger2:2.9.2")
-    implementation("io.springfox:springfox-swagger-ui:2.9.2")
+    implementation(Deps.Swagger.core)
 
     implementation(Deps.Ktorm.core)
     implementation(Deps.Ktorm.postgresql)
