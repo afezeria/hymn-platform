@@ -21,7 +21,7 @@ data class ModuleFunctionPerm(
     @ApiModelProperty(value = "功能api ;;fk:[core_module_function cascade]", required = true)
     var functionApi: String,
     @ApiModelProperty(value = "是否有访问权限")
-    var perm: Boolean? = null,
+    var perm: Boolean,
 ) : AbstractEntity() {
 
     lateinit var createById: String

@@ -116,7 +116,7 @@ comment on column hymn.core_account.datetime005 is '##ignore 预留字段';
 drop table if exists hymn.core_org cascade;
 create table hymn.core_org
 (
-    id                 text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id                 text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     name               text        not null,
     director_id        text,
     deputy_director_id text,
@@ -156,7 +156,7 @@ comment on column hymn.core_org.bigint005 is '##ignore 预留字段';
 drop table if exists hymn.core_role cascade;
 create table hymn.core_role
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     name         text        not null,
 --     type         text      not null,
     remark       text,
@@ -173,7 +173,7 @@ comment on column hymn.core_role.name is '角色名称';
 drop table if exists hymn.core_config cascade;
 create table hymn.core_config
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     key          text        not null,
     value        text        not null,
     create_by_id text        not null,
@@ -189,7 +189,7 @@ comment on column hymn.core_config.key is '键 ;; idx';
 drop table if exists hymn.core_account_menu_layout cascade;
 create table hymn.core_account_menu_layout
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     account_id   text        not null,
     client_type  text        not null,
     layout_json  text        not null,
@@ -210,7 +210,7 @@ comment on column hymn.core_account_menu_layout.layout_json is '布局json字符
 drop table if exists hymn.core_account_object_view cascade;
 create table hymn.core_account_object_view
 (
-    id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     copy_id       text,
     remark        text,
     global_view   bool        not null,
@@ -240,7 +240,7 @@ comment on column hymn.core_account_object_view.global_view is '是否所有人�
 drop table if exists hymn.core_custom_button cascade;
 create table hymn.core_custom_button
 (
-    id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     remark        text,
     biz_object_id text,
     name          text        not null,
@@ -267,7 +267,7 @@ comment on column hymn.core_custom_button.content is '按钮内容，当action�
 drop table if exists hymn.core_custom_component cascade;
 create table hymn.core_custom_component
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     api          text        not null,
     name         text        not null,
     code         text        not null,
@@ -288,7 +288,7 @@ comment on column hymn.core_custom_component.code is '组件html代码';
 drop table if exists hymn.core_custom_interface cascade;
 create table hymn.core_custom_interface
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     api          text        not null,
     name         text        not null,
     code         text        not null,
@@ -316,7 +316,7 @@ comment on column hymn.core_custom_interface.option_text is '用于给编译器�
 drop table if exists hymn.core_custom_menu_item cascade;
 create table hymn.core_custom_menu_item
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     name         text        not null,
     path         text        not null,
     path_type    text        not null,
@@ -344,7 +344,7 @@ comment on column hymn.core_custom_menu_item.icon is '图标';
 drop table if exists hymn.core_custom_page cascade;
 create table hymn.core_custom_page
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     api          text        not null,
     name         text        not null,
     md5          text        not null,
@@ -366,7 +366,7 @@ comment on column hymn.core_custom_page.name is '自定义页面名称，用于�
 drop table if exists hymn.core_dict cascade;
 create table hymn.core_dict
 (
-    id             text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id             text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     field_id       text,
     parent_dict_id text,
     name           text        not null,
@@ -390,7 +390,7 @@ comment on column hymn.core_dict.api is 'api名称 ;;uk';
 drop table if exists hymn.core_dict_item cascade;
 create table hymn.core_dict_item
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     dict_id      text        not null,
     name         text        not null,
     code         text        not null,
@@ -632,7 +632,7 @@ comment on column hymn.core_biz_object_field.join_view_name is '多选字段中�
 drop table if exists hymn.core_biz_object_layout cascade;
 create table hymn.core_biz_object_layout
 (
-    id                      text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id                      text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     biz_object_id           text        not null,
     name                    text        not null,
     remark                  text,
@@ -664,17 +664,17 @@ comment on column hymn.core_biz_object_layout.preview_layout_json is '小窗预�
 drop table if exists hymn.core_biz_object_type cascade;
 create table hymn.core_biz_object_type
 (
-    id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
-    biz_object_id text                           not null,
-    name          text                           not null,
-    active        bool             default false not null,
+    id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    biz_object_id text        not null,
+    name          text        not null,
+    active        bool                 default false not null,
     remark        text,
-    create_by_id  text                           not null,
-    create_by     text                           not null,
-    modify_by_id  text                           not null,
-    modify_by     text                           not null,
-    create_date   timestamptz                    not null default now(),
-    modify_date   timestamptz                    not null default now()
+    create_by_id  text        not null,
+    create_by     text        not null,
+    modify_by_id  text        not null,
+    modify_by     text        not null,
+    create_date   timestamptz not null default now(),
+    modify_date   timestamptz not null default now()
 );
 comment on table hymn.core_biz_object_type is '业务对象记录类型 ;; uk:[[biz_object_id name]]';
 comment on column hymn.core_biz_object_type.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade]';
@@ -684,7 +684,7 @@ comment on column hymn.core_biz_object_type.active is '是否启用';
 drop table if exists hymn.core_biz_object_type_options cascade;
 create table hymn.core_biz_object_type_options
 (
-    id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     biz_object_id text        not null,
     type_id       text        not null,
     field_id      text        not null,
@@ -707,7 +707,7 @@ comment on column hymn.core_biz_object_type_options.field_id is '字段id ;;fk:[
 drop table if exists hymn.core_biz_object_type_layout cascade;
 create table hymn.core_biz_object_type_layout
 (
-    id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id       text        not null,
     biz_object_id text        not null,
     type_id       text        not null,
@@ -730,7 +730,7 @@ comment on column hymn.core_biz_object_type_layout.layout_id is '页面布局id 
 drop table if exists hymn.core_biz_object_trigger cascade;
 create table hymn.core_biz_object_trigger
 (
-    id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     active        bool        not null,
     remark        text,
     biz_object_id text        not null,
@@ -764,7 +764,7 @@ comment on column hymn.core_biz_object_trigger.option_text is '用于给编译�
 drop table if exists hymn.core_biz_object_mapping cascade;
 create table hymn.core_biz_object_mapping
 (
-    id                   text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id                   text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     source_biz_object_id text        not null,
     source_type_id       text        not null,
     target_biz_object_id text        not null,
@@ -786,7 +786,7 @@ comment on column hymn.core_biz_object_mapping.target_type_id is '目标对象�
 drop table if exists hymn.core_biz_object_mapping_item cascade;
 create table hymn.core_biz_object_mapping_item
 (
-    id                       text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id                       text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     mapping_id               text        not null,
     source_field_id          text        not null,
     target_field_id          text        not null,
@@ -851,11 +851,11 @@ comment on column hymn.core_module_function.name is '功能名称';
 drop table if exists hymn.core_module_function_perm;
 create table hymn.core_module_function_perm
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id      text        not null,
     module_api   text        not null,
     function_api text        not null,
-    perm         bool,
+    perm         bool        not null default false,
     create_by_id text        not null,
     create_by    text        not null,
     modify_by_id text        not null,
@@ -872,7 +872,7 @@ comment on column hymn.core_module_function_perm.perm is '是否有访问权限'
 drop table if exists hymn.core_button_perm cascade;
 create table hymn.core_button_perm
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id      text        not null,
     button_id    text        not null,
     visible      bool        not null,
@@ -893,7 +893,7 @@ comment on column hymn.core_button_perm.visible is '是否可见';
 drop table if exists hymn.core_menu_item_perm cascade;
 create table hymn.core_menu_item_perm
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id      text        not null,
     menu_item_id text        not null,
     visible      bool        not null,
@@ -914,7 +914,7 @@ comment on column hymn.core_menu_item_perm.visible is '是否可见';
 drop table if exists hymn.core_biz_object_perm cascade;
 create table hymn.core_biz_object_perm
 (
-    id                      text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id                      text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id                 text        not null,
     biz_object_id           text        not null,
     ins                     bool        not null,
@@ -951,7 +951,7 @@ comment on column hymn.core_biz_object_perm.edit_all is '编辑全部';
 drop table if exists hymn.core_biz_object_field_perm cascade;
 create table hymn.core_biz_object_field_perm
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id      text        not null,
     field_id     text        not null,
     p_read       bool        not null,
@@ -974,7 +974,7 @@ comment on column hymn.core_biz_object_field_perm.p_edit is '可编辑';
 drop table if exists hymn.core_biz_object_type_perm cascade;
 create table hymn.core_biz_object_type_perm
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id      text        not null,
     type_id      text        not null,
     visible      bool        not null,
@@ -1019,7 +1019,7 @@ comment on column hymn.core_column_field_mapping.field_api is '视图中的字�
 drop table if exists hymn.core_shared_code;
 create table hymn.core_shared_code
 (
-    id           text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     api          text        not null,
     type         text        not null,
     code         text        not null,
@@ -1043,7 +1043,7 @@ comment on column hymn.core_shared_code.option_text is '用于给编译器或其
 drop table if exists hymn.core_business_code_ref;
 create table hymn.core_business_code_ref
 (
-    id                 text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id                 text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     trigger_id         text,
     interface_id       text,
     shared_code_id     text,
@@ -1072,7 +1072,7 @@ comment on column hymn.core_business_code_ref.ref_shared_code_id is '被引用�
 drop table if exists hymn.core_cron_job;
 create table hymn.core_cron_job
 (
-    id              text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id              text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     active          bool        not null,
     shared_code_id  text        not null,
     cron            text        not null,

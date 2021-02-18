@@ -88,4 +88,11 @@ class ModuleFunctionPermServiceImpl : ModuleFunctionPermService {
     override fun pageFind(pageSize: Int, pageNum: Int): List<ModuleFunctionPerm> {
         return moduleFunctionPermDao.pageSelect(null, pageSize, pageNum)
     }
+
+    override fun findByRoleIdAndFunctionApi(
+        roleId: String,
+        functionApi: String
+    ): ModuleFunctionPerm? {
+        TODO("Not yet implemented")
+    }
 }

@@ -39,5 +39,7 @@ internal interface ModuleFunctionPermService {
     fun batchSave(dtoList: List<ModuleFunctionPermDto>): Int
     fun pageFind(pageSize: Int, pageNum: Int): List<ModuleFunctionPerm>
 
+    fun findByRoleIdAndFunctionApi(roleId: String, functionApi: String): ModuleFunctionPerm?
+
 
 }

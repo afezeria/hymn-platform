@@ -6,6 +6,8 @@ package github.afezeria.hymn.common.platform
 interface PermService {
     /**
      * 是否具有指定功能的访问权限
+     * [roleId]表示的角色不存在时返回false
+     * [name]表示的功能不存在时返回false
      * 与[github.afezeria.hymn.common.ann.Function]相关
      * @param roleId 角色id
      * @param name 功能名称，[github.afezeria.hymn.common.ann.Function.name]的值，注解name值为空字符串时返回true
@@ -21,33 +23,7 @@ interface PermService {
     }
 
     /**
-     * 是否具有[dataId]所代表的数据的权限
-     *
-     * 数据权限类型共4种：查看，更新，删除，共享
-     *
-     * 用户对指定数据可能拥有的权限有5种情况：
-     *
-     * 1 当前用户为所有者 拥有全部权限
-     *
-     * 2 当前用户为管理员 至少拥有 共享 权限，
-     * 其他权限与当前管理员帐号拥有的id为[objectId]的对象的权限和是否被共享当前数据有关
-     *
-     * 3 当前用户拥有id为[objectId]的对象的查看其他人数据的权限 拥有权限：查看
-     *
-     * 4 当前用户被共享了指定数据 拥有权限：查看，更新
-     *
-     * 5 当前用户被只读共享了指定数据 拥有权限：查看
-     *
-     * [read],[update],[share],[owner]同时为null时返回false
-     *
-     * @param accountId 用户id
-     * @param objectId 对象id
-     * @param dataId 数据id
-     * @param read 是否具有读权限，为null时不检查
-     * @param update 是否具有更新权限，为null时不检查
-     * @param share 是否具有共享权限，为null时不检查
-     * @param owner 是否检查当前用户为数据所有者，为null时不检查
-     * @exception [github.afezeria.hymn.common.exception.DataNotFoundException] 当对象或数据不存在时抛出
+     * @see [DataService.hasDataPerm]
      */
     fun hasDataPerm(
         accountId: String,
@@ -142,15 +118,13 @@ interface PermService {
      * [read],[edit]同时为null时返回false
      *
      * @param roleId 角色id
-     * @param objectId 字段所属对象的id
      * @param fieldId 字段id
      * @param read 是否具有查看权限，为null时不检查
      * @param edit 是否具有更新权限，为null时不检查
-     * @exception [github.afezeria.hymn.common.exception.DataNotFoundException] 当对象或字段不存在时抛出
+     * @exception [github.afezeria.hymn.common.exception.DataNotFoundException] 当字段不存在时抛出
      */
     fun hasFieldPerm(
         roleId: String,
-        objectId: String,
         fieldId: String,
         read: Boolean? = null,
         edit: Boolean? = null
@@ -161,11 +135,10 @@ interface PermService {
      * @see [hasFieldPerm]
      */
     fun hasFieldPerm(
-        objectId: String,
         fieldId: String,
         read: Boolean? = null,
         edit: Boolean? = null
     ): Boolean {
-        return hasFieldPerm(Session.getInstance().roleId, objectId, fieldId, read, edit)
+        return hasFieldPerm(Session.getInstance().roleId, fieldId, read, edit)
     }
 }

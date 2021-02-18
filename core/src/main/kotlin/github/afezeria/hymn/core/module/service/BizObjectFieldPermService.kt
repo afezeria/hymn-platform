@@ -25,6 +25,11 @@ internal interface BizObjectFieldPermService {
         fieldId: String,
     ): BizObjectFieldPerm?
 
+    fun findByRoleIdAndFieldIdList(
+        roleId: String,
+        fieldIdList: List<String>,
+    ): MutableList<BizObjectFieldPerm>
+
     fun findByRoleId(
         roleId: String,
     ): MutableList<BizObjectFieldPerm>

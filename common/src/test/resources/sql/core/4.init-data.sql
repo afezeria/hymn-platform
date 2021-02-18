@@ -95,7 +95,7 @@ values ('1bad12b79d114b18a9f1b3276992886e', 'name', 'bcf5f00c2e6c494ea2318912a63
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),
        ('eee7e25a37f74d09a441f9829d4a4c69', 'role_id', 'bcf5f00c2e6c494ea2318912a639031a', '角色id',
         'role_id', 'reference', true, false, null, null, null, null, null, null, null, null,
-        '53e9c36723dc4e3db1faf396fdb3f1d2', '角色帐号', 'restrict', null, null, null, null, null, null,
+        '53e9c36723dc4e3db1faf396fdb3f1d2', '用户', 'restrict', null, null, null, null, null, null,
         null, null, null, true,
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00'),

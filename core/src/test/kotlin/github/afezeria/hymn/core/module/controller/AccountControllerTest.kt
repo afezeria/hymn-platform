@@ -5,7 +5,9 @@ import github.afezeria.hymn.common.adminSession
 import github.afezeria.hymn.common.platform.Session
 import github.afezeria.hymn.common.util.toClass
 import github.afezeria.hymn.core.module.entity.Account
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockkObject
 import okhttp3.HttpUrl
@@ -43,19 +45,18 @@ internal class AccountControllerTest {
 
     @Test
     fun findAll() {
-        println("=========================")
         val httpUrl = HttpUrl.parse(url)!!.newBuilder()
             .build()
         val request = Request.Builder().url(httpUrl)
             .build()
         client.newCall(request).execute().use {
             val body = it.body()?.string()
-            val list = it.body()?.string().toClass<List<Account>>()
             it.code() shouldBe 200
-//            body shouldNotBe null
-//            body!!.map { it.id } shouldContainExactly listOf(cid, bid, aid)
+            body shouldNotBe null
+            shouldNotThrow<Exception> {
+                it.body()?.string().toClass<List<Account>>()
+            }
         }
-
     }
 
     @Test

@@ -36,6 +36,7 @@ internal interface BizObjectFieldService {
      * @param autoRule 自动编号规则，name字段类型为text时为空
      */
     fun createDefaultField(objId: String, fieldName: String, autoRule: String?)
+
     fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectField>
 
 
