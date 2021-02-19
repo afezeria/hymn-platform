@@ -65,6 +65,13 @@ class BizObjectFieldPermServiceImpl : BizObjectFieldPermService {
         return bizObjectFieldPermDao.selectByRoleIdAndFieldId(roleId, fieldId)
     }
 
+    override fun findByRoleIdAndFieldIdList(
+        roleId: String,
+        fieldIdList: List<String>
+    ): MutableList<BizObjectFieldPerm> {
+        TODO("Not yet implemented")
+    }
+
     override fun findByRoleId(
         roleId: String,
     ): MutableList<BizObjectFieldPerm> {

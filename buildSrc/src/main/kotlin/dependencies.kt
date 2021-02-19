@@ -17,6 +17,10 @@ object Deps {
         const val hikariCP = "com.zaxxer:HikariCP:3.4.5"
     }
 
+    object Sql {
+        const val jsqlparser = "com.github.jsqlparser:jsqlparser:4.0"
+    }
+
     object Jackson {
         const val core = "com.fasterxml.jackson.core:jackson-core"
         const val databind = "com.fasterxml.jackson.core:jackson-databind"

@@ -101,6 +101,10 @@ class BizObjectTypeServiceImpl : BizObjectTypeService {
         return bizObjectTypeDao.selectByBizObjectIdAndName(bizObjectId, name)
     }
 
+    override fun findByBizObjectId(bizObjectId: String): List<BizObjectType> {
+        TODO("Not yet implemented")
+    }
+
     override fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectType> {
         return bizObjectTypeDao.pageSelect(null, pageSize, pageNum)
     }

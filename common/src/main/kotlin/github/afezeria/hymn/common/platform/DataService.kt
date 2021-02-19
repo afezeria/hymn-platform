@@ -11,7 +11,11 @@ interface DataService {
      * @param expr where表达式
      * @return 符合条件的数据列表
      */
-    fun query(objectApiName: String, expr: String): MutableList<MutableMap<String, Any?>>
+    fun query(
+        objectApiName: String, expr: String,
+        offset: Long? = null,
+        limit: Long? = null,
+    ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 查询数据
@@ -23,7 +27,10 @@ interface DataService {
     fun query(
         objectApiName: String,
         expr: String,
-        params: List<Any>
+        params: List<Any>,
+        offset: Long? = null,
+        limit: Long? = null,
+        fieldSet: Set<String> = emptySet(),
     ): MutableList<MutableMap<String, Any?>>
 
     /**
@@ -34,7 +41,9 @@ interface DataService {
      */
     fun query(
         objectApiName: String,
-        condition: Map<String, Any?>
+        condition: Map<String, Any?>,
+        offset: Long? = null,
+        limit: Long? = null,
     ): MutableList<MutableMap<String, Any?>>
 
     /**
@@ -51,7 +60,12 @@ interface DataService {
      * @param expr where表达式
      * @return 符合条件的数据列表
      */
-    fun queryWithPerm(objectApiName: String, expr: String): MutableList<MutableMap<String, Any?>>
+    fun queryWithPerm(
+        objectApiName: String,
+        expr: String,
+        offset: Long? = null,
+        limit: Long? = null,
+    ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 根据权限查询数据
@@ -61,7 +75,9 @@ interface DataService {
     fun queryWithPerm(
         objectApiName: String,
         expr: String,
-        params: List<Any>,
+        params: List<Any> = emptyList(),
+        offset: Long? = null,
+        limit: Long? = null,
         fieldSet: Set<String> = emptySet(),
     ): MutableList<MutableMap<String, Any?>>
 
@@ -73,7 +89,9 @@ interface DataService {
      */
     fun queryWithPerm(
         objectApiName: String,
-        condition: Map<String, Any?>
+        condition: Map<String, Any?>,
+        offset: Long? = null,
+        limit: Long? = null,
     ): MutableList<MutableMap<String, Any?>>
 
     /**
@@ -88,18 +106,14 @@ interface DataService {
      * 插入数据
      * @param objectApiName 对象api名称
      * @param data 待插入的数据，插入成功后data中将新增key为id的键值对
-     * @return 新增数据id
-     */
-    fun insert(objectApiName: String, data: MutableMap<String, Any?>): String
-
-    /**
-     * 插入数据
-     * @param objectApiName 对象api名称
-     * @param data 待插入的数据，插入成功后data中将新增key为id的键值对
      * @param trigger 是否触发触发器
      * @return 新增数据id
      */
-    fun insert(objectApiName: String, data: MutableMap<String, Any?>, trigger: Boolean): String
+    fun insert(
+        objectApiName: String,
+        data: MutableMap<String, Any?>,
+        trigger: Boolean = true
+    ): String
 
     /**
      * 根据权限插入数据，当前帐号无插入权限时抛出异常

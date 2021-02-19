@@ -10,6 +10,8 @@ dependencies {
 
     implementation(Deps.Swagger.core)
 
+    implementation(Deps.Sql.jsqlparser)
+
     implementation(Deps.Ktorm.core)
     implementation(Deps.Ktorm.postgresql)
     testImplementation(project(":common", "testArtifacts"))

@@ -25,6 +25,11 @@ internal interface BizObjectTypePermService {
         typeId: String,
     ): BizObjectTypePerm?
 
+    fun findByRoleIdAndBizObjectId(
+        roleId: String,
+        bizObjectId: String,
+    ): MutableList<BizObjectTypePerm>
+
     fun findByTypeId(
         typeId: String,
     ): MutableList<BizObjectTypePerm>
