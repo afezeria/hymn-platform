@@ -16,6 +16,8 @@ data class BizObjectFieldPerm(
 
     @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String,
+    @ApiModelProperty(value = "字段所属对象id ;;fk:[core_biz_object cascade];idx", required = true)
+    var bizObjectId: String,
     @ApiModelProperty(value = "字段id ;;fk:[core_biz_object_field cascade];idx", required = true)
     var fieldId: String,
     @ApiModelProperty(value = "可读", required = true)

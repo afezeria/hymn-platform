@@ -61,12 +61,9 @@ class TestPermServiceMock {
         ): Boolean = !(query == null && update == null && create == null && delete == null)
 
         override fun hasFieldPerm(
-            roleId: String,
-            objectId: String,
-            fieldId: String,
-            read: Boolean?,
-            edit: Boolean?
+            fieldId: String, read: Boolean?, edit: Boolean?
         ): Boolean = !(read == null && edit == null)
+
     }
 
     @Bean

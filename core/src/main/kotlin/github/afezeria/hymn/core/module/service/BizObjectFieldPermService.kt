@@ -27,7 +27,7 @@ internal interface BizObjectFieldPermService {
 
     fun findByRoleIdAndFieldIdList(
         roleId: String,
-        fieldIdList: List<String>,
+        fieldIdList: Collection<String>,
     ): MutableList<BizObjectFieldPerm>
 
     fun findByRoleId(
@@ -42,5 +42,7 @@ internal interface BizObjectFieldPermService {
 
     fun batchSave(dtoList: List<BizObjectFieldPermDto>): Int
     fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectFieldPerm>
+
+    fun findByRoleIdAndBizObjectId(roleId: String, bizObjectId: String): List<BizObjectFieldPerm>
 
 }

@@ -1,5 +1,6 @@
 package github.afezeria.hymn.core.service
 
+import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.common.exception.PermissionDeniedException
@@ -7,6 +8,7 @@ import github.afezeria.hymn.common.platform.DataService
 import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.Session
 import github.afezeria.hymn.common.util.execute
+import github.afezeria.hymn.common.util.toJson
 import github.afezeria.hymn.core.module.entity.BizObjectField
 import github.afezeria.hymn.core.module.service.*
 import mu.KLogging
@@ -152,15 +154,15 @@ class DataServiceImpl : DataService {
         }
 
         val typeList = typeService.findByBizObjectId(objectId)
-        val typePermList =
-            typePermService.findByRoleIdAndBizObjectId(roleId, objectId)
-//        TODO()
-//        val typeCondStr = if (typeList.size == typePermList.size) {
-//
-//
-//        } else {
-//            ""
-//        }
+        val canUseTypeIdSet = mutableSetOf<String>()
+        for (perm in typePermService.findByRoleIdAndBizObjectId(roleId, objectId)) {
+            if (perm.visible) canUseTypeIdSet.add(perm.id)
+        }
+        val typeWhereStr = if (typeList.size == canUseTypeIdSet.size) {
+            ""
+        } else {
+            " and type_id = any (?) "
+        }
 
 
 //        获取有读权限的字段集合
@@ -178,8 +180,7 @@ class DataServiceImpl : DataService {
 
         val columns =
             "id, " + fieldList.asSequence().filter { canReadFieldIdSet.contains(it.id) }
-                .map { "main.\"${it.api}\"" }
-                .joinToString(", ")
+                .joinToString(", ") { "main.\"${it.api}\"" }
 
         val limitAndOffset =
             "${if (limit != null) "limit $limit" else ""} ${if (offset != null) "offset $offset" else ""}"
@@ -208,20 +209,27 @@ class DataServiceImpl : DataService {
         if (objectPerm.queryAll) {
 //            查询全部数据
             //language=PostgreSQL
-            sql = "select $columns from hymn_view.\"${bizObject.api}\" where $expr"
+            sql = """
+                select $columns from hymn_view."${bizObject.api}" main
+                where (true $typeWhereStr) $whereExpression
+            """
+            if (typeWhereStr.isNotEmpty()) {
+                parameterList.add(canUseTypeIdSet)
+            }
+            parameterList.addAll(params)
         } else if (objectPerm.queryWithAccountTree) {
 //            查询本人及直接下属的数据
             //language=PostgreSQL
             sql = """
-                select main.*
-                from hymn_view.account main
+                select $columns
+                from hymn_view."${bizObject.api}" main
                          left join (select id
                                     from hymn_view.account
                                     where leader_id = ?) subordinates(_account_id) on main.owner = subordinates._account_id
                          $shareTableJoinStr
                 where (
                         subordinates._account_id is not null or main.owner = ?
-                        $shareTableWhereStr
+                        $shareTableWhereStr $typeWhereStr
                     )
                   $whereExpression
                 $limitAndOffset
@@ -232,21 +240,24 @@ class DataServiceImpl : DataService {
                 parameterList.add(session.roleId)
                 parameterList.add(session.orgId)
             }
+            if (typeWhereStr.isNotEmpty()) {
+                parameterList.add(canUseTypeIdSet)
+            }
             parameterList.add(session.accountId)
             parameterList.addAll(params)
         } else if (objectPerm.queryWithOrg) {
 //            查询本部门数据
             //language=PostgreSQL
             sql = """
-                select main.*
-                from hymn_view.account main
+                select $columns
+                from hymn_view."${bizObject.api}" main
                          left join (select id
                                     from hymn_view.account
                                     where org_id = ?) org(_account_id) on main.owner = org._account_id
                          $shareTableJoinStr
                 where (
                         org._account_id is not null or main.owner = ?
-                        $shareTableWhereStr
+                        $shareTableWhereStr $typeWhereStr
                     )
                   $whereExpression
                 $limitAndOffset
@@ -256,6 +267,9 @@ class DataServiceImpl : DataService {
                 parameterList.add(session.accountId)
                 parameterList.add(session.roleId)
                 parameterList.add(session.orgId)
+            }
+            if (typeWhereStr.isNotEmpty()) {
+                parameterList.add(canUseTypeIdSet)
             }
             parameterList.add(session.accountId)
             parameterList.addAll(params)
@@ -280,13 +294,13 @@ class DataServiceImpl : DataService {
                         from hymn_view.account
                                  inner join org_tree on account.org_id = org_tree.id
                     )
-                select main.*
-                from hymn_view.account main
+                select $columns
+                from hymn_view."${bizObject.api}" main
                          left join orgs on main.owner = orgs._account_id
                          $shareTableJoinStr
                 where (
                         orgs._account_id is not null or main.owner = ?
-                        $shareTableWhereStr
+                        $shareTableWhereStr $typeWhereStr
                     )
                   $whereExpression
                 $limitAndOffset
@@ -297,18 +311,21 @@ class DataServiceImpl : DataService {
                 parameterList.add(session.roleId)
                 parameterList.add(session.orgId)
             }
+            if (typeWhereStr.isNotEmpty()) {
+                parameterList.add(canUseTypeIdSet)
+            }
             parameterList.add(session.accountId)
             parameterList.addAll(params)
         } else {
 //            查询自己的数据
             //language=PostgreSQL
             sql = """
-                select main.*
-                from hymn_view.account main
+                select $columns
+                from hymn_view."${bizObject.api}" main
                          $shareTableJoinStr
                 where (
                         main.owner = ?
-                        $shareTableWhereStr
+                        $shareTableWhereStr $typeWhereStr
                     )
                   $whereExpression
                 $limitAndOffset
@@ -318,12 +335,14 @@ class DataServiceImpl : DataService {
                 parameterList.add(session.roleId)
                 parameterList.add(session.orgId)
             }
+            if (typeWhereStr.isNotEmpty()) {
+                parameterList.add(canUseTypeIdSet)
+            }
             parameterList.add(session.accountId)
             parameterList.addAll(params)
-
         }
         databaseService.user().useConnection {
-            return it.execute(sql, params)
+            return it.execute(sql, parameterList)
         }
     }
 
@@ -357,6 +376,18 @@ class DataServiceImpl : DataService {
         data: MutableMap<String, Any?>,
         trigger: Boolean
     ): String {
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw InnerException("对象 [api:$objectApiName] 已停用")
+        }
+        val typeIdSet = typeService.findByBizObjectId(bizObject.id).map { it.id }.toSet()
+        val fieldList = fieldService.findByBizObjectId(bizObject.id)
+
+        return insertHelper(objectApiName, data, fieldList, typeIdSet, Session.getInstance())
+    }
+
+    override fun insertWithPerm(objectApiName: String, data: MutableMap<String, Any?>): String {
 //        查询对象及权限
         val bizObject = bizObjectService.findByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
@@ -374,22 +405,47 @@ class DataServiceImpl : DataService {
             throw PermissionDeniedException("缺少对象 [api:$objectApiName] 新建权限")
         }
 
+//        查询业务类型及权限
+        val typeIdSet = mutableSetOf<String>()
+        val typePermList =
+            typePermService.findByRoleIdAndBizObjectId(roleId, bizObjectId)
+        for (typePerm in typePermList) {
+            if (typePerm.visible) typeIdSet.add(typePerm.id)
+        }
 
 //        查询字段及权限
-        val id2FieldMap = mutableMapOf<String, BizObjectField>()
-        for (field in fieldService.findByBizObjectId(bizObject.id)) {
-            if (data.containsKey(field.api)) {
-                id2FieldMap[field.id] = field
-            }
-        }
+        val canEditFieldIdSet = mutableSetOf<String>()
         val fieldPermList =
-            fieldPermService.findByRoleIdAndFieldIdList(session.roleId, id2FieldMap.keys.toList())
-        val insertData = mutableMapOf<String, Any?>()
+            fieldPermService.findByRoleIdAndBizObjectId(roleId, bizObjectId)
         for (perm in fieldPermList) {
-            if (perm.pEdit) {
-                val api = id2FieldMap[perm.fieldId]!!.api
-                insertData[api] = data[api]
-            }
+            if (perm.pEdit) canEditFieldIdSet.add(perm.fieldId)
+        }
+        val fieldList = fieldService.findByBizObjectId(bizObjectId)
+            .filter { !canEditFieldIdSet.contains(it.id) }
+
+        return insertHelper(objectApiName, data, fieldList, typeIdSet, session)
+    }
+
+    protected fun insertHelper(
+        objectApiName: String,
+        data: MutableMap<String, Any?>,
+        fields: Collection<BizObjectField>,
+        types: Set<String>,
+        session: Session,
+    ): String {
+
+        val typeId = data["type_id"] as String?
+        if (typeId == null) {
+            logger.info("data:${data.toJson()}")
+            throw BusinessException("新增数据未指定业务类型")
+        }
+        if (!types.contains(typeId)) {
+            throw BusinessException("业务类型 [id:$typeId,bizObjectApi:$objectApiName] 不存在或缺少该类型权限")
+        }
+
+        val insertData = LinkedHashMap<String, Any?>()
+        for (field in fields) {
+            insertData[field.api] = data[field.api]
         }
 
         val accountId = session.accountId
@@ -399,113 +455,193 @@ class DataServiceImpl : DataService {
         insertData.putIfAbsent("modify_by_id", accountId)
         insertData.putIfAbsent("create_date", now)
         insertData.putIfAbsent("modify_date", now)
-//        insertData.putIfAbsent("type_id")
         val columns = insertData.keys.joinToString(",")
         val params = "?" + ",?".repeat(insertData.keys.size - 1)
         //language=PostgreSQL
         val sql = """
-            insert into hymn_view.$objectApiName ($columns) values ();
+            insert into hymn_view.$objectApiName ($columns) values ($params) returning id
         """
-
-
-
-        TODO("Not yet implemented")
-    }
-
-    override fun insertWithPerm(objectApiName: String, data: MutableMap<String, Any?>): String {
-        TODO("Not yet implemented")
+        databaseService.user().useConnection {
+            val res = requireNotNull(it.execute(sql, insertData.values).first())
+            return requireNotNull(res["id"]) as String
+        }
     }
 
     override fun batchInsert(
         objectApiName: String,
         dataList: MutableList<MutableMap<String, Any?>>
     ): List<String> {
-        TODO("Not yet implemented")
-    }
+        if (dataList.isEmpty()) throw BusinessException("插入数据不能为空")
+        if (dataList.size > 100) throw BusinessException("批量插入数据一次不能大于100条")
 
-    override fun batchInsert(
-        objectApiName: String,
-        dataList: MutableList<MutableMap<String, Any?>>,
-        trigger: Boolean
-    ) {
-        TODO("Not yet implemented")
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw InnerException("对象 [api:$objectApiName] 已停用")
+        }
+        val typeIdSet = typeService.findByBizObjectId(bizObject.id).map { it.id }.toSet()
+        val fieldList = fieldService.findByBizObjectId(bizObject.id)
+
+        val ids = mutableListOf<String>()
+        databaseService.user().useTransaction {
+            for (data in dataList) {
+                val id =
+                    insertHelper(objectApiName, data, fieldList, typeIdSet, Session.getInstance())
+                ids.add(id)
+            }
+        }
+        return ids
     }
 
     override fun batchInsertWithPerm(
         objectApiName: String,
         dataList: MutableList<MutableMap<String, Any?>>
-    ) {
-        TODO("Not yet implemented")
+    ): List<String> {
+        if (dataList.isEmpty()) throw BusinessException("插入数据不能为空")
+        if (dataList.size > 100) throw BusinessException("批量插入数据一次不能大于100条")
+
+//        查询对象及权限
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw InnerException("对象 [api:$objectApiName] 已停用")
+        }
+        val bizObjectId = bizObject.id
+        val session = Session.getInstance()
+        val roleId = session.roleId
+
+        val objectPerm =
+            objectPermService.findByRoleIdAndBizObjectId(roleId, bizObjectId)
+                ?: throw PermissionDeniedException("缺少对象 [api:$objectApiName] 新建权限")
+        if (!objectPerm.ins) {
+            throw PermissionDeniedException("缺少对象 [api:$objectApiName] 新建权限")
+        }
+
+//        查询业务类型及权限
+        val typeIdSet = mutableSetOf<String>()
+        val typePermList =
+            typePermService.findByRoleIdAndBizObjectId(roleId, bizObjectId)
+        for (typePerm in typePermList) {
+            if (typePerm.visible) typeIdSet.add(typePerm.id)
+        }
+
+//        查询字段及权限
+        val canEditFieldIdSet = mutableSetOf<String>()
+        val fieldPermList =
+            fieldPermService.findByRoleIdAndBizObjectId(roleId, bizObjectId)
+        for (perm in fieldPermList) {
+            if (perm.pEdit) canEditFieldIdSet.add(perm.fieldId)
+        }
+        val fieldList = fieldService.findByBizObjectId(bizObjectId)
+            .filter { !canEditFieldIdSet.contains(it.id) }
+
+        val ids = mutableListOf<String>()
+        databaseService.user().useTransaction {
+            for (data in dataList) {
+                val id =
+                    insertHelper(objectApiName, data, fieldList, typeIdSet, Session.getInstance())
+                ids.add(id)
+            }
+        }
+        return ids
     }
 
-    override fun update(
+
+    override fun bulkInsertWithoutTrigger(
         objectApiName: String,
-        data: MutableMap<String, Any?>
-    ): MutableMap<String, Any?> {
-        TODO("Not yet implemented")
+        dataList: MutableList<MutableMap<String, Any?>>,
+    ): List<String> {
+        if (dataList.isEmpty()) throw BusinessException("插入数据不能为空")
+        if (dataList.size > 100) throw BusinessException("批量插入数据一次不能大于100条")
+
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw InnerException("对象 [api:$objectApiName] 已停用")
+        }
+        val typeIdSet = typeService.findByBizObjectId(bizObject.id).map { it.id }.toSet()
+        val fieldList = fieldService.findByBizObjectId(bizObject.id)
+
+        val insertDataList = mutableListOf<LinkedHashMap<String, Any?>>()
+        for (data in dataList) {
+            val map = LinkedHashMap<String, Any?>(fieldList.size)
+            val typeId = data["type_id"] as String?
+            if (typeId == null) {
+                logger.info("data:${data.toJson()}")
+                throw BusinessException("新增数据未指定业务类型")
+            }
+            if (!typeIdSet.contains(typeId)) {
+                throw BusinessException("业务类型 [id:$typeId,bizObjectApi:$objectApiName] 不存在或缺少该类型权限")
+            }
+            for (field in fieldList) {
+                val api = field.api
+                map[api] = data[api]
+            }
+            insertDataList.add(map)
+        }
+        val columns = fieldList.joinToString(", ") { it.api }
+        TODO()
+//        val params
+//        //language=PostgreSQL
+//        val sql = """
+//            insert into hymn_view.$objectApiName ($columns)
+//            values
+//            ($params)
+//            returning id
+//        """
+//        databaseService.user().useConnection {
+//            val res = requireNotNull(it.execute(sql, insertData.values).first())
+//            return requireNotNull(res["id"]) as String
+//        }
+//        return ids
     }
 
     override fun update(
         objectApiName: String,
         data: MutableMap<String, Any?>,
-        trigger: Boolean
+        partial: Boolean
     ): MutableMap<String, Any?> {
         TODO("Not yet implemented")
     }
 
-    override fun update(
+    override fun updateWithoutTrigger(
         objectApiName: String,
-        id: String,
         data: MutableMap<String, Any?>
-    ): MutableMap<String, Any?> {
-        TODO("Not yet implemented")
-    }
-
-    override fun update(
-        objectApiName: String,
-        id: String,
-        data: MutableMap<String, Any?>,
-        trigger: Boolean
     ): MutableMap<String, Any?> {
         TODO("Not yet implemented")
     }
 
     override fun updateWithPerm(
         objectApiName: String,
-        data: MutableMap<String, Any?>
+        data: MutableMap<String, Any?>,
+        partial: Boolean
     ): MutableMap<String, Any?> {
-        TODO("Not yet implemented")
-    }
-
-    override fun updateWithPerm(
-        objectApiName: String,
-        id: String,
-        data: MutableMap<String, Any?>
-    ): MutableMap<String, Any?> {
-        TODO("Not yet implemented")
-    }
-
-    override fun batchUpdate(
-        objectApiName: String,
-        data: MutableMap<String, Any?>
-    ): MutableList<MutableMap<String, Any?>> {
         TODO("Not yet implemented")
     }
 
     override fun batchUpdate(
         objectApiName: String,
         data: MutableMap<String, Any?>,
-        trigger: Boolean
+        partial: Boolean
     ): MutableList<MutableMap<String, Any?>> {
         TODO("Not yet implemented")
     }
 
     override fun batchUpdateWithPerm(
         objectApiName: String,
+        data: MutableMap<String, Any?>,
+        partial: Boolean
+    ): MutableList<MutableMap<String, Any?>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun bulkUpdateWithoutTrigger(
+        objectApiName: String,
         data: MutableMap<String, Any?>
     ): MutableList<MutableMap<String, Any?>> {
         TODO("Not yet implemented")
     }
+
 
     override fun delete(objectApiName: String, id: String): MutableMap<String, Any?>? {
         TODO("Not yet implemented")

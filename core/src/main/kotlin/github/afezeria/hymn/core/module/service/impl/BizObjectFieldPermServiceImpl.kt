@@ -7,6 +7,9 @@ import github.afezeria.hymn.core.module.dao.BizObjectFieldPermDao
 import github.afezeria.hymn.core.module.dto.BizObjectFieldPermDto
 import github.afezeria.hymn.core.module.entity.BizObjectFieldPerm
 import github.afezeria.hymn.core.module.service.BizObjectFieldPermService
+import org.ktorm.dsl.and
+import org.ktorm.dsl.eq
+import org.ktorm.dsl.inList
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -67,9 +70,9 @@ class BizObjectFieldPermServiceImpl : BizObjectFieldPermService {
 
     override fun findByRoleIdAndFieldIdList(
         roleId: String,
-        fieldIdList: List<String>
+        fieldIdList: Collection<String>
     ): MutableList<BizObjectFieldPerm> {
-        TODO("Not yet implemented")
+        return bizObjectFieldPermDao.select({ (it.roleId eq roleId) and (it.fieldId inList fieldIdList) })
     }
 
     override fun findByRoleId(
@@ -94,6 +97,13 @@ class BizObjectFieldPermServiceImpl : BizObjectFieldPermService {
 
     override fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectFieldPerm> {
         return bizObjectFieldPermDao.pageSelect(null, pageSize, pageNum)
+    }
+
+    override fun findByRoleIdAndBizObjectId(
+        roleId: String,
+        bizObjectId: String
+    ): List<BizObjectFieldPerm> {
+        return bizObjectFieldPermDao.select({ (it.roleId eq roleId) and (it.bizObjectId eq bizObjectId) })
     }
 
 

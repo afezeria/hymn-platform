@@ -135,148 +135,104 @@ interface DataService {
     ): List<String>
 
     /**
-     * 批量插入
-     * @param objectApiName 对象api名称
-     * @param dataList 待插入的数据列表，插入成功后列表的每一项中将新增key为id的键值对
-     * @param trigger 是否触发触发器
-     * @return 新增数据的id列表
-     */
-    fun batchInsert(
-        objectApiName: String,
-        dataList: MutableList<MutableMap<String, Any?>>,
-        trigger: Boolean
-    )
-
-    /**
      * 根据权限批量插入
      * @param objectApiName 对象api名称
      * @param dataList 待插入的数据列表，插入成功后data中将新增key为id的键值对
      * @return 新增数据的id列表
      */
-    fun batchInsertWithPerm(objectApiName: String, dataList: MutableList<MutableMap<String, Any?>>)
+    fun batchInsertWithPerm(
+        objectApiName: String,
+        dataList: MutableList<MutableMap<String, Any?>>
+    ): List<String>
 
     /**
-     * 更新数据
-     * 更新方式为全覆盖， [data] 中缺少的字段将被视为null
-     * 系统预定义字段除owner外不会被覆盖
+     * 批量插入
+     * 不触发触发器
      * @param objectApiName 对象api名称
-     * @param data 待更新数据，必须包含id
-     * @return 更新后的数据
+     * @param dataList 待插入的数据列表，插入成功后列表的每一项中将新增key为id的键值对
+     * @return 新增数据的id列表
      */
-    fun update(objectApiName: String, data: MutableMap<String, Any?>): MutableMap<String, Any?>
+    fun bulkInsertWithoutTrigger(
+        objectApiName: String,
+        dataList: MutableList<MutableMap<String, Any?>>,
+    ): List<String>
 
     /**
      * 更新数据
-     * 更新方式为全覆盖， [data] 中缺少的字段将被视为null
      * 系统预定义字段除owner外不会被覆盖
      * @param objectApiName 对象api名称
      * @param data 待更新数据，必须包含id
-     * @param trigger 是否触发触发器
+     * @param partial true：部分更新，false：全量更新（未赋值的字段将被设为null）
      * @return 更新后的数据
      */
     fun update(
         objectApiName: String,
         data: MutableMap<String, Any?>,
-        trigger: Boolean
+        partial: Boolean,
     ): MutableMap<String, Any?>
 
     /**
      * 更新数据
-     * 更新方式为部分覆盖，只会更新 [data] 中包含的字段
-     * 系统预定义字段除owner外不会被更新
+     * 系统预定义字段除owner外不会被覆盖
      * @param objectApiName 对象api名称
-     * @param id 待更新数据的id
      * @param data 待更新数据，必须包含id
      * @return 更新后的数据
      */
-    fun update(
+    fun updateWithoutTrigger(
         objectApiName: String,
-        id: String,
-        data: MutableMap<String, Any?>
-    ): MutableMap<String, Any?>
-
-    /**
-     * 更新数据
-     * 更新方式为部分覆盖，只会更新 [data] 中包含的字段
-     * 系统预定义字段除owner外不会被更新
-     * @param objectApiName 对象api名称
-     * @param id 待更新数据的id
-     * @param data 待更新数据，必须包含id
-     * @param trigger 是否触发触发器
-     * @return 更新后的数据
-     */
-    fun update(
-        objectApiName: String,
-        id: String,
         data: MutableMap<String, Any?>,
-        trigger: Boolean
     ): MutableMap<String, Any?>
+
 
     /**
      * 根据权限更新数据
-     * 更新方式为全覆盖， [data] 中缺少的字段将被视为null
      * 系统预定义字段除owner外不会被覆盖
      * @param objectApiName 对象api名称
      * @param data 待更新数据，必须包含id
+     * @param partial true：部分更新，false：全量更新（未赋值的字段将被设为null）
      * @return 更新后的数据
      */
     fun updateWithPerm(
         objectApiName: String,
-        data: MutableMap<String, Any?>
-    ): MutableMap<String, Any?>
-
-    /**
-     * 更新数据
-     * 更新方式为部分覆盖，只会更新 [data] 中包含的字段
-     * 系统预定义字段除owner外不会被更新
-     * @param objectApiName 对象api名称
-     * @param id 待更新数据的id
-     * @param data 待更新数据，必须包含id
-     * @return 更新后的数据
-     */
-    fun updateWithPerm(
-        objectApiName: String,
-        id: String,
-        data: MutableMap<String, Any?>
+        data: MutableMap<String, Any?>,
+        partial: Boolean,
     ): MutableMap<String, Any?>
 
     /**
      * 批量更新数据
-     * 更新方式为全覆盖， [data] 中缺少的字段将被视为null
      * 系统预定义字段除owner外不会被覆盖
      * @param objectApiName 对象api名称
      * @param data 待更新数据，必须包含id
-     * @return 更新后的数据
-     */
-    fun batchUpdate(
-        objectApiName: String,
-        data: MutableMap<String, Any?>
-    ): MutableList<MutableMap<String, Any?>>
-
-    /**
-     * 批量更新数据
-     * 更新方式为全覆盖， [data] 中缺少的字段将被视为null
-     * 系统预定义字段除owner外不会被覆盖
-     * @param objectApiName 对象api名称
-     * @param data 待更新数据，必须包含id
-     * @param trigger 是否触发触发器
+     * @param partial true：部分更新，false：全量更新（未赋值的字段将被设为null）
      * @return 更新后的数据
      */
     fun batchUpdate(
         objectApiName: String,
         data: MutableMap<String, Any?>,
-        trigger: Boolean
+        partial: Boolean,
     ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 根据权限批量更新数据
-     * 更新方式为全覆盖， [data] 中缺少的字段将被视为null
      * 系统预定义字段除owner外不会被覆盖
      * @param objectApiName 对象api名称
      * @param data 待更新数据，必须包含id
      * @return 更新后的数据
      */
     fun batchUpdateWithPerm(
+        objectApiName: String,
+        data: MutableMap<String, Any?>,
+        partial: Boolean,
+    ): MutableList<MutableMap<String, Any?>>
+
+    /**
+     * 根据权限批量更新数据
+     * 系统预定义字段除owner外不会被覆盖
+     * @param objectApiName 对象api名称
+     * @param data 待更新数据，必须包含id
+     * @return 更新后的数据
+     */
+    fun bulkUpdateWithoutTrigger(
         objectApiName: String,
         data: MutableMap<String, Any?>
     ): MutableList<MutableMap<String, Any?>>
