@@ -1,20 +1,22 @@
 -- table constraint
 alter table hymn.core_biz_object_field
-    add unique (biz_object_id,api);
+    add unique (biz_object_id, api);
 alter table hymn.core_biz_object_field_perm
-    add unique (role_id,field_id);
+    add unique (role_id, field_id);
 alter table hymn.core_biz_object_layout
-    add unique (biz_object_id,name);
+    add unique (biz_object_id, name);
+alter table hymn.core_biz_object_mapping
+    add unique (source_biz_object_id, source_type_id, target_biz_object_id, target_type_id);
 alter table hymn.core_biz_object_perm
-    add unique (role_id,biz_object_id);
+    add unique (role_id, biz_object_id);
 alter table hymn.core_biz_object_trigger
-    add unique (biz_object_id,api);
+    add unique (biz_object_id, api);
 alter table hymn.core_biz_object_type
-    add unique (biz_object_id,name);
+    add unique (biz_object_id, name);
 alter table hymn.core_biz_object_type_layout
-    add unique (role_id,type_id,layout_id);
+    add unique (role_id, type_id, layout_id);
 alter table hymn.core_biz_object_type_perm
-    add unique (role_id,type_id);
+    add unique (role_id, type_id);
 alter table hymn.core_button_perm
     add unique (role_id,button_id);
 alter table hymn.core_dict_item
@@ -61,15 +63,24 @@ alter table hymn.core_biz_object_field
 create index core_biz_object_field_biz_object_id_idx
     on hymn.core_biz_object_field (biz_object_id);
 alter table hymn.core_biz_object_field
-    add check ( type in ('text', 'check_box', 'check_box_group', 'select', 'integer', 'float', 'money', 'date', 'datetime', 'master_slave', 'reference', 'mreference', 'areference', 'summary', 'auto', 'picture', 'files') );
+    add check ( type in
+                ('text', 'check_box', 'check_box_group', 'select', 'integer', 'float', 'money',
+                 'date', 'datetime', 'master_slave', 'reference', 'mreference', 'areference',
+                 'summary', 'auto', 'picture', 'files') );
 alter table hymn.core_biz_object_field
     add check ( s_type in ('sum', 'count', 'min', 'max') );
 alter table hymn.core_biz_object_field
-    add check ( standard_type in ('create_by_id', 'create_by', 'modify_by_id', 'modify_by', 'create_date', 'modify_date', 'org_id', 'lock_state', 'name', 'type_id', 'owner_id') );
+    add check ( standard_type in
+                ('create_by_id', 'create_by', 'modify_by_id', 'modify_by', 'create_date',
+                 'modify_date', 'org_id', 'lock_state', 'name', 'type_id', 'owner_id') );
 alter table hymn.core_biz_object_field_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
 create index core_biz_object_field_perm_role_id_idx
     on hymn.core_biz_object_field_perm (role_id);
+alter table hymn.core_biz_object_field_perm
+    add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
+create index core_biz_object_field_perm_biz_object_id_idx
+    on hymn.core_biz_object_field_perm (biz_object_id);
 alter table hymn.core_biz_object_field_perm
     add foreign key (field_id) references hymn.core_biz_object_field on delete cascade;
 create index core_biz_object_field_perm_field_id_idx
