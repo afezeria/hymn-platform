@@ -2,7 +2,10 @@ package github.afezeria.hymn.common.util
 
 import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.sql.*
+import java.time.*
 
 /**
  * @author afezeria
@@ -50,7 +53,25 @@ fun Connection.execute(
     return if (params.isNotEmpty()) {
         prepareStatement(sql).use {
             params.forEachIndexed { index, any ->
-                it.setObject(index + 1, any)
+                when (any) {
+                    is Array<*> -> {
+                        if (any.isEmpty()) throw IllegalArgumentException("cannot use an empty array as a JDBC parameter")
+                        val jdbcType = javaObject2JdbcType(any[0]!!)
+                        if (jdbcType.isEmpty()) throw IllegalArgumentException("cannot convert $any to JDBC Array")
+                        val jdbcArray = createArrayOf(jdbcType, any)
+                        it.setArray(index + 1, jdbcArray)
+                    }
+                    is Collection<*> -> {
+                        if (any.isEmpty()) throw IllegalArgumentException("cannot use an empty collection as a JDBC parameter")
+                        val jdbcType = javaObject2JdbcType(any.first()!!)
+                        if (jdbcType.isEmpty()) throw IllegalArgumentException("cannot convert $any to JDBC Array")
+                        val jdbcArray = createArrayOf(jdbcType, any.toTypedArray())
+                        it.setArray(index + 1, jdbcArray)
+                    }
+                    else -> {
+                        it.setObject(index + 1, any)
+                    }
+                }
             }
             try {
                 it.execute()
@@ -149,4 +170,26 @@ internal fun parseNamingSql(sql: String, params: Map<String, Any?>): Pair<String
         i++
     }
     return realSql.toString() to values
+}
+
+private fun javaObject2JdbcType(any: Any): String {
+    return when (any) {
+        is String -> "VARCHAR"
+        is BigDecimal -> "NUMERIC"
+        is Boolean -> "BOOLEAN"
+        is Byte -> "TINYINT"
+        is Short -> "SMALLINT"
+        is Int -> "INTEGER"
+        is Long -> "BIGINT"
+        is Float -> "REAL"
+        is Double -> "DOUBLE"
+        is ByteArray -> "BINARY"
+        is BigInteger -> "BIGINT"
+        is LocalDateTime -> "TIMESTAMP"
+        is LocalDate -> "DATE"
+        is LocalTime -> "TIME"
+        is OffsetTime -> "TIME_WITH_TIMEZONE"
+        is OffsetDateTime -> "TIMESTAMP_WITH_TIMEZONE"
+        else -> ""
+    }
 }
