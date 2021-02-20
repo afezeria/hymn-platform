@@ -35,7 +35,7 @@ fun Connection.execute(
  */
 fun Connection.execute(
     @Language("sql") sql: String,
-    params: List<Any?>
+    params: Collection<Any?>
 ): MutableList<MutableMap<String, Any?>> {
     return execute(sql, *params.toTypedArray())
 }
