@@ -4,11 +4,11 @@ import github.afezeria.hymn.common.db.AutoFillType.*
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.platform.Session
-import github.afezeria.hymn.common.util.execute
 import org.ktorm.dsl.*
 import org.ktorm.expression.BinaryExpression
 import org.ktorm.expression.ColumnAssignmentExpression
 import org.ktorm.expression.OrderByExpression
+import org.ktorm.schema.BaseTable
 import org.ktorm.schema.Column
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.support.postgresql.BulkInsertOrUpdateOnConflictClauseBuilder
@@ -32,14 +32,22 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
     companion object {
         val and: (ColumnDeclaring<Boolean>, ColumnDeclaring<Boolean>) -> BinaryExpression<Boolean> =
             ColumnDeclaring<Boolean>::and
-        private val field=
+
+        inline fun <E : Any> Query.mapToArray(table: BaseTable<E>): ArrayList<E> {
+            return mapTo(ArrayList()) { table.createEntity(it) }
+        }
+
+        private val field =
             AssignmentsBuilder::class.memberProperties.find { it.name == "_assignments" }?.javaField!!.apply {
-                isAccessible=true
+                isAccessible = true
             }
 
         private fun BulkInsertOrUpdateOnConflictClauseBuilder.setExclude(column: Column<Any>) {
             val assignments = field.get(this) as ArrayList<ColumnAssignmentExpression<*>>
-            assignments += ColumnAssignmentExpression(column.asExpression(), excluded(column).asExpression())
+            assignments += ColumnAssignmentExpression(
+                column.asExpression(),
+                excluded(column).asExpression()
+            )
         }
     }
 
@@ -255,6 +263,14 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
     }
 
     fun select(
+        vararg conditions: ColumnDeclaring<Boolean>,
+    ): MutableList<E> {
+        return select(
+            conditions.takeIf { it.isNotEmpty() }?.run { { reduce(and) } },
+        )
+    }
+
+    fun select(
         conditions: List<ColumnDeclaring<Boolean>> = emptyList(),
         offset: Int? = null,
         limit: Int? = null,
@@ -342,7 +358,6 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         if (throwException && !res) throw DataNotFoundException("${table.entityClass!!.simpleName} [id:$id]")
         return res
     }
-
 
 
     inner class AutoFillSelector {

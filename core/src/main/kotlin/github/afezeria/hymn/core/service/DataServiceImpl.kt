@@ -2,7 +2,6 @@ package github.afezeria.hymn.core.service
 
 import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.exception.DataNotFoundException
-import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.common.exception.PermissionDeniedException
 import github.afezeria.hymn.common.platform.DataService
 import github.afezeria.hymn.common.platform.DatabaseService
@@ -27,7 +26,7 @@ class DataServiceImpl : DataService {
     companion object : KLogging() {
         val qualifyTableForColumns = object : ExpressionVisitorAdapter() {
             override fun visit(subSelect: SubSelect?) {
-                throw InnerException("无效的where表达式，表达式中不能包含子查询")
+                throw BusinessException("无效的where表达式，表达式中不能包含子查询")
             }
 
             override fun visit(column: Column?) {
@@ -80,7 +79,7 @@ class DataServiceImpl : DataService {
         val bizObject = bizObjectService.findByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
         if (!bizObject.active) {
-            throw InnerException("对象 [api:$objectApiName] 已停用")
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
         }
         val limitAndOffset =
             "${if (limit != null) "limit $limit" else ""} ${if (offset != null) "offset $offset" else ""}"
@@ -115,6 +114,13 @@ class DataServiceImpl : DataService {
         return query(objectApiName, "id = ?", listOf(id)).firstOrNull()
     }
 
+    override fun queryByIds(
+        objectApiName: String,
+        ids: List<String>
+    ): MutableList<MutableMap<String, Any?>> {
+        return query(objectApiName, "id = any (?)", listOf(ids))
+    }
+
     override fun queryWithPerm(
         objectApiName: String,
         expr: String,
@@ -136,7 +142,7 @@ class DataServiceImpl : DataService {
         val bizObject = bizObjectService.findByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName] 不存在")
         if (!bizObject.active) {
-            throw InnerException("对象 [api:$objectApiName] 已停用")
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
         }
         val sharedTableName = if (bizObject.type == "custom") {
             bizObject.api + "_share"
@@ -379,7 +385,7 @@ class DataServiceImpl : DataService {
         val bizObject = bizObjectService.findByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
         if (!bizObject.active) {
-            throw InnerException("对象 [api:$objectApiName] 已停用")
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
         }
         val typeIdSet = typeService.findByBizObjectId(bizObject.id).map { it.id }.toSet()
         val fieldList = fieldService.findByBizObjectId(bizObject.id)
@@ -392,7 +398,7 @@ class DataServiceImpl : DataService {
         val bizObject = bizObjectService.findByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
         if (!bizObject.active) {
-            throw InnerException("对象 [api:$objectApiName] 已停用")
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
         }
         val bizObjectId = bizObject.id
         val session = Session.getInstance()
@@ -477,7 +483,7 @@ class DataServiceImpl : DataService {
         val bizObject = bizObjectService.findByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
         if (!bizObject.active) {
-            throw InnerException("对象 [api:$objectApiName] 已停用")
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
         }
         val typeIdSet = typeService.findByBizObjectId(bizObject.id).map { it.id }.toSet()
         val fieldList = fieldService.findByBizObjectId(bizObject.id)
@@ -504,7 +510,7 @@ class DataServiceImpl : DataService {
         val bizObject = bizObjectService.findByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
         if (!bizObject.active) {
-            throw InnerException("对象 [api:$objectApiName] 已停用")
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
         }
         val bizObjectId = bizObject.id
         val session = Session.getInstance()
@@ -557,43 +563,75 @@ class DataServiceImpl : DataService {
         val bizObject = bizObjectService.findByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
         if (!bizObject.active) {
-            throw InnerException("对象 [api:$objectApiName] 已停用")
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
         }
         val typeIdSet = typeService.findByBizObjectId(bizObject.id).map { it.id }.toSet()
         val fieldList = fieldService.findByBizObjectId(bizObject.id)
 
+        val session = Session.getInstance()
+        val accountId = session.accountId
+        val now = LocalDateTime.now()
+
         val insertDataList = mutableListOf<LinkedHashMap<String, Any?>>()
         for (data in dataList) {
-            val map = LinkedHashMap<String, Any?>(fieldList.size)
             val typeId = data["type_id"] as String?
             if (typeId == null) {
                 logger.info("data:${data.toJson()}")
                 throw BusinessException("新增数据未指定业务类型")
             }
             if (!typeIdSet.contains(typeId)) {
-                throw BusinessException("业务类型 [id:$typeId,bizObjectApi:$objectApiName] 不存在或缺少该类型权限")
+                throw BusinessException("业务类型 [id:$typeId,bizObjectApi:$objectApiName] 不存")
             }
+
+            val map = LinkedHashMap<String, Any?>(fieldList.size + 5, 1f)
             for (field in fieldList) {
                 val api = field.api
                 map[api] = data[api]
             }
+            map.putIfAbsent("owner_id", accountId)
+            map.putIfAbsent("create_by_id", accountId)
+            map.putIfAbsent("modify_by_id", accountId)
+            map.putIfAbsent("create_date", now)
+            map.putIfAbsent("modify_date", now)
             insertDataList.add(map)
         }
+
         val columns = fieldList.joinToString(", ") { it.api }
-        TODO()
-//        val params
-//        //language=PostgreSQL
-//        val sql = """
-//            insert into hymn_view.$objectApiName ($columns)
-//            values
-//            ($params)
-//            returning id
-//        """
-//        databaseService.user().useConnection {
-//            val res = requireNotNull(it.execute(sql, insertData.values).first())
-//            return requireNotNull(res["id"]) as String
-//        }
-//        return ids
+        val rowPlaceholder = fieldList.joinToString(",", "(", "),") { "?" }
+        var idx = 0
+        var batchSize = 50
+        val size = insertDataList.size
+        val ids = ArrayList<String>(size)
+        var lastBatchSize = 50
+        var sql: String? = null
+        databaseService.user().useConnection {
+            while (idx < size) {
+                if (idx + batchSize > size) {
+                    batchSize = size - idx
+                }
+                if (sql == null || batchSize != lastBatchSize) {
+                    val ph = rowPlaceholder.repeat(batchSize)
+                    //language=PostgreSQL
+                    sql = """
+                        insert into hymn_view.$objectApiName ($columns)
+                        values ${ph.substringBeforeLast(",")}
+                        returning id
+                    """
+                }
+                val list = mutableListOf<Any?>()
+                for (map in insertDataList.subList(idx, idx + batchSize)) {
+                    for (entry in map) {
+                        list.add(entry.value)
+                    }
+                }
+                for (row in it.execute(sql!!, list)) {
+                    ids.add(requireNotNull(row["id"]) as String)
+                }
+                lastBatchSize = batchSize
+                idx += batchSize
+            }
+        }
+        return ids
     }
 
     override fun update(
@@ -601,50 +639,276 @@ class DataServiceImpl : DataService {
         data: MutableMap<String, Any?>,
         partial: Boolean
     ): MutableMap<String, Any?> {
-        TODO("Not yet implemented")
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
+        }
+        val objectId = bizObject.id
+
+        val dataId = data["id"] as String?
+        if (dataId == null) {
+            logger.warn("update data:${data.toJson()}")
+            throw BusinessException("未指定更新数据的id")
+        }
+
+        val oldData = queryById(objectApiName, dataId)
+            ?: return mutableMapOf()
+
+        val fieldList = fieldService.findByBizObjectId(objectId)
+        val session = Session.getInstance()
+        return updateHelper(objectApiName, fieldList, null, partial, session, oldData, data)
+    }
+
+    override fun updateWithPerm(
+        objectApiName: String,
+        data: MutableMap<String, Any?>,
+    ): MutableMap<String, Any?> {
+        TODO("还需要检查是否通过共享的方式获得了编辑权限")
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
+        }
+        val bizObjectId = bizObject.id
+
+        val dataId = data["id"] as String?
+        if (dataId == null) {
+            logger.warn("update data:${data.toJson()}")
+            throw BusinessException("未指定更新数据的id")
+        }
+
+        val oldData = queryById(objectApiName, dataId)
+            ?: return mutableMapOf()
+
+        val session = Session.getInstance()
+        val roleId = session.roleId
+
+        val typeIdSet = mutableSetOf<String>()
+        val typePermList = typePermService.findByRoleIdAndBizObjectId(roleId, bizObjectId)
+        for (perm in typePermList) {
+            if (perm.visible) typeIdSet.add(perm.id)
+        }
+
+        val canEditFieldIdSet = mutableSetOf<String>()
+        val fieldPermList =
+            fieldPermService.findByRoleIdAndBizObjectId(roleId, bizObjectId)
+        for (perm in fieldPermList) {
+            if (perm.pEdit) canEditFieldIdSet.add(perm.fieldId)
+        }
+        val fieldList = fieldService.findByBizObjectId(bizObjectId)
+            .filter { !canEditFieldIdSet.contains(it.id) }
+
+        return updateHelper(objectApiName, fieldList, typeIdSet, true, session, oldData, data)
+    }
+
+    protected fun updateHelper(
+        objectApiName: String,
+        fields: Collection<BizObjectField>,
+        typeIdSet: Set<String>?,
+        partial: Boolean,
+        session: Session,
+        oldData: MutableMap<String, Any?>,
+        data: MutableMap<String, Any?>,
+    ): MutableMap<String, Any?> {
+
+        val accountId = session.accountId
+        val now = LocalDateTime.now()
+
+        val newData = LinkedHashMap(oldData)
+        if (typeIdSet != null) {
+//            根据权限更新数据时只有部分更新，忽略partial
+            val fieldMap = mutableMapOf<String, BizObjectField>()
+            for (field in fields) {
+                fieldMap[field.api] = field
+            }
+            oldData.forEach { (k, v) ->
+                if (fieldMap.containsKey(k) && data.containsKey(k)) {
+                    newData[k] = data[k]
+                } else {
+                    newData[k] = v
+                }
+            }
+//            检查业务类型权限
+            if (!typeIdSet.contains(oldData["type_id"]) ||
+                (newData.containsKey("type_id")
+                    && !typeIdSet.contains(newData["type_id"]))
+            ) {
+                throw PermissionDeniedException("更新失败，缺少业务类型权限")
+            }
+        } else {
+            if (partial) {
+                for (field in fields) {
+                    if (data.containsKey(field.api)) {
+                        newData[field.api] = data[field.api]
+                    } else {
+                        newData[field.api] = oldData[field.api]
+                    }
+                }
+            } else {
+                for (field in fields) {
+                    newData[field.api] = data[field.api]
+                }
+            }
+        }
+        newData.putIfAbsent("modify_by_id", accountId)
+        newData.putIfAbsent("modify_date", now)
+
+        val columns = newData.keys.joinToString(", ") { "$it = ?" }
+        //language=PostgreSQL
+        val sql = """
+            update hymn_view."$objectApiName" set
+            $columns 
+            where id = ?
+            returning *;
+        """
+        databaseService.user().useConnection {
+            return it.execute(sql, newData.values).firstOrNull() ?: mutableMapOf()
+        }
     }
 
     override fun updateWithoutTrigger(
         objectApiName: String,
         data: MutableMap<String, Any?>
     ): MutableMap<String, Any?> {
-        TODO("Not yet implemented")
-    }
-
-    override fun updateWithPerm(
-        objectApiName: String,
-        data: MutableMap<String, Any?>,
-        partial: Boolean
-    ): MutableMap<String, Any?> {
-        TODO("Not yet implemented")
+        return bulkUpdateWithoutTrigger(objectApiName, mutableListOf(data)).first()
     }
 
     override fun batchUpdate(
         objectApiName: String,
-        data: MutableMap<String, Any?>,
+        dataList: MutableList<MutableMap<String, Any?>>,
         partial: Boolean
     ): MutableList<MutableMap<String, Any?>> {
-        TODO("Not yet implemented")
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
+        }
+        val objectId = bizObject.id
+
+        val fieldList = fieldService.findByBizObjectId(objectId)
+        val session = Session.getInstance()
+
+        val ids = mutableListOf<String>()
+        for (data in dataList) {
+            val id = data["id"]
+            if (id == null || id !is String || id.isBlank()) {
+                throw BusinessException("未指定更新数据的id")
+            }
+            ids.add(id)
+        }
+        val oldDataList = queryByIds(objectApiName, ids)
+            .map { it["id"] as String to it }.toMap()
+
+        val res = mutableListOf<MutableMap<String, Any?>>()
+        for (data in dataList) {
+            val id = data["id"] as String
+            val oldData = oldDataList[id]
+            if (oldData == null) {
+                res.add(mutableMapOf())
+            } else {
+                val map =
+                    updateHelper(objectApiName, fieldList, null, partial, session, oldData, data)
+                res.add(map)
+            }
+        }
+        return res
     }
 
     override fun batchUpdateWithPerm(
         objectApiName: String,
-        data: MutableMap<String, Any?>,
-        partial: Boolean
+        dataList: MutableList<MutableMap<String, Any?>>
     ): MutableList<MutableMap<String, Any?>> {
-        TODO("Not yet implemented")
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
+        }
+        val bizObjectId = bizObject.id
+
+        val session = Session.getInstance()
+        val roleId = session.roleId
+
+        val typeIdSet = mutableSetOf<String>()
+        val typePermList = typePermService.findByRoleIdAndBizObjectId(roleId, bizObjectId)
+        for (perm in typePermList) {
+            if (perm.visible) typeIdSet.add(perm.id)
+        }
+
+        val canEditFieldIdSet = mutableSetOf<String>()
+        val fieldPermList =
+            fieldPermService.findByRoleIdAndBizObjectId(roleId, bizObjectId)
+        for (perm in fieldPermList) {
+            if (perm.pEdit) canEditFieldIdSet.add(perm.fieldId)
+        }
+        val fieldList = fieldService.findByBizObjectId(bizObjectId)
+            .filter { !canEditFieldIdSet.contains(it.id) }
+
+        val ids = mutableListOf<String>()
+        for (data in dataList) {
+            val id = data["id"]
+            if (id == null || id !is String || id.isBlank()) {
+                throw BusinessException("未指定更新数据的id")
+            }
+            ids.add(id)
+        }
+        val oldDataList = queryByIds(objectApiName, ids)
+            .map { it["id"] as String to it }.toMap()
+
+        val res = mutableListOf<MutableMap<String, Any?>>()
+        for (data in dataList) {
+            val id = data["id"] as String
+            val oldData = oldDataList[id]
+            if (oldData == null) {
+                res.add(mutableMapOf())
+            } else {
+                val map =
+                    updateHelper(objectApiName, fieldList, typeIdSet, true, session, oldData, data)
+                res.add(map)
+            }
+        }
+        return res
     }
 
     override fun bulkUpdateWithoutTrigger(
         objectApiName: String,
-        data: MutableMap<String, Any?>
+        dataList: MutableList<MutableMap<String, Any?>>
     ): MutableList<MutableMap<String, Any?>> {
-        TODO("Not yet implemented")
-    }
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
+        }
+        val objectId = bizObject.id
 
+        val fieldList = fieldService.findByBizObjectId(objectId)
+        val session = Session.getInstance()
 
-    override fun delete(objectApiName: String, id: String): MutableMap<String, Any?>? {
-        TODO("Not yet implemented")
+        val ids = mutableListOf<String>()
+        for (data in dataList) {
+            val id = data["id"]
+            if (id == null || id !is String || id.isBlank()) {
+                throw BusinessException("未指定更新数据的id")
+            }
+            ids.add(id)
+        }
+        val oldDataList = queryByIds(objectApiName, ids)
+            .map { it["id"] as String to it }.toMap()
+
+        val res = mutableListOf<MutableMap<String, Any?>>()
+        for (data in dataList) {
+            val id = data["id"] as String
+            val oldData = oldDataList[id]
+            if (oldData == null) {
+                res.add(mutableMapOf())
+            } else {
+                val map =
+                    updateHelper(objectApiName, fieldList, null, true, session, oldData, data)
+                res.add(map)
+            }
+        }
+        TODO("删掉这个方法")
+        return res
     }
 
     override fun delete(
@@ -652,26 +916,77 @@ class DataServiceImpl : DataService {
         id: String,
         trigger: Boolean
     ): MutableMap<String, Any?>? {
-        TODO("Not yet implemented")
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
+        }
+        val oldData = queryById(objectApiName, id) ?: return null
+
+        databaseService.user().useConnection {
+            it.execute(
+                """
+                delete from hymn_view."$objectApiName" where id = ?
+            """, id
+            )
+            TODO("判断返回值是否为0")
+        }
     }
 
     override fun deleteWithPerm(objectApiName: String, id: String): MutableMap<String, Any?>? {
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
+        }
+        val oldData = queryById(objectApiName, id) ?: return null
+
+        databaseService.user().useConnection {
+            return it.execute(
+                """
+                delete from hymn_view."$objectApiName" where id = ?
+            """, id
+            ).firstOrNull()
+        }
         TODO("Not yet implemented")
     }
 
     override fun batchDelete(
         objectApiName: String,
         ids: MutableList<String>
-    ): Pair<MutableList<String>, MutableList<MutableMap<String, Any?>>> {
-        TODO("Not yet implemented")
+    ): MutableList<MutableMap<String, Any?>> {
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
+        }
+
+        databaseService.user().useConnection {
+            return it.execute(
+                """
+                delete from hymn_view."$objectApiName" where id = any (?)
+            """, ids
+            )
+        }
     }
 
-    override fun batchDelete(
+    override fun batchDeleteWithoutTrigger(
         objectApiName: String,
-        ids: MutableList<String>,
-        trigger: Boolean
+        ids: MutableList<String>
     ): MutableList<MutableMap<String, Any?>> {
-        TODO("Not yet implemented")
+        val bizObject = bizObjectService.findByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (!bizObject.active) {
+            throw BusinessException("对象 [api:$objectApiName] 已停用")
+        }
+
+        databaseService.user().useConnection {
+            return it.execute(
+                """
+                delete from hymn_view."$objectApiName" where id = any (?)
+            """, ids
+            )
+        }
     }
 
     override fun batchDeleteWithPerm(
@@ -681,16 +996,25 @@ class DataServiceImpl : DataService {
         TODO("Not yet implemented")
     }
 
-    override fun sql(sql: String): MutableList<MutableMap<String, Any?>> {
-        TODO("Not yet implemented")
+    override fun sql(sql: String, vararg params: Any?): MutableList<MutableMap<String, Any?>> {
+        databaseService.user().useConnection {
+            return it.execute(sql, *params)
+        }
     }
 
-    override fun sql(sql: String, params: Array<Any>): MutableList<MutableMap<String, Any?>> {
-        TODO("Not yet implemented")
+    override fun sql(sql: String, params: List<Any?>): MutableList<MutableMap<String, Any?>> {
+        databaseService.user().useConnection {
+            return it.execute(sql, params)
+        }
     }
 
-    override fun sql(sql: String, params: Map<String, Any>): MutableList<MutableMap<String, Any?>> {
-        TODO("Not yet implemented")
+    override fun sql(
+        sql: String,
+        params: Map<String, Any?>
+    ): MutableList<MutableMap<String, Any?>> {
+        databaseService.user().useConnection {
+            return it.execute(sql, params)
+        }
     }
 
     override fun hasDataPerm(

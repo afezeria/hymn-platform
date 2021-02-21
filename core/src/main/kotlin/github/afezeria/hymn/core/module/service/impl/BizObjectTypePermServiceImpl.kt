@@ -68,6 +68,13 @@ class BizObjectTypePermServiceImpl : BizObjectTypePermService {
         return bizObjectTypePermDao.selectByRoleIdAndTypeId(roleId, typeId)
     }
 
+    override fun findByRoleIdAndBizObjectId(
+        roleId: String,
+        bizObjectId: String
+    ): MutableList<BizObjectTypePerm> {
+        return bizObjectTypePermDao.findByRoleIdAndBizObjectId(roleId, bizObjectId)
+    }
+
     override fun findByTypeId(
         typeId: String,
     ): MutableList<BizObjectTypePerm> {

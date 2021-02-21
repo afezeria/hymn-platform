@@ -55,6 +55,14 @@ interface DataService {
     fun queryById(objectApiName: String, id: String): MutableMap<String, Any?>?
 
     /**
+     * 查询数据
+     * @param objectApiName 对象api名称
+     * @param ids 数据id列表
+     * @return 指定id的数据
+     */
+    fun queryByIds(objectApiName: String, ids: List<String>): MutableList<MutableMap<String, Any?>>
+
+    /**
      * 根据权限查询数据
      * @param objectApiName 对象api名称
      * @param expr where表达式
@@ -160,6 +168,7 @@ interface DataService {
     /**
      * 更新数据
      * 系统预定义字段除owner外不会被覆盖
+     * 给定的id表示的数据不存在时返回空map
      * @param objectApiName 对象api名称
      * @param data 待更新数据，必须包含id
      * @param partial true：部分更新，false：全量更新（未赋值的字段将被设为null）
@@ -168,7 +177,7 @@ interface DataService {
     fun update(
         objectApiName: String,
         data: MutableMap<String, Any?>,
-        partial: Boolean,
+        partial: Boolean = true,
     ): MutableMap<String, Any?>
 
     /**
@@ -186,64 +195,59 @@ interface DataService {
 
     /**
      * 根据权限更新数据
+     * 部分更新，只更新设置了值的字段
      * 系统预定义字段除owner外不会被覆盖
      * @param objectApiName 对象api名称
      * @param data 待更新数据，必须包含id
-     * @param partial true：部分更新，false：全量更新（未赋值的字段将被设为null）
      * @return 更新后的数据
      */
     fun updateWithPerm(
         objectApiName: String,
         data: MutableMap<String, Any?>,
-        partial: Boolean,
     ): MutableMap<String, Any?>
 
     /**
      * 批量更新数据
      * 系统预定义字段除owner外不会被覆盖
      * @param objectApiName 对象api名称
-     * @param data 待更新数据，必须包含id
+     * @param dataList 待更新数据，必须包含id
      * @param partial true：部分更新，false：全量更新（未赋值的字段将被设为null）
      * @return 更新后的数据
      */
     fun batchUpdate(
         objectApiName: String,
-        data: MutableMap<String, Any?>,
-        partial: Boolean,
+        dataList: MutableList<MutableMap<String, Any?>>,
+        partial: Boolean = true,
     ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 根据权限批量更新数据
+     * 部分更新，只更新设置了值的字段
      * 系统预定义字段除owner外不会被覆盖
      * @param objectApiName 对象api名称
-     * @param data 待更新数据，必须包含id
+     * @param dataList 待更新数据，必须包含id
      * @return 更新后的数据
      */
     fun batchUpdateWithPerm(
         objectApiName: String,
-        data: MutableMap<String, Any?>,
-        partial: Boolean,
+        dataList: MutableList<MutableMap<String, Any?>>,
     ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 根据权限批量更新数据
      * 系统预定义字段除owner外不会被覆盖
      * @param objectApiName 对象api名称
-     * @param data 待更新数据，必须包含id
+     * @param dataList 待更新数据，必须包含id
      * @return 更新后的数据
      */
     fun bulkUpdateWithoutTrigger(
         objectApiName: String,
-        data: MutableMap<String, Any?>
+        dataList: MutableList<MutableMap<String, Any?>>
     ): MutableList<MutableMap<String, Any?>>
 
-    /**
-     * 根据id删除数据
-     * @param objectApiName 对象api名称
-     * @param id 待删除数据的id
-     * @return 已删除的数据，id不存在时返回null
-     */
-    fun delete(objectApiName: String, id: String): MutableMap<String, Any?>?
+    fun delete(objectApiName: String, id: String): MutableMap<String, Any?>? {
+        return delete(objectApiName, id, true)
+    }
 
     /**
      * 根据id删除数据
@@ -269,19 +273,17 @@ interface DataService {
      * @return pair.first 数据不存在的id列表，全部数据都被删除时为空列表， pair.second 已删除的数据
      */
     fun batchDelete(objectApiName: String, ids: MutableList<String>)
-        : Pair<MutableList<String>, MutableList<MutableMap<String, Any?>>>
+        : MutableList<MutableMap<String, Any?>>
 
     /**
      * 根据id列表批量删除数据
      * @param objectApiName 对象api名称
      * @param ids 待删除数据id列表
-     * @param trigger 是否触发触发器
      * @return 已删除的数据列表
      */
-    fun batchDelete(
+    fun batchDeleteWithoutTrigger(
         objectApiName: String,
         ids: MutableList<String>,
-        trigger: Boolean
     ): MutableList<MutableMap<String, Any?>>
 
     /**
@@ -298,21 +300,21 @@ interface DataService {
      * 执行sql语句，进行的修改不会触发触发器，也不会记录在数据变更历史中
      * @param sql 对象api名称
      */
-    fun sql(sql: String): MutableList<MutableMap<String, Any?>>
+    fun sql(sql: String, vararg params: Any?): MutableList<MutableMap<String, Any?>>
 
     /**
      * 执行sql语句，进行的修改不会触发触发器，也不会记录在数据变更历史中
      * @param sql 对象api名称
      * @param params 参数
      */
-    fun sql(sql: String, params: Array<Any>): MutableList<MutableMap<String, Any?>>
+    fun sql(sql: String, params: List<Any?>): MutableList<MutableMap<String, Any?>>
 
     /**
      * 执行sql语句，进行的修改不会触发触发器，也不会记录在数据变更历史中
      * @param sql 对象api名称
      * @param params 命名参数
      */
-    fun sql(sql: String, params: Map<String, Any>): MutableList<MutableMap<String, Any?>>
+    fun sql(sql: String, params: Map<String, Any?>): MutableList<MutableMap<String, Any?>>
 
     /**
      * 是否具有[dataId]所代表的数据的权限

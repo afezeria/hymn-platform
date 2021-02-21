@@ -74,7 +74,7 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                 }
             }
             roleIdSet.forEach {
-                fieldPermDtoList.add(BizObjectFieldPermDto(it, id))
+                fieldPermDtoList.add(BizObjectFieldPermDto(it, dto.bizObjectId, id))
             }
             fieldPermService.batchCreate(fieldPermDtoList)
 
@@ -215,24 +215,25 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
                 )
             )
 //            创建默认的字段权限数据
-            val roleIds = roleService.findIdList()
-            val permList = ArrayList<BizObjectFieldPermDto>(roleIds.size * 8)
-            roleIds.forEach {
-                permList.add(
-                    BizObjectFieldPermDto(
-                        it, namefid, pRead = true,
-                        pEdit = autoRule == null
-                    )
-                )
-                permList.add(BizObjectFieldPermDto(it, typefid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, ownerfid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, cfid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, mfid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, cdatefid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, mdatefid, true, pEdit = false))
-                permList.add(BizObjectFieldPermDto(it, lockfid, true, pEdit = false))
-            }
-            fieldPermService.batchCreate(permList)
+            TODO()
+//            val roleIds = roleService.findIdList()
+//            val permList = ArrayList<BizObjectFieldPermDto>(roleIds.size * 8)
+//            roleIds.forEach {
+//                permList.add(
+//                    BizObjectFieldPermDto(
+//                        it, namefid, pRead = true,
+//                        pEdit = autoRule == null
+//                    )
+//                )
+//                permList.add(BizObjectFieldPermDto(it, typefid, true, pEdit = false))
+//                permList.add(BizObjectFieldPermDto(it, ownerfid, true, pEdit = false))
+//                permList.add(BizObjectFieldPermDto(it, cfid, true, pEdit = false))
+//                permList.add(BizObjectFieldPermDto(it, mfid, true, pEdit = false))
+//                permList.add(BizObjectFieldPermDto(it, cdatefid, true, pEdit = false))
+//                permList.add(BizObjectFieldPermDto(it, mdatefid, true, pEdit = false))
+//                permList.add(BizObjectFieldPermDto(it, lockfid, true, pEdit = false))
+//            }
+//            fieldPermService.batchCreate(permList)
         }
     }
 
