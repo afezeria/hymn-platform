@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.Config
 /**
  * @author afezeria
  */
-internal interface ConfigService {
+interface ConfigService {
 
     fun removeById(id: String): Int
 

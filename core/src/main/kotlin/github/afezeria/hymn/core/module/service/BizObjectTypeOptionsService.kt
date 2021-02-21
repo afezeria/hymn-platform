@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectTypeOptions
 /**
  * @author afezeria
  */
-internal interface BizObjectTypeOptionsService {
+interface BizObjectTypeOptionsService {
 
     fun removeById(id: String): Int
 

@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.CustomPage
 /**
  * @author afezeria
  */
-internal interface CustomPageService {
+interface CustomPageService {
 
     fun removeById(id: String): Int
 

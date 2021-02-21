@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.ModuleFunction
 /**
  * @author afezeria
  */
-internal interface ModuleService {
+interface ModuleService {
     fun getAllModule(): MutableList<Module>
     fun getAllFunction(): MutableList<ModuleFunction>
     fun getFunctionByModuleApi(moduleApi: String): MutableList<ModuleFunction>

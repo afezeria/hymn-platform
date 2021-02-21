@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.CustomButton
 /**
  * @author afezeria
  */
-internal interface CustomButtonService {
+interface CustomButtonService {
 
     fun removeById(id: String): Int
 

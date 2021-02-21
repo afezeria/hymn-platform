@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.CustomComponent
 /**
  * @author afezeria
  */
-internal interface CustomComponentService {
+interface CustomComponentService {
 
     fun removeById(id: String): Int
 

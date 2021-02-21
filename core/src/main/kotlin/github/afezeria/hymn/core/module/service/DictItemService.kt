@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.DictItem
 /**
  * @author afezeria
  */
-internal interface DictItemService {
+interface DictItemService {
 
     fun removeById(id: String): Int
 

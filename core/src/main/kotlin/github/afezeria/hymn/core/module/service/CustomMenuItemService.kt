@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.CustomMenuItem
 /**
  * @author afezeria
  */
-internal interface CustomMenuItemService {
+interface CustomMenuItemService {
 
     fun removeById(id: String): Int
 

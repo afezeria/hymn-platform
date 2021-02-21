@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.ButtonPerm
 /**
  * @author afezeria
  */
-internal interface ButtonPermService {
+interface ButtonPermService {
 
     fun removeById(id: String): Int
 

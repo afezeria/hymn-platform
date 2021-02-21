@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.CronJob
 /**
  * @author afezeria
  */
-internal interface CronJobService {
+interface CronJobService {
 
     fun removeById(id: String): Int
 
