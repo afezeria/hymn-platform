@@ -1,7 +1,7 @@
 package github.afezeria.hymn.core.service
 
-import github.afezeria.hymn.common.platform.DataService
 import github.afezeria.hymn.common.platform.PermService
+import github.afezeria.hymn.common.platform.dataservice.DataService
 import github.afezeria.hymn.core.module.service.BizObjectFieldPermService
 import github.afezeria.hymn.core.module.service.BizObjectPermService
 import github.afezeria.hymn.core.module.service.ModuleFunctionPermService

@@ -90,7 +90,7 @@ class OssServiceImpl(
     override fun getObject(
         bucket: String,
         objectName: String,
-        fn: ObjectInfo.(InputStream) -> Unit
+        fn: ResourceInfo.(InputStream) -> Unit
     ) {
         bucket.throwIfBucketNameInvalid()
         val record = fileRecordExist(bucket, objectName)
@@ -101,7 +101,7 @@ class OssServiceImpl(
 
     override fun getObject(
         objectId: String,
-        fn: ObjectInfo.(InputStream) -> Unit
+        fn: ResourceInfo.(InputStream) -> Unit
     ) {
         val record =
             fileRecordService.findById(objectId) ?: throw DataNotFoundException("id:$objectId")
@@ -110,7 +110,7 @@ class OssServiceImpl(
     }
 
 
-    override fun getObjectWithPerm(objectId: String, fn: ObjectInfo.(InputStream) -> Unit) {
+    override fun getObjectWithPerm(objectId: String, fn: ResourceInfo.(InputStream) -> Unit) {
         val record = fileRecordService.findById(objectId)
             ?: throw DataNotFoundException("id:$objectId")
         val func = { i: InputStream -> fn(record.toObjectInfo(), i) }
@@ -314,7 +314,7 @@ class OssServiceImpl(
         }
     }
 
-    override fun getObjectInfoById(id: String): ObjectInfo? {
+    override fun getObjectInfoById(id: String): ResourceInfo? {
         return fileRecordService.findById(id)?.toObjectInfo()
     }
 
@@ -323,7 +323,7 @@ class OssServiceImpl(
         bucket: String,
         pageSize: Int,
         pageNum: Int
-    ): List<ObjectInfo> {
+    ): List<ResourceInfo> {
         return fileRecordService.pageFindByBucket(bucket, pageSize, pageNum)
             .map { it.toObjectInfo() }
     }

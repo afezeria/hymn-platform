@@ -604,7 +604,7 @@ comment on column hymn.core_biz_object_field.api is 'api名称，用于触发器
 comment on column hymn.core_biz_object_field.name is '名称，用于页面显示';
 comment on column hymn.core_biz_object_field.type is '字段类型 ;;optional_value:[text(文本),check_box(复选框),check_box_group(复选框组),select(下拉菜单),integer(整型),float(浮点型),money(货币),date(日期),datetime(日期时间),master_slave(主详),reference(关联关系),mreference(多选关联关系),areference(任意关联),summary(汇总),auto(自动编号),picture(图片),files(文件)];';
 comment on column hymn.core_biz_object_field.history is '是否启用历史记录';
-comment on column hymn.core_biz_object_field.active is '字段启用状态，false表示停用，字段停用时从视图中移除，删除时清空没一行中对应字段数据';
+comment on column hymn.core_biz_object_field.active is '字段启用状态，false表示停用，字段停用时从视图中移除，删除时清空每一行中对应字段数据';
 comment on column hymn.core_biz_object_field.default_value is '默认值，可选择其他表中的字段，由后端处理，新建时与页面布局一起返回给前端';
 comment on column hymn.core_biz_object_field.formula is '公式，js代码，由前端处理，新建和编辑时拼接成监听函数与页面布局一起返回给前端';
 comment on column hymn.core_biz_object_field.max_length is '文本类型最大长度/浮点型整数位长度/整型最大值/图片最大数量';

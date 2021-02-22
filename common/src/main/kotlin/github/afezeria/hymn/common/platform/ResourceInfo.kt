@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 /**
  * @author afezeria
  */
-data class ObjectInfo(
+data class ResourceInfo(
     val recordId: String,
     val bucket: String,
     val fileName: String,

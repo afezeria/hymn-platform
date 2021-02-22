@@ -1,10 +1,27 @@
-package github.afezeria.hymn.common.platform
+package github.afezeria.hymn.common.platform.dataservice
 
 /**
  * 用于自定义对象和部分标准对象的增删改查接口
  * @author afezeria
  */
 interface DataService {
+    fun getObject(api: String): ObjectInfo?
+    fun getObjectPerm(roleId: String, objectApiName: String): ObjectPerm?
+
+    /**
+     * key 为 api
+     */
+    fun getFieldMap(objectApiName: String): Map<String, FieldInfo>
+    fun getFieldApiSetWithPerm(
+        roleId: String,
+        objectApiName: String,
+        read: Boolean? = null,
+        edit: Boolean? = null
+    ): Set<String>
+
+    fun getTypeList(objectApiName: String): Set<TypeInfo>
+    fun getVisibleTypeIdSet(roleId: String, objectApiName: String): Set<String>
+
     /**
      * 查询数据
      * @param objectApiName 对象api名称
@@ -27,7 +44,7 @@ interface DataService {
     fun query(
         objectApiName: String,
         expr: String,
-        params: List<Any>,
+        params: Collection<Any>,
         offset: Long? = null,
         limit: Long? = null,
         fieldSet: Set<String> = emptySet(),
@@ -60,7 +77,10 @@ interface DataService {
      * @param ids 数据id列表
      * @return 指定id的数据
      */
-    fun queryByIds(objectApiName: String, ids: List<String>): MutableList<MutableMap<String, Any?>>
+    fun queryByIds(
+        objectApiName: String,
+        ids: Collection<String>
+    ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 根据权限查询数据
@@ -83,7 +103,7 @@ interface DataService {
     fun queryWithPerm(
         objectApiName: String,
         expr: String,
-        params: List<Any> = emptyList(),
+        params: Collection<Any> = emptyList(),
         offset: Long? = null,
         limit: Long? = null,
         fieldSet: Set<String> = emptySet(),
@@ -110,6 +130,11 @@ interface DataService {
      */
     fun queryByIdWithPerm(objectApiName: String, id: String): MutableMap<String, Any?>?
 
+    fun queryByIdsWithPerm(
+        objectApiName: String,
+        ids: Collection<String>
+    ): MutableList<MutableMap<String, Any?>>
+
     /**
      * 插入数据
      * @param objectApiName 对象api名称
@@ -119,17 +144,9 @@ interface DataService {
      */
     fun insert(
         objectApiName: String,
-        data: MutableMap<String, Any?>,
+        data: Map<String, Any?>,
         trigger: Boolean = true
-    ): String
-
-    /**
-     * 根据权限插入数据，当前帐号无插入权限时抛出异常
-     * @param objectApiName 对象api名称
-     * @param data 待插入的数据，插入成功后data中将新增key为id的键值对
-     * @return 新增数据id
-     */
-    fun insertWithPerm(objectApiName: String, data: MutableMap<String, Any?>): String
+    ): MutableMap<String, Any?>
 
     /**
      * 批量插入
@@ -139,8 +156,16 @@ interface DataService {
      */
     fun batchInsert(
         objectApiName: String,
-        dataList: MutableList<MutableMap<String, Any?>>
-    ): List<String>
+        dataList: List<Map<String, Any?>>
+    ): MutableList<MutableMap<String, Any?>>
+
+    /**
+     * 根据权限插入数据，当前帐号无插入权限时抛出异常
+     * @param objectApiName 对象api名称
+     * @param data 待插入的数据，插入成功后data中将新增key为id的键值对
+     * @return 新增数据id
+     */
+    fun insertWithPerm(objectApiName: String, data: Map<String, Any?>): MutableMap<String, Any?>
 
     /**
      * 根据权限批量插入
@@ -150,8 +175,14 @@ interface DataService {
      */
     fun batchInsertWithPerm(
         objectApiName: String,
-        dataList: MutableList<MutableMap<String, Any?>>
-    ): List<String>
+        dataList: List<Map<String, Any?>>
+    ): MutableList<MutableMap<String, Any?>>
+
+
+    fun insertWithoutTrigger(
+        objectApiName: String,
+        data: MutableMap<String, Any?>
+    ): MutableMap<String, Any?>
 
     /**
      * 批量插入
@@ -162,22 +193,20 @@ interface DataService {
      */
     fun bulkInsertWithoutTrigger(
         objectApiName: String,
-        dataList: MutableList<MutableMap<String, Any?>>,
-    ): List<String>
+        dataList: List<Map<String, Any?>>,
+    ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 更新数据
      * 系统预定义字段除owner外不会被覆盖
-     * 给定的id表示的数据不存在时返回空map
+     * 给定的id表示的数据不存在时返回空map或抛出异常
      * @param objectApiName 对象api名称
      * @param data 待更新数据，必须包含id
-     * @param partial true：部分更新，false：全量更新（未赋值的字段将被设为null）
      * @return 更新后的数据
      */
     fun update(
         objectApiName: String,
         data: MutableMap<String, Any?>,
-        partial: Boolean = true,
     ): MutableMap<String, Any?>
 
     /**
@@ -211,13 +240,11 @@ interface DataService {
      * 系统预定义字段除owner外不会被覆盖
      * @param objectApiName 对象api名称
      * @param dataList 待更新数据，必须包含id
-     * @param partial true：部分更新，false：全量更新（未赋值的字段将被设为null）
      * @return 更新后的数据
      */
     fun batchUpdate(
         objectApiName: String,
         dataList: MutableList<MutableMap<String, Any?>>,
-        partial: Boolean = true,
     ): MutableList<MutableMap<String, Any?>>
 
     /**
@@ -240,31 +267,18 @@ interface DataService {
      * @param dataList 待更新数据，必须包含id
      * @return 更新后的数据
      */
-    fun bulkUpdateWithoutTrigger(
+    fun batchUpdateWithoutTrigger(
         objectApiName: String,
         dataList: MutableList<MutableMap<String, Any?>>
     ): MutableList<MutableMap<String, Any?>>
-
-    fun delete(objectApiName: String, id: String): MutableMap<String, Any?>? {
-        return delete(objectApiName, id, true)
-    }
 
     /**
      * 根据id删除数据
      * @param objectApiName 对象api名称
      * @param id 待删除数据的id
-     * @param trigger 是否触发触发器
      * @return 已删除的数据，id不存在时返回null
      */
-    fun delete(objectApiName: String, id: String, trigger: Boolean): MutableMap<String, Any?>?
-
-    /**
-     * 根据id和权限删除数据，无权限时抛出异常
-     * @param objectApiName 对象api名称
-     * @param id 待删除数据的id
-     * @return 已删除的数据，id不存在时返回null
-     */
-    fun deleteWithPerm(objectApiName: String, id: String): MutableMap<String, Any?>?
+    fun delete(objectApiName: String, id: String): MutableMap<String, Any?>?
 
     /**
      * 根据id列表批量删除数据
@@ -276,15 +290,12 @@ interface DataService {
         : MutableList<MutableMap<String, Any?>>
 
     /**
-     * 根据id列表批量删除数据
+     * 根据id和权限删除数据，无权限时抛出异常
      * @param objectApiName 对象api名称
-     * @param ids 待删除数据id列表
-     * @return 已删除的数据列表
+     * @param id 待删除数据的id
+     * @return 已删除的数据，id不存在时返回null
      */
-    fun batchDeleteWithoutTrigger(
-        objectApiName: String,
-        ids: MutableList<String>,
-    ): MutableList<MutableMap<String, Any?>>
+    fun deleteWithPerm(objectApiName: String, id: String): MutableMap<String, Any?>?
 
     /**
      * 根据id列表和权限批量删除数据
@@ -293,7 +304,21 @@ interface DataService {
      * @return pair.first 数据不存在的id列表，全部数据都被删除时为空列表， pair.second 已删除的数据
      */
     fun batchDeleteWithPerm(objectApiName: String, ids: MutableList<String>)
-        : Pair<MutableList<String>, MutableList<MutableMap<String, Any?>>>
+        : MutableList<MutableMap<String, Any?>>
+
+    fun deleteWithoutTrigger(objectApiName: String, id: String): MutableMap<String, Any?>?
+
+    /**
+     * 根据id列表批量删除数据
+     * @param objectApiName 对象api名称
+     * @param ids 待删除数据id列表
+     * @return 已删除的数据列表
+     */
+    fun batchDeleteWithoutTrigger(
+        objectApiName: String,
+        ids: List<String>,
+    ): MutableList<MutableMap<String, Any?>>
+
 
 
     /**

@@ -32,7 +32,7 @@ interface OssService {
      * @param objectName 对象名
      * @param fn 操作输入流的函数，在函数中完成数据的输出
      */
-    fun getObject(bucket: String, objectName: String, fn: ObjectInfo.(InputStream) -> Unit)
+    fun getObject(bucket: String, objectName: String, fn: ResourceInfo.(InputStream) -> Unit)
 
     /**
      *  获取对象字节流，权限不满足时抛出异常
@@ -40,7 +40,7 @@ interface OssService {
      * @param objectId 对象id
      * @param fn 操作输入流的函数，在函数中完成数据的输出
      */
-    fun getObjectWithPerm(objectId: String, fn: ObjectInfo.(InputStream) -> Unit)
+    fun getObjectWithPerm(objectId: String, fn: ResourceInfo.(InputStream) -> Unit)
 
     /**
      *  获取对象字节流，权限不满足时抛出异常
@@ -48,7 +48,7 @@ interface OssService {
      * @param objectId 对象id
      * @param fn 操作输入流的函数，在函数中完成数据的输出
      */
-    fun getObject(objectId: String, fn: ObjectInfo.(InputStream) -> Unit)
+    fun getObject(objectId: String, fn: ResourceInfo.(InputStream) -> Unit)
 
 
     /**
@@ -123,7 +123,7 @@ interface OssService {
     /**
      * 根据id获取对象信息
      */
-    fun getObjectInfoById(id: String): ObjectInfo?
+    fun getObjectInfoById(id: String): ResourceInfo?
 
     /**
      * 根据bucket获取对象列表
@@ -135,6 +135,6 @@ interface OssService {
         bucket: String,
         pageSize: Int,
         pageNum: Int
-    ): List<ObjectInfo>
+    ): List<ResourceInfo>
 
 }
