@@ -11,12 +11,12 @@ interface DataService {
     /**
      * key 为 api
      */
-    fun getFieldMap(objectApiName: String): Map<String, FieldInfo>
+    fun getFieldApiMap(objectApiName: String): Map<String, FieldInfo>
     fun getFieldApiSetWithPerm(
         roleId: String,
         objectApiName: String,
-        read: Boolean? = null,
-        edit: Boolean? = null
+        read: Boolean = false,
+        edit: Boolean = false,
     ): Set<String>
 
     fun getTypeList(objectApiName: String): Set<TypeInfo>
@@ -320,7 +320,6 @@ interface DataService {
     ): MutableList<MutableMap<String, Any?>>
 
 
-
     /**
      * 执行sql语句，进行的修改不会触发触发器，也不会记录在数据变更历史中
      * @param sql 对象api名称
@@ -360,6 +359,7 @@ interface DataService {
      * 5 当前用户被只读共享了指定数据 拥有权限：查看
      *
      * [read],[update],[share],[owner]同时为null时返回false
+     * 帐号/业务对象/数据不存在时返回false
      *
      * @param accountId 用户id
      * @param objectId 对象id
@@ -374,10 +374,10 @@ interface DataService {
         accountId: String,
         objectId: String,
         dataId: String,
-        read: Boolean? = null,
-        update: Boolean? = null,
-        share: Boolean? = null,
-        owner: Boolean? = null,
+        read: Boolean = false,
+        update: Boolean = false,
+        share: Boolean = false,
+        owner: Boolean = false,
     ): Boolean
 
 }

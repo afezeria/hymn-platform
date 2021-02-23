@@ -109,6 +109,6 @@ interface ScriptDataServiceForDelete : ScriptDataServiceForQuery {
                 delete from hymn_view."$objectApiName" where id = ? 
                 returning $returnColumns
             """
-        return execute(sql, listOf(old["id"]), WriteType.DELETE, old, null, true)
+        return execute(sql, listOf(old["id"]), WriteType.DELETE, objectApiName, old, null, true)
     }
 }

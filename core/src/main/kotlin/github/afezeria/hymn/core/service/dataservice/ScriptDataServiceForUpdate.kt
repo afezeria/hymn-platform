@@ -62,7 +62,7 @@ interface ScriptDataServiceForUpdate : ScriptDataServiceForQuery {
 
         val session = Session.getInstance()
         val roleId = session.roleId
-        val fieldMap = getFieldMap(objectApiName)
+        val fieldMap = getFieldApiMap(objectApiName)
 
         val updateDataMap = mutableMapOf<String, Map<String, Any?>>()
         val ids = mutableSetOf<String>()
@@ -168,7 +168,7 @@ interface ScriptDataServiceForUpdate : ScriptDataServiceForQuery {
             where id = ?
             returning $returnColumns
         """
-        return execute(sql, new.values, WriteType.UPDATE, old, new, trigger)
+        return execute(sql, new.values, WriteType.UPDATE, objectApiName, old, new, trigger)
     }
 
 }

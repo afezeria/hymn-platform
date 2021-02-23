@@ -19,6 +19,7 @@ interface ScriptDataService : DataService {
         sql: String,
         params: Collection<Any?>,
         type: WriteType,
+        objectApiName: String,
         oldData: MutableMap<String, Any?>? = null,
         newData: MutableMap<String, Any?>? = null,
         trigger: Boolean = true,

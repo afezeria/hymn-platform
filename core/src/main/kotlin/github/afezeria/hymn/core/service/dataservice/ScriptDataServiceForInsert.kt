@@ -62,7 +62,7 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
             }
         }
 
-        val fields = getFieldMap(objectApiName).values
+        val fields = getFieldApiMap(objectApiName).values
         val writeableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, edit = true)
 
         val visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
@@ -130,7 +130,7 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
             insert into hymn_view.$objectApiName ($columns) values ($placeholder) 
             returning $returnColumns
         """
-        return execute(sql, new.values, WriteType.INSERT, null, new, true)
+        return execute(sql, new.values, WriteType.INSERT, objectApiName, null, new, true)
     }
 
     override fun insertWithoutTrigger(
@@ -153,7 +153,7 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
         val session = Session.getInstance()
         val now = LocalDateTime.now()
 
-        val fieldMap = getFieldMap(objectApiName)
+        val fieldMap = getFieldApiMap(objectApiName)
 
 
         val insertDataList = mutableListOf<LinkedHashMap<String, Any?>>()

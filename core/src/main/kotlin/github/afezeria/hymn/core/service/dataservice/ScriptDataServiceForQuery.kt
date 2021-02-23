@@ -81,9 +81,9 @@ interface ScriptDataServiceForQuery : ScriptDataService {
         getObject(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
 
         val columns = if (fieldSet.isEmpty()) {
-            getFieldMap(objectApiName).keys.joinToString(", ")
+            getFieldApiMap(objectApiName).keys.joinToString(", ")
         } else {
-            getFieldMap(objectApiName).keys.filter { fieldSet.contains(it) }.joinToString(", ")
+            getFieldApiMap(objectApiName).keys.filter { fieldSet.contains(it) }.joinToString(", ")
         }
 
         val limitAndOffset =
@@ -180,7 +180,7 @@ interface ScriptDataServiceForQuery : ScriptDataService {
             throw PermissionDeniedException("缺少对象 [api:$objectApiName] 更新权限")
         }
         if (deletable && !objectPerm.del) {
-            throw PermissionDeniedException("缺少对象 [api:$objectApiName] 更新权限")
+            throw PermissionDeniedException("缺少对象 [api:$objectApiName] 删除权限")
         }
 
         val visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
@@ -192,12 +192,12 @@ interface ScriptDataServiceForQuery : ScriptDataService {
 
 
 //        获取有读权限的字段集合
-        val canReadFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, read = true)
+        val readAbleFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, read = true)
         val columnFields =
             if (fieldSet.isEmpty()) {
-                canReadFieldApiSet
+                readAbleFieldApiSet
             } else {
-                canReadFieldApiSet.filter { fieldSet.contains(it) }
+                readAbleFieldApiSet.filter { fieldSet.contains(it) }
             }
 
         val columns =
