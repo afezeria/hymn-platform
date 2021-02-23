@@ -1060,7 +1060,7 @@ begin
                 share_table_name := record_new.api || '_share';
                 sql_str := format(E'create table hymn_view.%I'
                                       '(\n'
-                                      '    data_id         text,\n'
+                                      '    data_id         text not null,\n'
                                       '    role_id         text,\n'
                                       '    org_id          text,\n'
                                       '    account_id      text,\n'
