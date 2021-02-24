@@ -3,9 +3,11 @@ package github.afezeria.hymn.core.service.dataservice
 import github.afezeria.hymn.common.constant.TriggerEvent.*
 import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.platform.ScriptService
 import github.afezeria.hymn.common.platform.dataservice.*
+import github.afezeria.hymn.common.platform.script.ScriptService
+import github.afezeria.hymn.common.platform.script.TriggerInfo
 import github.afezeria.hymn.common.util.execute
 import github.afezeria.hymn.core.module.service.*
 import mu.KLoggable
@@ -36,6 +38,8 @@ class ScriptDataServiceImpl(
     private val tmpMap = HashMap<String, Any?>()
     private val wrapper = DataServiceWrapper(this)
 
+    private val stack = Stack<String>()
+
 
     override val logger: KLogger = logger()
 
@@ -58,13 +62,27 @@ class ScriptDataServiceImpl(
                 WriteType.UPDATE -> BEFORE_UPDATE
                 WriteType.DELETE -> BEFORE_DELETE
             }
+            val callback = { info: TriggerInfo, trigger: () -> Unit ->
+                val flag = "$objectApiName:${info.api}"
+                if (stack.count { it == flag } == 6) {
+                    logger.info("当前触发器调用栈:{}", stack)
+                    throw InnerException("可能存在递归调用，终止执行触发器")
+                }
+                stack.push(flag)
+                try {
+                    trigger.invoke()
+                } finally {
+                    stack.pop()
+                }
+            }
             scriptService.executeTrigger(
-                wrapper,
-                event,
-                objectApiName,
-                oldData,
-                newData,
-                tmpMap,
+                dataService = wrapper,
+                event = event,
+                objectApiName = objectApiName,
+                old = oldData,
+                new = newData,
+                tmpMap = tmpMap,
+                around = callback,
             )
             database.useConnection {
                 result = it.execute(sql, params).firstOrNull()
@@ -75,12 +93,13 @@ class ScriptDataServiceImpl(
                 WriteType.DELETE -> AFTER_DELETE
             }
             scriptService.executeTrigger(
-                wrapper,
-                event,
-                objectApiName,
-                oldData,
-                newData,
-                tmpMap,
+                dataService = wrapper,
+                event = event,
+                objectApiName = objectApiName,
+                old = oldData,
+                new = newData,
+                tmpMap = tmpMap,
+                around = callback,
             )
         } else {
             database.useConnection {
