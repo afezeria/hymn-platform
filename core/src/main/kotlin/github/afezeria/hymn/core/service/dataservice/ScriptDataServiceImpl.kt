@@ -29,17 +29,26 @@ class ScriptDataServiceImpl(
     private val fieldPermService: BizObjectFieldPermService,
     private val databaseService: DatabaseService,
     private val scriptService: ScriptService,
+    memorize: Boolean = true,
 ) : ScriptDataService, ScriptDataServiceForQuery,
     ScriptDataServiceForInsert, ScriptDataServiceForUpdate, ScriptDataServiceForDelete, KLoggable {
 
-    private val cache = HashMap<String, Any>()
-    private val fieldPermCache = HashMap<String, List<FieldPerm>>()
+    inner class EmptyMap<K, V> : AbstractMap<K, V>() {
+        override val entries: MutableSet<MutableMap.MutableEntry<K, V>> = mutableSetOf()
 
-    private val tmpMap = HashMap<String, Any?>()
+        override fun put(key: K, value: V): V? = null
+    }
+
+    private val cache: MutableMap<String, Any?> = if (memorize) HashMap() else EmptyMap()
+
+    private val fieldPermCache: MutableMap<String, List<FieldPerm>> =
+        if (memorize) HashMap() else EmptyMap()
+
+    private val tmpMap: MutableMap<String, Any?> = HashMap()
+
     private val wrapper = DataServiceWrapper(this)
 
     private val stack = Stack<String>()
-
 
     override val logger: KLogger = logger()
 
@@ -106,6 +115,10 @@ class ScriptDataServiceImpl(
                 result = it.execute(sql, params).firstOrNull()
             }
         }
+//        主对象删除时没有触发触发器但关联对象的删除触发器还是会正常触发
+        if (type == WriteType.DELETE) {
+            processingDeletePolicy(objectApiName, requireNotNull(oldData))
+        }
         if (result == null) {
             val str = when (type) {
                 WriteType.INSERT -> "插入失败" //正常情况不会出现这个
@@ -117,9 +130,10 @@ class ScriptDataServiceImpl(
         return result
     }
 
-    override fun getObject(api: String): ObjectInfo? {
-        val key = "getObject:$api"
-        cache[key]?.apply {
+
+    override fun getObjectByApi(api: String): ObjectInfo? {
+        val apiKey = "getObjectByApi:$api"
+        cache[apiKey]?.apply {
             return this as ObjectInfo
         }
         val bizObject = bizObjectService.findByApi(api) ?: return null
@@ -136,7 +150,34 @@ class ScriptDataServiceImpl(
                 canSoftDelete = canSoftDelete
             )
         }
-        cache[key] = info
+        val idKey = "getObjectById:${info.id}"
+        cache[apiKey] = info
+        cache[idKey] = info
+        return info
+    }
+
+    override fun getObjectById(id: String): ObjectInfo? {
+        val idKey = "getObjectById:$id"
+        cache[idKey]?.apply {
+            return this as ObjectInfo
+        }
+        val bizObject = bizObjectService.findById(id) ?: return null
+        val info = bizObject.run {
+            ObjectInfo(
+                id = this.id,
+                name = name,
+                api = this.api,
+                type = type,
+                moduleApi = moduleApi,
+                canInsert = canInsert,
+                canUpdate = canUpdate,
+                canDelete = canDelete,
+                canSoftDelete = canSoftDelete
+            )
+        }
+        val apiKey = "getObjectByApi:${info.api}"
+        cache[idKey] = info
+        cache[apiKey] = info
         return info
     }
 
@@ -172,7 +213,7 @@ class ScriptDataServiceImpl(
             @Suppress("UNCHECKED_CAST")
             return this as Map<String, FieldInfo>
         }
-        val objectInfo = getObject(objectApiName)
+        val objectInfo = getObjectByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
 
         val fieldList =
@@ -215,7 +256,7 @@ class ScriptDataServiceImpl(
             @Suppress("UNCHECKED_CAST")
             return this as Set<String>
         }
-        val objectInfo = getObject(objectApiName)
+        val objectInfo = getObjectByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
         val fieldApiMap = getFieldApiMap(objectApiName)
         val fieldPerm = fieldPermCache.getOrPut(key) {
@@ -232,7 +273,8 @@ class ScriptDataServiceImpl(
             }
         }.toSet()
         var res =
-            fieldApiMap.values.mapNotNull { if (idSet.contains(it.id)) it.api else null }.toSet()
+            fieldApiMap.values.mapNotNull { if (idSet.contains(it.id)) it.api else null }
+                .toSet()
         res = Collections.unmodifiableSet(res)
         cache[key] = res
         return res
@@ -244,7 +286,7 @@ class ScriptDataServiceImpl(
             @Suppress("UNCHECKED_CAST")
             return this as Set<TypeInfo>
         }
-        val objectInfo = getObject(objectApiName)
+        val objectInfo = getObjectByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
 
         var result = typeService.findByBizObjectId(objectInfo.id).map {
@@ -261,7 +303,7 @@ class ScriptDataServiceImpl(
             @Suppress("UNCHECKED_CAST")
             return this as Set<String>
         }
-        val objectInfo = getObject(objectApiName)
+        val objectInfo = getObjectByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
 
         var result =
@@ -278,6 +320,7 @@ class ScriptDataServiceImpl(
         dataId: String,
         read: Boolean,
         update: Boolean,
+        delete: Boolean,
         share: Boolean,
         owner: Boolean,
     ): Boolean {
@@ -286,36 +329,26 @@ class ScriptDataServiceImpl(
             accountService.findById(accountId) ?: return false
         val bizObject = bizObjectService.findById(objectId) ?: return false
         val bizObjectPerm =
-            objectPermService.findByRoleIdAndBizObjectId(account.roleId, objectId) ?: return false
+            objectPermService.findByRoleIdAndBizObjectId(account.roleId, objectId)
+                ?: return false
 //        要求查询权限但没有对象的查询权限或要求更新权限但没有对象的更新权限时直接返回false
         if ((read && !bizObjectPerm.que)
             || (update && !bizObjectPerm.upd)
+            || (delete && !bizObjectPerm.del)
         ) {
             return false
         }
-        val data = queryByIdWithPerm(bizObject.api, dataId) ?: return false
-//        只要求读权限时如果查询出了数据说明可读，直接返回true
-        if (read && !update) {
-            return true
-        }
-        if (data["owner_id"] == accountId) {
-//        数据所有者必定有共享和所有者权限
-            if (owner || share) return true
-        } else {
 
+        val data = queryByIdWithPerm(bizObject.api, dataId) ?: return false
+        if (data["owner_id"] != accountId) {
             if (owner) return false
-            if (share) {
-                return account.admin
+            if (!account.admin && share) {
+                return false
+            }
+            if (!bizObjectPerm.editAll && delete) {
+                return false
             }
         }
-//        queryWithPerm(
-//            bizObject.api, "id = ?", listOf(dataId),
-//            limit = 1,
-//            fieldSet = setOf("id", "owner_id"),
-//            writeable = false,
-//            deletable = false,
-//            shareable = false,
-//        )
         val shareTableList =
             database.useConnection {
                 //language=PostgreSQL
@@ -326,12 +359,53 @@ class ScriptDataServiceImpl(
                 it.execute(sql, dataId, account.roleId, account.id, account.orgId)
                     .map { ShareTable(it) }
             }
-        if (update) {
-            shareTableList.find { !it.readOnly }?.apply {
-                return true
-            }
+        if (update && shareTableList.all { it.readOnly }) {
+            return false
         }
-        return false
+        return true
     }
 
+    /**
+     * 处理删除时的级联和阻止动作
+     */
+    private fun processingDeletePolicy(objectApiName: String, oldData: MutableMap<String, Any?>) {
+        val objectInfo = requireNotNull(getObjectByApi(objectApiName))
+        val masterDataId = requireNotNull(oldData["id"]) as String
+        val refFieldList = fieldService.findReferenceFieldByRefId(objectInfo.id)
+        if (refFieldList.isEmpty()) return
+        val refFieldMap = refFieldList.groupBy { it.refDeletePolicy }
+        refFieldMap["restrict"]?.let {
+            for (bizObjectField in it) {
+                val refObjectInfo = requireNotNull(getObjectById(bizObjectField.bizObjectId))
+                val subDataList =
+                    query(refObjectInfo.api, "\"${bizObjectField.api}\" = ?", listOf(masterDataId))
+                if (subDataList.isNotEmpty()) {
+                    throw BusinessException("删除失败，当前数据被${refObjectInfo.name}对象的数据引用，请删除所有引用数据后再执行删除操作")
+                }
+            }
+        }
+        refFieldMap["cascade"]?.let {
+            for (bizObjectField in it) {
+                val refObjectInfo = requireNotNull(getObjectById(bizObjectField.bizObjectId))
+                val subDataList =
+                    query(refObjectInfo.api, "\"${bizObjectField.api}\" = ?", listOf(masterDataId))
+                for (subData in subDataList) {
+                    delete(refObjectInfo.api, requireNotNull(subData["id"]) as String)
+                }
+            }
+        }
+        refFieldMap["set_null"]?.let {
+            for (bizObjectField in it) {
+                val refObjectInfo = requireNotNull(getObjectById(bizObjectField.bizObjectId))
+                //language=PostgreSQL
+                sql(
+                    """
+                    update hymn_view."${refObjectInfo.api}"
+                    set "${bizObjectField.api}" = null
+                    where "${bizObjectField.api}" = ?
+                """, masterDataId
+                )
+            }
+        }
+    }
 }

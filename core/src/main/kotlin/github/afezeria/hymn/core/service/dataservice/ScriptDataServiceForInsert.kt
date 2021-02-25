@@ -4,6 +4,7 @@ import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.exception.PermissionDeniedException
 import github.afezeria.hymn.common.platform.Session
+import github.afezeria.hymn.common.platform.dataservice.FieldInfo
 import github.afezeria.hymn.common.util.execute
 import github.afezeria.hymn.common.util.toJson
 import java.time.LocalDateTime
@@ -50,62 +51,44 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
         if (dataList.isEmpty()) throw BusinessException("插入数据不能为空")
         if (dataList.size > 100) throw BusinessException("批量插入数据一次不能大于100条")
 
-        getObject(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        getObjectByApi(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
         val session = Session.getInstance()
         val roleId = session.roleId
 
+        val fields: MutableList<FieldInfo> = getFieldApiMap(objectApiName)
+            .mapNotNullTo(mutableListOf()) { if (it.value.type != "auto" && it.value.type != "summary") it.value else null }
+        val typeIdSet = getTypeList(objectApiName).mapTo(mutableListOf()) { it.id }
         if (withPerm) {
             val objectPerm = getObjectPerm(roleId, objectApiName)
                 ?: throw PermissionDeniedException("缺少对象 [api:$objectApiName] 新建权限")
             if (!objectPerm.ins) {
                 throw PermissionDeniedException("缺少对象 [api:$objectApiName] 新建权限")
             }
+            val writeableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, edit = true)
+            fields.removeIf { !writeableFieldApiSet.contains(it.api) }
+            val visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
+            typeIdSet.removeIf { !visibleTypeIdSet.contains(it) }
         }
 
-        val fields = getFieldApiMap(objectApiName).values
-        val writeableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, edit = true)
-
-        val visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
 
         val insertDataList = mutableListOf<LinkedHashMap<String, Any?>>()
-        if (withPerm) {
-            for (data in dataList) {
-                val typeId = data["type_id"] as String?
-                if (typeId == null) {
-                    logger.info("$objectApiName data:${data.toJson()}")
-                    throw BusinessException("新增数据未指定业务类型")
-                }
-                if (!visibleTypeIdSet.contains(typeId)) {
-                    throw PermissionDeniedException("缺少 [id:$typeId] 业务类型权限")
-                }
-
-                val insertData = LinkedHashMap<String, Any?>()
-                val now = LocalDateTime.now()
-                for (field in fields) {
-                    if (writeableFieldApiSet.contains(field.api)) {
-                        insertData[field.api] =
-                            checkNewDataValue(field, data[field.api], session, now)
-                    } else {
-                        insertData[field.api] = null
-                    }
-                }
-                insertDataList.add(insertData)
+        for (data in dataList) {
+            val typeId = data["type_id"] as String?
+            if (typeId == null) {
+                logger.info("$objectApiName data:${data.toJson()}")
+                throw BusinessException("新增数据未指定业务类型")
             }
-        } else {
-            for (data in dataList) {
-                val typeId = data["type_id"] as String?
-                if (typeId == null) {
-                    logger.info("$objectApiName data:${data.toJson()}")
-                    throw BusinessException("新增数据未指定业务类型")
-                }
-
-                val insertData = LinkedHashMap<String, Any?>()
-                val now = LocalDateTime.now()
-                for (field in fields) {
-                    insertData[field.api] = checkNewDataValue(field, data[field.api], session, now)
-                }
-                insertDataList.add(insertData)
+            if (!typeIdSet.contains(typeId)) {
+                throw BusinessException("业务类型 [id:$typeId] 不存在或缺少权限")
             }
+
+            val insertData = LinkedHashMap<String, Any?>()
+            val now = LocalDateTime.now()
+            for (field in fields) {
+                insertData[field.api] =
+                    checkNewDataValue(field, data[field.api], session, now)
+            }
+            insertDataList.add(insertData)
         }
 
         return insertDataList.mapTo(ArrayList()) { insertHelper(objectApiName, it) }
@@ -114,16 +97,11 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
     private fun insertHelper(
         objectApiName: String,
         new: LinkedHashMap<String, Any?>,
-        fields: Collection<String>? = null,
     ): MutableMap<String, Any?> {
 
         val columns = new.keys.joinToString("\",\"", "\"", "\"")
         val placeholder = "?" + ",?".repeat(new.keys.size - 1)
-        val returnColumns = if (fields == null) {
-            "\"id\"" + new.keys.joinToString("\",\"", ",\"", "\"")
-        } else {
-            "\"id\"" + fields.joinToString("\",\"", ",\"", "\"")
-        }
+        val returnColumns = "\"id\"" + new.keys.joinToString("\",\"", ",\"", "\"")
 
         //language=PostgreSQL
         val sql = """
@@ -147,13 +125,14 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
         if (dataList.isEmpty()) throw BusinessException("插入数据不能为空")
         if (dataList.size > 100) throw BusinessException("批量插入数据一次不能大于100条")
 
-        getObject(objectApiName)
+        getObjectByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
 
         val session = Session.getInstance()
         val now = LocalDateTime.now()
 
         val fieldMap = getFieldApiMap(objectApiName)
+            .filter { it.value.type != "auto" && it.value.type != "summary" }
 
 
         val insertDataList = mutableListOf<LinkedHashMap<String, Any?>>()

@@ -4,6 +4,7 @@ import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.exception.PermissionDeniedException
 import github.afezeria.hymn.common.platform.Session
+import github.afezeria.hymn.common.util.execute
 import java.time.LocalDateTime
 
 /**
@@ -58,7 +59,8 @@ interface ScriptDataServiceForUpdate : ScriptDataServiceForQuery {
         withPerm: Boolean,
         trigger: Boolean,
     ): MutableList<MutableMap<String, Any?>> {
-        getObject(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        val objectInfo =
+            getObjectByApi(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
 
         val session = Session.getInstance()
         val roleId = session.roleId
@@ -81,6 +83,12 @@ interface ScriptDataServiceForUpdate : ScriptDataServiceForQuery {
         val oldAndNewData =
             mutableListOf<Pair<MutableMap<String, Any?>, LinkedHashMap<String, Any?>>>()
         if (withPerm) {
+            val objectPerm = getObjectPerm(roleId, objectApiName)
+                ?: throw PermissionDeniedException("缺少对象 [api:$objectApiName] 更新权限")
+            if (!objectPerm.upd) {
+                throw PermissionDeniedException("缺少对象 [api:$objectApiName] 更新权限")
+            }
+
             val writeableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, edit = true)
             readableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, read = true)
             val visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
@@ -88,8 +96,26 @@ interface ScriptDataServiceForUpdate : ScriptDataServiceForQuery {
                 queryWithPerm(
                     objectApiName, "id = any (?)", ids,
                     fieldSet = emptySet(),
-                    writeable = true,
                 )
+            if (objectInfo.type == "custom") {
+                val updatableDataIdSet =
+                    database.useConnection {
+                        //language=PostgreSQL
+                        val sql = """
+                            select data_id from hymn_view."${objectApiName}_share" 
+                            where read_only = false and data_id = any (?) and (role_id = ? or account_id = ? or org_id = ?)
+                        """
+                        it.execute(sql, ids, session.roleId, session.accountId, session.orgId)
+                            .map { it["data_id"] as String }.toSet()
+                    }
+                oldDataList.removeIf { !updatableDataIdSet.contains(it["id"]) }
+            } else {
+                if (!objectPerm.editAll) {
+                    oldDataList.removeIf { it["owner_id"] == session.accountId }
+                }
+            }
+
+
             for (old in oldDataList) {
                 val id = old["id"] as String
                 updateDataMap[id]?.apply {
@@ -158,7 +184,7 @@ interface ScriptDataServiceForUpdate : ScriptDataServiceForQuery {
         } else {
             "\"id\"" + fields.joinToString("\",\"", ",\"", "\"")
         }
-//        val setStr = new.keys.filter { it != "id" }.joinToString(", ") { "$it = ?" }
+
 //        id字段在最后一个
         val setStr = new.keys.joinToString(", ") { "$it = ?" }.substringBeforeLast(",")
         //language=PostgreSQL

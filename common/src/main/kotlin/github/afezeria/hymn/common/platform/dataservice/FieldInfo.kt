@@ -1,5 +1,8 @@
 package github.afezeria.hymn.common.platform.dataservice
 
+import github.afezeria.hymn.common.exception.InnerException
+import github.afezeria.hymn.common.util.toJson
+
 class FieldInfo(
     val id: String,
     /**
@@ -64,4 +67,25 @@ class FieldInfo(
      * 是否是预定义字段
      */
     val predefined: Boolean,
-)
+) {
+    fun getTypeDescription(): String = when (type) {
+        "text" -> "String"
+        "check_box" -> "Boolean"
+        "check_box_group" -> "String"
+        "select" -> "String"
+        "integer" -> "Int"
+        "float" -> "Float"
+        "money" -> "BigDecimal"
+        "date" -> "LocalDateTime"
+        "datetime" -> "LocalDateTime"
+        "master_slave" -> "String"
+        "reference" -> "String"
+        "mreference" -> "String"
+        "areference" -> "String"
+        "picture" -> "String"
+        "files" -> "String"
+        "summary" -> ""
+        "auto" -> ""
+        else -> throw InnerException("字段定义错误，未定义的类型:${this.toJson()}")
+    }
+}

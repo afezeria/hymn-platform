@@ -30,14 +30,16 @@ interface BizObjectFieldService {
     ): MutableList<BizObjectField>
 
     /**
-     * 创建默认字段，[objId] 表示的对象已存在字段时抛出 [github.afezeria.hymn.common.util.InnerException]
+     * 创建默认字段，[objId] 表示的对象已存在字段时抛出 [github.afezeria.hymn.common.exception.InnerException]
      * @param objId 新建的对象的id
      * @param fieldName name字段的名称
      * @param autoRule 自动编号规则，name字段类型为text时为空
      */
     fun createDefaultField(objId: String, fieldName: String, autoRule: String?)
 
-    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectField>
+    fun pageFind(pageSize: Int, pageNum: Int): MutableList<BizObjectField>
+
+    fun findReferenceFieldByRefId(id: String): MutableList<BizObjectField>
 
 
 }

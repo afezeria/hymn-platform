@@ -29,10 +29,11 @@ interface PermService {
         accountId: String,
         objectId: String,
         dataId: String,
-        read: Boolean? = null,
-        update: Boolean? = null,
-        share: Boolean? = null,
-        owner: Boolean? = null,
+        read: Boolean = false,
+        update: Boolean = false,
+        delete: Boolean = false,
+        share: Boolean = false,
+        owner: Boolean = false,
     ): Boolean
 
 
@@ -43,12 +44,21 @@ interface PermService {
     fun hasDataPerm(
         objectId: String,
         dataId: String,
-        read: Boolean? = null,
-        update: Boolean? = null,
-        share: Boolean? = null,
-        owner: Boolean? = null,
+        read: Boolean = false,
+        update: Boolean = false,
+        delete: Boolean = false,
+        share: Boolean = false,
+        owner: Boolean = false,
     ): Boolean {
-        return hasDataPerm(Session.getInstance().accountId, dataId, read, update, share, owner)
+        return hasDataPerm(
+            Session.getInstance().accountId,
+            dataId,
+            read,
+            update,
+            delete,
+            share,
+            owner
+        )
     }
 
 

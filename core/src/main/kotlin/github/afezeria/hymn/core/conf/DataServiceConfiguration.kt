@@ -44,7 +44,7 @@ class DataServiceConfiguration {
 
     @Bean
     fun dataService(): DataService {
-        val createImpl = {
+        val createImpl = { memorize: Boolean ->
             ScriptDataServiceImpl(
                 accountService,
                 bizObjectService,
@@ -54,10 +54,11 @@ class DataServiceConfiguration {
                 typePermService,
                 fieldPermService,
                 databaseService,
-                scriptService
+                scriptService,
+                memorize
             )
         }
-        val impl = createImpl()
+        val impl = createImpl(false)
         val regex = Regex("^(query|get|has)")
         val proxy = Proxy.newProxyInstance(
             DataService::class.java.classLoader,
@@ -69,7 +70,7 @@ class DataServiceConfiguration {
                     *(args ?: arrayOfNulls<Any>(0))
                 )
             } else {
-                method?.invoke(createImpl(), *(args ?: arrayOfNulls<Any>(0)))
+                method?.invoke(createImpl(true), *(args ?: arrayOfNulls<Any>(0)))
             }
         } as DataService
         return proxy

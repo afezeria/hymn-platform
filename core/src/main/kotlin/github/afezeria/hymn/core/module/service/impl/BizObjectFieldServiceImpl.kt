@@ -237,7 +237,11 @@ class BizObjectFieldServiceImpl : BizObjectFieldService {
         }
     }
 
-    override fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectField> {
+    override fun pageFind(pageSize: Int, pageNum: Int): MutableList<BizObjectField> {
         return bizObjectFieldDao.pageSelect(null, pageSize, pageNum)
+    }
+
+    override fun findReferenceFieldByRefId(id: String): MutableList<BizObjectField> {
+        return bizObjectFieldDao.selectByRefIdAndActiveIsTrue(id)
     }
 }

@@ -31,12 +31,22 @@ class PermServiceImpl : PermService {
         accountId: String,
         objectId: String,
         dataId: String,
-        read: Boolean?,
-        update: Boolean?,
-        share: Boolean?,
-        owner: Boolean?
+        read: Boolean,
+        update: Boolean,
+        delete: Boolean,
+        share: Boolean,
+        owner: Boolean,
     ): Boolean {
-        return dataService.hasDataPerm(accountId, objectId, dataId, read, update, share, owner)
+        return dataService.hasDataPerm(
+            accountId,
+            objectId,
+            dataId,
+            read,
+            update,
+            delete,
+            share,
+            owner
+        )
     }
 
     override fun hasObjectPerm(

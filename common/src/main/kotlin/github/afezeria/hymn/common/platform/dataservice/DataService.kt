@@ -1,17 +1,26 @@
 package github.afezeria.hymn.common.platform.dataservice
 
+import org.intellij.lang.annotations.Language
+
 /**
  * 用于自定义对象和部分标准对象的增删改查接口
  * @author afezeria
  */
 interface DataService {
-    fun getObject(api: String): ObjectInfo?
+    fun getObjectByApi(api: String): ObjectInfo?
+    fun getObjectById(id: String): ObjectInfo?
     fun getObjectPerm(roleId: String, objectApiName: String): ObjectPerm?
 
     /**
      * key 为 api
      */
     fun getFieldApiMap(objectApiName: String): Map<String, FieldInfo>
+
+    /**
+     * 返回[objectApiName] 表示的对象的字段
+     * edit为true时返回有编辑权限的字段，read为true时返回有读权限的字段
+     * 同时为false时返回没有权限的字段
+     */
     fun getFieldApiSetWithPerm(
         roleId: String,
         objectApiName: String,
@@ -324,21 +333,27 @@ interface DataService {
      * 执行sql语句，进行的修改不会触发触发器，也不会记录在数据变更历史中
      * @param sql 对象api名称
      */
-    fun sql(sql: String, vararg params: Any?): MutableList<MutableMap<String, Any?>>
+    fun sql(
+        @Language("sql") sql: String,
+        vararg params: Any?
+    ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 执行sql语句，进行的修改不会触发触发器，也不会记录在数据变更历史中
      * @param sql 对象api名称
      * @param params 参数
      */
-    fun sql(sql: String, params: List<Any?>): MutableList<MutableMap<String, Any?>>
+    fun sql(@Language("sql") sql: String, params: List<Any?>): MutableList<MutableMap<String, Any?>>
 
     /**
      * 执行sql语句，进行的修改不会触发触发器，也不会记录在数据变更历史中
      * @param sql 对象api名称
      * @param params 命名参数
      */
-    fun sql(sql: String, params: Map<String, Any?>): MutableList<MutableMap<String, Any?>>
+    fun sql(
+        @Language("sql") sql: String,
+        params: Map<String, Any?>
+    ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 是否具有[dataId]所代表的数据的权限
@@ -376,6 +391,7 @@ interface DataService {
         dataId: String,
         read: Boolean = false,
         update: Boolean = false,
+        delete: Boolean = false,
         share: Boolean = false,
         owner: Boolean = false,
     ): Boolean
