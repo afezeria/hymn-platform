@@ -23,7 +23,7 @@ class ReferenceFieldTest : BaseDbTest() {
                         """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,${randomFieldNameAndApi("reference")},?,'null',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("reference")},?,'set_null',?,?,?,?,now(),now()) returning *;
                     """,
                         objId, null, *COMMON_INFO
                     )
@@ -45,6 +45,22 @@ class ReferenceFieldTest : BaseDbTest() {
     }
 
     @Test
+    fun `invalid ref_delete_policy value`() {
+        customBizObject {
+            shouldThrow<PSQLException> {
+                it.execute(
+                    """
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
+                        create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
+                    values (?,${randomFieldNameAndApi("reference")},?,'cascade',?,?,?,?,now(),now()) returning *;
+                    """,
+                    objId, randomUUIDStr(), *COMMON_INFO
+                )
+            }.message shouldContain "[f:inner:08101] 删除策略必须为 restrict/set_null"
+        }
+    }
+
+    @Test
     fun `reference object does not exists`() {
         customBizObject {
             shouldThrow<PSQLException> {
@@ -52,7 +68,7 @@ class ReferenceFieldTest : BaseDbTest() {
                     """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,${randomFieldNameAndApi("reference")},?,'null',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("reference")},?,'set_null',?,?,?,?,now(),now()) returning *;
                     """,
                     objId, randomUUIDStr(), *COMMON_INFO
                 )
@@ -70,7 +86,7 @@ class ReferenceFieldTest : BaseDbTest() {
                         """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,${randomFieldNameAndApi("reference")},?,'null',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("reference")},?,'set_null',?,?,?,?,now(),now()) returning *;
                     """,
                         objId,
                         refId, *COMMON_INFO
@@ -88,7 +104,7 @@ class ReferenceFieldTest : BaseDbTest() {
                     """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,${randomFieldNameAndApi("reference")},?,'null',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("reference")},?,'set_null',?,?,?,?,now(),now()) returning *;
                     """,
                     refId, objId, *COMMON_INFO
                 )[0]

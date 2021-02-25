@@ -83,7 +83,7 @@ class UpdateTriggerTest : BaseDbTest() {
                 """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'关联','reffield','reference',?,'null',?,?,?,?,now(),now()) returning *;
+                    values (?,'关联','reffield','reference',?,'set_null',?,?,?,?,now(),now()) returning *;
                     """,
                 o1Id, o2Id, *COMMON_INFO
             )[0]

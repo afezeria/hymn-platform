@@ -1535,6 +1535,11 @@ begin
                 if record_new.ref_id is null or record_new.ref_delete_policy is null then
                     raise exception '[f:inner:04600] 关联对象/关联对象删除策略不能为空';
                 end if;
+                --                 关联字段及引用的对象的数据被删除时，执行删除操作的用户可能没有删除当前数据的权限
+--                 所以关联字段和多选关联字段的删除策略只能是 restrict 或 null
+                if record_new.ref_delete_policy not in ('restrict', 'set_null') then
+                    raise exception '[f:inner:04700] 删除策略必须为 restrict/set_null';
+                end if;
                 select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
                 if not FOUND then
                     raise exception '[f:inner:04800] 引用对象 [id:%] 不存在',record_new.ref_id;
@@ -2048,6 +2053,11 @@ begin
                 if record_new.ref_id is null or record_new.ref_delete_policy is null then
                     raise exception '[f:inner:08100] 关联对象/关联对象删除策略不能为空';
                 end if;
+                --                 关联字段及引用的对象的数据被删除时，执行删除操作的用户可能没有删除当前数据的权限
+--                 所以关联字段和多选关联字段的删除策略只能是 restrict 或 null
+                if record_new.ref_delete_policy not in ('restrict', 'set_null') then
+                    raise exception '[f:inner:08101] 删除策略必须为 restrict/set_null';
+                end if;
                 select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
                 if not FOUND then
                     raise exception '[f:inner:08200] 引用对象 [id:%] 不存在',record_new.ref_id;
@@ -2133,8 +2143,12 @@ begin
             if tg_op = 'INSERT' or tg_op = 'UPDATE' then
 
 --         主详关系
-                if record_new.ref_id is null or record_new.ref_list_label is null then
-                    raise exception '[f:inner:08400] 关联对象/关联对象相关列表标签不能为空';
+                if record_new.ref_id is null or record_new.ref_list_label is null or
+                   record_new.ref_delete_policy is null then
+                    raise exception '[f:inner:08400] 关联对象/关联对象相关列表标签/删除策略不能为空';
+                end if;
+                if record_new.ref_delete_policy not in ('cascade', 'restrict') then
+                    raise exception '[f:inner:08401] 主从字段删除策略必须为 cascade 或 restrict';
                 end if;
                 select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
                 if not FOUND then

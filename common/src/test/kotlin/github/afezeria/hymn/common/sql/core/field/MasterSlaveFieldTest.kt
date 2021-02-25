@@ -27,7 +27,7 @@ class MasterSlaveFieldTest : BaseDbTest() {
                     """,
                         objId, randomUUIDStr(), *COMMON_INFO
                     )
-                }.message shouldContain "[f:inner:08400] 关联对象/关联对象相关列表标签不能为空"
+                }.message shouldContain "[f:inner:08400] 关联对象/关联对象相关列表标签/删除策略不能为空"
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
@@ -37,9 +37,35 @@ class MasterSlaveFieldTest : BaseDbTest() {
                     """,
                         objId, null, *COMMON_INFO
                     )
-                }.message shouldContain "[f:inner:08400] 关联对象/关联对象相关列表标签不能为空"
+                }.message shouldContain "[f:inner:08400] 关联对象/关联对象相关列表标签/删除策略不能为空"
 
+                shouldThrow<PSQLException> {
+                    it.execute(
+                        """
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,ref_delete_policy,
+                        create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
+                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象',null,?,?,?,?,now(),now()) returning *;
+                    """,
+                        objId, randomUUIDStr(), *COMMON_INFO
+                    )
+                }.message shouldContain "[f:inner:08400] 关联对象/关联对象相关列表标签/删除策略不能为空"
             }
+        }
+    }
+
+    @Test
+    fun `invalid ref_delete_policy value`() {
+        customBizObject {
+            shouldThrow<PSQLException> {
+                it.execute(
+                    """
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,ref_delete_policy,
+                        create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
+                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象','null',?,?,?,?,now(),now()) returning *;
+                    """,
+                    objId, randomUUIDStr(), *COMMON_INFO
+                )
+            }.message shouldContain "[f:inner:08401] 主从字段删除策略必须为 cascade 或 restrict"
         }
     }
 
@@ -49,9 +75,9 @@ class MasterSlaveFieldTest : BaseDbTest() {
             shouldThrow<PSQLException> {
                 it.execute(
                     """
-                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象','cascade',?,?,?,?,now(),now()) returning *;
                     """,
                     objId, randomUUIDStr(), *COMMON_INFO
                 )
@@ -67,9 +93,9 @@ class MasterSlaveFieldTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象','cascade',?,?,?,?,now(),now()) returning *;
                     """,
                         objId,
                         refId, *COMMON_INFO
@@ -78,6 +104,7 @@ class MasterSlaveFieldTest : BaseDbTest() {
             }
         }
     }
+
 
 
     @Test
@@ -89,9 +116,9 @@ class MasterSlaveFieldTest : BaseDbTest() {
             try {
                 val field = it.execute(
                     """
-                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象','cascade',?,?,?,?,now(),now()) returning *;
                     """,
                     slaveId, objId, *COMMON_INFO
                 )[0]

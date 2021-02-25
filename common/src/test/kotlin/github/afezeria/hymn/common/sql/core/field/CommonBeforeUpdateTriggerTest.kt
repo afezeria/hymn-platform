@@ -132,9 +132,9 @@ class CommonBeforeUpdateTriggerTest : BaseDbTest() {
                 )[0]["id"]
                 it.execute(
                     """
-                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,'主对象','masterfield','master_slave',?,'从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,'主对象','masterfield','master_slave',?,'从对象','cascade',?,?,?,?,now(),now()) returning *;
                     """,
                     objId, masterId, *COMMON_INFO
                 )[0]

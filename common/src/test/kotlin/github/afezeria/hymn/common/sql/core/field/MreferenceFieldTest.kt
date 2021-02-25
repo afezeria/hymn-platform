@@ -73,6 +73,23 @@ class MreferenceFieldTest : BaseDbTest() {
     }
 
     @Test
+    fun `invalid ref_delete_policy value`() {
+        adminConn.use {
+            shouldThrow<PSQLException> {
+                it.execute(
+                    """
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_delete_policy,
+                        ref_list_label,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
+                    values (?,${randomFieldNameAndApi("mreference")},?,'cascade','从对象',?,?,?,?,now(),now()) returning *;
+                    """,
+                    objId, randomUUIDStr(), *COMMON_INFO
+                )
+            }.message shouldContain "[f:inner:04700] 删除策略必须为 restrict/set_null"
+        }
+
+    }
+
+    @Test
     fun `reference object does not exist`() {
         adminConn.use {
             shouldThrow<PSQLException> {

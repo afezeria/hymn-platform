@@ -295,9 +295,9 @@ fun Connection.refBizObject(masterId: String = "", fn: RefBizObject.(Connection)
         if (masterId.isNotEmpty()) {
             val field = execute(
                 """
-                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象','cascade',?,?,?,?,now(),now()) returning *;
                     """,
                 data["id"], masterId, *COMMON_INFO
             )[0]
@@ -362,7 +362,7 @@ fun createBObject(
                 ref_delete_policy, standard_type, predefined, create_by_id, create_by, modify_by_id, 
                 modify_by, create_date, modify_date) 
             values ('type_id', ?, '业务类型','type_id', 'reference', '09da56a7de514895aea5c596820d0ced', 
-                'null', 'type_id', true, ?,?,?,?,now(),now());
+                'set_null', 'type_id', true, ?,?,?,?,now(),now());
         """,
             objId, *COMMON_INFO
         )
@@ -381,7 +381,7 @@ fun createBObject(
                 ref_delete_policy, standard_type, predefined, create_by_id, create_by, modify_by_id, 
                 modify_by, create_date, modify_date) 
             values ('owner_id', ?, '所有者','owner_id', 'reference', 'bcf5f00c2e6c494ea2318912a639031a', 
-                'null', 'owner_id', true, ?,?,?,?,now(),now());
+                'set_null', 'owner_id', true, ?,?,?,?,now(),now());
         """,
             objId, *COMMON_INFO
         )
@@ -391,7 +391,7 @@ fun createBObject(
                 ref_delete_policy, standard_type, predefined, create_by_id, create_by, modify_by_id, 
                 modify_by, create_date, modify_date) 
             values ('create_by_id', ?, '创建人','create_by_id', 'reference', 'bcf5f00c2e6c494ea2318912a639031a', 
-                'null', 'create_by_id', true, ?,?,?,?,now(),now());
+                'set_null', 'create_by_id', true, ?,?,?,?,now(),now());
         """,
             objId, *COMMON_INFO
         )
@@ -401,7 +401,7 @@ fun createBObject(
                 ref_delete_policy, standard_type, predefined, create_by_id, create_by, modify_by_id, 
                 modify_by, create_date, modify_date) 
             values ('modify_by_id', ?, '修改人','modify_by_id', 'reference', 'bcf5f00c2e6c494ea2318912a639031a', 
-                'null', 'modify_by_id', true, ?,?,?,?,now(),now());
+                'set_null', 'modify_by_id', true, ?,?,?,?,now(),now());
         """,
             objId, *COMMON_INFO
         )

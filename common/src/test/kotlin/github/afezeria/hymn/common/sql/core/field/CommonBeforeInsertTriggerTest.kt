@@ -275,9 +275,10 @@ class CommonBeforeInsertTriggerTest : BaseDbTest() {
             adminConn.use {
                 it.execute(
                     """
-                    insert into hymn.core_biz_object_field (ref_id,ref_list_label,biz_object_id, name, api, type, 
+                    insert into hymn.core_biz_object_field (ref_id,ref_list_label, ref_delete_policy, 
+                        biz_object_id, name, api, type, 
                         create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
-                    values (?,'子对象',?,${randomFieldNameAndApi("master_slave")},  ?, ?, ?, ?, now(), now()) returning *;
+                    values (?,'子对象','cascade',?,${randomFieldNameAndApi("master_slave")},  ?, ?, ?, ?, now(), now()) returning *;
                     """,
                     masterId, objId, *COMMON_INFO
                 )[0]

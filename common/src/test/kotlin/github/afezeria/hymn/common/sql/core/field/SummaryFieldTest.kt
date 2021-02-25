@@ -19,14 +19,6 @@ import org.postgresql.util.PSQLException
  * @author afezeria
  */
 class SummaryFieldTest : BaseDbTest() {
-//    companion object : KLogging() {
-//        @JvmStatic
-//        @AfterAll
-//        fun clear() {
-//            clearBObject()
-//        }
-//
-//    }
 
     @Test
     fun `required field is null`() {
@@ -167,7 +159,7 @@ class SummaryFieldTest : BaseDbTest() {
                 shouldThrow<PSQLException> {
                     it.execute(
                         """
-                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id , s_field_id , 
+                    insert into hymn.core_biz_object_field (biz_object_id,name,api,type,s_id, s_field_id, 
                     s_type , min_length ,create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
                     values (?,${randomFieldNameAndApi("summary")},?,?,'max',1,?,?,?,?,now(),now()) returning *;
                     """,

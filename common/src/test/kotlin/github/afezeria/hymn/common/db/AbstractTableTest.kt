@@ -86,13 +86,13 @@ internal class AbstractTableTest {
                     values ('cc25e3c045390139d47e1cb6d0c265af', 2, 42424204040, 3.2, 42.42420913, true, 'abc',
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin',
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin', now(), now()),
-                           ('d2dbcc6045390139d47f1cb6d0c265af', 2, null, 3.2, 42.42420913, true, true,
+                           ('d2dbcc6045390139d47f1cb6d0c265af', 3, null, 3.2, 42.42420913, true, true,
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin',
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin', now(), now()),
                            ('aaabcc6045390139d47f1cb6d0c265af', null, null, 3.2, 42.42420913, true, true,
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin',
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin', now(), now()),
-                           ('cfc431c0453a0139d4811cb6d0c265af', 2, null, 3.2, 42.42420913, true, null,
+                           ('cfc431c0453a0139d4811cb6d0c265af', 4, null, 3.2, 42.42420913, true, null,
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin',
                             'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin', now(), now());
             """

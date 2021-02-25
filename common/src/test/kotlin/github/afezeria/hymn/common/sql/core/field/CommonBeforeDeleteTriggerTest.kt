@@ -149,7 +149,7 @@ class CommonBeforeDeleteTriggerTest : BaseDbTest() {
                 )[0]["idx"] shouldNotBe null
             } finally {
                 deleteBObject(objId)
-                it.execute("drop table hymn.module_object_1");
+                it.execute("drop table hymn.module_object_1")
             }
 
         }
@@ -196,8 +196,9 @@ class CommonBeforeDeleteTriggerTest : BaseDbTest() {
                 it.execute(
                     """
                     insert into hymn.core_biz_object_field (biz_object_id,name,api,type,ref_id,ref_list_label,
+                        ref_delete_policy,
                         create_by_id, create_by, modify_by_id, modify_by,create_date,modify_date) 
-                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象',?,?,?,?,now(),now()) returning *;
+                    values (?,${randomFieldNameAndApi("master_slave")},?,'从对象','cascade',?,?,?,?,now(),now()) returning *;
                     """,
                     objId, masterId, *COMMON_INFO
                 )[0]

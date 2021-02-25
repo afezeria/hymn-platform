@@ -497,6 +497,7 @@ comment on table hymn.core_biz_object_field is '业务对象字段
 多选关联(mreference),任意关联(areference),汇总(summary),自动编号(auto),图片(picture);
 公共可选字段：remark （备注，只显示在管理员界面），help （帮助文本，显示在对象详情界面）
 通用字段：default_value （默认值，后端处理，字段间不能联动），formula （前端处理）
+说明：列表类型的值多个字段间用 '','' 号分割
 
 type: 文本 text
 required: min_length （最小长度）, max_length （最大长度）, visible_row （显示行数）
@@ -552,17 +553,19 @@ type: 主详 master_slave
 remark: 值为主表数据id
 required: ref_id （引用对象id）, ref_list_label （引用对象相关列表显示的标签）
 optional: default_value, formula, query_filter
-rule:
+rule: ref_delete_policy in (''restrict'', ''cascade'')
 
 type: 关联 reference
 remark: 值为引用数据id
 required: ref_id （引用对象id）, ref_delete_policy （引用对象数据被删除时是否阻止）
 optional: default_value, formula, query_filter, ref_list_label （引用对象相关列表显示的标签）
+rule: ref_delete_policy in (''restrict'', ''set_null'')
 
 type: 多选关联 mreference
-remark: 值为引用数据id，多个id间以英文逗号分隔
+remark: 值为引用数据id，多个id间以英文逗号分隔，远程对象的 ref_delete_policy 会被忽略
 required: ref_id （引用对象id）, ref_delete_policy （引用对象数据被删除时是否阻止）
 optional: default_value, formula, query_filter, ref_list_label （引用对象相关列表显示的标签）
+rule: ref_delete_policy in (''restrict'', ''set_null'')
 
 type: 任意关联 areference
 remark: 格式为：业务对象id,数据id;对象名称,数据name字段。默认不提供任意关联字段，
@@ -615,7 +618,7 @@ comment on column hymn.core_biz_object_field.master_field_id is '下拉字段依
 comment on column hymn.core_biz_object_field.optional_number is '副选框和下拉多选的可选个数';
 comment on column hymn.core_biz_object_field.ref_id is '关联的自定义对象id';
 comment on column hymn.core_biz_object_field.ref_list_label is '相关列表标签，当前对象在被关联对象的相关列表中显示的标签，为空时表示不能显示在被关联对象的相关列表中';
-comment on column hymn.core_biz_object_field.ref_delete_policy is '当字段为关联字段时，引用数据被删除时的动作。 cascade 级联删除当前对象数据, restrict 阻止删除被引用对象, null 无动作';
+comment on column hymn.core_biz_object_field.ref_delete_policy is '当字段为关联字段时，引用数据被删除时的动作。 cascade 级联删除引用当前数据的数据, restrict 阻止删除被引用数据, set_null 删除引用字段的值';
 comment on column hymn.core_biz_object_field.gen_rule is '编号规则，{000} 递增序列，必填，实际序号大小小于0的个数时将会在前面补0 ; {yyyy}/{yy} 年; {mm} 月; {dd} 日';
 comment on column hymn.core_biz_object_field.s_id is '汇总对象id';
 comment on column hymn.core_biz_object_field.s_field_id is '汇总字段id';
