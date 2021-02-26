@@ -31,7 +31,8 @@ class ScriptDataServiceImpl(
     private val scriptService: ScriptService,
     memorize: Boolean = true,
 ) : ScriptDataService, ScriptDataServiceForQuery,
-    ScriptDataServiceForInsert, ScriptDataServiceForUpdate, ScriptDataServiceForDelete, KLoggable {
+    ScriptDataServiceForInsert, ScriptDataServiceForUpdate, ScriptDataServiceForDelete,
+    ScriptDataServiceForShare, KLoggable {
 
     inner class EmptyMap<K, V> : AbstractMap<K, V>() {
         override val entries: MutableSet<MutableMap.MutableEntry<K, V>> = mutableSetOf()
@@ -62,10 +63,10 @@ class ScriptDataServiceImpl(
         objectApiName: String,
         oldData: MutableMap<String, Any?>?,
         newData: MutableMap<String, Any?>?,
-        trigger: Boolean,
+        withTrigger: Boolean,
     ): MutableMap<String, Any?> {
         val result: MutableMap<String, Any?>?
-        if (trigger) {
+        if (withTrigger) {
             var event = when (type) {
                 WriteType.INSERT -> BEFORE_INSERT
                 WriteType.UPDATE -> BEFORE_UPDATE
@@ -407,5 +408,12 @@ class ScriptDataServiceImpl(
                 )
             }
         }
+    }
+
+    private fun processingOssValueChange(
+        objectApiName: String,
+        oldData: MutableMap<String, Any?>,
+        newData: MutableMap<String, Any?>?
+    ) {
     }
 }

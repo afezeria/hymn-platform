@@ -1,6 +1,5 @@
 package github.afezeria.hymn.core.service.dataservice
 
-import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.common.exception.PermissionDeniedException
@@ -22,7 +21,7 @@ interface ScriptDataServiceForQuery : ScriptDataService {
     companion object : KLogging() {
         val qualifyTableForColumns = object : ExpressionVisitorAdapter() {
             override fun visit(subSelect: SubSelect?) {
-                throw BusinessException("无效的where表达式，表达式中不能包含子查询")
+                throw InnerException("无效的where表达式，表达式中不能包含子查询")
             }
 
             override fun visit(column: Column?) {
@@ -35,34 +34,25 @@ interface ScriptDataServiceForQuery : ScriptDataService {
     }
 
     override fun query(
-        objectApiName: String, expr: String,
-        offset: Long?,
-        limit: Long?,
+        objectApiName: String,
+        expr: String,
+        params: Collection<Any>
     ): MutableList<MutableMap<String, Any?>> {
-        return query(objectApiName, expr, emptyList(), offset, limit)
+        return query(objectApiName, expr, params, 0, 500, emptySet())
     }
-
 
     override fun query(
         objectApiName: String,
-        condition: Map<String, Any?>,
-        offset: Long?,
-        limit: Long?,
+        expr: String,
+        params: Collection<Any>,
+        offset: Long,
+        limit: Long
     ): MutableList<MutableMap<String, Any?>> {
-        val params = mutableListOf<Any>()
-        val expr = condition.map { (k, v) ->
-            if (v == null) {
-                "(\"$k\" is null)"
-            } else {
-                params.add(v)
-                "(\"$k\" = ?)"
-            }
-        }.joinToString(" and ")
-        return query(objectApiName, expr, params, offset, limit)
+        return query(objectApiName, expr, params, offset, limit, emptySet())
     }
 
     override fun queryById(objectApiName: String, id: String): MutableMap<String, Any?>? {
-        return query(objectApiName, "id = ?", listOf(id)).firstOrNull()
+        return query(objectApiName, "id = ?", listOf(id), 0, 1).firstOrNull()
     }
 
     override fun queryByIds(
@@ -76,61 +66,83 @@ interface ScriptDataServiceForQuery : ScriptDataService {
         objectApiName: String,
         expr: String,
         params: Collection<Any>,
-        offset: Long?,
-        limit: Long?,
+        offset: Long,
+        limit: Long,
         fieldSet: Set<String>,
     ): MutableList<MutableMap<String, Any?>> {
         getObjectByApi(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
 
-        val columns = if (fieldSet.isEmpty()) {
-            getFieldApiMap(objectApiName).keys.joinToString(", ")
+        val summaryFields = mutableListOf<FieldInfo>()
+        val columns = getFieldApiMap(objectApiName).mapNotNullTo(ArrayList()) { (k, v) ->
+            var key: String? = when {
+                fieldSet.isEmpty() -> k
+                fieldSet.contains(k) -> k
+                else -> null
+            }
+            if (v.type == "summary") {
+                key = null
+                summaryFields.add(v)
+            }
+            key
+        }.joinToString("\", \"", prefix = "\"", postfix = "\"")
+
+        val whereExpression = if (expr.isNotBlank()) {
+            " where " + CCJSqlParserUtil.parseCondExpression(expr).apply {
+                accept(qualifyTableForColumns)
+            }.toString()
         } else {
-            getFieldApiMap(objectApiName).keys.filter { fieldSet.contains(it) }.joinToString(", ")
+            ""
         }
 
-        val limitAndOffset =
-            "${if (limit != null) "limit $limit" else ""} ${if (offset != null) "offset $offset" else ""}"
+        val limitAndOffset = "limit $limit offset $offset"
+
         val sql = """
-            select $columns from hymn_view."$objectApiName" where $expr
+            select "id", $columns from hymn_view."$objectApiName" $whereExpression
             $limitAndOffset
         """
+        val resultIdMap = mutableMapOf<String, MutableMap<String, Any?>>()
         database.useConnection {
-            return it.execute(sql, params)
+            for (data in it.execute(sql, params)) {
+                resultIdMap[requireNotNull(data["id"]) as String] = data
+            }
         }
+//        查询汇总数据
+        if (resultIdMap.isNotEmpty()) {
+            for (field in summaryFields) {
+                val summaryResult = getSummaryValue(field, resultIdMap.keys)
+                for (map in summaryResult) {
+                    val id = requireNotNull(map["_master_id"])
+                    val value = map["_summary"]
+                    resultIdMap[id]!![field.api] = value
+                }
+            }
+        }
+        return resultIdMap.mapTo(ArrayList()) { it.value }
     }
 
     override fun queryWithPerm(
         objectApiName: String,
         expr: String,
-        offset: Long?,
-        limit: Long?,
+        params: Collection<Any>,
     ): MutableList<MutableMap<String, Any?>> {
-        return queryWithPerm(objectApiName, expr, emptyList(), offset, limit)
+        return queryWithPerm(objectApiName, expr, emptyList(), 0, 500, emptySet())
     }
 
     override fun queryWithPerm(
         objectApiName: String,
-        condition: Map<String, Any?>,
-        offset: Long?,
-        limit: Long?,
+        expr: String,
+        params: Collection<Any>,
+        offset: Long,
+        limit: Long,
     ): MutableList<MutableMap<String, Any?>> {
-        val params = mutableListOf<Any>()
-        val expr = condition.map { (k, v) ->
-            if (v == null) {
-                "(\"$k\" is null)"
-            } else {
-                params.add(v)
-                "(\"$k\" = ?)"
-            }
-        }.joinToString(" and ")
-        return queryWithPerm(objectApiName, expr, params, offset, limit)
+        return queryWithPerm(objectApiName, expr, emptyList(), offset, limit, emptySet())
     }
 
     override fun queryByIdWithPerm(
         objectApiName: String,
         id: String
     ): MutableMap<String, Any?>? {
-        return queryWithPerm(objectApiName, "id = ?", listOf(id)).firstOrNull()
+        return queryWithPerm(objectApiName, "id = ?", listOf(id), 0, 1).firstOrNull()
     }
 
     override fun queryByIdsWithPerm(
@@ -144,8 +156,8 @@ interface ScriptDataServiceForQuery : ScriptDataService {
         objectApiName: String,
         expr: String,
         params: Collection<Any>,
-        offset: Long?,
-        limit: Long?,
+        offset: Long,
+        limit: Long,
         fieldSet: Set<String>,
     ): MutableList<MutableMap<String, Any?>> {
 //        查询对象及权限
@@ -164,12 +176,6 @@ interface ScriptDataServiceForQuery : ScriptDataService {
         if (!objectPerm.que) {
             throw PermissionDeniedException("缺少对象 [api:$objectApiName] 查看权限")
         }
-//        if (writeable && !objectPerm.ins) {
-//            throw PermissionDeniedException("缺少对象 [api:$objectApiName] 更新权限")
-//        }
-//        if (deletable && !objectPerm.del) {
-//            throw PermissionDeniedException("缺少对象 [api:$objectApiName] 删除权限")
-//        }
 
         val visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
         val typeWhereStr = if (getTypeList(objectApiName).size == visibleTypeIdSet.size) {

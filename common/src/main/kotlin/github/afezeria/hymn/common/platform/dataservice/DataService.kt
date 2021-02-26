@@ -7,17 +7,29 @@ import org.intellij.lang.annotations.Language
  * @author afezeria
  */
 interface DataService {
+    /**
+     * 根据api查询对象
+     */
     fun getObjectByApi(api: String): ObjectInfo?
+
+    /**
+     *  根据id查询对象
+     */
     fun getObjectById(id: String): ObjectInfo?
+
+    /**
+     * 获取对象权限
+     */
     fun getObjectPerm(roleId: String, objectApiName: String): ObjectPerm?
 
     /**
-     * key 为 api
+     * 获取对象字段
+     * @return key:field api,value:field info
      */
     fun getFieldApiMap(objectApiName: String): Map<String, FieldInfo>
 
     /**
-     * 返回[objectApiName] 表示的对象的字段
+     * 返回指定角色拥有指定权限的对象的字段
      * edit为true时返回有编辑权限的字段，read为true时返回有读权限的字段
      * 同时为false时返回没有权限的字段
      */
@@ -28,55 +40,83 @@ interface DataService {
         edit: Boolean = false,
     ): Set<String>
 
+    /**
+     * 获取对象的所有业务类型
+     */
     fun getTypeList(objectApiName: String): Set<TypeInfo>
+
+    /**
+     * 返回指定对象下指定角色可用的权限的id列表
+     */
     fun getVisibleTypeIdSet(roleId: String, objectApiName: String): Set<String>
 
     /**
-     * 查询数据
+     * 共享数据给其他用户
+     * [accountId],[roleId],[orgId] 同时只生效一个，优先级按照参数顺序
+     *
+     * 同时给出多个值时如果第一个值所代表的数据不存在，直接返回false
+     *
+     * 三个值都为null时返回false
+     *
      * @param objectApiName 对象api名称
-     * @param expr where表达式
-     * @return 符合条件的数据列表
+     * @param accountId 根据帐号id共享
+     * @param roleId 根据权限共享
+     * @param orgId 根据组织共享
+     * @return true:共享成功
+     *  false:共享失败
      */
+    fun share(
+        objectApiName: String,
+        dataId: String,
+        accountId: String?,
+        roleId: String?,
+        orgId: String?,
+        readOnly: Boolean,
+    ): Boolean
+
+    /**
+     * @see [share]
+     */
+    fun shareWithPerm(
+        objectApiName: String,
+        dataId: String,
+        accountId: String?,
+        roleId: String?,
+        orgId: String?,
+        readOnly: Boolean,
+    ): Boolean
+
     fun query(
-        objectApiName: String, expr: String,
-        offset: Long? = null,
-        limit: Long? = null,
+        objectApiName: String, expr: String, params: Collection<Any>,
+    ): MutableList<MutableMap<String, Any?>>
+
+    fun query(
+        objectApiName: String, expr: String, params: Collection<Any>, offset: Long, limit: Long,
     ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 查询数据
      * @param objectApiName 对象api名称
      * @param expr where表达式
-     * @param params sql参数
+     * @param params 参数列表
+     * @param offset sql offset参数
+     * @param limit sql limit参数
+     * @param fieldSet 返回数据中包含的字段，set为空时返回所有字段
      * @return 数据列表
      */
     fun query(
         objectApiName: String,
         expr: String,
         params: Collection<Any>,
-        offset: Long? = null,
-        limit: Long? = null,
-        fieldSet: Set<String> = emptySet(),
-    ): MutableList<MutableMap<String, Any?>>
-
-    /**
-     * 查询数据
-     * @param objectApiName 对象api名称
-     * @param condition 查询条件，value不为空时条件为 "=" ，为空时条件为 "is null"，多个条件取和
-     * @return 符合条件的数据列表
-     */
-    fun query(
-        objectApiName: String,
-        condition: Map<String, Any?>,
-        offset: Long? = null,
-        limit: Long? = null,
+        offset: Long,
+        limit: Long,
+        fieldSet: Set<String>,
     ): MutableList<MutableMap<String, Any?>>
 
     /**
      * 查询数据
      * @param objectApiName 对象api名称
      * @param id 数据id
-     * @return 指定id的数据
      */
     fun queryById(objectApiName: String, id: String): MutableMap<String, Any?>?
 
@@ -84,59 +124,32 @@ interface DataService {
      * 查询数据
      * @param objectApiName 对象api名称
      * @param ids 数据id列表
-     * @return 指定id的数据
      */
     fun queryByIds(
         objectApiName: String,
         ids: Collection<String>
     ): MutableList<MutableMap<String, Any?>>
 
+    fun queryWithPerm(
+        objectApiName: String, expr: String, params: Collection<Any>,
+    ): MutableList<MutableMap<String, Any?>>
+
+    fun queryWithPerm(
+        objectApiName: String, expr: String, params: Collection<Any>, offset: Long, limit: Long,
+    ): MutableList<MutableMap<String, Any?>>
+
     /**
      * 根据权限查询数据
-     * @param objectApiName 对象api名称
-     * @param expr where表达式
-     * @return 符合条件的数据列表
      */
     fun queryWithPerm(
         objectApiName: String,
         expr: String,
-        offset: Long? = null,
-        limit: Long? = null,
+        params: Collection<Any>,
+        offset: Long,
+        limit: Long,
+        fieldSet: Set<String>,
     ): MutableList<MutableMap<String, Any?>>
 
-    /**
-     * 根据权限查询数据
-     * @param objectApiName 对象api名称
-     * @return 符合条件的数据列表
-     */
-    fun queryWithPerm(
-        objectApiName: String,
-        expr: String,
-        params: Collection<Any> = emptyList(),
-        offset: Long? = null,
-        limit: Long? = null,
-        fieldSet: Set<String> = emptySet(),
-    ): MutableList<MutableMap<String, Any?>>
-
-    /**
-     * 根据权限查询数据
-     * @param objectApiName 对象api名称
-     * @param condition 查询条件，value不为空是条件为 "=" ，为空是条件为 "is null"，多个条件取和
-     * @return 符合条件的数据列表
-     */
-    fun queryWithPerm(
-        objectApiName: String,
-        condition: Map<String, Any?>,
-        offset: Long? = null,
-        limit: Long? = null,
-    ): MutableList<MutableMap<String, Any?>>
-
-    /**
-     * 根据权限查询数据
-     * @param objectApiName 对象api名称
-     * @return 符合条件的数据列表
-     * @return 数据列表
-     */
     fun queryByIdWithPerm(objectApiName: String, id: String): MutableMap<String, Any?>?
 
     fun queryByIdsWithPerm(
@@ -154,7 +167,6 @@ interface DataService {
     fun insert(
         objectApiName: String,
         data: Map<String, Any?>,
-        trigger: Boolean = true
     ): MutableMap<String, Any?>
 
     /**
@@ -373,16 +385,17 @@ interface DataService {
      *
      * 5 当前用户被只读共享了指定数据 拥有权限：查看
      *
-     * [read],[update],[share],[owner]同时为null时返回false
+     * [read],[update],[share],[owner]同时为false时返回false
      * 帐号/业务对象/数据不存在时返回false
      *
      * @param accountId 用户id
      * @param objectId 对象id
      * @param dataId 数据id
-     * @param read 是否具有读权限，为null时不检查
-     * @param update 是否具有更新权限，为null时不检查
-     * @param share 是否具有共享权限，为null时不检查
-     * @param owner 是否检查当前用户为数据所有者，为null时不检查
+     * @param read 是否具有读权限
+     * @param update 是否具有更新权限
+     * @param delete 是否具有删除权限
+     * @param share 是否具有共享权限
+     * @param owner 是否检查当前用户为数据所有者
      * @exception [github.afezeria.hymn.common.exception.DataNotFoundException] 当对象或数据不存在时抛出
      */
     fun hasDataPerm(

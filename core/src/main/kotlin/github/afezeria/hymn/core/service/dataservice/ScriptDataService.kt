@@ -24,7 +24,7 @@ interface ScriptDataService : DataService {
         objectApiName: String,
         oldData: MutableMap<String, Any?>? = null,
         newData: MutableMap<String, Any?>? = null,
-        trigger: Boolean = true,
+        withTrigger: Boolean = true,
     ): MutableMap<String, Any?>
 
     override fun sql(sql: String, vararg params: Any?): MutableList<MutableMap<String, Any?>> {

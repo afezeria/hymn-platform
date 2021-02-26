@@ -16,7 +16,6 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
     override fun insert(
         objectApiName: String,
         data: Map<String, Any?>,
-        trigger: Boolean
     ): MutableMap<String, Any?> {
         return batchInsert(objectApiName, listOf(data)).first()
     }
