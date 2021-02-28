@@ -1,41 +1,89 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.BizObjectTypeLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
 import github.afezeria.hymn.core.module.entity.BizObjectTypeLayout
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
  */
-interface BizObjectTypeLayoutService {
+@Service
+class BizObjectTypeLayoutService {
 
-    fun removeById(id: String): Int
+    @Autowired
+    private lateinit var bizObjectTypeLayoutDao: BizObjectTypeLayoutDao
 
-    fun update(id: String, dto: BizObjectTypeLayoutDto): Int
+    @Autowired
+    private lateinit var dbService: DatabaseService
 
-    fun create(dto: BizObjectTypeLayoutDto): String
 
-    fun findAll(): MutableList<BizObjectTypeLayout>
+    fun removeById(id: String): Int {
+        bizObjectTypeLayoutDao.selectById(id)
+            ?: throw DataNotFoundException("BizObjectTypeLayout".msgById(id))
+        val i = bizObjectTypeLayoutDao.deleteById(id)
+        return i
+    }
 
-    fun findById(id: String): BizObjectTypeLayout?
+    fun update(id: String, dto: BizObjectTypeLayoutDto): Int {
+        val e = bizObjectTypeLayoutDao.selectById(id)
+            ?: throw DataNotFoundException("BizObjectTypeLayout".msgById(id))
+        dto.update(e)
+        val i = bizObjectTypeLayoutDao.update(e)
+        return i
+    }
 
-    fun findByIds(ids: List<String>): MutableList<BizObjectTypeLayout>
+    fun create(dto: BizObjectTypeLayoutDto): String {
+        val e = dto.toEntity()
+        val id = bizObjectTypeLayoutDao.insert(e)
+        return id
+    }
+
+    fun findAll(): MutableList<BizObjectTypeLayout> {
+        return bizObjectTypeLayoutDao.selectAll()
+    }
+
+
+    fun findById(id: String): BizObjectTypeLayout? {
+        return bizObjectTypeLayoutDao.selectById(id)
+    }
+
+    fun findByIds(ids: List<String>): MutableList<BizObjectTypeLayout> {
+        return bizObjectTypeLayoutDao.selectByIds(ids)
+    }
+
 
     fun findByRoleIdAndTypeIdAndLayoutId(
         roleId: String,
         typeId: String,
         layoutId: String,
-    ): BizObjectTypeLayout?
+    ): BizObjectTypeLayout? {
+        return bizObjectTypeLayoutDao.selectByRoleIdAndTypeIdAndLayoutId(roleId, typeId, layoutId)
+    }
 
     fun findByRoleId(
         roleId: String,
-    ): MutableList<BizObjectTypeLayout>
+    ): MutableList<BizObjectTypeLayout> {
+        return bizObjectTypeLayoutDao.selectByRoleId(roleId)
+    }
 
     fun findByBizObjectId(
         bizObjectId: String,
-    ): MutableList<BizObjectTypeLayout>
+    ): MutableList<BizObjectTypeLayout> {
+        return bizObjectTypeLayoutDao.selectByBizObjectId(bizObjectId)
+    }
 
-    fun batchCreate(dtoList: List<BizObjectTypeLayoutDto>): Int
-    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectTypeLayout>
+    fun batchCreate(dtoList: List<BizObjectTypeLayoutDto>): Int {
+        return bizObjectTypeLayoutDao.bulkInsert(dtoList.map { it.toEntity() })
+    }
+
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectTypeLayout> {
+        return bizObjectTypeLayoutDao.pageSelect(null, pageSize, pageNum)
+    }
 
 
 }

@@ -51,6 +51,19 @@ interface DataService {
     fun getVisibleTypeIdSet(roleId: String, objectApiName: String): Set<String>
 
     /**
+     * 查询共享数据
+     * [roleId],[orgId],[accountId]三个参数间为“或”关系
+     */
+    fun getShare(
+        objectApiName: String,
+        ids: Collection<String>,
+        roleId: String?,
+        orgId: String?,
+        accountId: String?,
+        readOnly: Boolean?,
+    ): MutableList<ShareTable>
+
+    /**
      * 共享数据给其他用户
      * [accountId],[roleId],[orgId] 同时只生效一个，优先级按照参数顺序
      *
@@ -161,7 +174,6 @@ interface DataService {
      * 插入数据
      * @param objectApiName 对象api名称
      * @param data 待插入的数据，插入成功后data中将新增key为id的键值对
-     * @param trigger 是否触发触发器
      * @return 新增数据id
      */
     fun insert(

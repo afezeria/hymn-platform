@@ -7,7 +7,6 @@ import github.afezeria.hymn.common.exception.ResourceNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.AccountDto
 import github.afezeria.hymn.core.module.entity.Account
-import github.afezeria.hymn.core.module.service.AccountService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired

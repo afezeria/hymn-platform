@@ -1,30 +1,66 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.AccountMenuLayoutDao
 import github.afezeria.hymn.core.module.dto.AccountMenuLayoutDto
 import github.afezeria.hymn.core.module.entity.AccountMenuLayout
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
  */
-interface AccountMenuLayoutService {
+@Service
+class AccountMenuLayoutService {
 
-    fun removeById(id: String): Int
+    @Autowired
+    private lateinit var accountMenuLayoutDao: AccountMenuLayoutDao
 
-    fun update(id: String, dto: AccountMenuLayoutDto): Int
+    fun pageFind(pageSize: Int, pageNum: Int): List<AccountMenuLayout> {
+        return accountMenuLayoutDao.pageSelect(null, pageSize, pageNum)
+    }
 
-    fun create(dto: AccountMenuLayoutDto): String
+    fun removeById(id: String): Int {
+        accountMenuLayoutDao.selectById(id)
+            ?: throw DataNotFoundException("AccountMenuLayout".msgById(id))
+        val i = accountMenuLayoutDao.deleteById(id)
+        return i
+    }
 
-    fun findAll(): MutableList<AccountMenuLayout>
+    fun update(id: String, dto: AccountMenuLayoutDto): Int {
+        val e = accountMenuLayoutDao.selectById(id)
+            ?: throw DataNotFoundException("AccountMenuLayout".msgById(id))
+        dto.update(e)
+        val i = accountMenuLayoutDao.update(e)
+        return i
+    }
 
-    fun findById(id: String): AccountMenuLayout?
+    fun create(dto: AccountMenuLayoutDto): String {
+        val e = dto.toEntity()
+        val id = accountMenuLayoutDao.insert(e)
+        return id
+    }
 
-    fun findByIds(ids: List<String>): MutableList<AccountMenuLayout>
+    fun findAll(): MutableList<AccountMenuLayout> {
+        return accountMenuLayoutDao.selectAll()
+    }
+
+
+    fun findById(id: String): AccountMenuLayout? {
+        return accountMenuLayoutDao.selectById(id)
+    }
+
+    fun findByIds(ids: List<String>): MutableList<AccountMenuLayout> {
+        return accountMenuLayoutDao.selectByIds(ids)
+    }
+
 
     fun findByAccountId(
         accountId: String,
-    ): MutableList<AccountMenuLayout>
-
-    fun pageFind(pageSize: Int, pageNum: Int): List<AccountMenuLayout>
+    ): MutableList<AccountMenuLayout> {
+        return accountMenuLayoutDao.selectByAccountId(accountId)
+    }
 
 
 }

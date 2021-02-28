@@ -79,8 +79,6 @@ class BizObjectFieldDto(
         required = true
     )
     var predefined: Boolean,
-    @ApiModelProperty(value = "字段权限")
-    var permList: List<BizObjectFieldPermDto> = emptyList()
 ) {
     fun toEntity(): BizObjectField {
         return BizObjectField(

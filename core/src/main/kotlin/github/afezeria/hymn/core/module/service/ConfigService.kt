@@ -1,30 +1,71 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.ConfigDao
 import github.afezeria.hymn.core.module.dto.ConfigDto
 import github.afezeria.hymn.core.module.entity.Config
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
  */
-interface ConfigService {
+@Service
+class ConfigService {
 
-    fun removeById(id: String): Int
+    @Autowired
+    private lateinit var configDao: ConfigDao
 
-    fun update(id: String, dto: ConfigDto): Int
+    @Autowired
+    private lateinit var dbService: DatabaseService
 
-    fun create(dto: ConfigDto): String
 
-    fun findAll(): MutableList<Config>
+    fun removeById(id: String): Int {
+        configDao.selectById(id)
+            ?: throw DataNotFoundException("Config".msgById(id))
+        val i = configDao.deleteById(id)
+        return i
+    }
 
-    fun findById(id: String): Config?
+    fun update(id: String, dto: ConfigDto): Int {
+        val e = configDao.selectById(id)
+            ?: throw DataNotFoundException("Config".msgById(id))
+        dto.update(e)
+        val i = configDao.update(e)
+        return i
+    }
 
-    fun findByIds(ids: List<String>): MutableList<Config>
+    fun create(dto: ConfigDto): String {
+        val e = dto.toEntity()
+        val id = configDao.insert(e)
+        return id
+    }
+
+    fun findAll(): MutableList<Config> {
+        return configDao.selectAll()
+    }
+
+
+    fun findById(id: String): Config? {
+        return configDao.selectById(id)
+    }
+
+    fun findByIds(ids: List<String>): MutableList<Config> {
+        return configDao.selectByIds(ids)
+    }
+
 
     fun findByKey(
         key: String,
-    ): MutableList<Config>
+    ): MutableList<Config> {
+        return configDao.selectByKeyPattern(key)
+    }
 
-    fun pageFind(pageSize: Int, pageNum: Int): List<Config>
+    fun pageFind(pageSize: Int, pageNum: Int): List<Config> {
+        return configDao.pageSelect(null, pageSize, pageNum)
+    }
 
 
 }

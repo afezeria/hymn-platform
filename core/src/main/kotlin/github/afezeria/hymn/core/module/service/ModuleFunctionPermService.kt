@@ -1,45 +1,97 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.ModuleFunctionPermDao
 import github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
 import github.afezeria.hymn.core.module.entity.ModuleFunctionPerm
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
  */
-interface ModuleFunctionPermService {
+@Service
+class ModuleFunctionPermService {
 
-    fun removeById(id: String): Int
+    @Autowired
+    private lateinit var moduleFunctionPermDao: ModuleFunctionPermDao
 
-    fun update(id: String, dto: ModuleFunctionPermDto): Int
+    @Autowired
+    private lateinit var dbService: DatabaseService
 
-    fun create(dto: ModuleFunctionPermDto): String
 
-    fun findAll(): MutableList<ModuleFunctionPerm>
+    fun removeById(id: String): Int {
+        moduleFunctionPermDao.selectById(id)
+            ?: throw DataNotFoundException("ModuleFunctionPerm".msgById(id))
+        val i = moduleFunctionPermDao.deleteById(id)
+        return i
+    }
 
-    fun findById(id: String): ModuleFunctionPerm?
+    fun update(id: String, dto: ModuleFunctionPermDto): Int {
+        val e = moduleFunctionPermDao.selectById(id)
+            ?: throw DataNotFoundException("ModuleFunctionPerm".msgById(id))
+        dto.update(e)
+        val i = moduleFunctionPermDao.update(e)
+        return i
+    }
 
-    fun findByIds(ids: List<String>): MutableList<ModuleFunctionPerm>
+    fun create(dto: ModuleFunctionPermDto): String {
+        val e = dto.toEntity()
+        val id = moduleFunctionPermDao.insert(e)
+        return id
+    }
+
+    fun findAll(): MutableList<ModuleFunctionPerm> {
+        return moduleFunctionPermDao.selectAll()
+    }
+
+
+    fun findById(id: String): ModuleFunctionPerm? {
+        return moduleFunctionPermDao.selectById(id)
+    }
+
+    fun findByIds(ids: List<String>): MutableList<ModuleFunctionPerm> {
+        return moduleFunctionPermDao.selectByIds(ids)
+    }
+
 
     fun findByRoleIdAndModuleApiAndFunctionApi(
         roleId: String,
         moduleApi: String,
         functionApi: String,
-    ): ModuleFunctionPerm?
+    ): ModuleFunctionPerm? {
+        return moduleFunctionPermDao.selectByRoleIdAndModuleApiAndFunctionApi(
+            roleId,
+            moduleApi,
+            functionApi,
+        )
+    }
 
     fun findByRoleId(
         roleId: String,
-    ): MutableList<ModuleFunctionPerm>
+    ): MutableList<ModuleFunctionPerm> {
+        return moduleFunctionPermDao.selectByRoleId(roleId)
+    }
 
 
-    fun batchCreate(dtoList: List<ModuleFunctionPermDto>): Int
+    fun batchCreate(dtoList: List<ModuleFunctionPermDto>): Int {
+        return moduleFunctionPermDao.bulkInsert(dtoList.map { it.toEntity() })
+    }
 
-    /**
-     * insert or update on conflict (roleId,functionApi)
-     */
-    fun batchSave(dtoList: List<ModuleFunctionPermDto>): Int
-    fun pageFind(pageSize: Int, pageNum: Int): List<ModuleFunctionPerm>
+    fun batchSave(dtoList: List<ModuleFunctionPermDto>): Int {
+        return moduleFunctionPermDao.bulkInsertOrUpdate(dtoList.map { it.toEntity() })
+    }
 
-    fun findByRoleIdAndFunctionApi(roleId: String, functionApi: String): ModuleFunctionPerm?
+    fun pageFind(pageSize: Int, pageNum: Int): List<ModuleFunctionPerm> {
+        return moduleFunctionPermDao.pageSelect(null, pageSize, pageNum)
+    }
 
-
+    fun findByRoleIdAndFunctionApi(
+        roleId: String,
+        functionApi: String
+    ): ModuleFunctionPerm? {
+        TODO("Not yet implemented")
+    }
 }

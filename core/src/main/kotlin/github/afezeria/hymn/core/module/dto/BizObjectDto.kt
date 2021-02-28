@@ -38,8 +38,6 @@ class BizObjectDto(
     var canDelete: Boolean? = null,
     @ApiModelProperty(value = "name字段名称", required = true)
     var fieldName: String,
-    @ApiModelProperty(value = "对象权限")
-    var permList: List<BizObjectPermDto> = emptyList(),
     @ApiModelProperty(value = "自动编号规则，name字段为文本类型时为空")
     var autoRule: String? = null
 ) {

@@ -18,14 +18,17 @@ interface ScriptDataService : DataService {
     val database: Database
 
     fun execute(
-        sql: String,
-        params: Collection<Any?>,
+        sqlBuilder: (
+            oldData: Map<String, Any?>?,
+            newData: RecordMap?,
+        ) -> Pair<String, Collection<Any?>>,
         type: WriteType,
         objectApiName: String,
-        oldData: MutableMap<String, Any?>? = null,
-        newData: MutableMap<String, Any?>? = null,
-        withTrigger: Boolean = true,
+        oldData: Map<String, Any?>?,
+        newData: RecordMap?,
+        withTrigger: Boolean,
     ): MutableMap<String, Any?>
+
 
     override fun sql(sql: String, vararg params: Any?): MutableList<MutableMap<String, Any?>> {
         database.useConnection {

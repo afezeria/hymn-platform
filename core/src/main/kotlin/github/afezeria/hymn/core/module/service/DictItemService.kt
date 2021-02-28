@@ -1,35 +1,78 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.DictItemDao
 import github.afezeria.hymn.core.module.dto.DictItemDto
 import github.afezeria.hymn.core.module.entity.DictItem
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
  */
-interface DictItemService {
+@Service
+class DictItemService {
 
-    fun removeById(id: String): Int
+    @Autowired
+    private lateinit var dictItemDao: DictItemDao
 
-    fun update(id: String, dto: DictItemDto): Int
+    @Autowired
+    private lateinit var dbService: DatabaseService
 
-    fun create(dto: DictItemDto): String
 
-    fun findAll(): MutableList<DictItem>
+    fun removeById(id: String): Int {
+        dictItemDao.selectById(id)
+            ?: throw DataNotFoundException("DictItem".msgById(id))
+        val i = dictItemDao.deleteById(id)
+        return i
+    }
 
-    fun findById(id: String): DictItem?
+    fun update(id: String, dto: DictItemDto): Int {
+        val e = dictItemDao.selectById(id)
+            ?: throw DataNotFoundException("DictItem".msgById(id))
+        dto.update(e)
+        val i = dictItemDao.update(e)
+        return i
+    }
 
-    fun findByIds(ids: List<String>): MutableList<DictItem>
+    fun create(dto: DictItemDto): String {
+        val e = dto.toEntity()
+        val id = dictItemDao.insert(e)
+        return id
+    }
+
+    fun findAll(): MutableList<DictItem> {
+        return dictItemDao.selectAll()
+    }
+
+
+    fun findById(id: String): DictItem? {
+        return dictItemDao.selectById(id)
+    }
+
+    fun findByIds(ids: List<String>): MutableList<DictItem> {
+        return dictItemDao.selectByIds(ids)
+    }
+
 
     fun findByDictIdAndCode(
         dictId: String,
         code: String,
-    ): DictItem?
+    ): DictItem? {
+        return dictItemDao.selectByDictIdAndCode(dictId, code)
+    }
 
     fun findByDictId(
         dictId: String,
-    ): MutableList<DictItem>
+    ): MutableList<DictItem> {
+        return dictItemDao.selectByDictId(dictId)
+    }
 
-    fun pageFind(pageSize: Int, pageNum: Int): List<DictItem>
+    fun pageFind(pageSize: Int, pageNum: Int): List<DictItem> {
+        return dictItemDao.pageSelect(null, pageSize, pageNum)
+    }
 
 
 }

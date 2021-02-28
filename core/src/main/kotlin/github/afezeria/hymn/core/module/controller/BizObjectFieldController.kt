@@ -8,7 +8,6 @@ import github.afezeria.hymn.common.exception.ResourceNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectFieldDto
 import github.afezeria.hymn.core.module.entity.BizObjectField
-import github.afezeria.hymn.core.module.service.BizObjectFieldService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired

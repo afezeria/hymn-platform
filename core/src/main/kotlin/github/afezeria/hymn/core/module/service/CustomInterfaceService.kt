@@ -1,30 +1,71 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.CustomInterfaceDao
 import github.afezeria.hymn.core.module.dto.CustomInterfaceDto
 import github.afezeria.hymn.core.module.entity.CustomInterface
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
  */
-interface CustomInterfaceService {
+@Service
+class CustomInterfaceService {
 
-    fun removeById(id: String): Int
+    @Autowired
+    private lateinit var customInterfaceDao: CustomInterfaceDao
 
-    fun update(id: String, dto: CustomInterfaceDto): Int
+    @Autowired
+    private lateinit var dbService: DatabaseService
 
-    fun create(dto: CustomInterfaceDto): String
 
-    fun findAll(): MutableList<CustomInterface>
+    fun removeById(id: String): Int {
+        customInterfaceDao.selectById(id)
+            ?: throw DataNotFoundException("CustomInterface".msgById(id))
+        val i = customInterfaceDao.deleteById(id)
+        return i
+    }
 
-    fun findById(id: String): CustomInterface?
+    fun update(id: String, dto: CustomInterfaceDto): Int {
+        val e = customInterfaceDao.selectById(id)
+            ?: throw DataNotFoundException("CustomInterface".msgById(id))
+        dto.update(e)
+        val i = customInterfaceDao.update(e)
+        return i
+    }
 
-    fun findByIds(ids: List<String>): MutableList<CustomInterface>
+    fun create(dto: CustomInterfaceDto): String {
+        val e = dto.toEntity()
+        val id = customInterfaceDao.insert(e)
+        return id
+    }
+
+    fun findAll(): MutableList<CustomInterface> {
+        return customInterfaceDao.selectAll()
+    }
+
+
+    fun findById(id: String): CustomInterface? {
+        return customInterfaceDao.selectById(id)
+    }
+
+    fun findByIds(ids: List<String>): MutableList<CustomInterface> {
+        return customInterfaceDao.selectByIds(ids)
+    }
+
 
     fun findByApi(
         api: String,
-    ): CustomInterface?
+    ): CustomInterface? {
+        return customInterfaceDao.selectByApi(api)
+    }
 
-    fun pageFind(pageSize: Int, pageNum: Int): List<CustomInterface>
+    fun pageFind(pageSize: Int, pageNum: Int): List<CustomInterface> {
+        return customInterfaceDao.pageSelect(null, pageSize, pageNum)
+    }
 
 
 }

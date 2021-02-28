@@ -362,7 +362,6 @@ interface ScriptDataServiceForQuery : ScriptDataService {
             parameterList.add(session.accountId)
             parameterList.addAll(params)
         }
-        sql = sql.trimIndent()
         val resultIdMap = mutableMapOf<String, MutableMap<String, Any?>>()
         database.useConnection {
             for (data in it.execute(sql, parameterList)) {

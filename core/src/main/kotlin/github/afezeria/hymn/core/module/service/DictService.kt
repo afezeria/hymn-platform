@@ -1,30 +1,71 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.DictDao
 import github.afezeria.hymn.core.module.dto.DictDto
 import github.afezeria.hymn.core.module.entity.Dict
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
  */
-interface DictService {
+@Service
+class DictService {
 
-    fun removeById(id: String): Int
+    @Autowired
+    private lateinit var dictDao: DictDao
 
-    fun update(id: String, dto: DictDto): Int
+    @Autowired
+    private lateinit var dbService: DatabaseService
 
-    fun create(dto: DictDto): String
 
-    fun findAll(): MutableList<Dict>
+    fun removeById(id: String): Int {
+        dictDao.selectById(id)
+            ?: throw DataNotFoundException("Dict".msgById(id))
+        val i = dictDao.deleteById(id)
+        return i
+    }
 
-    fun findById(id: String): Dict?
+    fun update(id: String, dto: DictDto): Int {
+        val e = dictDao.selectById(id)
+            ?: throw DataNotFoundException("Dict".msgById(id))
+        dto.update(e)
+        val i = dictDao.update(e)
+        return i
+    }
 
-    fun findByIds(ids: List<String>): MutableList<Dict>
+    fun create(dto: DictDto): String {
+        val e = dto.toEntity()
+        val id = dictDao.insert(e)
+        return id
+    }
+
+    fun findAll(): MutableList<Dict> {
+        return dictDao.selectAll()
+    }
+
+
+    fun findById(id: String): Dict? {
+        return dictDao.selectById(id)
+    }
+
+    fun findByIds(ids: List<String>): MutableList<Dict> {
+        return dictDao.selectByIds(ids)
+    }
+
 
     fun findByApi(
         api: String,
-    ): Dict?
+    ): Dict? {
+        return dictDao.selectByApi(api)
+    }
 
-    fun pageFind(pageSize: Int, pageNum: Int): List<Dict>
+    fun pageFind(pageSize: Int, pageNum: Int): List<Dict> {
+        return dictDao.pageSelect(null, pageSize, pageNum)
+    }
 
 
 }

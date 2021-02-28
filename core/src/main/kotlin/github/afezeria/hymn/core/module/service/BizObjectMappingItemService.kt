@@ -1,25 +1,64 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.BizObjectMappingItemDao
 import github.afezeria.hymn.core.module.dto.BizObjectMappingItemDto
 import github.afezeria.hymn.core.module.entity.BizObjectMappingItem
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
  */
-interface BizObjectMappingItemService {
+@Service
+class BizObjectMappingItemService {
 
-    fun removeById(id: String): Int
+    @Autowired
+    private lateinit var bizObjectMappingItemDao: BizObjectMappingItemDao
 
-    fun update(id: String, dto: BizObjectMappingItemDto): Int
+    @Autowired
+    private lateinit var dbService: DatabaseService
 
-    fun create(dto: BizObjectMappingItemDto): String
 
-    fun findAll(): MutableList<BizObjectMappingItem>
+    fun removeById(id: String): Int {
+        bizObjectMappingItemDao.selectById(id)
+            ?: throw DataNotFoundException("BizObjectMappingItem".msgById(id))
+        val i = bizObjectMappingItemDao.deleteById(id)
+        return i
+    }
 
-    fun findById(id: String): BizObjectMappingItem?
+    fun update(id: String, dto: BizObjectMappingItemDto): Int {
+        val e = bizObjectMappingItemDao.selectById(id)
+            ?: throw DataNotFoundException("BizObjectMappingItem".msgById(id))
+        dto.update(e)
+        val i = bizObjectMappingItemDao.update(e)
+        return i
+    }
 
-    fun findByIds(ids: List<String>): MutableList<BizObjectMappingItem>
-    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectMappingItem>
+    fun create(dto: BizObjectMappingItemDto): String {
+        val e = dto.toEntity()
+        val id = bizObjectMappingItemDao.insert(e)
+        return id
+    }
+
+    fun findAll(): MutableList<BizObjectMappingItem> {
+        return bizObjectMappingItemDao.selectAll()
+    }
+
+
+    fun findById(id: String): BizObjectMappingItem? {
+        return bizObjectMappingItemDao.selectById(id)
+    }
+
+    fun findByIds(ids: List<String>): MutableList<BizObjectMappingItem> {
+        return bizObjectMappingItemDao.selectByIds(ids)
+    }
+
+    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectMappingItem> {
+        return bizObjectMappingItemDao.pageSelect(null, pageSize, pageNum)
+    }
 
 
 }

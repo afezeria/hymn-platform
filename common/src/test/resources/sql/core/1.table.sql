@@ -627,7 +627,7 @@ comment on column hymn.core_biz_object_field.query_filter is '字段为汇总字
 comment on column hymn.core_biz_object_field.filter_list is '页面中填入值时可以选择的对象的过滤列表，多个id间以英文逗号分隔，为空时可以选择所有有查看权限的对象，不为空时可以选择列表中所有有查看权限的对象';
 comment on column hymn.core_biz_object_field.help is '说明，显示在页面上的帮助信息';
 comment on column hymn.core_biz_object_field.remark is '备注';
-comment on column hymn.core_biz_object_field.standard_type is '标准类型 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型 ;; optional_value:[create_by_id(创建人id), create_by(创建人), modify_by_id(修改人id), modify_by(修改人), create_date(创建时间), modify_date(修改时间), org_id(组织id), lock_state(锁定状态), name(名称), type_id(业务类型), owner_id(所有人)]';
+comment on column hymn.core_biz_object_field.standard_type is '标准类型 自定义字段不能设置该值，用于处理模块对象和标准对象的特殊字段的类型 ;; optional_value:[create_by_id(创建人id), modify_by_id(修改人id),  create_date(创建时间), modify_date(修改时间), org_id(组织id), lock_state(锁定状态), name(名称), type_id(业务类型), owner_id(所有人id)]';
 comment on column hymn.core_biz_object_field.predefined is '是否是预定义字段，区分对象中的自定义字段与预定义字段，预定义字段该值为true且source_column与api相等，后台对象管理界面中不能删除和修改';
 comment on column hymn.core_biz_object_field.join_view_name is '多选字段中间表视图名，中间表名为视图名加上前缀 core_ ，表结构为（s_id,t_id)，s_id 为当前数据id， t_id为关联数据id';
 
@@ -635,7 +635,7 @@ comment on column hymn.core_biz_object_field.join_view_name is '多选字段中�
 drop table if exists hymn.core_biz_object_layout cascade;
 create table hymn.core_biz_object_layout
 (
-    id                      text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    id                      text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     biz_object_id           text        not null,
     name                    text        not null,
     remark                  text,

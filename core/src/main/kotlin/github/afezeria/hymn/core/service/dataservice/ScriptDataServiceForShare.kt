@@ -3,12 +3,52 @@ package github.afezeria.hymn.core.service.dataservice
 import github.afezeria.hymn.common.constant.AccountType
 import github.afezeria.hymn.common.exception.PermissionDeniedException
 import github.afezeria.hymn.common.platform.Session
+import github.afezeria.hymn.common.platform.dataservice.ShareTable
 import github.afezeria.hymn.common.util.execute
 
 /**
  * @author afezeria
  */
-interface ScriptDataServiceForShare : ScriptDataServiceForQuery {
+interface ScriptDataServiceForShare : ScriptDataService {
+    override fun getShare(
+        objectApiName: String,
+        ids: Collection<String>,
+        roleId: String?,
+        orgId: String?,
+        accountId: String?,
+        readOnly: Boolean?,
+    ): MutableList<ShareTable> {
+        getObjectByApi(objectApiName) ?: return mutableListOf()
+        val params = mutableListOf<Any?>()
+        params.add(ids)
+        val subWhere = listOf(
+            "role_id" to roleId,
+            "account_id" to accountId,
+            "org_id" to orgId
+        ).filter { it.second != null }
+            .run {
+                for (pair in this) {
+                    params.add(pair.second)
+                }
+                joinToString(" or ", " and (", ") ") { "${it.first} = ?" }
+            }
+        val readOnlySubWhere = if (readOnly != null) {
+            params.add(readOnly)
+            " and read_only = ?"
+        } else {
+            ""
+        }
+        //language=PostgreSQL
+        val sql = """
+            select data_id,role_id,org_id,account_id,read_only from hymn_view."${objectApiName}_share" 
+            where data_id = any (?) $subWhere $readOnlySubWhere
+        """.trimIndent()
+        database.useConnection {
+            return it.execute(sql, params)
+                .mapTo(ArrayList()) { ShareTable(it) }
+        }
+    }
+
     override fun share(
         objectApiName: String,
         dataId: String,

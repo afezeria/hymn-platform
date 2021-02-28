@@ -57,14 +57,21 @@ class ScriptDataServiceImpl(
         get() = databaseService.user()
 
     override fun execute(
-        sql: String,
-        params: Collection<Any?>,
+        sqlBuilder: (
+            oldData: Map<String, Any?>?,
+            newData: RecordMap?,
+        ) -> Pair<String, Collection<Any?>>,
         type: WriteType,
         objectApiName: String,
-        oldData: MutableMap<String, Any?>?,
-        newData: MutableMap<String, Any?>?,
+        oldData: Map<String, Any?>?,
+        newData: RecordMap?,
         withTrigger: Boolean,
     ): MutableMap<String, Any?> {
+        var old: Map<String, Any?>? = oldData
+        val new: RecordMap? = newData
+        if (type == WriteType.DELETE || type == WriteType.UPDATE) {
+            old = Collections.unmodifiableMap(old)
+        }
         val result: MutableMap<String, Any?>?
         if (withTrigger) {
             var event = when (type) {
@@ -89,11 +96,12 @@ class ScriptDataServiceImpl(
                 dataService = wrapper,
                 event = event,
                 objectApiName = objectApiName,
-                old = oldData,
-                new = newData,
+                old = old,
+                new = new,
                 tmpMap = tmpMap,
                 around = callback,
             )
+            val (sql, params) = sqlBuilder(old, new)
             database.useConnection {
                 result = it.execute(sql, params).firstOrNull()
             }
@@ -106,19 +114,20 @@ class ScriptDataServiceImpl(
                 dataService = wrapper,
                 event = event,
                 objectApiName = objectApiName,
-                old = oldData,
-                new = newData,
+                old = old,
+                new = new,
                 tmpMap = tmpMap,
                 around = callback,
             )
         } else {
+            val (sql, params) = sqlBuilder(old, new)
             database.useConnection {
                 result = it.execute(sql, params).firstOrNull()
             }
         }
 //        主对象删除时没有触发触发器但关联对象的删除触发器还是会正常触发
         if (type == WriteType.DELETE) {
-            processingDeletePolicy(objectApiName, requireNotNull(oldData))
+            processingDeletePolicy(objectApiName, requireNotNull(old))
         }
         if (result == null) {
             val str = when (type) {
@@ -369,7 +378,7 @@ class ScriptDataServiceImpl(
     /**
      * 处理删除时的级联和阻止动作
      */
-    private fun processingDeletePolicy(objectApiName: String, oldData: MutableMap<String, Any?>) {
+    private fun processingDeletePolicy(objectApiName: String, oldData: Map<String, Any?>) {
         val objectInfo = requireNotNull(getObjectByApi(objectApiName))
         val masterDataId = requireNotNull(oldData["id"]) as String
         val refFieldList = fieldService.findReferenceFieldByRefId(objectInfo.id)

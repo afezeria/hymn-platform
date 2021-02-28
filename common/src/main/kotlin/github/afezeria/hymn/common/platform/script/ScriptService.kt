@@ -23,7 +23,7 @@ interface ScriptService {
         dataService: DataService,
         event: TriggerEvent,
         objectApiName: String,
-        old: MutableMap<String, Any?>?,
+        old: Map<String, Any?>?,
         new: MutableMap<String, Any?>?,
         tmpMap: MutableMap<String, Any?>,
         around: (TriggerInfo, () -> Unit) -> Unit = { _, trigger -> trigger.invoke() },

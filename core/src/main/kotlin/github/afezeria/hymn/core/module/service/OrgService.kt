@@ -1,30 +1,71 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.core.module.dao.OrgDao
 import github.afezeria.hymn.core.module.dto.OrgDto
 import github.afezeria.hymn.core.module.entity.Org
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
 
 /**
  * @author afezeria
  */
-interface OrgService {
+@Service
+class OrgService {
 
-    fun removeById(id: String): Int
+    @Autowired
+    private lateinit var orgDao: OrgDao
 
-    fun update(id: String, dto: OrgDto): Int
+    @Autowired
+    private lateinit var dbService: DatabaseService
 
-    fun create(dto: OrgDto): String
 
-    fun findAll(): MutableList<Org>
+    fun removeById(id: String): Int {
+        orgDao.selectById(id)
+            ?: throw DataNotFoundException("Org".msgById(id))
+        val i = orgDao.deleteById(id)
+        return i
+    }
 
-    fun findById(id: String): Org?
+    fun update(id: String, dto: OrgDto): Int {
+        val e = orgDao.selectById(id)
+            ?: throw DataNotFoundException("Org".msgById(id))
+        dto.update(e)
+        val i = orgDao.update(e)
+        return i
+    }
 
-    fun findByIds(ids: List<String>): MutableList<Org>
+    fun create(dto: OrgDto): String {
+        val e = dto.toEntity()
+        val id = orgDao.insert(e)
+        return id
+    }
+
+    fun findAll(): MutableList<Org> {
+        return orgDao.selectAll()
+    }
+
+
+    fun findById(id: String): Org? {
+        return orgDao.selectById(id)
+    }
+
+    fun findByIds(ids: List<String>): MutableList<Org> {
+        return orgDao.selectByIds(ids)
+    }
+
 
     fun findByParentId(
         parentId: String,
-    ): MutableList<Org>
+    ): MutableList<Org> {
+        return orgDao.selectByParentId(parentId)
+    }
 
-    fun pageFind(pageSize: Int, pageNum: Int): List<Org>
+    fun pageFind(pageSize: Int, pageNum: Int): List<Org> {
+        return orgDao.pageSelect(null, pageSize, pageNum)
+    }
 
 
 }

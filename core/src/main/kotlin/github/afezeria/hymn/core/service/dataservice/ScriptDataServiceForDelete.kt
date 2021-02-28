@@ -10,7 +10,7 @@ import github.afezeria.hymn.common.util.execute
 /**
  * @author afezeria
  */
-interface ScriptDataServiceForDelete : ScriptDataServiceForQuery {
+interface ScriptDataServiceForDelete : ScriptDataService {
 
     override fun delete(
         objectApiName: String,
@@ -84,7 +84,6 @@ interface ScriptDataServiceForDelete : ScriptDataServiceForQuery {
             }
             oldDataList = queryWithPerm(
                 objectApiName, "id = any (?)", ids,
-                fieldSet = emptySet(),
             )
             if (!objectPerm.editAll) {
 //                如果没有对象的编辑全部权限则过滤掉所有人不是当前用户的数据
@@ -114,15 +113,17 @@ interface ScriptDataServiceForDelete : ScriptDataServiceForQuery {
         old: MutableMap<String, Any?>,
         fields: Collection<FieldInfo>,
     ): MutableMap<String, Any?> {
-        val returnColumns =
-            "\"id\"" + fields.joinToString("\",\"", ",\"", "\"") { it.api }
+        return execute({ _, _ ->
+            val returnColumns =
+                "\"id\"" + fields.joinToString("\",\"", ",\"", "\"") { it.api }
 
-        //language=PostgreSQL
-        val sql =
-            """
+            //language=PostgreSQL
+            val sql =
+                """
                 delete from hymn_view."$objectApiName" where id = ? 
                 returning $returnColumns
             """
-        return execute(sql, listOf(old["id"]), WriteType.DELETE, objectApiName, old, null, true)
+            sql to listOf(old["id"])
+        }, WriteType.DELETE, objectApiName, old, null, true)
     }
 }

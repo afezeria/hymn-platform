@@ -2,6 +2,7 @@ package github.afezeria.hymn.core.service.dataservice
 
 import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.exception.DataNotFoundException
+import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.common.exception.PermissionDeniedException
 import github.afezeria.hymn.common.platform.Session
 import github.afezeria.hymn.common.platform.dataservice.FieldInfo
@@ -12,7 +13,7 @@ import java.time.LocalDateTime
 /**
  * @author afezeria
  */
-interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
+interface ScriptDataServiceForInsert : ScriptDataService {
     override fun insert(
         objectApiName: String,
         data: Map<String, Any?>,
@@ -54,7 +55,8 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
         val session = Session.getInstance()
         val roleId = session.roleId
 
-        val fields: MutableList<FieldInfo> = getFieldApiMap(objectApiName)
+        val fieldApiMap = getFieldApiMap(objectApiName)
+        val fields: MutableList<FieldInfo> = fieldApiMap
             .mapNotNullTo(mutableListOf()) { if (it.value.type != "auto" && it.value.type != "summary") it.value else null }
         val typeIdSet = getTypeList(objectApiName).mapTo(mutableListOf()) { it.id }
         if (withPerm) {
@@ -70,22 +72,42 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
         }
 
 
-        val insertDataList = mutableListOf<LinkedHashMap<String, Any?>>()
+        val insertDataList = mutableListOf<RecordMap>()
         for (data in dataList) {
             val typeId = data["type_id"] as String?
             if (typeId == null) {
                 logger.info("$objectApiName data:${data.toJson()}")
                 throw BusinessException("新增数据未指定业务类型")
             }
+            val name = data["name"] as String?
+            if (name == null) {
+                val nameField = requireNotNull(fieldApiMap["name"])
+                logger.info("$objectApiName data:${data.toJson()}")
+                throw BusinessException("新增数据未指定 ${nameField.name}")
+            }
             if (!typeIdSet.contains(typeId)) {
                 throw BusinessException("业务类型 [id:$typeId] 不存在或缺少权限")
             }
 
-            val insertData = LinkedHashMap<String, Any?>()
+            val insertData = RecordMap(fieldApiMap)
             val now = LocalDateTime.now()
             for (field in fields) {
-                insertData[field.api] =
-                    checkNewDataValue(field, data[field.api], session, now)
+                var any = data[field.api]
+                if (field.predefined) {
+                    any = when (field.standardType) {
+                        "create_by_id" -> session.accountId
+                        "modify_by_id" -> session.accountId
+                        "create_date" -> now
+                        "modify_date" -> now
+                        "org_id" -> session.orgId
+                        "lock_state" -> false
+                        "name" -> any
+                        "type_id" -> any
+                        "owner_id" -> session.accountId
+                        else -> throw InnerException("错误的标准字段类型")
+                    }
+                }
+                insertData[field.api] = any
             }
             insertDataList.add(insertData)
         }
@@ -95,19 +117,22 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
 
     private fun insertHelper(
         objectApiName: String,
-        new: LinkedHashMap<String, Any?>,
+        new: RecordMap,
     ): MutableMap<String, Any?> {
 
-        val columns = new.keys.joinToString("\",\"", "\"", "\"")
-        val placeholder = "?" + ",?".repeat(new.keys.size - 1)
-        val returnColumns = "\"id\"" + new.keys.joinToString("\",\"", ",\"", "\"")
+        return execute({ _, newData ->
+            requireNotNull(newData)
+            val columns = newData.keys.joinToString("\",\"", "\"", "\"")
+            val placeholder = "?" + ",?".repeat(newData.keys.size - 1)
+            val returnColumns = "\"id\"" + newData.keys.joinToString("\",\"", ",\"", "\"")
 
-        //language=PostgreSQL
-        val sql = """
+            //language=PostgreSQL
+            val sql = """
             insert into hymn_view.$objectApiName ($columns) values ($placeholder) 
             returning $returnColumns
         """
-        return execute(sql, new.values, WriteType.INSERT, objectApiName, null, new, true)
+            sql to newData.values
+        }, WriteType.INSERT, objectApiName, null, new, true)
     }
 
     override fun insertWithoutTrigger(
@@ -170,7 +195,7 @@ interface ScriptDataServiceForInsert : ScriptDataServiceForQuery {
                         insert into hymn_view.$objectApiName ($columns)
                         values $ph
                         returning id,$columns
-                    """
+                    """.trimIndent()
                 }
                 val list = mutableListOf<Any?>()
                 for (map in insertDataList.subList(idx, idx + batchSize)) {
