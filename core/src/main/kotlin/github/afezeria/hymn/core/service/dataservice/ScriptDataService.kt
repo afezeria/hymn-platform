@@ -20,12 +20,12 @@ interface ScriptDataService : DataService {
     fun execute(
         sqlBuilder: (
             oldData: Map<String, Any?>?,
-            newData: RecordMap?,
+            newData: NewRecordMap?,
         ) -> Pair<String, Collection<Any?>>,
         type: WriteType,
         objectApiName: String,
         oldData: Map<String, Any?>?,
-        newData: RecordMap?,
+        newData: NewRecordMap?,
         withTrigger: Boolean,
     ): MutableMap<String, Any?>
 

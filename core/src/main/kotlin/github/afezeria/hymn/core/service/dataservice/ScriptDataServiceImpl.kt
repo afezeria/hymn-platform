@@ -59,16 +59,16 @@ class ScriptDataServiceImpl(
     override fun execute(
         sqlBuilder: (
             oldData: Map<String, Any?>?,
-            newData: RecordMap?,
+            newData: NewRecordMap?,
         ) -> Pair<String, Collection<Any?>>,
         type: WriteType,
         objectApiName: String,
         oldData: Map<String, Any?>?,
-        newData: RecordMap?,
+        newData: NewRecordMap?,
         withTrigger: Boolean,
     ): MutableMap<String, Any?> {
         var old: Map<String, Any?>? = oldData
-        val new: RecordMap? = newData
+        val new: NewRecordMap? = newData
         if (type == WriteType.DELETE || type == WriteType.UPDATE) {
             old = Collections.unmodifiableMap(old)
         }

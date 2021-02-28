@@ -7,15 +7,15 @@ import java.util.function.Function
 /**
  * @author afezeria
  */
-class RecordMap(private val fieldApiMap: Map<String, FieldInfo>) : LinkedHashMap<String, Any?>() {
+class NewRecordMap(private val fieldApiMap: Map<String, FieldInfo>) :
+    LinkedHashMap<String, Any?>() {
 
     private fun checkValue(
         key: String,
         value: Any?,
     ): Pair<Boolean, Any?> {
         val field = fieldApiMap[key] ?: return false to null
-        val res = NewDataValidator.check(field, value)
-        return true to res
+        return NewDataValidator.check(field, value)
     }
 
     override fun put(key: String, value: Any?): Any? {

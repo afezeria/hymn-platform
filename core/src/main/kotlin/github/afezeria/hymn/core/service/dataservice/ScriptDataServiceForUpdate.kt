@@ -81,7 +81,7 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
 
         var readableFieldApiSet: Set<String>? = null
         val oldAndNewData =
-            mutableListOf<Pair<MutableMap<String, Any?>, RecordMap>>()
+            mutableListOf<Pair<MutableMap<String, Any?>, NewRecordMap>>()
         val oldDataList: MutableList<MutableMap<String, Any?>>
         val writeableFieldApiSet: Set<String>
         val visibleTypeIdSet: Set<String>
@@ -121,7 +121,7 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
         for (old in oldDataList) {
             val id = old["id"] as String
             updateDataMap[id]?.apply {
-                val insertData = RecordMap(fieldApiMap)
+                val insertData = NewRecordMap(fieldApiMap)
                 val now = LocalDateTime.now()
                 for ((api, field) in fieldApiMap) {
                     if (writeableFieldApiSet.contains(api) && containsKey(api)) {
@@ -178,7 +178,7 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
     private fun updateHelper(
         objectApiName: String,
         old: MutableMap<String, Any?>,
-        new: RecordMap,
+        new: NewRecordMap,
         fields: Collection<String>? = null,
         trigger: Boolean = true,
     ): MutableMap<String, Any?> {

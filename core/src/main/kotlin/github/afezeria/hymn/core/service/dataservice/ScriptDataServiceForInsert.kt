@@ -72,7 +72,7 @@ interface ScriptDataServiceForInsert : ScriptDataService {
         }
 
 
-        val insertDataList = mutableListOf<RecordMap>()
+        val insertDataList = mutableListOf<NewRecordMap>()
         for (data in dataList) {
             val typeId = data["type_id"] as String?
             if (typeId == null) {
@@ -89,7 +89,7 @@ interface ScriptDataServiceForInsert : ScriptDataService {
                 throw BusinessException("业务类型 [id:$typeId] 不存在或缺少权限")
             }
 
-            val insertData = RecordMap(fieldApiMap)
+            val insertData = NewRecordMap(fieldApiMap)
             val now = LocalDateTime.now()
             for (field in fields) {
                 var any = data[field.api]
@@ -117,7 +117,7 @@ interface ScriptDataServiceForInsert : ScriptDataService {
 
     private fun insertHelper(
         objectApiName: String,
-        new: RecordMap,
+        new: NewRecordMap,
     ): MutableMap<String, Any?> {
 
         return execute({ _, newData ->
