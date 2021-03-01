@@ -15,14 +15,11 @@ class BizObjectTypeDto(
     var active: Boolean,
     @ApiModelProperty(value = "")
     var remark: String? = null,
-    @ApiModelProperty(value = "类型权限")
-    var permList: List<BizObjectTypePermDto> = emptyList(),
 ) {
     fun toEntity(): BizObjectType {
         return BizObjectType(
             bizObjectId = bizObjectId,
             name = name,
-            active = active,
             remark = remark,
         )
     }
@@ -31,7 +28,6 @@ class BizObjectTypeDto(
         entity.also {
             it.bizObjectId = bizObjectId
             it.name = name
-            it.active = active
             it.remark = remark
         }
     }

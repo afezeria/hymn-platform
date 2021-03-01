@@ -125,8 +125,9 @@ class ScriptDataServiceImpl(
                 result = it.execute(sql, params).firstOrNull()
             }
         }
-//        主对象删除时没有触发触发器但关联对象的删除触发器还是会正常触发
         if (type == WriteType.DELETE) {
+            //删除对象数据时执行删除策略
+            //被删除的子对象的数据会触发触发器，不论删除主数据时是否触发了触发器
             processingDeletePolicy(objectApiName, requireNotNull(old))
         }
         if (result == null) {
@@ -299,7 +300,7 @@ class ScriptDataServiceImpl(
         val objectInfo = getObjectByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
 
-        var result = typeService.findByBizObjectId(objectInfo.id).map {
+        var result = typeService.findAvailableTypeByBizObjectId(objectInfo.id).map {
             TypeInfo(it.id, it.name)
         }.toSet()
         result = Collections.unmodifiableSet(result)

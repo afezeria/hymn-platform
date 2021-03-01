@@ -57,7 +57,7 @@ class RoleService {
         return roleDao.selectByIds(ids)
     }
 
-    fun findIdList(ids: List<String>?): MutableList<String> {
+    fun findIdList(ids: List<String>? = null): MutableList<String> {
         return if (ids != null && ids.isEmpty()) {
             ArrayList()
         } else {

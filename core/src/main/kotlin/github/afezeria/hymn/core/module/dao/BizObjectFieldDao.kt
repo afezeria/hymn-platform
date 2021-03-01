@@ -33,11 +33,12 @@ class BizObjectFieldDao(
         return select({ it.bizObjectId eq bizObjectId })
     }
 
-    fun selectByRefIdAndActiveIsTrue(id: String): MutableList<BizObjectField> {
+    fun selectByRefIdAndActiveIsTrue(refObjectId: String): MutableList<BizObjectField> {
         return databaseService.db().from(table)
-            .leftJoin(bizObjects, bizObjects.id eq table.bizObjectId)
+            .leftJoin(bizObjects, bizObjects.id eq table.refId)
             .select(table.columns)
-            .where { (table.refId eq id) and (table.active eq true) and (bizObjects.active eq true) }
+            //对象停用时不能有关联到该对象的启用的字段，所以这里不需要判断被关联对象的启用状态
+            .where { (table.refId eq refObjectId) and (table.active eq true) }
             .mapTo(ArrayList()) { table.createEntity(it) }
     }
 

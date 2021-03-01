@@ -18,8 +18,6 @@ data class BizObjectType(
     var bizObjectId: String,
     @ApiModelProperty(value = "记录类型名称", required = true)
     var name: String,
-    @ApiModelProperty(value = "是否启用", required = true)
-    var active: Boolean,
     @ApiModelProperty(value = "")
     var remark: String? = null,
 ) : AbstractEntity() {

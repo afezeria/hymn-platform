@@ -18,7 +18,7 @@ class NewDataValidator {
             "字段 ${field.name} 数据类型错误，要求类型：${field.getTypeDescription()},实际类型：${value.javaClass.simpleName}",
         )
 
-        val DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")!!
+        private val DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")!!
         fun check(
             field: FieldInfo,
             value: Any?,

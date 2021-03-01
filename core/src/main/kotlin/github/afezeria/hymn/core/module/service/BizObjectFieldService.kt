@@ -82,12 +82,12 @@ class BizObjectFieldService {
         return bizObjectFieldDao.selectByBizObjectId(bizObjectId)
     }
 
-    fun createDefaultField(objId: String, fieldName: String, autoRule: String?) {
+    internal fun createDefaultField(objId: String, fieldName: String, autoRule: String?) {
         dbService.useTransaction {
             if (bizObjectFieldDao.selectByBizObjectId(objId).isNotEmpty()) {
                 throw InnerException("对象 [id:${objId}] 不是新对象，无法创建默认字段")
             }
-            val namefid = bizObjectFieldDao.insert(
+            bizObjectFieldDao.insert(
                 BizObjectField(
                     bizObjectId = objId,
                     name = fieldName,
@@ -102,59 +102,59 @@ class BizObjectFieldService {
                     sourceColumn = "name",
                 )
             )
-            val typefid = bizObjectFieldDao.insert(
+            bizObjectFieldDao.insert(
                 BizObjectField(
                     bizObjectId = objId,
                     name = "业务类型",
                     api = "type_id",
                     type = "reference",
                     refId = "09da56a7de514895aea5c596820d0ced",
-                    refDeletePolicy = "null",
+                    refDeletePolicy = "no_action",
                     standardType = "type_id",
                     predefined = true,
                     sourceColumn = "type_id",
                 )
             )
-            val ownerfid = bizObjectFieldDao.insert(
+            bizObjectFieldDao.insert(
                 BizObjectField(
                     bizObjectId = objId,
                     name = "所有者",
                     api = "owner_id",
                     type = "reference",
                     refId = "bcf5f00c2e6c494ea2318912a639031a",
-                    refDeletePolicy = "null",
+                    refDeletePolicy = "no_action",
                     standardType = "owner_id",
                     predefined = true,
                     sourceColumn = "owner_id",
                 )
             )
-            val cfid = bizObjectFieldDao.insert(
+            bizObjectFieldDao.insert(
                 BizObjectField(
                     bizObjectId = objId,
                     name = "创建人",
                     api = "create_by_id",
                     type = "reference",
                     refId = "bcf5f00c2e6c494ea2318912a639031a",
-                    refDeletePolicy = "null",
+                    refDeletePolicy = "no_action",
                     standardType = "create_by_id",
                     predefined = true,
                     sourceColumn = "create_by_id",
                 )
             )
-            val mfid = bizObjectFieldDao.insert(
+            bizObjectFieldDao.insert(
                 BizObjectField(
                     bizObjectId = objId,
                     name = "修改人",
                     api = "modify_by_id",
                     type = "reference",
                     refId = "bcf5f00c2e6c494ea2318912a639031a",
-                    refDeletePolicy = "null",
+                    refDeletePolicy = "no_action",
                     standardType = "modify_by_id",
                     predefined = true,
                     sourceColumn = "modify_by_id",
                 )
             )
-            val cdatefid = bizObjectFieldDao.insert(
+            bizObjectFieldDao.insert(
                 BizObjectField(
                     bizObjectId = objId,
                     name = "创建时间",
@@ -165,7 +165,7 @@ class BizObjectFieldService {
                     sourceColumn = "create_date",
                 )
             )
-            val mdatefid = bizObjectFieldDao.insert(
+            bizObjectFieldDao.insert(
                 BizObjectField(
                     bizObjectId = objId,
                     name = "修改时间",
@@ -176,7 +176,7 @@ class BizObjectFieldService {
                     sourceColumn = "modify_date",
                 )
             )
-            val lockfid = bizObjectFieldDao.insert(
+            bizObjectFieldDao.insert(
                 BizObjectField(
                     bizObjectId = objId,
                     name = "锁定状态",
@@ -187,26 +187,6 @@ class BizObjectFieldService {
                     sourceColumn = "lock_state"
                 )
             )
-//            创建默认的字段权限数据
-            TODO()
-//            val roleIds = roleService.findIdList()
-//            val permList = ArrayList<BizObjectFieldPermDto>(roleIds.size * 8)
-//            roleIds.forEach {
-//                permList.add(
-//                    BizObjectFieldPermDto(
-//                        it, namefid, pRead = true,
-//                        pEdit = autoRule == null
-//                    )
-//                )
-//                permList.add(BizObjectFieldPermDto(it, typefid, true, pEdit = false))
-//                permList.add(BizObjectFieldPermDto(it, ownerfid, true, pEdit = false))
-//                permList.add(BizObjectFieldPermDto(it, cfid, true, pEdit = false))
-//                permList.add(BizObjectFieldPermDto(it, mfid, true, pEdit = false))
-//                permList.add(BizObjectFieldPermDto(it, cdatefid, true, pEdit = false))
-//                permList.add(BizObjectFieldPermDto(it, mdatefid, true, pEdit = false))
-//                permList.add(BizObjectFieldPermDto(it, lockfid, true, pEdit = false))
-//            }
-//            fieldPermService.batchCreate(permList)
         }
     }
 
@@ -214,7 +194,7 @@ class BizObjectFieldService {
         return bizObjectFieldDao.pageSelect(null, pageSize, pageNum)
     }
 
-    fun findReferenceFieldByRefId(id: String): MutableList<BizObjectField> {
-        return bizObjectFieldDao.selectByRefIdAndActiveIsTrue(id)
+    fun findReferenceFieldByRefId(refObjectId: String): MutableList<BizObjectField> {
+        return bizObjectFieldDao.selectByRefIdAndActiveIsTrue(refObjectId)
     }
 }

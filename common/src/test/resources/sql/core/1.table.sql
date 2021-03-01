@@ -540,12 +540,12 @@ optional: default_value, formula
 rule: min_length >= 0, max_length >= 1
 
 type: 日期 date
-remark: 格式 yyyy-MM-dd
+remark: 格式 yyyy-MM-dd 00:00:00
 required:
 optional: default_value, formula
 
 type: 日期时间 datetime
-remark: 格式 yyyy-MM-dd HH:mm:ss.SSSZ
+remark: 格式 yyyy-MM-dd HH:mm:ss
 required:
 optional: default_value, formula
 
@@ -618,7 +618,7 @@ comment on column hymn.core_biz_object_field.master_field_id is '下拉字段依
 comment on column hymn.core_biz_object_field.optional_number is '副选框和下拉多选的可选个数';
 comment on column hymn.core_biz_object_field.ref_id is '关联的自定义对象id';
 comment on column hymn.core_biz_object_field.ref_list_label is '相关列表标签，当前对象在被关联对象的相关列表中显示的标签，为空时表示不能显示在被关联对象的相关列表中';
-comment on column hymn.core_biz_object_field.ref_delete_policy is '当字段为关联字段时，引用数据被删除时的动作。 cascade 级联删除引用当前数据的数据, restrict 阻止删除被引用数据, set_null 删除引用字段的值';
+comment on column hymn.core_biz_object_field.ref_delete_policy is '当字段为关联字段时，引用数据被删除时的动作 ;;optional_value:[cascade(级联删除引用当前数据的数据),restrict(阻止删除被引用数据),set_null(删除引用字段的值),no_action(无动作)]';
 comment on column hymn.core_biz_object_field.gen_rule is '编号规则，{000} 递增序列，必填，实际序号大小小于0的个数时将会在前面补0 ; {yyyy}/{yy} 年; {mm} 月; {dd} 日';
 comment on column hymn.core_biz_object_field.s_id is '汇总对象id';
 comment on column hymn.core_biz_object_field.s_field_id is '汇总字段id';
@@ -670,7 +670,6 @@ create table hymn.core_biz_object_type
     id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     biz_object_id text        not null,
     name          text        not null,
-    active        bool                 default false not null,
     remark        text,
     create_by_id  text        not null,
     create_by     text        not null,
@@ -682,7 +681,6 @@ create table hymn.core_biz_object_type
 comment on table hymn.core_biz_object_type is '业务对象记录类型 ;; uk:[[biz_object_id name]]';
 comment on column hymn.core_biz_object_type.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade]';
 comment on column hymn.core_biz_object_type.name is '记录类型名称';
-comment on column hymn.core_biz_object_type.active is '是否启用';
 
 drop table if exists hymn.core_biz_object_type_options cascade;
 create table hymn.core_biz_object_type_options
