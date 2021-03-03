@@ -6,6 +6,7 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectTriggerDao
 import github.afezeria.hymn.core.module.dto.BizObjectTriggerDto
 import github.afezeria.hymn.core.module.entity.BizObjectTrigger
+import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -23,14 +24,13 @@ class BizObjectTriggerService {
 
 
     fun removeById(id: String): Int {
-        bizObjectTriggerDao.selectById(id)
-            ?: throw DataNotFoundException("BizObjectTrigger".msgById(id))
+        bizObjectTriggerDao.selectAvailableType { it.id eq id }
         val i = bizObjectTriggerDao.deleteById(id)
         return i
     }
 
     fun update(id: String, dto: BizObjectTriggerDto): Int {
-        val e = bizObjectTriggerDao.selectById(id)
+        val e = bizObjectTriggerDao.selectAvailableType { it.id eq id }.firstOrNull()
             ?: throw DataNotFoundException("BizObjectTrigger".msgById(id))
         dto.update(e)
         val i = bizObjectTriggerDao.update(e)
@@ -43,30 +43,12 @@ class BizObjectTriggerService {
         return id
     }
 
-    fun findAll(): MutableList<BizObjectTrigger> {
-        return bizObjectTriggerDao.selectAll()
+    fun findByBizObjectId(bizObjectId: String): MutableList<BizObjectTrigger> {
+        return bizObjectTriggerDao.selectAvailableType { it.bizObjectId eq bizObjectId }
     }
-
 
     fun findById(id: String): BizObjectTrigger? {
-        return bizObjectTriggerDao.selectById(id)
+        return bizObjectTriggerDao.selectAvailableType { it.id eq id }.first()
     }
-
-    fun findByIds(ids: List<String>): MutableList<BizObjectTrigger> {
-        return bizObjectTriggerDao.selectByIds(ids)
-    }
-
-
-    fun findByBizObjectIdAndApi(
-        bizObjectId: String,
-        api: String,
-    ): BizObjectTrigger? {
-        return bizObjectTriggerDao.selectByBizObjectIdAndApi(bizObjectId, api)
-    }
-
-    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectTrigger> {
-        return bizObjectTriggerDao.pageSelect(null, pageSize, pageNum)
-    }
-
 
 }

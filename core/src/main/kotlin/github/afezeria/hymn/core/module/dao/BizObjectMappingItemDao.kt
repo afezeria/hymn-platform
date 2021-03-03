@@ -15,4 +15,13 @@ class BizObjectMappingItemDao(
 ) : AbstractDao<BizObjectMappingItem, CoreBizObjectMappingItems>(
     table = CoreBizObjectMappingItems(),
     databaseService = databaseService
-)
+) {
+    fun batchSave(entityList: List<BizObjectMappingItem>): Int {
+        return bulkInsertOrUpdate(
+            entityList,
+            table.mappingId,
+            table.sourceFieldId,
+            table.targetFieldId
+        )
+    }
+}

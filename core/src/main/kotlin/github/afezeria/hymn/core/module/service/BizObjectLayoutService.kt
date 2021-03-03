@@ -6,6 +6,7 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
 import github.afezeria.hymn.core.module.entity.BizObjectLayout
+import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -23,14 +24,14 @@ class BizObjectLayoutService {
 
 
     fun removeById(id: String): Int {
-        bizObjectLayoutDao.selectById(id)
+        bizObjectLayoutDao.selectAvailableLayout { it.id eq id }.firstOrNull()
             ?: throw DataNotFoundException("BizObjectLayout".msgById(id))
         val i = bizObjectLayoutDao.deleteById(id)
         return i
     }
 
     fun update(id: String, dto: BizObjectLayoutDto): Int {
-        val e = bizObjectLayoutDao.selectById(id)
+        val e = bizObjectLayoutDao.selectAvailableLayout { it.id eq id }.firstOrNull()
             ?: throw DataNotFoundException("BizObjectLayout".msgById(id))
         dto.update(e)
         val i = bizObjectLayoutDao.update(e)
@@ -43,30 +44,12 @@ class BizObjectLayoutService {
         return id
     }
 
-    fun findAll(): MutableList<BizObjectLayout> {
-        return bizObjectLayoutDao.selectAll()
-    }
-
-
     fun findById(id: String): BizObjectLayout? {
-        return bizObjectLayoutDao.selectById(id)
+        return bizObjectLayoutDao.selectAvailableLayout { it.id eq id }
+            .firstOrNull()
     }
 
-    fun findByIds(ids: List<String>): MutableList<BizObjectLayout> {
-        return bizObjectLayoutDao.selectByIds(ids)
+    fun findByBizObjectId(bizObjectId: String): List<BizObjectLayout> {
+        return bizObjectLayoutDao.select({ it.bizObjectId eq bizObjectId })
     }
-
-
-    fun findByBizObjectIdAndName(
-        bizObjectId: String,
-        name: String,
-    ): BizObjectLayout? {
-        return bizObjectLayoutDao.selectByBizObjectIdAndName(bizObjectId, name)
-    }
-
-    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectLayout> {
-        return bizObjectLayoutDao.pageSelect(null, pageSize, pageNum)
-    }
-
-
 }

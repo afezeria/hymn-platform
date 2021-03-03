@@ -8,6 +8,7 @@ import github.afezeria.hymn.common.exception.ResourceNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectTriggerDto
 import github.afezeria.hymn.core.module.entity.BizObjectTrigger
+import github.afezeria.hymn.core.module.service.BizObjectTriggerService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,13 +28,12 @@ class BizObjectTriggerController {
     private lateinit var bizObjectTriggerService: BizObjectTriggerService
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "分页查询数据", notes = "")
+    @ApiOperation(value = "更具对象id查询", notes = "")
     @GetMapping
-    fun findAll(
-        @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
-        @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
+    fun find(
+        @RequestParam("biz_object_id") bizObjectId: String,
     ): List<BizObjectTrigger> {
-        val list = bizObjectTriggerService.pageFind(pageSize, pageNum)
+        val list = bizObjectTriggerService.findByBizObjectId(bizObjectId)
         return list
     }
 

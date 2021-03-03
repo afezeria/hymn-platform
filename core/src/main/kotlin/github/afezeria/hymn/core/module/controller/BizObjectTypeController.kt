@@ -8,6 +8,7 @@ import github.afezeria.hymn.common.exception.ResourceNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectTypeDto
 import github.afezeria.hymn.core.module.entity.BizObjectType
+import github.afezeria.hymn.core.module.service.BizObjectTypeService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,10 +31,9 @@ class BizObjectTypeController {
     @ApiOperation(value = "分页查询数据", notes = "")
     @GetMapping
     fun findAll(
-        @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
-        @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
+        @RequestParam("biz_object_id") bizObjectId: String
     ): List<BizObjectType> {
-        val list = bizObjectTypeService.pageFind(pageSize, pageNum)
+        val list = bizObjectTypeService.findAvailableTypeByBizObjectId(bizObjectId)
         return list
     }
 

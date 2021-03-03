@@ -6,6 +6,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectField
 import github.afezeria.hymn.core.module.table.CoreBizObjectFields
 import github.afezeria.hymn.core.module.table.CoreBizObjects
 import org.ktorm.dsl.*
+import org.ktorm.schema.ColumnDeclaring
 import org.springframework.stereotype.Component
 
 /**
@@ -33,7 +34,7 @@ class BizObjectFieldDao(
         return select({ it.bizObjectId eq bizObjectId })
     }
 
-    fun selectByRefIdAndActiveIsTrue(refObjectId: String): MutableList<BizObjectField> {
+    fun selectByRefIdAndActiveTrue(refObjectId: String): MutableList<BizObjectField> {
         return databaseService.db().from(table)
             .leftJoin(bizObjects, bizObjects.id eq table.refId)
             .select(table.columns)
@@ -42,5 +43,42 @@ class BizObjectFieldDao(
             .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
+    fun selectActiveField(
+        whereExpr: ((CoreBizObjectFields) -> ColumnDeclaring<Boolean>)
+    ): MutableList<BizObjectField> {
+        return databaseService.db().from(table)
+            .leftJoin(bizObjects, bizObjects.id eq table.bizObjectId)
+            .select(table.columns)
+            .where { (bizObjects.active eq true) and (table.active eq true) and whereExpr(table) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
+    }
 
+    fun selectUpdatableField(
+        whereExpr: ((CoreBizObjectFields) -> ColumnDeclaring<Boolean>)
+    ): MutableList<BizObjectField> {
+        return databaseService.db().from(table)
+            .leftJoin(bizObjects, bizObjects.id eq table.bizObjectId)
+            .select(table.columns)
+            .where {
+                (bizObjects.active eq true) and
+                    (table.active eq true) and
+                    ((table.predefined eq false) or (table.standardType eq "name")) and
+                    whereExpr(table)
+            }
+            .mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
+    fun selectCanModifyActiveStateFieldByIdAndActive(id: String, active: Boolean): BizObjectField? {
+        return databaseService.db().from(table)
+            .leftJoin(bizObjects, bizObjects.id eq table.bizObjectId)
+            .select(table.columns)
+            .where {
+                (bizObjects.active eq true) and
+                    (table.predefined eq false) and
+                    (table.active eq active) and
+                    (table.id eq id)
+            }
+            .mapTo(ArrayList()) { table.createEntity(it) }
+            .firstOrNull()
+    }
 }

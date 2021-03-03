@@ -7,6 +7,8 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectFieldDao
 import github.afezeria.hymn.core.module.dto.BizObjectFieldDto
 import github.afezeria.hymn.core.module.entity.BizObjectField
+import org.ktorm.dsl.eq
+import org.ktorm.dsl.inList
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -38,7 +40,7 @@ class BizObjectFieldService {
 
     fun update(id: String, dto: BizObjectFieldDto): Int {
         return dbService.useTransaction {
-            val e = bizObjectFieldDao.selectById(id)
+            val e = bizObjectFieldDao.selectUpdatableField { it.id eq id }.firstOrNull()
                 ?: throw DataNotFoundException("BizObjectField".msgById(id))
             dto.update(e)
             val i = bizObjectFieldDao.update(e)
@@ -55,31 +57,36 @@ class BizObjectFieldService {
         }
     }
 
-    fun findAll(): MutableList<BizObjectField> {
-        return bizObjectFieldDao.selectAll()
-    }
-
-
     fun findById(id: String): BizObjectField? {
-        return bizObjectFieldDao.selectById(id)
+        return bizObjectFieldDao.selectActiveField { it.id eq id }.firstOrNull()
     }
 
     fun findByIds(ids: List<String>): MutableList<BizObjectField> {
-        return bizObjectFieldDao.selectByIds(ids)
-    }
-
-
-    fun findByBizObjectIdAndApi(
-        bizObjectId: String,
-        api: String,
-    ): BizObjectField? {
-        return bizObjectFieldDao.selectByBizObjectIdAndApi(bizObjectId, api)
+        return bizObjectFieldDao.selectActiveField { it.id inList ids }
     }
 
     fun findByBizObjectId(
         bizObjectId: String,
     ): MutableList<BizObjectField> {
-        return bizObjectFieldDao.selectByBizObjectId(bizObjectId)
+        return bizObjectFieldDao.selectActiveField { it.bizObjectId eq bizObjectId }
+    }
+
+    fun findReferenceFieldByRefId(refObjectId: String): MutableList<BizObjectField> {
+        return bizObjectFieldDao.selectByRefIdAndActiveTrue(refObjectId)
+    }
+
+    fun activateById(id: String): Int {
+        val field = bizObjectFieldDao.selectCanModifyActiveStateFieldByIdAndActive(id, false)
+            ?: return 0
+        field.active = true
+        return bizObjectFieldDao.update(field)
+    }
+
+    fun inactivateById(id: String): Int {
+        val field = bizObjectFieldDao.selectCanModifyActiveStateFieldByIdAndActive(id, true)
+            ?: return 0
+        field.active = false
+        return bizObjectFieldDao.update(field)
     }
 
     internal fun createDefaultField(objId: String, fieldName: String, autoRule: String?) {
@@ -188,13 +195,5 @@ class BizObjectFieldService {
                 )
             )
         }
-    }
-
-    fun pageFind(pageSize: Int, pageNum: Int): MutableList<BizObjectField> {
-        return bizObjectFieldDao.pageSelect(null, pageSize, pageNum)
-    }
-
-    fun findReferenceFieldByRefId(refObjectId: String): MutableList<BizObjectField> {
-        return bizObjectFieldDao.selectByRefIdAndActiveIsTrue(refObjectId)
     }
 }

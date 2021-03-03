@@ -6,6 +6,8 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.ModuleFunctionPermDao
 import github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
 import github.afezeria.hymn.core.module.entity.ModuleFunctionPerm
+import org.ktorm.dsl.and
+import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -86,5 +88,9 @@ class ModuleFunctionPermService {
 
     fun pageFind(pageSize: Int, pageNum: Int): List<ModuleFunctionPerm> {
         return moduleFunctionPermDao.pageSelect(null, pageSize, pageNum)
+    }
+
+    fun findByRoleIdAndFunctionApi(roleId: String, functionApi: String): ModuleFunctionPerm? {
+        return moduleFunctionPermDao.singleRowSelect({ (it.roleId eq roleId) and (it.functionApi eq functionApi) })
     }
 }

@@ -2,6 +2,9 @@ package github.afezeria.hymn.core.service
 
 import github.afezeria.hymn.common.platform.PermService
 import github.afezeria.hymn.common.platform.dataservice.DataService
+import github.afezeria.hymn.core.module.service.BizObjectFieldPermService
+import github.afezeria.hymn.core.module.service.BizObjectPermService
+import github.afezeria.hymn.core.module.service.ModuleFunctionPermService
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
@@ -21,7 +24,7 @@ class PermServiceImpl : PermService {
     private lateinit var fieldPermService: BizObjectFieldPermService
 
     override fun hasFunctionPerm(roleId: String, name: String): Boolean {
-        return functionPermService.findByRoleIdAndFunctionApi(roleId, name).perm ?: false
+        return functionPermService.findByRoleIdAndFunctionApi(roleId, name)?.perm ?: false
     }
 
     override fun hasDataPerm(

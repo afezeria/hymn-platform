@@ -147,7 +147,7 @@ class ScriptDataServiceImpl(
         cache[apiKey]?.apply {
             return this as ObjectInfo
         }
-        val bizObject = bizObjectService.findByApi(api) ?: return null
+        val bizObject = bizObjectService.findActiveObjectByApi(api) ?: return null
         val info = bizObject.run {
             ObjectInfo(
                 id = id,
@@ -172,7 +172,7 @@ class ScriptDataServiceImpl(
         cache[idKey]?.apply {
             return this as ObjectInfo
         }
-        val bizObject = bizObjectService.findById(id) ?: return null
+        val bizObject = bizObjectService.findActiveObjectById(id) ?: return null
         val info = bizObject.run {
             ObjectInfo(
                 id = this.id,
@@ -338,7 +338,7 @@ class ScriptDataServiceImpl(
         if (!read && !update && !share && !owner) return false
         val account =
             accountService.findById(accountId) ?: return false
-        val bizObject = bizObjectService.findById(objectId) ?: return false
+        val bizObject = bizObjectService.findActiveObjectById(objectId) ?: return false
         val bizObjectPerm =
             objectPermService.findByRoleIdAndBizObjectId(account.roleId, objectId)
                 ?: return false

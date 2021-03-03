@@ -6,6 +6,7 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectTypeDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypeDto
 import github.afezeria.hymn.core.module.entity.BizObjectType
+import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -29,7 +30,7 @@ class BizObjectTypeService {
 
 
     fun removeById(id: String): Int {
-        bizObjectTypeDao.selectById(id)
+        bizObjectTypeDao.selectAvailableType { it.id eq id }.firstOrNull()
             ?: throw DataNotFoundException("BizObjectType".msgById(id))
         val i = bizObjectTypeDao.deleteById(id)
         return i
@@ -37,7 +38,7 @@ class BizObjectTypeService {
 
     fun update(id: String, dto: BizObjectTypeDto): Int {
         return dbService.useTransaction {
-            val e = bizObjectTypeDao.selectById(id)
+            val e = bizObjectTypeDao.selectAvailableType { it.id eq id }.firstOrNull()
                 ?: throw DataNotFoundException("BizObjectType".msgById(id))
             dto.update(e)
             val i = bizObjectTypeDao.update(e)
@@ -55,34 +56,11 @@ class BizObjectTypeService {
         }
     }
 
-    fun findAll(): MutableList<BizObjectType> {
-        return bizObjectTypeDao.selectAll()
-    }
-
-
     fun findById(id: String): BizObjectType? {
-        return bizObjectTypeDao.selectById(id)
-    }
-
-    fun findByIds(ids: List<String>): MutableList<BizObjectType> {
-        return bizObjectTypeDao.selectByIds(ids)
-    }
-
-
-    fun findByBizObjectIdAndName(
-        bizObjectId: String,
-        name: String,
-    ): BizObjectType? {
-        return bizObjectTypeDao.selectByBizObjectIdAndName(bizObjectId, name)
+        return bizObjectTypeDao.selectAvailableType { it.id eq id }.firstOrNull()
     }
 
     fun findAvailableTypeByBizObjectId(bizObjectId: String): List<BizObjectType> {
         return bizObjectTypeDao.selectAvailableTypeByBizObjectId(bizObjectId)
     }
-
-    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectType> {
-        return bizObjectTypeDao.pageSelect(null, pageSize, pageNum)
-    }
-
-
 }

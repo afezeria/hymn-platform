@@ -38,27 +38,24 @@ class BizObjectService {
     private lateinit var typeLayoutService: BizObjectTypeLayoutService
 
     @Autowired
-    private lateinit var objectPermService: BizObjectPermService
-
-    @Autowired
     private lateinit var roleService: RoleService
 
     @Autowired
     private lateinit var dbService: DatabaseService
 
-    fun findAll(): MutableList<BizObject> {
+    fun findAllActiveObject(): MutableList<BizObject> {
         return bizObjectDao.select({ it.active eq true })
     }
 
-    fun findById(id: String): BizObject? {
+    fun findActiveObjectById(id: String): BizObject? {
         return bizObjectDao.singleRowSelect({ (it.active eq true) and (it.id eq id) })
     }
 
-    fun findByIds(ids: List<String>): MutableList<BizObject> {
+    fun findActiveObjectByIds(ids: List<String>): MutableList<BizObject> {
         return bizObjectDao.select({ (it.active eq true) and (it.id inList ids) })
     }
 
-    fun findByApi(
+    fun findActiveObjectByApi(
         api: String,
     ): BizObject? {
         return bizObjectDao.singleRowSelect({ (it.api eq api) and (it.active eq true) })
@@ -68,11 +65,7 @@ class BizObjectService {
         return bizObjectDao.pageSelect({ it.active eq true }, pageSize, pageNum)
     }
 
-    fun findInactiveObjectById(id: String): BizObject? {
-        return bizObjectDao.singleRowSelect({ (it.active eq false) and (it.id eq id) })
-    }
-
-    fun findAllInactiveObject(id: String): List<BizObject> {
+    fun findAllInactiveObject(): List<BizObject> {
         return bizObjectDao.select({ it.active eq false })
     }
 
@@ -91,8 +84,7 @@ class BizObjectService {
 
     fun update(id: String, dto: BizObjectDto): Int {
         return dbService.useTransaction {
-
-            val e = bizObjectDao.selectById(id)
+            val e = findActiveObjectById(id)
                 ?: throw DataNotFoundException("BizObject".msgById(id))
             dto.update(e)
             val i = bizObjectDao.update(e)
@@ -126,30 +118,25 @@ class BizObjectService {
     }
 
 
-    fun inactivateObjectById(id: String): Int {
-        val bizObject = bizObjectDao.selectById(id)
+    fun inactivateById(id: String): Int {
+        val bizObject = findActiveObjectById(id)
             ?: throw DataNotFoundException("BizObject".msgById(id))
         if (bizObject.type == "module") {
             throw InnerException("不能修改模块对象启用状态")
         }
-        if (bizObject.active) {
-            bizObject.active = false
-            return bizObjectDao.update(bizObject)
-        }
-        return 0
+        bizObject.active = false
+        return bizObjectDao.update(bizObject)
     }
 
-    fun activateObjectById(id: String): Int {
-        val bizObject = bizObjectDao.selectById(id)
-            ?: throw DataNotFoundException("BizObject".msgById(id))
+    fun activateById(id: String): Int {
+        val bizObject =
+            bizObjectDao.singleRowSelect({ (it.id eq id) and (it.active eq false) })
+                ?: throw DataNotFoundException("BizObject".msgById(id))
         if (bizObject.type == "module") {
             throw InnerException("不能修改模块对象启用状态")
         }
-        if (bizObject.active) {
-            bizObject.active = true
-            return bizObjectDao.update(bizObject)
-        }
-        return 0
+        bizObject.active = true
+        return bizObjectDao.update(bizObject)
     }
 
 

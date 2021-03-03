@@ -6,6 +6,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectType
 import github.afezeria.hymn.core.module.table.CoreBizObjectTypes
 import github.afezeria.hymn.core.module.table.CoreBizObjects
 import org.ktorm.dsl.*
+import org.ktorm.schema.ColumnDeclaring
 import org.springframework.stereotype.Component
 
 /**
@@ -26,6 +27,16 @@ class BizObjectTypeDao(
         name: String,
     ): BizObjectType? {
         return singleRowSelect(listOf(table.bizObjectId eq bizObjectId, table.name eq name))
+    }
+
+    fun selectAvailableType(
+        whereExpr: ((CoreBizObjectTypes) -> ColumnDeclaring<Boolean>)
+    ): List<BizObjectType> {
+        return databaseService.db().from(table)
+            .leftJoin(bizObjects, bizObjects.id eq table.bizObjectId)
+            .select(table.columns)
+            .where { (bizObjects.active eq true) and whereExpr(table) }
+            .mapTo(ArrayList()) { table.createEntity(it) }
     }
 
     fun selectAvailableTypeByBizObjectId(bizObjectId: String): List<BizObjectType> {

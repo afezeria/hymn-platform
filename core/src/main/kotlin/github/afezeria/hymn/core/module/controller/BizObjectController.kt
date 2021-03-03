@@ -8,6 +8,7 @@ import github.afezeria.hymn.common.exception.ResourceNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectDto
 import github.afezeria.hymn.core.module.entity.BizObject
+import github.afezeria.hymn.core.module.service.BizObjectService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,23 +28,41 @@ class BizObjectController {
     private lateinit var bizObjectService: BizObjectService
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "分页查询数据", notes = "")
+    @ApiOperation(value = "分页查询数据", notes = "active 为 false 时返回所有未启用的对象，忽略pageSize和pageNum参数")
     @GetMapping
     fun findAll(
         @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
         @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
+        @RequestParam("active", defaultValue = "true") active: Boolean,
     ): List<BizObject> {
-        val list = bizObjectService.pageFind(pageSize, pageNum)
-        return list
+        if (active) {
+            return bizObjectService.pageFind(pageSize, pageNum)
+        } else {
+            return bizObjectService.findAllInactiveObject()
+        }
     }
 
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "根据id查询", notes = "")
     @GetMapping("/{id}")
     fun findById(@PathVariable("id") id: String): BizObject {
-        val entity = bizObjectService.findById(id)
+        val entity = bizObjectService.findActiveObjectById(id)
             ?: throw ResourceNotFoundException("业务对象".msgById(id))
         return entity
+    }
+
+    @Function(AccountType.ADMIN)
+    @ApiOperation(value = "停用对象", notes = "")
+    @GetMapping("/{id}/inactivate")
+    fun inactivateObject(@PathVariable("id") id: String): Int {
+        return bizObjectService.inactivateById(id)
+    }
+
+    @Function(AccountType.ADMIN)
+    @ApiOperation(value = "启用对象", notes = "")
+    @GetMapping("/{id}/activate")
+    fun activateObject(@PathVariable("id") id: String): Int {
+        return bizObjectService.activateById(id)
     }
 
     @Function(AccountType.ADMIN)

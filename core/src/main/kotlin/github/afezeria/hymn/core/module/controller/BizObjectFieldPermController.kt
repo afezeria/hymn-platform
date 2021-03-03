@@ -8,6 +8,7 @@ import github.afezeria.hymn.common.exception.ResourceNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectFieldPermDto
 import github.afezeria.hymn.core.module.entity.BizObjectFieldPerm
+import github.afezeria.hymn.core.module.service.BizObjectFieldPermService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired

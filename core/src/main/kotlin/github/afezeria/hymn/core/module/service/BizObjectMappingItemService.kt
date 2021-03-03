@@ -1,11 +1,13 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectMappingItemDao
 import github.afezeria.hymn.core.module.dto.BizObjectMappingItemDto
 import github.afezeria.hymn.core.module.entity.BizObjectMappingItem
+import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -29,12 +31,19 @@ class BizObjectMappingItemService {
         return i
     }
 
-    fun update(id: String, dto: BizObjectMappingItemDto): Int {
-        val e = bizObjectMappingItemDao.selectById(id)
-            ?: throw DataNotFoundException("BizObjectMappingItem".msgById(id))
-        dto.update(e)
-        val i = bizObjectMappingItemDao.update(e)
-        return i
+    /**
+     * 更新对象映射表
+     * 更新前删除旧数据
+     */
+    fun save(dtoList: List<BizObjectMappingItemDto>): Int {
+        if (dtoList.isEmpty()) return 0
+        val mappingIdSet = dtoList.mapTo(mutableSetOf()) { it.mappingId }
+        if (mappingIdSet.size != 1) throw BusinessException("不能同时修改多个对象映射关系")
+        return dbService.useTransaction {
+            bizObjectMappingItemDao.delete { it.mappingId eq mappingIdSet.first() }
+            val entityList = dtoList.map { it.toEntity() }
+            bizObjectMappingItemDao.batchSave(entityList)
+        }
     }
 
     fun create(dto: BizObjectMappingItemDto): String {
@@ -43,22 +52,8 @@ class BizObjectMappingItemService {
         return id
     }
 
-    fun findAll(): MutableList<BizObjectMappingItem> {
-        return bizObjectMappingItemDao.selectAll()
+    fun findByMappingId(mappingId: String): MutableList<BizObjectMappingItem> {
+        return bizObjectMappingItemDao.select({ it.mappingId eq mappingId })
     }
-
-
-    fun findById(id: String): BizObjectMappingItem? {
-        return bizObjectMappingItemDao.selectById(id)
-    }
-
-    fun findByIds(ids: List<String>): MutableList<BizObjectMappingItem> {
-        return bizObjectMappingItemDao.selectByIds(ids)
-    }
-
-    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectMappingItem> {
-        return bizObjectMappingItemDao.pageSelect(null, pageSize, pageNum)
-    }
-
 
 }

@@ -8,6 +8,7 @@ import github.afezeria.hymn.common.exception.ResourceNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectFieldDto
 import github.afezeria.hymn.core.module.entity.BizObjectField
+import github.afezeria.hymn.core.module.service.BizObjectFieldService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,17 +28,6 @@ class BizObjectFieldController {
     private lateinit var bizObjectFieldService: BizObjectFieldService
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "分页查询数据", notes = "")
-    @GetMapping
-    fun findAll(
-        @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
-        @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
-    ): List<BizObjectField> {
-        val list = bizObjectFieldService.pageFind(pageSize, pageNum)
-        return list
-    }
-
-    @Function(AccountType.ADMIN)
     @ApiOperation(value = "根据id查询", notes = "")
     @GetMapping("/{id}")
     fun findById(@PathVariable("id") id: String): BizObjectField {
@@ -52,6 +42,20 @@ class BizObjectFieldController {
     fun create(@RequestBody dto: BizObjectFieldDto): String {
         val id = bizObjectFieldService.create(dto)
         return id
+    }
+
+    @Function(AccountType.ADMIN)
+    @ApiOperation(value = "停用对象", notes = "")
+    @GetMapping("/{id}/inactivate")
+    fun inactivateObject(@PathVariable("id") id: String): Int {
+        return bizObjectFieldService.inactivateById(id)
+    }
+
+    @Function(AccountType.ADMIN)
+    @ApiOperation(value = "启用对象", notes = "")
+    @GetMapping("/{id}/activate")
+    fun activateObject(@PathVariable("id") id: String): Int {
+        return bizObjectFieldService.activateById(id)
     }
 
     @Function(AccountType.ADMIN)

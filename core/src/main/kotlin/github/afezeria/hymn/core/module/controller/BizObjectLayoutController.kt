@@ -8,6 +8,7 @@ import github.afezeria.hymn.common.exception.ResourceNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
 import github.afezeria.hymn.core.module.entity.BizObjectLayout
+import github.afezeria.hymn.core.module.service.BizObjectLayoutService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,13 +28,12 @@ class BizObjectLayoutController {
     private lateinit var bizObjectLayoutService: BizObjectLayoutService
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "分页查询数据", notes = "")
+    @ApiOperation(value = "根据对象id查询页面布局", notes = "")
     @GetMapping
-    fun findAll(
-        @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
-        @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
+    fun find(
+        @RequestParam("biz_object_id") bizObjectId: String,
     ): List<BizObjectLayout> {
-        val list = bizObjectLayoutService.pageFind(pageSize, pageNum)
+        val list = bizObjectLayoutService.findByBizObjectId(bizObjectId)
         return list
     }
 
