@@ -7,6 +7,7 @@ import github.afezeria.hymn.core.module.dao.BizObjectTypeDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypeDto
 import github.afezeria.hymn.core.module.entity.BizObjectType
 import org.ktorm.dsl.eq
+import org.ktorm.dsl.inList
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -18,12 +19,6 @@ class BizObjectTypeService {
 
     @Autowired
     private lateinit var bizObjectTypeDao: BizObjectTypeDao
-
-    @Autowired
-    private lateinit var roleService: RoleService
-
-    @Autowired
-    private lateinit var typePermService: BizObjectTypePermService
 
     @Autowired
     private lateinit var dbService: DatabaseService
@@ -58,6 +53,10 @@ class BizObjectTypeService {
 
     fun findById(id: String): BizObjectType? {
         return bizObjectTypeDao.selectAvailableType { it.id eq id }.firstOrNull()
+    }
+
+    fun findByIds(ids: Collection<String>): MutableList<BizObjectType> {
+        return bizObjectTypeDao.selectAvailableType { it.id inList ids }
     }
 
     fun findAvailableTypeByBizObjectId(bizObjectId: String): List<BizObjectType> {

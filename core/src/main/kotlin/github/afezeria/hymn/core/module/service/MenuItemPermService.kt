@@ -1,11 +1,9 @@
 package github.afezeria.hymn.core.module.service
 
-import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.MenuItemPermDao
 import github.afezeria.hymn.core.module.dto.MenuItemPermDto
-import github.afezeria.hymn.core.module.entity.MenuItemPerm
+import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -19,66 +17,40 @@ class MenuItemPermService {
     private lateinit var menuItemPermDao: MenuItemPermDao
 
     @Autowired
+    private lateinit var roleService: RoleService
+
+    @Autowired
     private lateinit var dbService: DatabaseService
 
-
-    fun removeById(id: String): Int {
-        menuItemPermDao.selectById(id)
-            ?: throw DataNotFoundException("MenuItemPerm".msgById(id))
-        val i = menuItemPermDao.deleteById(id)
-        return i
+    fun findByItemId(menuItemId: String): MutableList<MenuItemPermDto> {
+        return menuItemPermDao.selectDto { it.roleId eq menuItemId }
     }
 
-    fun update(id: String, dto: MenuItemPermDto): Int {
-        val e = menuItemPermDao.selectById(id)
-            ?: throw DataNotFoundException("MenuItemPerm".msgById(id))
-        dto.update(e)
-        val i = menuItemPermDao.update(e)
-        return i
+    fun findByRoleId(roleId: String): MutableList<MenuItemPermDto> {
+        return menuItemPermDao.selectDto { it.roleId eq roleId }
     }
 
-    fun create(dto: MenuItemPermDto): String {
-        val e = dto.toEntity()
-        val id = menuItemPermDao.insert(e)
-        return id
-    }
-
-    fun findAll(): MutableList<MenuItemPerm> {
-        return menuItemPermDao.selectAll()
-    }
-
-
-    fun findById(id: String): MenuItemPerm? {
-        return menuItemPermDao.selectById(id)
-    }
-
-    fun findByIds(ids: List<String>): MutableList<MenuItemPerm> {
-        return menuItemPermDao.selectByIds(ids)
-    }
-
-
-    fun findByRoleId(
-        roleId: String,
-    ): MutableList<MenuItemPerm> {
-        return menuItemPermDao.selectByRoleId(roleId)
-    }
-
-    fun findByMenuItemId(
-        menuItemId: String,
-    ): MutableList<MenuItemPerm> {
-        return menuItemPermDao.selectByMenuItemId(menuItemId)
-    }
-
-    fun batchCreate(dtoList: List<MenuItemPermDto>): Int {
-        return menuItemPermDao.bulkInsert(dtoList.map { it.toEntity() })
-    }
-
-    fun batchSave(dtoList: List<MenuItemPermDto>): Int {
-        return menuItemPermDao.bulkInsertOrUpdate(dtoList.map { it.toEntity() })
-    }
-
-    fun pageFind(pageSize: Int, pageNum: Int): List<MenuItemPerm> {
-        return menuItemPermDao.pageSelect(null, pageSize, pageNum)
+    fun save(dtoList: List<MenuItemPermDto>): Int {
+        if (dtoList.isEmpty()) return 0
+        return dbService.useTransaction {
+            val inRoleIdSet = dtoList.mapTo(mutableSetOf()) { it.roleId }
+            val availableRoleIdSet =
+                roleService.findByIds(inRoleIdSet).mapTo(mutableSetOf()) { it.id }
+//            menu_item_id为关联到core_custom_menu_item表的外键，所有这里不需要对输入的menu_item_id做校验
+            val entityList = dtoList.mapNotNull {
+                if (availableRoleIdSet.contains(it.roleId)) {
+                    it.toEntity()
+                } else {
+                    null
+                }
+            }
+            menuItemPermDao.bulkInsertOrUpdate(
+                entityList,
+                *menuItemPermDao.table.run {
+                    arrayOf(roleId, menuItemId)
+                }
+            )
+        }
     }
 
 }

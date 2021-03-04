@@ -14,6 +14,8 @@ import java.time.LocalDateTime
 @ApiModel(value = "菜单项", description = """菜单项""")
 data class CustomMenuItem(
 
+    @ApiModelProperty(value = "唯一标识", required = true)
+    var api: String,
     @ApiModelProperty(value = "菜单项名称", required = true)
     var name: String,
     @ApiModelProperty(value = "url path", required = true)

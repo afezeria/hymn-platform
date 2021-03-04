@@ -16,8 +16,6 @@ data class ModuleFunctionPerm(
 
     @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String,
-    @ApiModelProperty(value = "模块api ;;fk:[core_module cascade]", required = true)
-    var moduleApi: String,
     @ApiModelProperty(value = "功能api ;;fk:[core_module_function cascade]", required = true)
     var functionApi: String,
     @ApiModelProperty(value = "是否有访问权限")

@@ -53,7 +53,7 @@ class RoleService {
         return roleDao.selectById(id)
     }
 
-    fun findByIds(ids: List<String>): MutableList<Role> {
+    fun findByIds(ids: Collection<String>): MutableList<Role> {
         return roleDao.selectByIds(ids)
     }
 

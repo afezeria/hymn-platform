@@ -33,6 +33,11 @@ class BizObjectPermDto(
     @ApiModelProperty(value = "编辑全部")
     var editAll: Boolean = false,
 ) {
+    @ApiModelProperty(value = "角色名称", notes = "只用于后端返回数据")
+    var roleName: String? = null
+
+    @ApiModelProperty(value = "对象名称", notes = "只用于后端返回数据")
+    var bizObjectName: String? = null
     fun toEntity(): BizObjectPerm {
         return BizObjectPerm(
             roleId = roleId,

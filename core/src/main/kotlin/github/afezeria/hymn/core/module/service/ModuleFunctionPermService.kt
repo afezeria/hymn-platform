@@ -1,8 +1,6 @@
 package github.afezeria.hymn.core.module.service
 
-import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.ModuleFunctionPermDao
 import github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
 import github.afezeria.hymn.core.module.entity.ModuleFunctionPerm
@@ -21,74 +19,43 @@ class ModuleFunctionPermService {
     private lateinit var moduleFunctionPermDao: ModuleFunctionPermDao
 
     @Autowired
+    private lateinit var roleService: RoleService
+
+    @Autowired
     private lateinit var dbService: DatabaseService
 
-
-    fun removeById(id: String): Int {
-        moduleFunctionPermDao.selectById(id)
-            ?: throw DataNotFoundException("ModuleFunctionPerm".msgById(id))
-        val i = moduleFunctionPermDao.deleteById(id)
-        return i
+    fun findByFunctionApi(functionApi: String): MutableList<ModuleFunctionPermDto> {
+        return moduleFunctionPermDao.selectDto { it.functionApi eq functionApi }
     }
 
-    fun update(id: String, dto: ModuleFunctionPermDto): Int {
-        val e = moduleFunctionPermDao.selectById(id)
-            ?: throw DataNotFoundException("ModuleFunctionPerm".msgById(id))
-        dto.update(e)
-        val i = moduleFunctionPermDao.update(e)
-        return i
+    fun findByRoleId(roleId: String): MutableList<ModuleFunctionPermDto> {
+        return moduleFunctionPermDao.selectDto { it.roleId eq roleId }
     }
 
-    fun create(dto: ModuleFunctionPermDto): String {
-        val e = dto.toEntity()
-        val id = moduleFunctionPermDao.insert(e)
-        return id
+    fun save(dtoList: List<ModuleFunctionPermDto>): Int {
+        if (dtoList.isEmpty()) return 0
+        return dbService.useTransaction {
+            val inRoleIdSet = dtoList.mapTo(mutableSetOf()) { it.roleId }
+            val availableRoleIdSet =
+                roleService.findByIds(inRoleIdSet).mapTo(mutableSetOf()) { it.id }
+//            function_api为关联到core_module_function表的外键，所有这里不需要对输入的function_api做校验
+            val entityList = dtoList.mapNotNull {
+                if (availableRoleIdSet.contains(it.roleId)) {
+                    it.toEntity()
+                } else {
+                    null
+                }
+            }
+            moduleFunctionPermDao.bulkInsertOrUpdate(
+                entityList,
+                *moduleFunctionPermDao.table.run {
+                    arrayOf(roleId, functionApi)
+                }
+            )
+        }
+
     }
 
-    fun findAll(): MutableList<ModuleFunctionPerm> {
-        return moduleFunctionPermDao.selectAll()
-    }
-
-
-    fun findById(id: String): ModuleFunctionPerm? {
-        return moduleFunctionPermDao.selectById(id)
-    }
-
-    fun findByIds(ids: List<String>): MutableList<ModuleFunctionPerm> {
-        return moduleFunctionPermDao.selectByIds(ids)
-    }
-
-
-    fun findByRoleIdAndModuleApiAndFunctionApi(
-        roleId: String,
-        moduleApi: String,
-        functionApi: String,
-    ): ModuleFunctionPerm? {
-        return moduleFunctionPermDao.selectByRoleIdAndModuleApiAndFunctionApi(
-            roleId,
-            moduleApi,
-            functionApi,
-        )
-    }
-
-    fun findByRoleId(
-        roleId: String,
-    ): MutableList<ModuleFunctionPerm> {
-        return moduleFunctionPermDao.selectByRoleId(roleId)
-    }
-
-
-    fun batchCreate(dtoList: List<ModuleFunctionPermDto>): Int {
-        return moduleFunctionPermDao.bulkInsert(dtoList.map { it.toEntity() })
-    }
-
-    fun batchSave(dtoList: List<ModuleFunctionPermDto>): Int {
-        return moduleFunctionPermDao.bulkInsertOrUpdate(dtoList.map { it.toEntity() })
-    }
-
-    fun pageFind(pageSize: Int, pageNum: Int): List<ModuleFunctionPerm> {
-        return moduleFunctionPermDao.pageSelect(null, pageSize, pageNum)
-    }
 
     fun findByRoleIdAndFunctionApi(roleId: String, functionApi: String): ModuleFunctionPerm? {
         return moduleFunctionPermDao.singleRowSelect({ (it.roleId eq roleId) and (it.functionApi eq functionApi) })

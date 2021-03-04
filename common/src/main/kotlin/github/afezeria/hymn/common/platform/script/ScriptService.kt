@@ -47,4 +47,29 @@ interface ScriptService {
         api: String,
         params: MutableMap<String, Any?>,
     ): Any?
+
+    /**
+     * 编译脚本
+     *
+     * [txCallback]会在脚本编译完成并没有错误时执行，调用后将提交事务并清空所有节点关于该脚本的缓存
+     *
+     * [type]和[id]一起组成一个脚本的唯一标识
+     *
+     * [id]为null时不执行清空缓存逻辑
+     *
+     * @param type 编译代码的类型
+     * @param id 脚本id
+     * @param lang 脚本使用
+     * @param option 编译选项
+     * @param code 脚本代码
+     * @param txCallback 事务回调，调用者提供的执行数据库更新的函数，
+     */
+    fun <T> compile(
+        type: CompileType,
+        id: String?,
+        lang: String,
+        option: String?,
+        code: String,
+        txCallback: () -> T
+    ): T
 }

@@ -22,16 +22,9 @@ class BizObjectTypeDao(
 
     val bizObjects = CoreBizObjects()
 
-    fun selectByBizObjectIdAndName(
-        bizObjectId: String,
-        name: String,
-    ): BizObjectType? {
-        return singleRowSelect(listOf(table.bizObjectId eq bizObjectId, table.name eq name))
-    }
-
     fun selectAvailableType(
         whereExpr: ((CoreBizObjectTypes) -> ColumnDeclaring<Boolean>)
-    ): List<BizObjectType> {
+    ): MutableList<BizObjectType> {
         return databaseService.db().from(table)
             .leftJoin(bizObjects, bizObjects.id eq table.bizObjectId)
             .select(table.columns)

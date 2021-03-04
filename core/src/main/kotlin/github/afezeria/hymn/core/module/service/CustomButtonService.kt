@@ -4,7 +4,6 @@ import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.CustomButtonDao
-import github.afezeria.hymn.core.module.dto.ButtonPermDto
 import github.afezeria.hymn.core.module.dto.CustomButtonDto
 import github.afezeria.hymn.core.module.entity.CustomButton
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,12 +17,6 @@ class CustomButtonService {
 
     @Autowired
     private lateinit var customButtonDao: CustomButtonDao
-
-    @Autowired
-    private lateinit var roleService: RoleService
-
-    @Autowired
-    private lateinit var buttonPermService: ButtonPermService
 
     @Autowired
     private lateinit var dbService: DatabaseService
@@ -44,11 +37,11 @@ class CustomButtonService {
             val i = customButtonDao.update(e)
 
 //        更新按钮权限数据
-            val roleIdSet = roleService.findIdList().toMutableSet()
-            val buttonPermDtoList = dto.permList
-                .filter { roleIdSet.contains(it.roleId) }
-                .onEach { it.buttonId = id }
-            buttonPermService.batchSave(buttonPermDtoList)
+//            val roleIdSet = roleService.findIdList().toMutableSet()
+//            val buttonPermDtoList = dto.permList
+//                .filter { roleIdSet.contains(it.roleId) }
+//                .onEach { it.buttonId = id }
+//            buttonPermService.batchSave(buttonPermDtoList)
 
             i
         }
@@ -60,19 +53,19 @@ class CustomButtonService {
             val id = customButtonDao.insert(e)
 
 //        创建按钮权限数据
-            val allRoleId = roleService.findIdList()
-            val roleIdSet = allRoleId.toMutableSet()
-            val buttonPermDtoList = mutableListOf<ButtonPermDto>()
-            dto.permList.forEach {
-                if (roleIdSet.remove(it.roleId)) {
-                    it.buttonId = id
-                    buttonPermDtoList.add(it)
-                }
-            }
-            roleIdSet.forEach {
-                buttonPermDtoList.add(ButtonPermDto(it, id))
-            }
-            buttonPermService.batchCreate(buttonPermDtoList)
+//            val allRoleId = roleService.findIdList()
+//            val roleIdSet = allRoleId.toMutableSet()
+//            val buttonPermDtoList = mutableListOf<ButtonPermDto>()
+//            dto.permList.forEach {
+//                if (roleIdSet.remove(it.roleId)) {
+//                    it.buttonId = id
+//                    buttonPermDtoList.add(it)
+//                }
+//            }
+//            roleIdSet.forEach {
+//                buttonPermDtoList.add(ButtonPermDto(it, id))
+//            }
+//            buttonPermService.batchCreate(buttonPermDtoList)
 
             id
         }
@@ -87,7 +80,7 @@ class CustomButtonService {
         return customButtonDao.selectById(id)
     }
 
-    fun findByIds(ids: List<String>): MutableList<CustomButton> {
+    fun findByIds(ids: Collection<String>): MutableList<CustomButton> {
         return customButtonDao.selectByIds(ids)
     }
 

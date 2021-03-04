@@ -2,11 +2,14 @@ package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.db.AbstractDao
 import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
 import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
 import github.afezeria.hymn.core.module.table.CoreBizObjectTypePerms
 import github.afezeria.hymn.core.module.table.CoreBizObjectTypes
 import github.afezeria.hymn.core.module.table.CoreBizObjects
+import github.afezeria.hymn.core.module.table.CoreRoles
 import org.ktorm.dsl.*
+import org.ktorm.schema.ColumnDeclaring
 import org.springframework.stereotype.Component
 
 /**
@@ -19,8 +22,9 @@ class BizObjectTypePermDao(
     table = CoreBizObjectTypePerms(),
     databaseService = databaseService
 ) {
-    val bizObjects = CoreBizObjects()
-    val bizObjectTypes = CoreBizObjectTypes()
+    private val bizObjects = CoreBizObjects()
+    private val types = CoreBizObjectTypes()
+    private val roles = CoreRoles()
 
     fun selectByRoleIdAndTypeId(
         roleId: String,
@@ -40,9 +44,38 @@ class BizObjectTypePermDao(
         bizObjectId: String
     ): MutableList<BizObjectTypePerm> {
         return databaseService.db().from(table)
-            .innerJoin(bizObjectTypes, bizObjectTypes.id eq table.typeId)
+            .innerJoin(types, types.id eq table.typeId)
             .select(table.columns)
-            .where { (table.roleId eq roleId) eq (bizObjectTypes.bizObjectId eq bizObjectId) }
+            .where { (table.roleId eq roleId) eq (types.bizObjectId eq bizObjectId) }
             .mapToArray(table)
+    }
+
+    fun selectDto(whereExpr: (CoreBizObjectTypePerms) -> ColumnDeclaring<Boolean>): MutableList<BizObjectTypePermDto> {
+        return table.run {
+            databaseService.db().from(this)
+                .innerJoin(types, types.id eq typeId)
+                .innerJoin(bizObjects, bizObjects.id eq types.bizObjectId)
+                .innerJoin(roles, roles.id eq roleId)
+                .select(
+                    roleId,
+                    typeId,
+                    visible,
+                    roles.name,
+                    types.name
+                )
+                .where {
+                    (bizObjects.active eq true) and
+                        whereExpr(this)
+                }
+                .mapTo(ArrayList()) {
+                    BizObjectTypePermDto(
+                        roleId = "", typeId = "", visible = false
+                    ).apply {
+                        roleName = requireNotNull(it[roles.name])
+                        typeName = requireNotNull(it[types.name])
+                    }
+                }
+        }
+
     }
 }

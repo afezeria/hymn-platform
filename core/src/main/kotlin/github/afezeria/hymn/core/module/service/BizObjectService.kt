@@ -117,7 +117,9 @@ class BizObjectService {
 
     }
 
-
+    /**
+     * 停用对象
+     */
     fun inactivateById(id: String): Int {
         val bizObject = findActiveObjectById(id)
             ?: throw DataNotFoundException("BizObject".msgById(id))
@@ -128,6 +130,9 @@ class BizObjectService {
         return bizObjectDao.update(bizObject)
     }
 
+    /**
+     * 启用对象
+     */
     fun activateById(id: String): Int {
         val bizObject =
             bizObjectDao.singleRowSelect({ (it.id eq id) and (it.active eq false) })

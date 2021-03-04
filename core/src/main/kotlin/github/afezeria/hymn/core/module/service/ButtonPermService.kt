@@ -1,11 +1,9 @@
 package github.afezeria.hymn.core.module.service
 
-import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.ButtonPermDao
 import github.afezeria.hymn.core.module.dto.ButtonPermDto
-import github.afezeria.hymn.core.module.entity.ButtonPerm
+import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -19,74 +17,60 @@ class ButtonPermService {
     private lateinit var buttonPermDao: ButtonPermDao
 
     @Autowired
+    private lateinit var roleService: RoleService
+
+    @Autowired
+    private lateinit var buttonService: CustomButtonService
+
+    @Autowired
+    private lateinit var objectService: BizObjectService
+
+    @Autowired
     private lateinit var dbService: DatabaseService
 
-
-    fun removeById(id: String): Int {
-        buttonPermDao.selectById(id)
-            ?: throw DataNotFoundException("ButtonPerm".msgById(id))
-        val i = buttonPermDao.deleteById(id)
-        return i
+    fun findByButtonId(buttonId: String): MutableList<ButtonPermDto> {
+        return buttonPermDao.selectDto { it, _ -> it.buttonId eq buttonId }
     }
 
-    fun update(id: String, dto: ButtonPermDto): Int {
-        val e = buttonPermDao.selectById(id)
-            ?: throw DataNotFoundException("ButtonPerm".msgById(id))
-        dto.update(e)
-        val i = buttonPermDao.update(e)
-        return i
+    fun findByRoleId(roleId: String): MutableList<ButtonPermDto> {
+        return buttonPermDao.selectDto { it, _ -> it.roleId eq roleId }
     }
 
-    fun create(dto: ButtonPermDto): String {
-        val e = dto.toEntity()
-        val id = buttonPermDao.insert(e)
-        return id
+    fun save(dtoList: List<ButtonPermDto>): Int {
+        if (dtoList.isEmpty()) return 0
+        return dbService.useTransaction {
+            val inRoleIdSet = mutableSetOf<String>()
+            val inButtonIdSet = mutableSetOf<String>()
+            dtoList.forEach {
+                inRoleIdSet.add(it.roleId)
+                inButtonIdSet.add(it.buttonId)
+            }
+            val availableRoleIdSet =
+                roleService.findByIds(inRoleIdSet).mapTo(mutableSetOf()) { it.id }
+            val buttonList = buttonService.findByIds(inButtonIdSet)
+            val objectIds = buttonList.mapNotNull { it.bizObjectId }
+            val activeObjectIdSet =
+                objectService.findActiveObjectByIds(objectIds).mapTo(mutableSetOf()) { it.id }
+            val availableButtonIdSet =
+                buttonList.mapNotNull {
+                    if (it.bizObjectId == null || activeObjectIdSet.contains(it.bizObjectId)) it.id
+                    else null
+                }
+            val entityList = dtoList.mapNotNull {
+                if (availableRoleIdSet.contains(it.roleId) &&
+                    availableButtonIdSet.contains(it.buttonId)
+                ) {
+                    it.toEntity()
+                } else {
+                    null
+                }
+            }
+            buttonPermDao.bulkInsertOrUpdate(
+                entityList,
+                *buttonPermDao.table.run {
+                    arrayOf(roleId, buttonId)
+                }
+            )
+        }
     }
-
-    fun findAll(): MutableList<ButtonPerm> {
-        return buttonPermDao.selectAll()
-    }
-
-
-    fun findById(id: String): ButtonPerm? {
-        return buttonPermDao.selectById(id)
-    }
-
-    fun findByIds(ids: List<String>): MutableList<ButtonPerm> {
-        return buttonPermDao.selectByIds(ids)
-    }
-
-
-    fun findByRoleIdAndButtonId(
-        roleId: String,
-        buttonId: String,
-    ): ButtonPerm? {
-        return buttonPermDao.selectByRoleIdAndButtonId(roleId, buttonId)
-    }
-
-    fun findByRoleId(
-        roleId: String,
-    ): MutableList<ButtonPerm> {
-        return buttonPermDao.selectByRoleId(roleId)
-    }
-
-    fun findByButtonId(
-        buttonId: String,
-    ): MutableList<ButtonPerm> {
-        return buttonPermDao.selectByButtonId(buttonId)
-    }
-
-    fun batchCreate(dtoList: List<ButtonPermDto>): Int {
-        return buttonPermDao.bulkInsert(dtoList.map { it.toEntity() })
-    }
-
-    fun batchSave(dtoList: List<ButtonPermDto>): Int {
-        return buttonPermDao.bulkInsertOrUpdate(dtoList.map { it.toEntity() })
-    }
-
-    fun pageFind(pageSize: Int, pageNum: Int): List<ButtonPerm> {
-        return buttonPermDao.pageSelect(null, pageSize, pageNum)
-    }
-
-
 }

@@ -12,6 +12,7 @@ class CoreCustomMenuItems(alias: String? = null) :
     AbstractTable<CustomMenuItem>("core_custom_menu_item", schema = "hymn", alias = alias) {
 
     val name = varchar("name")
+    val api = varchar("api")
     val path = varchar("path")
     val pathType = varchar("path_type")
     val action = varchar("action")

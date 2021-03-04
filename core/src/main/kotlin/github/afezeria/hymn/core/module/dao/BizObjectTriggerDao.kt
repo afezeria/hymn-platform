@@ -29,6 +29,17 @@ class BizObjectTriggerDao(
         return singleRowSelect(listOf(table.bizObjectId eq bizObjectId, table.api eq api))
     }
 
+    fun selectAvailableTypeWithLock(
+        whereExpr: ((CoreBizObjectTriggers) -> ColumnDeclaring<Boolean>)
+    ): MutableList<BizObjectTrigger> {
+        return databaseService.db().from(table)
+            .leftJoin(bizObjects, bizObjects.id eq table.bizObjectId)
+            .select(table.columns)
+            .where { (bizObjects.active eq true) and whereExpr(table) }
+            .forUpdate()
+            .mapTo(ArrayList()) { table.createEntity(it) }
+    }
+
     fun selectAvailableType(
         whereExpr: ((CoreBizObjectTriggers) -> ColumnDeclaring<Boolean>)
     ): MutableList<BizObjectTrigger> {

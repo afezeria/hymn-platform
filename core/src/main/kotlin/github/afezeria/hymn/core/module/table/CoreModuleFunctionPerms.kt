@@ -13,7 +13,6 @@ class CoreModuleFunctionPerms(alias: String? = null) :
     AbstractTable<ModuleFunctionPerm>("core_module_function_perm", schema = "hymn", alias = alias) {
 
     val roleId = varchar("role_id")
-    val moduleApi = varchar("module_api")
     val functionApi = varchar("function_api")
     val perm = boolean("perm")
     val createById = varchar("create_by_id")

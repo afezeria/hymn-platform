@@ -9,7 +9,7 @@ import org.ktorm.schema.varchar
 /**
  * @author afezeria
  */
-class Modules(alias: String? = null) :
+class CoreModules(alias: String? = null) :
     BaseTable<Module>("core_module", schema = "hymn", alias = alias) {
 
     val api = varchar("api")

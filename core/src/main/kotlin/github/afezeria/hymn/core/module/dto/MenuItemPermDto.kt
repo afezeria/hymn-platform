@@ -14,6 +14,15 @@ class MenuItemPermDto(
     @ApiModelProperty(value = "是否可见")
     var visible: Boolean = false,
 ) {
+    @ApiModelProperty(value = "角色名称", notes = "只用于后端返回数据")
+    var roleName: String? = null
+
+    @ApiModelProperty(value = "菜单项名称", notes = "只用于后端返回数据")
+    var menuItemName: String? = null
+
+    @ApiModelProperty(value = "菜单项唯一标识", notes = "只用于后端返回数据")
+    var menuItemApi: String? = null
+
     fun toEntity(): MenuItemPerm {
         return MenuItemPerm(
             roleId = roleId,

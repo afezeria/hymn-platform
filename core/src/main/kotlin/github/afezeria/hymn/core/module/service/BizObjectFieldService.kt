@@ -61,7 +61,7 @@ class BizObjectFieldService {
         return bizObjectFieldDao.selectActiveField { it.id eq id }.firstOrNull()
     }
 
-    fun findByIds(ids: List<String>): MutableList<BizObjectField> {
+    fun findByIds(ids: Collection<String>): MutableList<BizObjectField> {
         return bizObjectFieldDao.selectActiveField { it.id inList ids }
     }
 
@@ -75,6 +75,9 @@ class BizObjectFieldService {
         return bizObjectFieldDao.selectByRefIdAndActiveTrue(refObjectId)
     }
 
+    /**
+     * 启用字段
+     */
     fun activateById(id: String): Int {
         val field = bizObjectFieldDao.selectCanModifyActiveStateFieldByIdAndActive(id, false)
             ?: return 0
@@ -82,6 +85,9 @@ class BizObjectFieldService {
         return bizObjectFieldDao.update(field)
     }
 
+    /**
+     * 停用字段
+     */
     fun inactivateById(id: String): Int {
         val field = bizObjectFieldDao.selectCanModifyActiveStateFieldByIdAndActive(id, true)
             ?: return 0
