@@ -334,7 +334,7 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             ?: throw DataNotFoundException("${table.entityClass!!.simpleName} [id:$id]")
     }
 
-    fun selectByIds(ids: List<String>): MutableList<E> {
+    fun selectByIds(ids: Collection<String>): MutableList<E> {
         return databaseService.db().from(table)
             .select(table.columns)
             .where {
