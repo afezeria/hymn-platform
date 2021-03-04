@@ -317,6 +317,7 @@ drop table if exists hymn.core_custom_menu_item cascade;
 create table hymn.core_custom_menu_item
 (
     id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    api          text        not null,
     name         text        not null,
     path         text        not null,
     path_type    text        not null,
@@ -332,6 +333,7 @@ create table hymn.core_custom_menu_item
 );
 comment on table hymn.core_custom_menu_item is '菜单项';
 comment on column hymn.core_custom_menu_item.name is '菜单项名称';
+comment on column hymn.core_custom_menu_item.api is '唯一标识 ;;uk';
 comment on column hymn.core_custom_menu_item.path is 'url path';
 comment on column hymn.core_custom_menu_item.path_type is 'path类型 ;; optional_value:[path(路径),url(外部url)]';
 comment on column hymn.core_custom_menu_item.action is '菜单点击行为 ;; optional_value:[iframe(在iframe中打开), current_tab(当前标签页中打开), new_tab(新标签页中打开)]';
@@ -635,7 +637,7 @@ comment on column hymn.core_biz_object_field.join_view_name is '多选字段中�
 drop table if exists hymn.core_biz_object_layout cascade;
 create table hymn.core_biz_object_layout
 (
-    id                      text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id                      text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     biz_object_id           text        not null,
     name                    text        not null,
     remark                  text,
@@ -854,7 +856,6 @@ create table hymn.core_module_function_perm
 (
     id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id      text        not null,
-    module_api   text        not null,
     function_api text        not null,
     perm         bool        not null default false,
     create_by_id text        not null,
@@ -864,9 +865,8 @@ create table hymn.core_module_function_perm
     create_date  timestamptz not null default now(),
     modify_date  timestamptz not null default now()
 );
-comment on table hymn.core_module_function_perm is '模块功能权限表 ;;uk:[[role_id module_api function_api]]';
+comment on table hymn.core_module_function_perm is '模块功能权限表 ;;uk:[[role_id function_api]]';
 comment on column hymn.core_module_function_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
-comment on column hymn.core_module_function_perm.module_api is '模块api ;;fk:[core_module_function cascade];idx';
 comment on column hymn.core_module_function_perm.function_api is '功能api ;;fk:[core_module_function cascade];idx';
 comment on column hymn.core_module_function_perm.perm is '是否有访问权限';
 

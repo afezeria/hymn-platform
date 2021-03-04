@@ -18,13 +18,13 @@ alter table hymn.core_biz_object_type_layout
 alter table hymn.core_biz_object_type_perm
     add unique (role_id, type_id);
 alter table hymn.core_button_perm
-    add unique (role_id,button_id);
+    add unique (role_id, button_id);
 alter table hymn.core_dict_item
-    add unique (dict_id,code);
+    add unique (dict_id, code);
 alter table hymn.core_module_function
-    add unique (module_api,api);
+    add unique (module_api, api);
 alter table hymn.core_module_function_perm
-    add unique (role_id,module_api,function_api);
+    add unique (role_id, function_api);
 
 
 -- column constraint
@@ -68,11 +68,13 @@ alter table hymn.core_biz_object_field
                  'date', 'datetime', 'master_slave', 'reference', 'mreference', 'areference',
                  'summary', 'auto', 'picture', 'files') );
 alter table hymn.core_biz_object_field
+    add check ( ref_delete_policy in ('cascade', 'restrict', 'set_null', 'no_action') );
+alter table hymn.core_biz_object_field
     add check ( s_type in ('sum', 'count', 'min', 'max') );
 alter table hymn.core_biz_object_field
     add check ( standard_type in
-                ('create_by_id', 'create_by', 'modify_by_id', 'modify_by', 'create_date',
-                 'modify_date', 'org_id', 'lock_state', 'name', 'type_id', 'owner_id') );
+                ('create_by_id', 'modify_by_id', 'create_date', 'modify_date', 'org_id',
+                 'lock_state', 'name', 'type_id', 'owner_id') );
 alter table hymn.core_biz_object_field_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
 create index core_biz_object_field_perm_role_id_idx
@@ -202,13 +204,16 @@ alter table hymn.core_custom_button
 alter table hymn.core_custom_button
     add check ( client_type in ('browser', 'mobile') );
 alter table hymn.core_custom_button
-    add check ( action in ('eval', 'open_in_current_tab', 'open_in_new_tab', 'open_in_new_window') );
+    add check ( action in
+                ('eval', 'open_in_current_tab', 'open_in_new_tab', 'open_in_new_window') );
 alter table hymn.core_custom_component
     add constraint core_custom_component_api_uk unique (api);
 alter table hymn.core_custom_interface
     add constraint core_custom_interface_api_uk unique (api);
 alter table hymn.core_custom_interface
     add check ( lang in ('javascript') );
+alter table hymn.core_custom_menu_item
+    add constraint core_custom_menu_item_api_uk unique (api);
 alter table hymn.core_custom_menu_item
     add check ( path_type in ('path', 'url') );
 alter table hymn.core_custom_menu_item
@@ -243,10 +248,6 @@ alter table hymn.core_module_function_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
 create index core_module_function_perm_role_id_idx
     on hymn.core_module_function_perm (role_id);
-alter table hymn.core_module_function_perm
-    add foreign key (module_api) references hymn.core_module_function on delete cascade;
-create index core_module_function_perm_module_api_idx
-    on hymn.core_module_function_perm (module_api);
 alter table hymn.core_module_function_perm
     add foreign key (function_api) references hymn.core_module_function on delete cascade;
 create index core_module_function_perm_function_api_idx
