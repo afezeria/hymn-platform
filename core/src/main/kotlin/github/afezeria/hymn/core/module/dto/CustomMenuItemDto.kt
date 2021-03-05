@@ -27,8 +27,6 @@ class CustomMenuItemDto(
     var clientType: String,
     @ApiModelProperty(value = "图标", required = true)
     var icon: String,
-    @ApiModelProperty(value = "菜单项权限")
-    var permList: List<MenuItemPermDto> = emptyList(),
 ) {
     fun toEntity(): CustomMenuItem {
         return CustomMenuItem(

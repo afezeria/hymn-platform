@@ -6,6 +6,10 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectMappingDao
 import github.afezeria.hymn.core.module.dto.BizObjectMappingDto
 import github.afezeria.hymn.core.module.entity.BizObjectMapping
+import github.afezeria.hymn.core.module.table.CoreBizObjectMappings
+import org.ktorm.dsl.and
+import org.ktorm.dsl.eq
+import org.ktorm.schema.ColumnDeclaring
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -29,14 +33,6 @@ class BizObjectMappingService {
         return i
     }
 
-    fun update(id: String, dto: BizObjectMappingDto): Int {
-        val e = bizObjectMappingDao.selectById(id)
-            ?: throw DataNotFoundException("BizObjectMapping".msgById(id))
-        dto.update(e)
-        val i = bizObjectMappingDao.update(e)
-        return i
-    }
-
     fun create(dto: BizObjectMappingDto): String {
         val e = dto.toEntity()
         val id = bizObjectMappingDao.insert(e)
@@ -52,20 +48,67 @@ class BizObjectMappingService {
         return bizObjectMappingDao.selectById(id)
     }
 
-    fun findByIds(ids: List<String>): MutableList<BizObjectMapping> {
-        return bizObjectMappingDao.selectByIds(ids)
-    }
-
-
     fun findBySourceBizObjectId(
         sourceBizObjectId: String,
     ): MutableList<BizObjectMapping> {
         return bizObjectMappingDao.selectBySourceBizObjectId(sourceBizObjectId)
     }
 
-    fun pageFind(pageSize: Int, pageNum: Int): List<BizObjectMapping> {
-        return bizObjectMappingDao.pageSelect(null, pageSize, pageNum)
+    fun pageFind(
+        sourceBizObjectId: String? = null,
+        targetBizObjectId: String? = null,
+        pageSize: Int,
+        pageNum: Int
+    ): List<BizObjectMapping> {
+        val expr: ((CoreBizObjectMappings) -> ColumnDeclaring<Boolean>)? =
+            if (sourceBizObjectId != null) {
+                if (targetBizObjectId != null) {
+                    {
+                        (it.sourceBizObjectId eq sourceBizObjectId) and
+                            (it.targetBizObjectId eq targetBizObjectId)
+                    }
+                } else {
+                    { it.sourceBizObjectId eq sourceBizObjectId }
+                }
+            } else {
+                if (targetBizObjectId != null) {
+                    { it.targetBizObjectId eq targetBizObjectId }
+                } else {
+                    null
+                }
+            }
+        return bizObjectMappingDao.pageSelect(expr, pageSize, pageNum)
     }
 
+    fun findDtoById(id: String): BizObjectMappingDto? {
+        return bizObjectMappingDao.selectDto({ it.id eq id }, 0, 1).firstOrNull()
+    }
 
+    fun pageFindDto(
+        sourceBizObjectId: String?,
+        targetBizObjectId: String?,
+        pageSize: Int,
+        pageNumber: Int
+    ): MutableList<BizObjectMappingDto> {
+        if (pageSize < 1) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
+        if (pageNumber < 1) throw IllegalArgumentException("pageNumber must be greater than 0, current value $pageNumber")
+        val expr: ((CoreBizObjectMappings) -> ColumnDeclaring<Boolean>)? =
+            if (sourceBizObjectId != null) {
+                if (targetBizObjectId != null) {
+                    {
+                        (it.sourceBizObjectId eq sourceBizObjectId) and
+                            (it.targetBizObjectId eq targetBizObjectId)
+                    }
+                } else {
+                    { it.sourceBizObjectId eq sourceBizObjectId }
+                }
+            } else {
+                if (targetBizObjectId != null) {
+                    { it.targetBizObjectId eq targetBizObjectId }
+                } else {
+                    null
+                }
+            }
+        return bizObjectMappingDao.selectDto(expr, (pageNumber - 1) * pageSize, pageSize)
+    }
 }

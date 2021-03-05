@@ -370,20 +370,19 @@ execute function hymn.core_biz_object_field_history_del();
 drop table if exists hymn.core_biz_object_field_perm_history cascade;
 create table hymn.core_biz_object_field_perm_history
 (
-    operation     text,
-    stamp         timestamp,
-    id            text,
-    role_id       text,
-    biz_object_id text,
-    field_id      text,
-    p_read        bool,
-    p_edit        bool,
-    create_by_id  text,
-    create_by     text,
-    modify_by_id  text,
-    modify_by     text,
-    create_date   timestamptz,
-    modify_date   timestamptz
+    operation    text,
+    stamp        timestamp,
+    id           text,
+    role_id      text,
+    field_id     text,
+    p_read       bool,
+    p_edit       bool,
+    create_by_id text,
+    create_by    text,
+    modify_by_id text,
+    modify_by    text,
+    create_date  timestamptz,
+    modify_date  timestamptz
 );
 create or replace function hymn.core_biz_object_field_perm_history_ins() returns trigger
     language plpgsql as
@@ -1469,8 +1468,8 @@ create table hymn.core_custom_menu_item_history
     create_by    text,
     modify_by_id text,
     modify_by    text,
-    create_date timestamptz,
-    modify_date timestamptz
+    create_date  timestamptz,
+    modify_date  timestamptz
 );
 create or replace function hymn.core_custom_menu_item_history_ins() returns trigger
     language plpgsql as

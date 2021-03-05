@@ -4,6 +4,7 @@ import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.core.module.dao.BizObjectTypePermDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
 import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
+import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -58,11 +59,20 @@ class BizObjectTypePermService {
     }
 
     fun findByTypeId(typeId: String): MutableList<BizObjectTypePermDto> {
-        return bizObjectTypePermDao.selectDto { it.typeId eq typeId }
+        return bizObjectTypePermDao.selectDto { it, _ -> it.typeId eq typeId }
     }
 
-    fun findByRoleId(roleId: String): MutableList<BizObjectTypePermDto> {
-        return bizObjectTypePermDao.selectDto { it.roleId eq roleId }
+    fun findDtoByRoleId(roleId: String): MutableList<BizObjectTypePermDto> {
+        return bizObjectTypePermDao.selectDto { it, _ -> it.roleId eq roleId }
+    }
+
+    fun findDtoByRoleIdAndBizObjectId(
+        roleId: String,
+        bizObjectId: String
+    ): MutableList<BizObjectTypePermDto> {
+        return bizObjectTypePermDao.selectDto { perms, types ->
+            (perms.roleId eq roleId) and (types.bizObjectId eq bizObjectId)
+        }
     }
 
     fun findByRoleIdAndBizObjectId(

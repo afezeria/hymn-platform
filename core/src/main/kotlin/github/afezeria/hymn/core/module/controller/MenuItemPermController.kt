@@ -4,11 +4,10 @@ package github.afezeria.hymn.core.module.controller
 import github.afezeria.hymn.common.ann.ApiVersion
 import github.afezeria.hymn.common.ann.Function
 import github.afezeria.hymn.common.constant.AccountType
-import github.afezeria.hymn.common.exception.ResourceNotFoundException
-import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.MenuItemPermDto
-import github.afezeria.hymn.core.module.entity.MenuItemPerm
+import github.afezeria.hymn.core.module.service.CustomMenuItemService
 import github.afezeria.hymn.core.module.service.MenuItemPermService
+import github.afezeria.hymn.core.module.service.RoleService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,50 +26,62 @@ class MenuItemPermController {
     @Autowired
     private lateinit var menuItemPermService: MenuItemPermService
 
+    @Autowired
+    private lateinit var menuItemService: CustomMenuItemService
+
+    @Autowired
+    private lateinit var roleService: RoleService
+
+
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "分页查询数据", notes = "")
+    @ApiOperation(
+        value = "查询按钮权限",
+        notes = "role_id不为空时返回该角色对所有菜单项的权限,item_id不为空时返回所有角色对该菜单项的权限"
+    )
     @GetMapping
-    fun findAll(
-        @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
-        @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
-    ): List<MenuItemPerm> {
-        val list = menuItemPermService.pageFind(pageSize, pageNum)
-        return list
+    fun find(
+        @RequestParam("role_id", defaultValue = "") roleId: String,
+        @RequestParam("item_id", defaultValue = "") itemId: String,
+    ): List<MenuItemPermDto> {
+        return if (roleId.isNotBlank()) {
+            val dtoItemIdMap =
+                menuItemPermService.findDtoByRoleId(roleId)
+                    .map { it.menuItemId to it }.toMap()
+            val roleName = dtoItemIdMap.values.first().roleName
+            menuItemService.findAll()
+                .map {
+                    dtoItemIdMap[it.id] ?: MenuItemPermDto(roleId, it.id).apply {
+                        this.roleName = roleName
+                        menuItemName = it.name
+                        menuItemApi = it.api
+                    }
+                }
+        } else if (itemId.isNotBlank()) {
+            val dtoRoleIdMap = menuItemPermService.findDtoByItemId(itemId)
+                .map { it.roleId to it }.toMap()
+            val menuItemName: String?
+            val menuItemApi: String?
+            dtoRoleIdMap.values.first().let {
+                menuItemName = it.menuItemName
+                menuItemApi = it.menuItemApi
+            }
+            roleService.findAll()
+                .map {
+                    dtoRoleIdMap[it.id] ?: MenuItemPermDto(it.id, itemId).apply {
+                        roleName = it.name
+                        this.menuItemName = menuItemName
+                        this.menuItemApi = menuItemApi
+                    }
+                }
+        } else {
+            emptyList()
+        }
     }
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "根据id查询", notes = "")
-    @GetMapping("/{id}")
-    fun findById(@PathVariable("id") id: String): MenuItemPerm {
-        val entity = menuItemPermService.findById(id)
-            ?: throw ResourceNotFoundException("菜单项权限".msgById(id))
-        return entity
-    }
-
-    @Function(AccountType.ADMIN)
-    @ApiOperation(value = "新建", notes = "")
-    @PostMapping
-    fun create(@RequestBody dto: MenuItemPermDto): String {
-        val id = menuItemPermService.create(dto)
-        return id
-    }
-
-    @Function(AccountType.ADMIN)
-    @ApiOperation(value = "更新", notes = "")
-    @PutMapping("/{id}")
-    fun update(
-        @PathVariable("id") id: String,
-        @RequestBody dto: MenuItemPermDto
-    ): Int {
-        val count = menuItemPermService.update(id, dto)
-        return count
-    }
-
-    @Function(AccountType.ADMIN)
-    @ApiOperation(value = "根据id删除", notes = "")
-    @DeleteMapping("/{id}")
-    fun delete(@PathVariable("id") id: String): Int {
-        val count = menuItemPermService.removeById(id)
-        return count
+    @ApiOperation(value = "修改菜单项权限", notes = "")
+    @PutMapping
+    fun save(@RequestBody dtoList: List<MenuItemPermDto>): Int {
+        return menuItemPermService.save(dtoList)
     }
 }

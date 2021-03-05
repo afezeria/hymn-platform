@@ -34,18 +34,41 @@ class BizObjectFieldPermController {
 
     @Function(AccountType.ADMIN)
     @ApiOperation(
-        value = "根据角色id或字段id查询数据",
-        notes = "role_id和field_id同时只有一个启作用，role_id优先，同时为空字符串时返回空列表"
+        value = "根据 角色id和对象id 或 字段id 查询数据",
+        notes = "(role_id,biz_object_id)和field_id同时只有一个启作用，(role_id,biz_object_id)优先，同时为空字符串时返回空列表"
     )
     @GetMapping
     fun find(
-        @RequestParam("role_id") roleId: String,
-        @RequestParam("field_id") fieldId: String,
+        @RequestParam("role_id", defaultValue = "") roleId: String,
+        @RequestParam("biz_object_id", defaultValue = "") bizObjectId: String,
+        @RequestParam("field_id", defaultValue = "") fieldId: String,
     ): List<BizObjectFieldPermDto> {
-        return if (roleId.isNotBlank()) {
-            bizObjectFieldPermService.findByRoleId(roleId)
+        return if (roleId.isNotBlank() && bizObjectId.isNotBlank()) {
+            val dtoFieldIdMap =
+                bizObjectFieldPermService.findDtoByRoleIdAndBizObjectId(roleId, bizObjectId)
+                    .map { it.fieldId to it }.toMap()
+            val roleName = dtoFieldIdMap.values.first().roleName
+            fieldService.findByBizObjectId(bizObjectId)
+                .map {
+                    dtoFieldIdMap[it.id] ?: BizObjectFieldPermDto(roleId, it.id).apply {
+                        this.roleName = roleName
+                        this.bizObjectId = bizObjectId
+                        this.fieldName = it.name
+                    }
+                }
         } else if (fieldId.isNotBlank()) {
-            bizObjectFieldPermService.findByFieldId(fieldId)
+            val dtoRoleIdMap = bizObjectFieldPermService.findDtoByFieldId(fieldId)
+                .map { it.roleId to it }.toMap()
+            val fieldName = dtoRoleIdMap.values.first().fieldName
+            val objectId = dtoRoleIdMap.values.first().bizObjectId
+            roleService.findAll()
+                .map {
+                    dtoRoleIdMap[it.id] ?: BizObjectFieldPermDto(it.id, fieldId).apply {
+                        this.roleName = it.name
+                        this.bizObjectId = objectId
+                        this.fieldName = fieldName
+                    }
+                }
         } else {
             emptyList()
         }
@@ -53,8 +76,8 @@ class BizObjectFieldPermController {
 
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "修改字段权限", notes = "")
-    @PostMapping
-    fun create(@RequestBody dto: List<BizObjectFieldPermDto>): Int {
+    @PutMapping
+    fun save(@RequestBody dto: List<BizObjectFieldPermDto>): Int {
         return bizObjectFieldPermService.save(dto)
     }
 

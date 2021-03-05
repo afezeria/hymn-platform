@@ -56,16 +56,12 @@ class BizObjectFieldPermService {
         }
     }
 
-    fun findByRoleId(roleId: String): List<BizObjectFieldPermDto> {
-        return bizObjectFieldPermDao.selectDto { it, _ -> it.roleId eq roleId }
-    }
-
-    fun findByFieldId(fieldId: String): List<BizObjectFieldPermDto> {
+    fun findDtoByFieldId(fieldId: String): List<BizObjectFieldPermDto> {
         return bizObjectFieldPermDao.selectDto { it, _ -> it.fieldId eq fieldId }
     }
 
 
-    fun findByRoleIdAndBizObjectId(
+    fun findDtoByRoleIdAndBizObjectId(
         roleId: String,
         bizObjectId: String
     ): List<BizObjectFieldPermDto> {

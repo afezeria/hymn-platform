@@ -50,7 +50,7 @@ class BizObjectTypePermDao(
             .mapToArray(table)
     }
 
-    fun selectDto(whereExpr: (CoreBizObjectTypePerms) -> ColumnDeclaring<Boolean>): MutableList<BizObjectTypePermDto> {
+    fun selectDto(whereExpr: (CoreBizObjectTypePerms, CoreBizObjectTypes) -> ColumnDeclaring<Boolean>): MutableList<BizObjectTypePermDto> {
         return table.run {
             databaseService.db().from(this)
                 .innerJoin(types, types.id eq typeId)
@@ -65,13 +65,14 @@ class BizObjectTypePermDao(
                 )
                 .where {
                     (bizObjects.active eq true) and
-                        whereExpr(this)
+                        whereExpr(this, types)
                 }
                 .mapTo(ArrayList()) {
                     BizObjectTypePermDto(
                         roleId = "", typeId = "", visible = false
                     ).apply {
                         roleName = requireNotNull(it[roles.name])
+                        bizObjectId = requireNotNull(it[types.bizObjectId])
                         typeName = requireNotNull(it[types.name])
                     }
                 }

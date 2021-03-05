@@ -10,9 +10,12 @@ import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
 import github.afezeria.hymn.core.module.entity.BizObjectLayout
 import github.afezeria.hymn.core.module.service.BizObjectLayoutService
 import io.swagger.annotations.Api
+import io.swagger.annotations.ApiModel
+import io.swagger.annotations.ApiModelProperty
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 
 
 /**
@@ -32,8 +35,20 @@ class BizObjectLayoutController {
     @GetMapping
     fun find(
         @RequestParam("biz_object_id") bizObjectId: String,
-    ): List<BizObjectLayout> {
-        val list = bizObjectLayoutService.findByBizObjectId(bizObjectId)
+    ): List<LayoutListView> {
+        val list = bizObjectLayoutService.findByBizObjectId(bizObjectId).map {
+            LayoutListView(
+                bizObjectId = it.bizObjectId,
+                name = it.name,
+                remark = it.remark,
+                createById = it.createById,
+                createBy = it.createBy,
+                modifyById = it.modifyById,
+                modifyBy = it.modifyBy,
+                createDate = it.createDate,
+                modifyDate = it.modifyDate,
+            )
+        }
         return list
     }
 
@@ -72,4 +87,27 @@ class BizObjectLayoutController {
         val count = bizObjectLayoutService.removeById(id)
         return count
     }
+
+    @ApiModel(value = "业务对象页面布局列表")
+    class LayoutListView(
+        @ApiModelProperty(value = "引用对象", required = true)
+        var bizObjectId: String,
+        @ApiModelProperty(value = "布局名称", required = true)
+        var name: String,
+        @ApiModelProperty(value = "备注", required = true)
+        var remark: String? = null,
+        @ApiModelProperty(value = "创建人id", required = true)
+        var createById: String,
+        @ApiModelProperty(value = "创建人", required = true)
+        var createBy: String,
+        @ApiModelProperty(value = "最后修改人id", required = true)
+        var modifyById: String,
+        @ApiModelProperty(value = "最后修改人", required = true)
+        var modifyBy: String,
+        @ApiModelProperty(value = "创建日期", required = true)
+        var createDate: LocalDateTime,
+        @ApiModelProperty(value = "最后修改日期", required = true)
+        var modifyDate: LocalDateTime,
+    )
+
 }

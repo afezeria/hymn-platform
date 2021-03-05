@@ -28,7 +28,7 @@ class BizObjectTriggerController {
     private lateinit var bizObjectTriggerService: BizObjectTriggerService
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "更具对象id查询", notes = "")
+    @ApiOperation(value = "根据对象id查询", notes = "")
     @GetMapping
     fun find(
         @RequestParam("biz_object_id") bizObjectId: String,

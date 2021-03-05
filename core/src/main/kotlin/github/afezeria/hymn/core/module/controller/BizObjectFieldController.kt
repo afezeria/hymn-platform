@@ -45,14 +45,14 @@ class BizObjectFieldController {
     }
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "停用对象", notes = "")
+    @ApiOperation(value = "停用字段", notes = "")
     @GetMapping("/{id}/inactivate")
     fun inactivateObject(@PathVariable("id") id: String): Int {
         return bizObjectFieldService.inactivateById(id)
     }
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "启用对象", notes = "")
+    @ApiOperation(value = "启用启用", notes = "")
     @GetMapping("/{id}/activate")
     fun activateObject(@PathVariable("id") id: String): Int {
         return bizObjectFieldService.activateById(id)

@@ -9,8 +9,6 @@ import io.swagger.annotations.ApiModelProperty
 class BizObjectFieldPermDto(
     @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
     var roleId: String,
-    @ApiModelProperty(value = "字段所属对象id ;;fk:[core_biz_object cascade];idx", required = true)
-    var bizObjectId: String,
     @ApiModelProperty(
         value = "字段id，新建自定义字段时该字段用空字符串占位 ;;fk:[core_biz_object_field cascade];idx",
         required = true
@@ -24,13 +22,15 @@ class BizObjectFieldPermDto(
     @ApiModelProperty(value = "角色名称", notes = "只用于后端返回数据")
     var roleName: String? = null
 
+    @ApiModelProperty(value = "字段所属对象id", notes = "只用于后端返回数据")
+    var bizObjectId: String? = null
+
     @ApiModelProperty(value = "字段名称", notes = "只用于后端返回数据")
     var fieldName: String? = null
 
     fun toEntity(): BizObjectFieldPerm {
         return BizObjectFieldPerm(
             roleId = roleId,
-            bizObjectId = bizObjectId,
             fieldId = fieldId,
             pRead = pRead,
             pEdit = pEdit,

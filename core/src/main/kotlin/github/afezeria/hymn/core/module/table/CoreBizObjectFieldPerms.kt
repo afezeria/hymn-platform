@@ -17,7 +17,6 @@ class CoreBizObjectFieldPerms(alias: String? = null) :
     ) {
 
     val roleId = varchar("role_id")
-    val bizObjectId = varchar("biz_object_id")
     val fieldId = varchar("field_id")
     val pRead = boolean("p_read")
     val pEdit = boolean("p_edit")

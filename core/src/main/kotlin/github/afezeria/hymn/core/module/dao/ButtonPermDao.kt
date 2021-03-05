@@ -47,12 +47,12 @@ class ButtonPermDao(
     private val buttons = CoreCustomButtons()
     private val roles = CoreRoles()
 
-    fun selectDto(whereExpr: (CoreButtonPerms, CoreBizObjects) -> ColumnDeclaring<Boolean>): MutableList<ButtonPermDto> {
+    fun selectDto(whereExpr: (CoreButtonPerms, CoreCustomButtons) -> ColumnDeclaring<Boolean>): MutableList<ButtonPermDto> {
         return table.run {
             databaseService.db().from(this)
                 .innerJoin(buttons, buttons.id eq buttonId)
                 .innerJoin(roles, roles.id eq roleId)
-                .innerJoin(bizObjects, bizObjects.id eq buttons.bizObjectId)
+                .leftJoin(bizObjects, bizObjects.id eq buttons.bizObjectId)
                 .select(
                     roleId,
                     buttonId,
@@ -63,7 +63,8 @@ class ButtonPermDao(
                     bizObjects.name
                 )
                 .where {
-                    whereExpr(this, bizObjects)
+                    (bizObjects.id.isNull() or (bizObjects.active eq true)) and
+                        whereExpr(this, buttons)
                 }
                 .mapTo(ArrayList()) {
                     ButtonPermDto(

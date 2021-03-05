@@ -3,7 +3,9 @@ package github.afezeria.hymn.core.module.service
 import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.core.module.dao.ButtonPermDao
 import github.afezeria.hymn.core.module.dto.ButtonPermDto
+import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
+import org.ktorm.dsl.isNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -28,12 +30,29 @@ class ButtonPermService {
     @Autowired
     private lateinit var dbService: DatabaseService
 
+    /**
+     * 根据角色id和对象id查找对象专用按钮的权限
+     */
+    fun findByRoleIdAndBizObjectId(
+        roleId: String,
+        bizObjectId: String
+    ): MutableList<ButtonPermDto> {
+        return buttonPermDao.selectDto { perms, buttons ->
+            (perms.roleId eq roleId) and (buttons.bizObjectId eq bizObjectId)
+        }
+    }
+
     fun findByButtonId(buttonId: String): MutableList<ButtonPermDto> {
         return buttonPermDao.selectDto { it, _ -> it.buttonId eq buttonId }
     }
 
+    /**
+     * 根据角色id查找通用按钮的权限
+     */
     fun findByRoleId(roleId: String): MutableList<ButtonPermDto> {
-        return buttonPermDao.selectDto { it, _ -> it.roleId eq roleId }
+        return buttonPermDao.selectDto { perms, buttons ->
+            (perms.roleId eq roleId) and (buttons.bizObjectId.isNull())
+        }
     }
 
     fun save(dtoList: List<ButtonPermDto>): Int {

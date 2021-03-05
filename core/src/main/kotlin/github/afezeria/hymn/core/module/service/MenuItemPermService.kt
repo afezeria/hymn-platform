@@ -22,11 +22,11 @@ class MenuItemPermService {
     @Autowired
     private lateinit var dbService: DatabaseService
 
-    fun findByItemId(menuItemId: String): MutableList<MenuItemPermDto> {
+    fun findDtoByItemId(menuItemId: String): MutableList<MenuItemPermDto> {
         return menuItemPermDao.selectDto { it.roleId eq menuItemId }
     }
 
-    fun findByRoleId(roleId: String): MutableList<MenuItemPermDto> {
+    fun findDtoByRoleId(roleId: String): MutableList<MenuItemPermDto> {
         return menuItemPermDao.selectDto { it.roleId eq roleId }
     }
 

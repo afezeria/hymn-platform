@@ -4,11 +4,10 @@ package github.afezeria.hymn.core.module.controller
 import github.afezeria.hymn.common.ann.ApiVersion
 import github.afezeria.hymn.common.ann.Function
 import github.afezeria.hymn.common.constant.AccountType
-import github.afezeria.hymn.common.exception.ResourceNotFoundException
-import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
-import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
 import github.afezeria.hymn.core.module.service.BizObjectTypePermService
+import github.afezeria.hymn.core.module.service.BizObjectTypeService
+import github.afezeria.hymn.core.module.service.RoleService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,50 +26,60 @@ class BizObjectTypePermController {
     @Autowired
     private lateinit var bizObjectTypePermService: BizObjectTypePermService
 
+    @Autowired
+    private lateinit var bizObjectTypeService: BizObjectTypeService
+
+    @Autowired
+    private lateinit var roleService: RoleService
+
+
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "分页查询数据", notes = "")
+    @ApiOperation(
+        value = "根据类型id或角色id和对象id查询",
+        notes = "(role_id,biz_object_id)和type_id同时只有一个启作用，(role_id,biz_object_id)优先，同时为空字符串时返回空列表"
+    )
     @GetMapping
-    fun findAll(
-        @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
-        @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
-    ): List<BizObjectTypePerm> {
-        val list = bizObjectTypePermService.pageFind(pageSize, pageNum)
-        return list
+    fun find(
+        @RequestParam("role_id", defaultValue = "") roleId: String,
+        @RequestParam("biz_object_id", defaultValue = "") bizObjectId: String,
+        @RequestParam("type_id", defaultValue = "") typeId: String,
+    ): List<BizObjectTypePermDto> {
+        return if (roleId.isNotBlank() && bizObjectId.isNotBlank()) {
+            val dtoTypeIdMap =
+                bizObjectTypePermService.findDtoByRoleIdAndBizObjectId(roleId, bizObjectId)
+                    .map { it.typeId to it }.toMap()
+            val roleName = dtoTypeIdMap.values.first().roleName
+            bizObjectTypeService.findAvailableTypeByBizObjectId(bizObjectId)
+                .map {
+                    dtoTypeIdMap[it.id] ?: BizObjectTypePermDto(roleId, it.id).apply {
+                        this.roleName = roleName
+                        this.bizObjectId = bizObjectId
+                        typeName = it.name
+                    }
+                }
+        } else if (typeId.isNotBlank()) {
+            val dtoRoleIdMap = bizObjectTypePermService.findByTypeId(typeId)
+                .map { it.roleId to it }.toMap()
+            val objectId = dtoRoleIdMap.values.first().bizObjectId
+            val typeName = dtoRoleIdMap.values.first().typeName
+            roleService.findAll()
+                .map {
+                    dtoRoleIdMap[it.id] ?: BizObjectTypePermDto(it.id, typeId).apply {
+                        roleName = it.name
+                        this.bizObjectId = objectId
+                        this.typeName = typeName
+                    }
+                }
+        } else {
+            emptyList()
+        }
     }
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "根据id查询", notes = "")
-    @GetMapping("/{id}")
-    fun findById(@PathVariable("id") id: String): BizObjectTypePerm {
-        val entity = bizObjectTypePermService.findById(id)
-            ?: throw ResourceNotFoundException("记录类型权限".msgById(id))
-        return entity
+    @ApiOperation(value = "修改类型权限", notes = "")
+    @PutMapping
+    fun save(@RequestBody dtoList: List<BizObjectTypePermDto>): Int {
+        return bizObjectTypePermService.save(dtoList)
     }
 
-    @Function(AccountType.ADMIN)
-    @ApiOperation(value = "新建", notes = "")
-    @PostMapping
-    fun create(@RequestBody dto: BizObjectTypePermDto): String {
-        val id = bizObjectTypePermService.create(dto)
-        return id
-    }
-
-    @Function(AccountType.ADMIN)
-    @ApiOperation(value = "更新", notes = "")
-    @PutMapping("/{id}")
-    fun update(
-        @PathVariable("id") id: String,
-        @RequestBody dto: BizObjectTypePermDto
-    ): Int {
-        val count = bizObjectTypePermService.update(id, dto)
-        return count
-    }
-
-    @Function(AccountType.ADMIN)
-    @ApiOperation(value = "根据id删除", notes = "")
-    @DeleteMapping("/{id}")
-    fun delete(@PathVariable("id") id: String): Int {
-        val count = bizObjectTypePermService.removeById(id)
-        return count
-    }
 }

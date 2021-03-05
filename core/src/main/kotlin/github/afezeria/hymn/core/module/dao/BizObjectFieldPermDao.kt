@@ -51,17 +51,17 @@ class BizObjectFieldPermDao(
     ): List<BizObjectFieldPermDto> {
         return table.run {
             databaseService.db().from(this)
-                .innerJoin(bizObjects, bizObjects.id eq bizObjectId)
                 .innerJoin(bizObjectFields, bizObjectFields.id eq fieldId)
+                .innerJoin(bizObjects, bizObjects.id eq bizObjectFields.bizObjectId)
                 .innerJoin(roles, roles.id eq roleId)
                 .select(
                     roleId,
-                    bizObjectId,
                     fieldId,
                     pRead,
                     pEdit,
                     roles.name,
-                    bizObjectFields.name
+                    bizObjects.id,
+                    bizObjectFields.name,
                 )
                 .where {
                     (bizObjects.active eq true) and
@@ -71,12 +71,12 @@ class BizObjectFieldPermDao(
                 .mapTo(ArrayList()) {
                     BizObjectFieldPermDto(
                         roleId = requireNotNull(it[roleId]),
-                        bizObjectId = requireNotNull(it[bizObjectId]),
                         fieldId = requireNotNull(it[fieldId]),
                         pRead = requireNotNull(it[pRead]),
                         pEdit = requireNotNull(it[pEdit])
                     ).apply {
                         roleName = requireNotNull(it[roles.name])
+                        bizObjectId = requireNotNull(it[bizObjects.id])
                         fieldName = requireNotNull(it[bizObjectFields.name])
                     }
                 }

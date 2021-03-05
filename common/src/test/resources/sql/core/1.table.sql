@@ -781,7 +781,7 @@ create table hymn.core_biz_object_mapping
 );
 comment on table hymn.core_biz_object_mapping is '对象映射关系 描述以一个对象的数据为基础新建其他对象的数据时字段间的映射关系，比如根据订单创建发货单时将订单中的字段映射到发货单中 ;;uk:[[source_biz_object_id source_type_id target_biz_object_id target_type_id]]';
 comment on column hymn.core_biz_object_mapping.source_biz_object_id is '源对象id ;;fk:[core_biz_object cascade];idx';
-comment on column hymn.core_biz_object_mapping.target_biz_object_id is '目标对象id ;;fk:[core_biz_object cascade]';
+comment on column hymn.core_biz_object_mapping.target_biz_object_id is '目标对象id ;;fk:[core_biz_object cascade];idx';
 comment on column hymn.core_biz_object_mapping.source_type_id is '源对象记录类型id ;;fk:[core_biz_object_type cascade]';
 comment on column hymn.core_biz_object_mapping.target_type_id is '目标对象记录类型id ;;fk:[core_biz_object_type cascade]';
 
@@ -954,7 +954,6 @@ create table hymn.core_biz_object_field_perm
 (
     id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     role_id       text        not null,
-    biz_object_id text        not null,
     field_id      text        not null,
     p_read        bool        not null,
     p_edit        bool        not null,
@@ -967,7 +966,6 @@ create table hymn.core_biz_object_field_perm
 );
 comment on table hymn.core_biz_object_field_perm is '字段权限 ;;uk:[[role_id field_id]]';
 comment on column hymn.core_biz_object_field_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
-comment on column hymn.core_biz_object_field_perm.biz_object_id is '字段所属对象id ;;fk:[core_biz_object cascade];idx';
 comment on column hymn.core_biz_object_field_perm.field_id is '字段id ;;fk:[core_biz_object_field cascade];idx';
 comment on column hymn.core_biz_object_field_perm.p_read is '可读';
 comment on column hymn.core_biz_object_field_perm.p_edit is '可编辑';

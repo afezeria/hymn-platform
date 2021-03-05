@@ -50,11 +50,11 @@ class BizObjectPermService {
 
     }
 
-    fun findByBizObjectId(bizObjectId: String): MutableList<BizObjectPermDto> {
+    fun findDtoByBizObjectId(bizObjectId: String): MutableList<BizObjectPermDto> {
         return bizObjectPermDao.selectDto { it.bizObjectId eq bizObjectId }
     }
 
-    fun findByRoleId(roleId: String): MutableList<BizObjectPermDto> {
+    fun findDtoByRoleId(roleId: String): MutableList<BizObjectPermDto> {
         return bizObjectPermDao.selectDto { it.roleId eq roleId }
     }
 

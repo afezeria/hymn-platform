@@ -80,10 +80,6 @@ alter table hymn.core_biz_object_field_perm
 create index core_biz_object_field_perm_role_id_idx
     on hymn.core_biz_object_field_perm (role_id);
 alter table hymn.core_biz_object_field_perm
-    add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
-create index core_biz_object_field_perm_biz_object_id_idx
-    on hymn.core_biz_object_field_perm (biz_object_id);
-alter table hymn.core_biz_object_field_perm
     add foreign key (field_id) references hymn.core_biz_object_field on delete cascade;
 create index core_biz_object_field_perm_field_id_idx
     on hymn.core_biz_object_field_perm (field_id);
@@ -97,6 +93,8 @@ alter table hymn.core_biz_object_mapping
     add foreign key (source_type_id) references hymn.core_biz_object_type on delete cascade;
 alter table hymn.core_biz_object_mapping
     add foreign key (target_biz_object_id) references hymn.core_biz_object on delete cascade;
+create index core_biz_object_mapping_target_biz_object_id_idx
+    on hymn.core_biz_object_mapping (target_biz_object_id);
 alter table hymn.core_biz_object_mapping
     add foreign key (target_type_id) references hymn.core_biz_object_type on delete cascade;
 alter table hymn.core_biz_object_mapping_item
@@ -132,7 +130,9 @@ create index core_biz_object_perm_biz_object_id_idx
 alter table hymn.core_biz_object_trigger
     add check ( lang in ('javascript') );
 alter table hymn.core_biz_object_trigger
-    add check ( event in ('BEFORE_INSERT', 'BEFORE_UPDATE', 'BEFORE_UPSERT', 'BEFORE_DELETE', 'AFTER_INSERT', 'AFTER_UPDATE', 'AFTER_UPSERT', 'AFTER_DELETE') );
+    add check ( event in
+                ('BEFORE_INSERT', 'BEFORE_UPDATE', 'BEFORE_UPSERT', 'BEFORE_DELETE', 'AFTER_INSERT',
+                 'AFTER_UPDATE', 'AFTER_UPSERT', 'AFTER_DELETE') );
 alter table hymn.core_biz_object_type
     add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
 alter table hymn.core_biz_object_type_layout

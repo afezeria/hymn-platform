@@ -12,7 +12,7 @@ class ModuleFunctionPermDto(
     @ApiModelProperty(value = "功能api ;;fk:[core_module_function cascade]", required = true)
     var functionApi: String,
     @ApiModelProperty(value = "是否有访问权限")
-    var perm: Boolean,
+    var perm: Boolean = false,
 ) {
     @ApiModelProperty(value = "角色名称", notes = "只用于后端返回数据")
     var roleName: String? = null

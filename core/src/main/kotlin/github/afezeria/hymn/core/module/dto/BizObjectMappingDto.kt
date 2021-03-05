@@ -16,6 +16,21 @@ class BizObjectMappingDto(
     @ApiModelProperty(value = "目标对象记录类型id ;;fk:[core_biz_object_type cascade]", required = true)
     var targetTypeId: String,
 ) {
+    @ApiModelProperty(notes = "只用于后端返回数据")
+    var id: String? = null
+
+    @ApiModelProperty(value = "源对象名称", notes = "只用于后端返回数据")
+    var sourceBizObjectName: String? = null
+
+    @ApiModelProperty(value = "源对象记录类型名称", notes = "只用于后端返回数据")
+    var sourceTypeName: String? = null
+
+    @ApiModelProperty(value = "目标对象名称", notes = "只用于后端返回数据")
+    var targetBizObjectName: String? = null
+
+    @ApiModelProperty(value = "目标对象记录类型名称", notes = "只用于后端返回数据")
+    var targetTypeName: String? = null
+
     fun toEntity(): BizObjectMapping {
         return BizObjectMapping(
             sourceBizObjectId = sourceBizObjectId,

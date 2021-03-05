@@ -7,7 +7,6 @@ import github.afezeria.hymn.common.constant.AccountType
 import github.afezeria.hymn.common.exception.ResourceNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectMappingDto
-import github.afezeria.hymn.core.module.entity.BizObjectMapping
 import github.afezeria.hymn.core.module.service.BizObjectMappingService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
@@ -31,20 +30,26 @@ class BizObjectMappingController {
     @ApiOperation(value = "分页查询数据", notes = "")
     @GetMapping
     fun findAll(
+        @RequestParam("source_biz_object_id", required = false) sourceBizObjectId: String?,
+        @RequestParam("target_biz_object_id", required = false) targetBizObjectId: String?,
         @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
         @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
-    ): List<BizObjectMapping> {
-        val list = bizObjectMappingService.pageFind(pageSize, pageNum)
-        return list
+    ): List<BizObjectMappingDto> {
+        return bizObjectMappingService.pageFindDto(
+            sourceBizObjectId,
+            targetBizObjectId,
+            pageSize,
+            pageNum
+        )
     }
 
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "根据id查询", notes = "")
     @GetMapping("/{id}")
-    fun findById(@PathVariable("id") id: String): BizObjectMapping {
-        val entity = bizObjectMappingService.findById(id)
+    fun findById(@PathVariable("id") id: String): BizObjectMappingDto {
+        val result = bizObjectMappingService.findDtoById(id)
             ?: throw ResourceNotFoundException("对象映射关系".msgById(id))
-        return entity
+        return result
     }
 
     @Function(AccountType.ADMIN)
@@ -53,17 +58,6 @@ class BizObjectMappingController {
     fun create(@RequestBody dto: BizObjectMappingDto): String {
         val id = bizObjectMappingService.create(dto)
         return id
-    }
-
-    @Function(AccountType.ADMIN)
-    @ApiOperation(value = "更新", notes = "")
-    @PutMapping("/{id}")
-    fun update(
-        @PathVariable("id") id: String,
-        @RequestBody dto: BizObjectMappingDto
-    ): Int {
-        val count = bizObjectMappingService.update(id, dto)
-        return count
     }
 
     @Function(AccountType.ADMIN)
