@@ -669,19 +669,21 @@ comment on column hymn.core_biz_object_layout.preview_layout_json is '小窗预�
 drop table if exists hymn.core_biz_object_type cascade;
 create table hymn.core_biz_object_type
 (
-    id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
-    biz_object_id text        not null,
-    name          text        not null,
-    remark        text,
-    create_by_id  text        not null,
-    create_by     text        not null,
-    modify_by_id  text        not null,
-    modify_by     text        not null,
-    create_date   timestamptz not null default now(),
-    modify_date   timestamptz not null default now()
+    id                text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    biz_object_id     text        not null,
+    name              text        not null,
+    default_layout_id text        not null,
+    remark            text,
+    create_by_id      text        not null,
+    create_by         text        not null,
+    modify_by_id      text        not null,
+    modify_by         text        not null,
+    create_date       timestamptz not null default now(),
+    modify_date       timestamptz not null default now()
 );
 comment on table hymn.core_biz_object_type is '业务对象记录类型 ;; uk:[[biz_object_id name]]';
 comment on column hymn.core_biz_object_type.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade]';
+comment on column hymn.core_biz_object_type.default_layout_id is '默认使用的页面布局的id ;;fk:[core_biz_object_layout restrict]';
 comment on column hymn.core_biz_object_type.name is '记录类型名称';
 
 drop table if exists hymn.core_biz_object_type_options cascade;
@@ -722,9 +724,8 @@ create table hymn.core_biz_object_type_layout
     create_date   timestamptz not null default now(),
     modify_date   timestamptz not null default now()
 );
-comment on table hymn.core_biz_object_type_layout is '业务对象记录类型、角色和页面布局关联表 ;;uk:[[role_id type_id layout_id]]';
+comment on table hymn.core_biz_object_type_layout is '业务对象记录类型、角色和页面布局关联表 ;;uk:[[role_id type_id]]';
 comment on column hymn.core_biz_object_type_layout.role_id is '角色id ;;fk:[core_role cascade];idx';
-comment on column hymn.core_biz_object_type_layout.biz_object_id is '业务对象id ;;fk:[core_biz_object cascade];idx';
 comment on column hymn.core_biz_object_type_layout.type_id is '记录类型id ;;fk:[core_biz_object_type cascade]';
 comment on column hymn.core_biz_object_type_layout.layout_id is '页面布局id ;;fk:[core_biz_object_layout cascade]';
 
@@ -733,7 +734,7 @@ comment on column hymn.core_biz_object_type_layout.layout_id is '页面布局id 
 drop table if exists hymn.core_biz_object_trigger cascade;
 create table hymn.core_biz_object_trigger
 (
-    id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
     active        bool        not null,
     remark        text,
     biz_object_id text        not null,
@@ -952,17 +953,17 @@ comment on column hymn.core_biz_object_perm.edit_all is '编辑全部';
 drop table if exists hymn.core_biz_object_field_perm cascade;
 create table hymn.core_biz_object_field_perm
 (
-    id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
-    role_id       text        not null,
-    field_id      text        not null,
-    p_read        bool        not null,
-    p_edit        bool        not null,
-    create_by_id  text        not null,
-    create_by     text        not null,
-    modify_by_id  text        not null,
-    modify_by     text        not null,
-    create_date   timestamptz not null default now(),
-    modify_date   timestamptz not null default now()
+    id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    role_id      text        not null,
+    field_id     text        not null,
+    p_read       bool        not null,
+    p_edit       bool        not null,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
+    create_date  timestamptz not null default now(),
+    modify_date  timestamptz not null default now()
 );
 comment on table hymn.core_biz_object_field_perm is '字段权限 ;;uk:[[role_id field_id]]';
 comment on column hymn.core_biz_object_field_perm.role_id is '角色id ;;fk:[core_role cascade];idx';

@@ -6,6 +6,7 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
 import github.afezeria.hymn.core.module.entity.BizObjectLayout
+import github.afezeria.hymn.core.module.view.ObjectLayoutListView
 import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -18,6 +19,12 @@ class BizObjectLayoutService {
 
     @Autowired
     private lateinit var bizObjectLayoutDao: BizObjectLayoutDao
+
+    @Autowired
+    private lateinit var roleService: RoleService
+
+    @Autowired
+    private lateinit var typeService: BizObjectTypeService
 
     @Autowired
     private lateinit var dbService: DatabaseService
@@ -49,7 +56,24 @@ class BizObjectLayoutService {
             .firstOrNull()
     }
 
-    fun findByBizObjectId(bizObjectId: String): List<BizObjectLayout> {
+    fun findByBizObjectId(bizObjectId: String): MutableList<BizObjectLayout> {
         return bizObjectLayoutDao.select({ it.bizObjectId eq bizObjectId })
     }
+
+    /**
+     * 根据当前角色和数据的业务类型返回对应的布局
+     */
+    fun findByRoleIdAndTypeId(roleId: String, typeId: String): BizObjectLayout {
+        roleService.findById(roleId) ?: throw DataNotFoundException("角色".msgById(roleId))
+        val type =
+            typeService.findById(typeId) ?: throw DataNotFoundException("业务类型".msgById(roleId))
+        val layout = bizObjectLayoutDao.selectByRoleIdAndTypeId(roleId, typeId)
+            ?: requireNotNull(bizObjectLayoutDao.selectById(type.defaultLayoutId))
+        return layout
+    }
+
+    fun findListViewByBizObjectId(bizObjectId: String): MutableList<ObjectLayoutListView> {
+        return bizObjectLayoutDao.selectView { it.bizObjectId eq bizObjectId }
+    }
+
 }

@@ -13,6 +13,7 @@ class CoreBizObjectTypes(alias: String? = null) :
 
     val bizObjectId = varchar("biz_object_id")
     val name = varchar("name")
+    val defaultLayoutId = varchar("default_layout_id")
     val remark = varchar("remark")
     val createById = varchar("create_by_id")
     val createBy = varchar("create_by")

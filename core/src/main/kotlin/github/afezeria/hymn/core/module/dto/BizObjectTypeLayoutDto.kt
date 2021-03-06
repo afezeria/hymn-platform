@@ -16,10 +16,19 @@ class BizObjectTypeLayoutDto(
     @ApiModelProperty(value = "页面布局id ;;fk:[core_biz_object_layout cascade]", required = true)
     var layoutId: String,
 ) {
+    @ApiModelProperty(value = "角色名称", notes = "只用于后端返回数据")
+    var roleName: String? = null
+
+    @ApiModelProperty(value = "布局名称", notes = "只用于后端返回数据")
+    var layoutName: String? = null
+
+    @ApiModelProperty(value = "类型名称", notes = "只用于后端返回数据")
+    var typeName: String? = null
+
+
     fun toEntity(): BizObjectTypeLayout {
         return BizObjectTypeLayout(
             roleId = roleId,
-            bizObjectId = bizObjectId,
             typeId = typeId,
             layoutId = layoutId,
         )
@@ -28,7 +37,6 @@ class BizObjectTypeLayoutDto(
     fun update(entity: BizObjectTypeLayout) {
         entity.also {
             it.roleId = roleId
-            it.bizObjectId = bizObjectId
             it.typeId = typeId
             it.layoutId = layoutId
         }

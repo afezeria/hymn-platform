@@ -18,6 +18,11 @@ data class BizObjectType(
     var bizObjectId: String,
     @ApiModelProperty(value = "记录类型名称", required = true)
     var name: String,
+    @ApiModelProperty(
+        value = "默认使用的页面布局的id ;;fk:[core_biz_object_layout restrict]",
+        required = true
+    )
+    var defaultLayoutId: String,
     @ApiModelProperty(value = "")
     var remark: String? = null,
 ) : AbstractEntity() {

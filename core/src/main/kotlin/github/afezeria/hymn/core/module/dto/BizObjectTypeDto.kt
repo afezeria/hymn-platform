@@ -11,6 +11,11 @@ class BizObjectTypeDto(
     var bizObjectId: String,
     @ApiModelProperty(value = "记录类型名称", required = true)
     var name: String,
+    @ApiModelProperty(
+        value = "默认使用的页面布局的id ;;fk:[core_biz_object_layout restrict]",
+        required = true
+    )
+    var defaultLayoutId: String,
     @ApiModelProperty(value = "是否启用", required = true)
     var active: Boolean,
     @ApiModelProperty(value = "")
@@ -20,6 +25,7 @@ class BizObjectTypeDto(
         return BizObjectType(
             bizObjectId = bizObjectId,
             name = name,
+            defaultLayoutId = defaultLayoutId,
             remark = remark,
         )
     }
@@ -28,6 +34,7 @@ class BizObjectTypeDto(
         entity.also {
             it.bizObjectId = bizObjectId
             it.name = name
+            it.defaultLayoutId = defaultLayoutId
             it.remark = remark
         }
     }
