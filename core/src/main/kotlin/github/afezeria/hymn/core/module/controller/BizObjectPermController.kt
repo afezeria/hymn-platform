@@ -8,6 +8,7 @@ import github.afezeria.hymn.core.module.dto.BizObjectPermDto
 import github.afezeria.hymn.core.module.service.BizObjectPermService
 import github.afezeria.hymn.core.module.service.BizObjectService
 import github.afezeria.hymn.core.module.service.RoleService
+import github.afezeria.hymn.core.module.view.BizObjectPermListView
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,29 +43,11 @@ class BizObjectPermController {
     fun find(
         @RequestParam("role_id", defaultValue = "") roleId: String,
         @RequestParam("biz_object_id", defaultValue = "") bizObjectId: String,
-    ): List<BizObjectPermDto> {
+    ): List<BizObjectPermListView> {
         return if (roleId.isNotBlank()) {
-            val dtoObjectIdMap = bizObjectPermService.findDtoByRoleId(roleId)
-                .map { it.bizObjectId to it }.toMap()
-            val roleName = dtoObjectIdMap.values.first().roleName
-            bizObjectService.findAllActiveObject()
-                .map {
-                    dtoObjectIdMap[it.id] ?: BizObjectPermDto(roleId, it.id).apply {
-                        this.roleName = roleName
-                        bizObjectName = it.name
-                    }
-                }
+            bizObjectPermService.findViewByRoleId(roleId)
         } else if (bizObjectId.isNotBlank()) {
-            val dtoRoleIdMap = bizObjectPermService.findDtoByBizObjectId(bizObjectId)
-                .map { it.roleId to it }.toMap()
-            val objectName = dtoRoleIdMap.values.first().bizObjectName
-            roleService.findAll()
-                .map {
-                    dtoRoleIdMap[it.id] ?: BizObjectPermDto(it.id, bizObjectId).apply {
-                        roleName = it.name
-                        bizObjectName = objectName
-                    }
-                }
+            bizObjectPermService.findViewByBizObjectId(bizObjectId)
         } else {
             emptyList()
         }

@@ -6,7 +6,7 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
 import github.afezeria.hymn.core.module.entity.BizObjectLayout
-import github.afezeria.hymn.core.module.view.ObjectLayoutListView
+import github.afezeria.hymn.core.module.view.BizObjectLayoutListView
 import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -72,7 +72,7 @@ class BizObjectLayoutService {
         return layout
     }
 
-    fun findListViewByBizObjectId(bizObjectId: String): MutableList<ObjectLayoutListView> {
+    fun findListViewByBizObjectId(bizObjectId: String): MutableList<BizObjectLayoutListView> {
         return bizObjectLayoutDao.selectView { it.bizObjectId eq bizObjectId }
     }
 

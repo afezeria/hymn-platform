@@ -19,15 +19,6 @@ class BizObjectFieldPermDto(
     @ApiModelProperty(value = "可编辑")
     var pEdit: Boolean = false,
 ) {
-    @ApiModelProperty(value = "角色名称", notes = "只用于后端返回数据")
-    var roleName: String? = null
-
-    @ApiModelProperty(value = "字段所属对象id", notes = "只用于后端返回数据")
-    var bizObjectId: String? = null
-
-    @ApiModelProperty(value = "字段名称", notes = "只用于后端返回数据")
-    var fieldName: String? = null
-
     fun toEntity(): BizObjectFieldPerm {
         return BizObjectFieldPerm(
             roleId = roleId,

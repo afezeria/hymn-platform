@@ -4,6 +4,7 @@ import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.core.module.dao.BizObjectTypePermDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
 import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
+import github.afezeria.hymn.core.module.view.BizObjectTypePermListView
 import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
@@ -58,21 +59,46 @@ class BizObjectTypePermService {
 
     }
 
-    fun findByTypeId(typeId: String): MutableList<BizObjectTypePermDto> {
-        return bizObjectTypePermDao.selectDto { it, _ -> it.typeId eq typeId }
+    fun findViewByTypeId(typeId: String): List<BizObjectTypePermListView> {
+        val viewRoleIdMap =
+            bizObjectTypePermDao.selectView { it, _ -> it.typeId eq typeId }
+                .map { it.roleId to it }.toMap()
+        val objectId = viewRoleIdMap.values.first().bizObjectId
+        val typeName = viewRoleIdMap.values.first().typeName
+        return roleService.findAll()
+            .map {
+                viewRoleIdMap[it.id] ?: BizObjectTypePermListView(
+                    roleId = it.id,
+                    roleName = it.name,
+                    typeId = typeId,
+                    typeName = typeName,
+                    bizObjectId = objectId,
+                )
+            }
+
     }
 
-    fun findDtoByRoleId(roleId: String): MutableList<BizObjectTypePermDto> {
-        return bizObjectTypePermDao.selectDto { it, _ -> it.roleId eq roleId }
-    }
-
-    fun findDtoByRoleIdAndBizObjectId(
+    fun findViewByRoleIdAndBizObjectId(
         roleId: String,
         bizObjectId: String
-    ): MutableList<BizObjectTypePermDto> {
-        return bizObjectTypePermDao.selectDto { perms, types ->
-            (perms.roleId eq roleId) and (types.bizObjectId eq bizObjectId)
-        }
+    ): List<BizObjectTypePermListView> {
+        val dtoTypeIdMap =
+            bizObjectTypePermDao.selectView { perms, types ->
+                (perms.roleId eq roleId) and (types.bizObjectId eq bizObjectId)
+            }
+                .map { it.typeId to it }.toMap()
+        val roleName = dtoTypeIdMap.values.first().roleName
+        return typeService.findAvailableTypeByBizObjectId(bizObjectId)
+            .map {
+                dtoTypeIdMap[it.id] ?: BizObjectTypePermListView(
+                    roleId = roleId,
+                    roleName = roleName,
+                    typeId = it.id,
+                    typeName = it.name,
+                    bizObjectId = bizObjectId,
+                )
+            }
+
     }
 
     fun findByRoleIdAndBizObjectId(

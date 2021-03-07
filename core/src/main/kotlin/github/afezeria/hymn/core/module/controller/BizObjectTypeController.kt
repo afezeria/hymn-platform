@@ -28,9 +28,9 @@ class BizObjectTypeController {
     private lateinit var bizObjectTypeService: BizObjectTypeService
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "分页查询数据", notes = "")
+    @ApiOperation(value = "根据对象id查询数据", notes = "")
     @GetMapping
-    fun findAll(
+    fun find(
         @RequestParam("biz_object_id") bizObjectId: String
     ): List<BizObjectType> {
         val list = bizObjectTypeService.findAvailableTypeByBizObjectId(bizObjectId)

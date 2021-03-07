@@ -8,6 +8,7 @@ import github.afezeria.hymn.core.module.dto.BizObjectFieldPermDto
 import github.afezeria.hymn.core.module.service.BizObjectFieldPermService
 import github.afezeria.hymn.core.module.service.BizObjectFieldService
 import github.afezeria.hymn.core.module.service.RoleService
+import github.afezeria.hymn.core.module.view.BizObjectFieldPermListView
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,33 +43,11 @@ class BizObjectFieldPermController {
         @RequestParam("role_id", defaultValue = "") roleId: String,
         @RequestParam("biz_object_id", defaultValue = "") bizObjectId: String,
         @RequestParam("field_id", defaultValue = "") fieldId: String,
-    ): List<BizObjectFieldPermDto> {
+    ): List<BizObjectFieldPermListView> {
         return if (roleId.isNotBlank() && bizObjectId.isNotBlank()) {
-            val dtoFieldIdMap =
-                bizObjectFieldPermService.findDtoByRoleIdAndBizObjectId(roleId, bizObjectId)
-                    .map { it.fieldId to it }.toMap()
-            val roleName = dtoFieldIdMap.values.first().roleName
-            fieldService.findByBizObjectId(bizObjectId)
-                .map {
-                    dtoFieldIdMap[it.id] ?: BizObjectFieldPermDto(roleId, it.id).apply {
-                        this.roleName = roleName
-                        this.bizObjectId = bizObjectId
-                        this.fieldName = it.name
-                    }
-                }
+            bizObjectFieldPermService.findViewByRoleIdAndBizObjectId(roleId, bizObjectId)
         } else if (fieldId.isNotBlank()) {
-            val dtoRoleIdMap = bizObjectFieldPermService.findDtoByFieldId(fieldId)
-                .map { it.roleId to it }.toMap()
-            val fieldName = dtoRoleIdMap.values.first().fieldName
-            val objectId = dtoRoleIdMap.values.first().bizObjectId
-            roleService.findAll()
-                .map {
-                    dtoRoleIdMap[it.id] ?: BizObjectFieldPermDto(it.id, fieldId).apply {
-                        this.roleName = it.name
-                        this.bizObjectId = objectId
-                        this.fieldName = fieldName
-                    }
-                }
+            bizObjectFieldPermService.findViewByFieldId(fieldId)
         } else {
             emptyList()
         }

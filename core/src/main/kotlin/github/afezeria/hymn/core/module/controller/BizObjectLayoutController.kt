@@ -9,7 +9,7 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
 import github.afezeria.hymn.core.module.entity.BizObjectLayout
 import github.afezeria.hymn.core.module.service.BizObjectLayoutService
-import github.afezeria.hymn.core.module.view.ObjectLayoutListView
+import github.afezeria.hymn.core.module.view.BizObjectLayoutListView
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,7 +33,7 @@ class BizObjectLayoutController {
     @GetMapping
     fun find(
         @RequestParam("biz_object_id") bizObjectId: String,
-    ): List<ObjectLayoutListView> {
+    ): List<BizObjectLayoutListView> {
         return bizObjectLayoutService.findListViewByBizObjectId(bizObjectId)
     }
 

@@ -8,6 +8,7 @@ import github.afezeria.hymn.core.module.dto.ButtonPermDto
 import github.afezeria.hymn.core.module.service.ButtonPermService
 import github.afezeria.hymn.core.module.service.CustomButtonService
 import github.afezeria.hymn.core.module.service.RoleService
+import github.afezeria.hymn.core.module.view.ButtonPermListView
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,64 +43,15 @@ class ButtonPermController {
         @RequestParam("role_id", defaultValue = "") roleId: String,
         @RequestParam("biz_object_id", defaultValue = "") bizObjectId: String,
         @RequestParam("button_id", defaultValue = "") buttonId: String,
-    ): List<ButtonPermDto> {
+    ): List<ButtonPermListView> {
         return if (roleId.isNotBlank()) {
             if (bizObjectId.isNotBlank()) {
-                val dtoButtonIdMap =
-                    buttonPermService.findByRoleIdAndBizObjectId(roleId, bizObjectId)
-                        .map { it.buttonId to it }.toMap()
-                val objectName: String?
-                val objectId: String?
-                val roleName: String?
-                dtoButtonIdMap.values.first().let {
-                    objectName = it.bizObjectName
-                    objectId = it.bizObjectId
-                    roleName = it.buttonName
-                }
-                buttonService.findAll()
-                    .map {
-                        dtoButtonIdMap[it.id] ?: ButtonPermDto(roleId, it.id).apply {
-                            this.bizObjectName = objectName
-                            this.bizObjectId = objectId
-                            buttonName = it.name
-                            this.roleName = roleName
-                        }
-                    }
+                buttonPermService.findViewByRoleIdAndBizObjectId(roleId, bizObjectId)
             } else {
-                val dtoButtonIdMap = buttonPermService.findByRoleId(roleId)
-                    .map { it.buttonId to it }.toMap()
-                val roleName: String?
-                dtoButtonIdMap.values.first().let {
-                    roleName = it.roleName
-                }
-                buttonService.findAll()
-                    .map {
-                        dtoButtonIdMap[it.id] ?: ButtonPermDto(roleId, it.id).apply {
-                            this.roleName = roleName
-                            buttonName = it.name
-                        }
-                    }
+                buttonPermService.findViewByRoleId(roleId)
             }
         } else if (buttonId.isNotBlank()) {
-            val dtoRoleIdMap = buttonPermService.findByButtonId(buttonId)
-                .map { it.roleId to it }.toMap()
-            val objectName: String?
-            val objectId: String?
-            val buttonName: String?
-            dtoRoleIdMap.values.first().let {
-                objectName = it.bizObjectName
-                objectId = it.bizObjectId
-                buttonName = it.buttonName
-            }
-            roleService.findAll()
-                .map {
-                    dtoRoleIdMap[it.id] ?: ButtonPermDto(it.id, buttonId).apply {
-                        roleName = it.name
-                        this.bizObjectName = objectName
-                        this.bizObjectId = objectId
-                        this.buttonName = buttonName
-                    }
-                }
+            buttonPermService.findViewByButtonId(buttonId)
         } else {
             emptyList()
         }

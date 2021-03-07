@@ -6,7 +6,7 @@ import github.afezeria.hymn.common.ann.Function
 import github.afezeria.hymn.common.constant.AccountType
 import github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
 import github.afezeria.hymn.core.module.service.BizObjectTypeLayoutService
-import github.afezeria.hymn.core.module.view.ObjectTypeLayoutListView
+import github.afezeria.hymn.core.module.view.BizObjectTypeLayoutListView
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,7 +30,7 @@ class BizObjectTypeLayoutController {
     @GetMapping
     fun findAll(
         @RequestParam("biz_object_id") bizObjectId: String,
-    ): MutableList<ObjectTypeLayoutListView> {
+    ): MutableList<BizObjectTypeLayoutListView> {
         return bizObjectTypeLayoutService.findViewByBizObjectId(bizObjectId)
     }
 

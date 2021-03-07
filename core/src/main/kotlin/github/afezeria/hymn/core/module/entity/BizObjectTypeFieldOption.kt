@@ -16,7 +16,7 @@ import java.time.LocalDateTime
     value = "业务对象记录类型可选项限制", description = """业务对象记录类型可选项限制
 限制指定记录类型时指定字段 （多选/单选）的可用选项"""
 )
-data class BizObjectTypeOptions(
+data class BizObjectTypeFieldOption(
 
     @ApiModelProperty(value = "所属对象 ;;idx", required = true)
     var bizObjectId: String,

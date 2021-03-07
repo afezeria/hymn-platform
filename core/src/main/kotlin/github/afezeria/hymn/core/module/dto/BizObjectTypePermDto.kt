@@ -17,14 +17,7 @@ class BizObjectTypePermDto(
     @ApiModelProperty(value = "创建数据时选择特定记录类型的权限", required = true)
     var visible: Boolean = false,
 ) {
-    @ApiModelProperty(value = "角色名称", notes = "只用于后端返回数据")
-    var roleName: String? = null
 
-    @ApiModelProperty(value = "类型所属对象id", notes = "只用于后端返回数据")
-    var bizObjectId: String? = null
-
-    @ApiModelProperty(value = "类型名称", notes = "只用于后端返回数据")
-    var typeName: String? = null
     fun toEntity(): BizObjectTypePerm {
         return BizObjectTypePerm(
             roleId = roleId,

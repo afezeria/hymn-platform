@@ -1,16 +1,16 @@
 package github.afezeria.hymn.core.module.table
 
 import github.afezeria.hymn.common.db.AbstractTable
-import github.afezeria.hymn.core.module.entity.BizObjectTypeOptions
+import github.afezeria.hymn.core.module.entity.BizObjectTypeFieldOption
 import org.ktorm.schema.datetime
 import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
  */
-class CoreBizObjectTypeOptionss(alias: String? = null) :
-    AbstractTable<BizObjectTypeOptions>(
-        "core_biz_object_type_options",
+class CoreBizObjectTypeFieldOptions(alias: String? = null) :
+    AbstractTable<BizObjectTypeFieldOption>(
+        "core_biz_object_type_field_option",
         schema = "hymn",
         alias = alias
     ) {

@@ -686,8 +686,8 @@ comment on column hymn.core_biz_object_type.biz_object_id is '所属业务对象
 comment on column hymn.core_biz_object_type.default_layout_id is '默认使用的页面布局的id ;;fk:[core_biz_object_layout restrict]';
 comment on column hymn.core_biz_object_type.name is '记录类型名称';
 
-drop table if exists hymn.core_biz_object_type_options cascade;
-create table hymn.core_biz_object_type_options
+drop table if exists hymn.core_biz_object_type_field_option cascade;
+create table hymn.core_biz_object_type_field_option
 (
     id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     biz_object_id text        not null,
@@ -701,12 +701,12 @@ create table hymn.core_biz_object_type_options
     create_date   timestamptz not null default now(),
     modify_date   timestamptz not null default now()
 );
-comment on table hymn.core_biz_object_type_options is '业务对象记录类型可选项限制
+comment on table hymn.core_biz_object_type_field_option is '业务对象记录类型可选项限制
 限制指定记录类型时指定字段 （多选/单选）的可用选项';
-comment on column hymn.core_biz_object_type_options.biz_object_id is '所属对象 ;;idx';
-comment on column hymn.core_biz_object_type_options.type_id is '记录类型id ;;fk:[core_biz_object_type cascade];idx';
-comment on column hymn.core_biz_object_type_options.dict_item_id is '字段关联的字典项id ;;fk:[core_dict_item cascade]';
-comment on column hymn.core_biz_object_type_options.field_id is '字段id ;;fk:[core_biz_object_field cascade]';
+comment on column hymn.core_biz_object_type_field_option.biz_object_id is '所属对象 ;;idx';
+comment on column hymn.core_biz_object_type_field_option.type_id is '记录类型id ;;fk:[core_biz_object_type cascade];idx';
+comment on column hymn.core_biz_object_type_field_option.dict_item_id is '字段关联的字典项id ;;fk:[core_dict_item cascade]';
+comment on column hymn.core_biz_object_type_field_option.field_id is '字段id ;;fk:[core_biz_object_field cascade]';
 
 
 drop table if exists hymn.core_biz_object_type_layout cascade;

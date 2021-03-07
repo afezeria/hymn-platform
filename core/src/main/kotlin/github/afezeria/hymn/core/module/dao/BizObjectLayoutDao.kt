@@ -6,7 +6,7 @@ import github.afezeria.hymn.core.module.entity.BizObjectLayout
 import github.afezeria.hymn.core.module.table.CoreBizObjectLayouts
 import github.afezeria.hymn.core.module.table.CoreBizObjectTypeLayouts
 import github.afezeria.hymn.core.module.table.CoreBizObjects
-import github.afezeria.hymn.core.module.view.ObjectLayoutListView
+import github.afezeria.hymn.core.module.view.BizObjectLayoutListView
 import org.ktorm.dsl.*
 import org.ktorm.schema.ColumnDeclaring
 import org.springframework.stereotype.Component
@@ -44,7 +44,7 @@ class BizObjectLayoutDao(
             .firstOrNull()
     }
 
-    fun selectView(expr: ((CoreBizObjectLayouts) -> ColumnDeclaring<Boolean>)): MutableList<ObjectLayoutListView> {
+    fun selectView(expr: ((CoreBizObjectLayouts) -> ColumnDeclaring<Boolean>)): MutableList<BizObjectLayoutListView> {
         return table.run {
             databaseService.db().from(table)
                 .innerJoin(bizObjects, bizObjects.id eq bizObjectId)
@@ -55,7 +55,7 @@ class BizObjectLayoutDao(
                     (bizObjects.active eq true) and
                         expr(table)
                 }.mapTo(ArrayList()) {
-                    ObjectLayoutListView(
+                    BizObjectLayoutListView(
                         id = requireNotNull(it[id]),
                         bizObjectId = requireNotNull(it[bizObjectId]),
                         name = requireNotNull(it[name]),

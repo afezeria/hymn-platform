@@ -1,9 +1,13 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
+import github.afezeria.hymn.common.util.msgByPair
 import github.afezeria.hymn.core.module.dao.ModuleFunctionPermDao
 import github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
 import github.afezeria.hymn.core.module.entity.ModuleFunctionPerm
+import github.afezeria.hymn.core.module.view.ModuleFunctionPermListView
 import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,14 +26,54 @@ class ModuleFunctionPermService {
     private lateinit var roleService: RoleService
 
     @Autowired
+    private lateinit var moduleService: ModuleService
+
+    @Autowired
     private lateinit var dbService: DatabaseService
 
-    fun findByFunctionApi(functionApi: String): MutableList<ModuleFunctionPermDto> {
-        return moduleFunctionPermDao.selectDto { it.functionApi eq functionApi }
+    fun findByFunctionApi(functionApi: String): List<ModuleFunctionPermListView> {
+        val function = moduleService.getFunctionByApi(functionApi)
+            ?: throw DataNotFoundException("ModuleFunction".msgByPair("api", functionApi))
+        val module = moduleService.getModuleByApi(function.moduleApi)
+            ?: throw DataNotFoundException("Module".msgByPair("api", functionApi))
+        val viewRoleIdMap =
+            moduleFunctionPermDao.selectView { it.functionApi eq functionApi }
+                .map { it.roleId to it }.toMap()
+        val moduleName: String = module.name
+        val moduleApi: String = module.api
+        val functionName: String = function.name
+        return roleService.findAll()
+            .map {
+                viewRoleIdMap[it.id] ?: ModuleFunctionPermListView(
+                    roleId = it.id,
+                    roleName = it.name,
+                    functionApi = functionApi,
+                    functionName = functionName,
+                    moduleApi = moduleApi,
+                    moduleName = moduleName,
+                )
+            }
     }
 
-    fun findByRoleId(roleId: String): MutableList<ModuleFunctionPermDto> {
-        return moduleFunctionPermDao.selectDto { it.roleId eq roleId }
+    fun findViewByRoleId(roleId: String): List<ModuleFunctionPermListView> {
+        val role = roleService.findById(roleId)
+            ?: throw DataNotFoundException("Role".msgById(roleId))
+        val viewFunctionApiMap =
+            moduleFunctionPermDao.selectView { it.roleId eq roleId }
+                .map { it.functionApi to it }.toMap()
+        val roleName = role.name
+        val moduleApi2Name = moduleService.getAllModule().map { it.api to it.name }.toMap()
+        return moduleService.getAllFunction()
+            .map {
+                viewFunctionApiMap[it.api] ?: ModuleFunctionPermListView(
+                    roleId = roleId,
+                    roleName = roleName,
+                    functionApi = it.api,
+                    functionName = it.name,
+                    moduleName = requireNotNull(moduleApi2Name[it.moduleApi]),
+                    moduleApi = it.moduleApi,
+                )
+            }
     }
 
     fun save(dtoList: List<ModuleFunctionPermDto>): Int {

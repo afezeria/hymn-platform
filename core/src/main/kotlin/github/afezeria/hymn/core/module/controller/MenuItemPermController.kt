@@ -8,6 +8,7 @@ import github.afezeria.hymn.core.module.dto.MenuItemPermDto
 import github.afezeria.hymn.core.module.service.CustomMenuItemService
 import github.afezeria.hymn.core.module.service.MenuItemPermService
 import github.afezeria.hymn.core.module.service.RoleService
+import github.afezeria.hymn.core.module.view.MenuItemPermListView
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,37 +43,11 @@ class MenuItemPermController {
     fun find(
         @RequestParam("role_id", defaultValue = "") roleId: String,
         @RequestParam("item_id", defaultValue = "") itemId: String,
-    ): List<MenuItemPermDto> {
+    ): List<MenuItemPermListView> {
         return if (roleId.isNotBlank()) {
-            val dtoItemIdMap =
-                menuItemPermService.findDtoByRoleId(roleId)
-                    .map { it.menuItemId to it }.toMap()
-            val roleName = dtoItemIdMap.values.first().roleName
-            menuItemService.findAll()
-                .map {
-                    dtoItemIdMap[it.id] ?: MenuItemPermDto(roleId, it.id).apply {
-                        this.roleName = roleName
-                        menuItemName = it.name
-                        menuItemApi = it.api
-                    }
-                }
+            menuItemPermService.findViewByRoleId(roleId)
         } else if (itemId.isNotBlank()) {
-            val dtoRoleIdMap = menuItemPermService.findDtoByItemId(itemId)
-                .map { it.roleId to it }.toMap()
-            val menuItemName: String?
-            val menuItemApi: String?
-            dtoRoleIdMap.values.first().let {
-                menuItemName = it.menuItemName
-                menuItemApi = it.menuItemApi
-            }
-            roleService.findAll()
-                .map {
-                    dtoRoleIdMap[it.id] ?: MenuItemPermDto(it.id, itemId).apply {
-                        roleName = it.name
-                        this.menuItemName = menuItemName
-                        this.menuItemApi = menuItemApi
-                    }
-                }
+            menuItemPermService.findViewByItemId(itemId)
         } else {
             emptyList()
         }

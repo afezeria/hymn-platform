@@ -1,12 +1,12 @@
 package github.afezeria.hymn.core.module.dto
 
-import github.afezeria.hymn.core.module.entity.BizObjectTypeOptions
+import github.afezeria.hymn.core.module.entity.BizObjectTypeFieldOption
 import io.swagger.annotations.ApiModelProperty
 
 /**
  * @author afezeria
  */
-class BizObjectTypeOptionsDto(
+class BizObjectTypeFieldOptionDto(
     @ApiModelProperty(value = "所属对象 ;;idx", required = true)
     var bizObjectId: String,
     @ApiModelProperty(value = "记录类型id ;;fk:[core_biz_object_type cascade];idx", required = true)
@@ -16,8 +16,8 @@ class BizObjectTypeOptionsDto(
     @ApiModelProperty(value = "字段关联的字典项id ;;fk:[core_dict_item cascade]", required = true)
     var dictItemId: String,
 ) {
-    fun toEntity(): BizObjectTypeOptions {
-        return BizObjectTypeOptions(
+    fun toEntity(): BizObjectTypeFieldOption {
+        return BizObjectTypeFieldOption(
             bizObjectId = bizObjectId,
             typeId = typeId,
             fieldId = fieldId,
@@ -25,7 +25,7 @@ class BizObjectTypeOptionsDto(
         )
     }
 
-    fun update(entity: BizObjectTypeOptions) {
+    fun update(entity: BizObjectTypeFieldOption) {
         entity.also {
             it.bizObjectId = bizObjectId
             it.typeId = typeId

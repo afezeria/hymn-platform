@@ -6,7 +6,7 @@ import github.afezeria.hymn.common.platform.DatabaseService
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectTypeLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
-import github.afezeria.hymn.core.module.view.ObjectTypeLayoutListView
+import github.afezeria.hymn.core.module.view.BizObjectTypeLayoutListView
 import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -35,7 +35,7 @@ class BizObjectTypeLayoutService {
     @Autowired
     private lateinit var dbService: DatabaseService
 
-    fun findViewByBizObjectId(bizObjectId: String): MutableList<ObjectTypeLayoutListView> {
+    fun findViewByBizObjectId(bizObjectId: String): MutableList<BizObjectTypeLayoutListView> {
         val allRole = roleService.findAll()
         val allType = typeService.findAvailableTypeByBizObjectId(bizObjectId)
         if (allType.isEmpty()) return ArrayList()
@@ -43,18 +43,18 @@ class BizObjectTypeLayoutService {
             layoutService.findListViewByBizObjectId(bizObjectId).map { it.id to it }.toMap()
 
         // map<roleId,map<typeId,dto>>
-        val dtoMap = mutableMapOf<String, MutableMap<String, ObjectTypeLayoutListView>>()
+        val dtoMap = mutableMapOf<String, MutableMap<String, BizObjectTypeLayoutListView>>()
         bizObjectTypeLayoutDao.selectView { it.bizObjectId eq bizObjectId }
             .forEach {
                 dtoMap.getOrPut(it.roleId) { mutableMapOf() }[it.typeId] = it
             }
 
-        val result = mutableListOf<ObjectTypeLayoutListView>()
+        val result = mutableListOf<BizObjectTypeLayoutListView>()
         for (role in allRole) {
             val typeId2dto = dtoMap[role.id] ?: emptyMap()
             for (type in allType) {
                 result.add(
-                    typeId2dto[type.id] ?: ObjectTypeLayoutListView(
+                    typeId2dto[type.id] ?: BizObjectTypeLayoutListView(
                         roleId = role.id,
                         typeId = type.id,
                         layoutId = type.defaultLayoutId,
@@ -75,7 +75,7 @@ class BizObjectTypeLayoutService {
             objectIdSet.add(dto.bizObjectId)
         }
         if (objectIdSet.size != 1) {
-            throw BusinessException("不同同时更新多个对象的 类型-页面布局 映射关系")
+            throw BusinessException("不能同时更新多个对象的 类型-页面布局 映射关系")
         }
         bizObjectService.findActiveObjectById(dtoList[0].bizObjectId)
             ?: throw DataNotFoundException("业务对象".msgById(dtoList[0].bizObjectId))

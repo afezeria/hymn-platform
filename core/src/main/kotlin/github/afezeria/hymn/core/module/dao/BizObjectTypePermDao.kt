@@ -2,12 +2,12 @@ package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.db.AbstractDao
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
 import github.afezeria.hymn.core.module.entity.BizObjectTypePerm
 import github.afezeria.hymn.core.module.table.CoreBizObjectTypePerms
 import github.afezeria.hymn.core.module.table.CoreBizObjectTypes
 import github.afezeria.hymn.core.module.table.CoreBizObjects
 import github.afezeria.hymn.core.module.table.CoreRoles
+import github.afezeria.hymn.core.module.view.BizObjectTypePermListView
 import org.ktorm.dsl.*
 import org.ktorm.schema.ColumnDeclaring
 import org.springframework.stereotype.Component
@@ -50,7 +50,7 @@ class BizObjectTypePermDao(
             .mapToArray(table)
     }
 
-    fun selectDto(whereExpr: (CoreBizObjectTypePerms, CoreBizObjectTypes) -> ColumnDeclaring<Boolean>): MutableList<BizObjectTypePermDto> {
+    fun selectView(whereExpr: (CoreBizObjectTypePerms, CoreBizObjectTypes) -> ColumnDeclaring<Boolean>): MutableList<BizObjectTypePermListView> {
         return table.run {
             databaseService.db().from(this)
                 .innerJoin(types, types.id eq typeId)
@@ -68,13 +68,14 @@ class BizObjectTypePermDao(
                         whereExpr(this, types)
                 }
                 .mapTo(ArrayList()) {
-                    BizObjectTypePermDto(
-                        roleId = "", typeId = "", visible = false
-                    ).apply {
-                        roleName = requireNotNull(it[roles.name])
-                        bizObjectId = requireNotNull(it[types.bizObjectId])
-                        typeName = requireNotNull(it[types.name])
-                    }
+                    BizObjectTypePermListView(
+                        roleId = requireNotNull(it[roleId]),
+                        roleName = requireNotNull(it[roles.name]),
+                        typeId = requireNotNull(it[typeId]),
+                        typeName = requireNotNull(it[types.name]),
+                        bizObjectId = requireNotNull(it[types.bizObjectId]),
+                        visible = requireNotNull(it[visible]),
+                    )
                 }
         }
 

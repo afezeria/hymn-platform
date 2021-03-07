@@ -2,11 +2,11 @@ package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.db.AbstractDao
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.core.module.dto.BizObjectPermDto
 import github.afezeria.hymn.core.module.entity.BizObjectPerm
 import github.afezeria.hymn.core.module.table.CoreBizObjectPerms
 import github.afezeria.hymn.core.module.table.CoreBizObjects
 import github.afezeria.hymn.core.module.table.CoreRoles
+import github.afezeria.hymn.core.module.view.BizObjectPermListView
 import org.ktorm.dsl.*
 import org.ktorm.schema.ColumnDeclaring
 import org.springframework.stereotype.Component
@@ -60,9 +60,9 @@ class BizObjectPermDao(
         bizObjects.name
     )
 
-    fun selectDto(
+    fun selectView(
         whereExpr: (CoreBizObjectPerms) -> ColumnDeclaring<Boolean>
-    ): MutableList<BizObjectPermDto> {
+    ): MutableList<BizObjectPermListView> {
         return table.run {
             databaseService.db().from(this)
                 .innerJoin(bizObjects, bizObjects.id eq bizObjectId)
@@ -73,9 +73,11 @@ class BizObjectPermDao(
                         whereExpr(this)
                 }
                 .mapTo(ArrayList()) {
-                    BizObjectPermDto(
+                    BizObjectPermListView(
                         roleId = requireNotNull(it[roleId]),
                         bizObjectId = requireNotNull(it[bizObjectId]),
+                        roleName = requireNotNull(it[roles.name]),
+                        bizObjectName = requireNotNull(it[bizObjects.name]),
                         ins = requireNotNull(it[ins]),
                         upd = requireNotNull(it[upd]),
                         del = requireNotNull(it[del]),
@@ -85,10 +87,7 @@ class BizObjectPermDao(
                         queryWithOrgTree = requireNotNull(it[queryWithOrgTree]),
                         queryAll = requireNotNull(it[queryAll]),
                         editAll = requireNotNull(it[editAll]),
-                    ).apply {
-                        roleName = requireNotNull(it[roles.name])
-                        bizObjectName = requireNotNull(it[bizObjects.name])
-                    }
+                    )
                 }
         }
     }

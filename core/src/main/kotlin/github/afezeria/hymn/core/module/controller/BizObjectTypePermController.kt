@@ -8,6 +8,7 @@ import github.afezeria.hymn.core.module.dto.BizObjectTypePermDto
 import github.afezeria.hymn.core.module.service.BizObjectTypePermService
 import github.afezeria.hymn.core.module.service.BizObjectTypeService
 import github.afezeria.hymn.core.module.service.RoleService
+import github.afezeria.hymn.core.module.view.BizObjectTypePermListView
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,33 +44,11 @@ class BizObjectTypePermController {
         @RequestParam("role_id", defaultValue = "") roleId: String,
         @RequestParam("biz_object_id", defaultValue = "") bizObjectId: String,
         @RequestParam("type_id", defaultValue = "") typeId: String,
-    ): List<BizObjectTypePermDto> {
+    ): List<BizObjectTypePermListView> {
         return if (roleId.isNotBlank() && bizObjectId.isNotBlank()) {
-            val dtoTypeIdMap =
-                bizObjectTypePermService.findDtoByRoleIdAndBizObjectId(roleId, bizObjectId)
-                    .map { it.typeId to it }.toMap()
-            val roleName = dtoTypeIdMap.values.first().roleName
-            bizObjectTypeService.findAvailableTypeByBizObjectId(bizObjectId)
-                .map {
-                    dtoTypeIdMap[it.id] ?: BizObjectTypePermDto(roleId, it.id).apply {
-                        this.roleName = roleName
-                        this.bizObjectId = bizObjectId
-                        typeName = it.name
-                    }
-                }
+            bizObjectTypePermService.findViewByRoleIdAndBizObjectId(roleId, bizObjectId)
         } else if (typeId.isNotBlank()) {
-            val dtoRoleIdMap = bizObjectTypePermService.findByTypeId(typeId)
-                .map { it.roleId to it }.toMap()
-            val objectId = dtoRoleIdMap.values.first().bizObjectId
-            val typeName = dtoRoleIdMap.values.first().typeName
-            roleService.findAll()
-                .map {
-                    dtoRoleIdMap[it.id] ?: BizObjectTypePermDto(it.id, typeId).apply {
-                        roleName = it.name
-                        this.bizObjectId = objectId
-                        this.typeName = typeName
-                    }
-                }
+            bizObjectTypePermService.findViewByTypeId(typeId)
         } else {
             emptyList()
         }

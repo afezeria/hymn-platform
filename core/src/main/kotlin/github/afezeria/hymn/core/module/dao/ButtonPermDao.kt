@@ -2,12 +2,12 @@ package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.db.AbstractDao
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.core.module.dto.ButtonPermDto
 import github.afezeria.hymn.core.module.entity.ButtonPerm
 import github.afezeria.hymn.core.module.table.CoreBizObjects
 import github.afezeria.hymn.core.module.table.CoreButtonPerms
 import github.afezeria.hymn.core.module.table.CoreCustomButtons
 import github.afezeria.hymn.core.module.table.CoreRoles
+import github.afezeria.hymn.core.module.view.ButtonPermListView
 import org.ktorm.dsl.*
 import org.ktorm.schema.ColumnDeclaring
 import org.springframework.stereotype.Component
@@ -47,7 +47,7 @@ class ButtonPermDao(
     private val buttons = CoreCustomButtons()
     private val roles = CoreRoles()
 
-    fun selectDto(whereExpr: (CoreButtonPerms, CoreCustomButtons) -> ColumnDeclaring<Boolean>): MutableList<ButtonPermDto> {
+    fun selectView(whereExpr: (CoreButtonPerms, CoreCustomButtons) -> ColumnDeclaring<Boolean>): MutableList<ButtonPermListView> {
         return table.run {
             databaseService.db().from(this)
                 .innerJoin(buttons, buttons.id eq buttonId)
@@ -67,16 +67,15 @@ class ButtonPermDao(
                         whereExpr(this, buttons)
                 }
                 .mapTo(ArrayList()) {
-                    ButtonPermDto(
+                    ButtonPermListView(
                         roleId = requireNotNull(it[roleId]),
+                        roleName = requireNotNull(it[roles.name]),
                         buttonId = requireNotNull(it[buttonId]),
-                        visible = requireNotNull(it[visible])
-                    ).apply {
-                        roleName = it[roles.name]
-                        buttonName = it[buttons.name]
-                        bizObjectId = it[bizObjects.id]
-                        bizObjectName = it[bizObjects.name]
-                    }
+                        buttonName = requireNotNull(it[buttons.name]),
+                        visible = requireNotNull(it[visible]),
+                        bizObjectId = it[bizObjects.id],
+                        bizObjectName = it[bizObjects.name],
+                    )
                 }
         }
 

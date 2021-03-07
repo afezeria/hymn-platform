@@ -271,7 +271,7 @@ class ScriptDataServiceImpl(
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
         val fieldApiMap = getFieldApiMap(objectApiName)
         val fieldPerm = fieldPermCache.getOrPut(key) {
-            fieldPermService.findDtoByRoleIdAndBizObjectId(roleId, objectInfo.id)
+            fieldPermService.findViewByRoleIdAndBizObjectId(roleId, objectInfo.id)
                 .map { FieldPerm(it.roleId, it.fieldId, it.pRead, it.pEdit) }
         }
         val idSet = fieldPerm.mapNotNull {

@@ -1,8 +1,11 @@
 package github.afezeria.hymn.core.module.service
 
+import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.platform.DatabaseService
+import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.MenuItemPermDao
 import github.afezeria.hymn.core.module.dto.MenuItemPermDto
+import github.afezeria.hymn.core.module.view.MenuItemPermListView
 import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -20,14 +23,48 @@ class MenuItemPermService {
     private lateinit var roleService: RoleService
 
     @Autowired
+    private lateinit var menuItemService: CustomMenuItemService
+
+    @Autowired
     private lateinit var dbService: DatabaseService
 
-    fun findDtoByItemId(menuItemId: String): MutableList<MenuItemPermDto> {
-        return menuItemPermDao.selectDto { it.roleId eq menuItemId }
+    fun findViewByItemId(menuItemId: String): List<MenuItemPermListView> {
+        val menuItem = menuItemService.findById(menuItemId)
+            ?: throw DataNotFoundException("CustomMenuItem".msgById(menuItemId))
+        val viewRoleIdMap =
+            menuItemPermDao.selectView { it.roleId eq menuItemId }
+                .map { it.roleId to it }.toMap()
+        val menuItemName: String = menuItem.name
+        val menuItemApi: String = menuItem.api
+        return roleService.findAll()
+            .map {
+                viewRoleIdMap[it.id] ?: MenuItemPermListView(
+                    roleId = it.id,
+                    roleName = it.name,
+                    menuItemId = menuItemId,
+                    menuItemName = menuItemName,
+                    menuItemApi = menuItemApi,
+                )
+            }
     }
 
-    fun findDtoByRoleId(roleId: String): MutableList<MenuItemPermDto> {
-        return menuItemPermDao.selectDto { it.roleId eq roleId }
+    fun findViewByRoleId(roleId: String): List<MenuItemPermListView> {
+        val role = roleService.findById(roleId)
+            ?: throw DataNotFoundException("Role".msgById(roleId))
+        val viewItemIdMap =
+            menuItemPermDao.selectView { it.roleId eq roleId }
+                .map { it.menuItemId to it }.toMap()
+        val roleName = role.name
+        return menuItemService.findAll()
+            .map {
+                viewItemIdMap[it.id] ?: MenuItemPermListView(
+                    roleId = roleId,
+                    roleName = roleName,
+                    menuItemId = it.id,
+                    menuItemName = it.name,
+                    menuItemApi = it.api,
+                )
+            }
     }
 
     fun save(dtoList: List<MenuItemPermDto>): Int {
