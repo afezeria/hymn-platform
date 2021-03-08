@@ -6,6 +6,7 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BusinessCodeRefDao
 import github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
 import github.afezeria.hymn.core.module.entity.BusinessCodeRef
+import github.afezeria.hymn.core.module.view.BusinessCodeRefListView
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -21,19 +22,10 @@ class BusinessCodeRefService {
     @Autowired
     private lateinit var dbService: DatabaseService
 
-
     fun removeById(id: String): Int {
         businessCodeRefDao.selectById(id)
             ?: throw DataNotFoundException("BusinessCodeRef".msgById(id))
         val i = businessCodeRefDao.deleteById(id)
-        return i
-    }
-
-    fun update(id: String, dto: BusinessCodeRefDto): Int {
-        val e = businessCodeRefDao.selectById(id)
-            ?: throw DataNotFoundException("BusinessCodeRef".msgById(id))
-        dto.update(e)
-        val i = businessCodeRefDao.update(e)
         return i
     }
 
@@ -52,19 +44,28 @@ class BusinessCodeRefService {
         return businessCodeRefDao.selectById(id)
     }
 
-    fun findByIds(ids: List<String>): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.selectByIds(ids)
-    }
-
-
-    fun findByFieldId(
-        fieldId: String,
-    ): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.selectByFieldId(fieldId)
-    }
-
-    fun pageFind(pageSize: Int, pageNum: Int): List<BusinessCodeRef> {
-        return businessCodeRefDao.pageSelect(null, pageSize, pageNum)
+    fun pageFindView(
+        byTriggerId: String?,
+        byInterfaceId: String?,
+        byCustomFunctionId: String?,
+        bizObjectId: String?,
+        fieldId: String?,
+        customFunctionId: String?,
+        pageSize: Int,
+        pageNum: Int
+    ): List<BusinessCodeRefListView> {
+        if (pageSize < 1) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
+        if (pageNum < 1) throw IllegalArgumentException("pageNum must be greater than 0, current value $pageNum")
+        return businessCodeRefDao.pageSelectView(
+            byTriggerId,
+            byInterfaceId,
+            byCustomFunctionId,
+            bizObjectId,
+            fieldId,
+            customFunctionId,
+            (pageNum - 1) * pageSize,
+            pageSize,
+        )
     }
 
 

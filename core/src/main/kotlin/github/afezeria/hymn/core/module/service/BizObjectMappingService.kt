@@ -88,10 +88,10 @@ class BizObjectMappingService {
         sourceBizObjectId: String?,
         targetBizObjectId: String?,
         pageSize: Int,
-        pageNumber: Int
+        pageNum: Int
     ): MutableList<BizObjectMappingDto> {
         if (pageSize < 1) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
-        if (pageNumber < 1) throw IllegalArgumentException("pageNumber must be greater than 0, current value $pageNumber")
+        if (pageNum < 1) throw IllegalArgumentException("pageNum must be greater than 0, current value $pageNum")
         val expr: ((CoreBizObjectMappings) -> ColumnDeclaring<Boolean>)? =
             if (sourceBizObjectId != null) {
                 if (targetBizObjectId != null) {
@@ -109,6 +109,6 @@ class BizObjectMappingService {
                     null
                 }
             }
-        return bizObjectMappingDao.selectDto(expr, (pageNumber - 1) * pageSize, pageSize)
+        return bizObjectMappingDao.selectDto(expr, (pageNum - 1) * pageSize, pageSize)
     }
 }

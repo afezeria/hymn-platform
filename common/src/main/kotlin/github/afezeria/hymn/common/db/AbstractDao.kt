@@ -304,12 +304,12 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
     fun pageSelect(
         condition: ((T) -> ColumnDeclaring<Boolean>)? = null,
         pageSize: Int,
-        pageNumber: Int,
+        pageNum: Int,
         orderBy: List<OrderByExpression> = emptyList(),
     ): MutableList<E> {
         if (pageSize < 1) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
-        if (pageNumber < 1) throw IllegalArgumentException("pageNumber must be greater than 0, current value $pageNumber")
-        return select(condition, (pageNumber - 1) * pageSize, pageSize, orderBy)
+        if (pageNum < 1) throw IllegalArgumentException("pageNum must be greater than 0, current value $pageNum")
+        return select(condition, (pageNum - 1) * pageSize, pageSize, orderBy)
     }
 
     fun selectAll(): MutableList<E> {

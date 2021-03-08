@@ -11,12 +11,12 @@ import org.ktorm.schema.varchar
 class CoreBusinessCodeRefs(alias: String? = null) :
     AbstractTable<BusinessCodeRef>("core_business_code_ref", schema = "hymn", alias = alias) {
 
-    val triggerId = varchar("trigger_id")
-    val interfaceId = varchar("interface_id")
-    val customFunctionId = varchar("custom_function_id")
+    val byTriggerId = varchar("by_trigger_id")
+    val byInterfaceId = varchar("by_interface_id")
+    val byCustomFunctionId = varchar("by_custom_function_id")
     val bizObjectId = varchar("biz_object_id")
     val fieldId = varchar("field_id")
-    val refCustomFunctionId = varchar("ref_custom_function_id")
+    val customFunctionId = varchar("custom_function_id")
     val createById = varchar("create_by_id")
     val createBy = varchar("create_by")
     val modifyById = varchar("modify_by_id")

@@ -9,6 +9,7 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
 import github.afezeria.hymn.core.module.entity.BusinessCodeRef
 import github.afezeria.hymn.core.module.service.BusinessCodeRefService
+import github.afezeria.hymn.core.module.view.BusinessCodeRefListView
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,11 +32,25 @@ class BusinessCodeRefController {
     @ApiOperation(value = "分页查询数据", notes = "")
     @GetMapping
     fun findAll(
+        @RequestParam("byTriggerId", required = false) byTriggerId: String? = null,
+        @RequestParam("byInterfaceId", required = false) byInterfaceId: String? = null,
+        @RequestParam("byCustomFunctionId", required = false) byCustomFunctionId: String? = null,
+        @RequestParam("bizObjectId", required = false) bizObjectId: String? = null,
+        @RequestParam("fieldId", required = false) fieldId: String? = null,
+        @RequestParam("customFunctionId", required = false) customFunctionId: String? = null,
         @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
         @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
-    ): List<BusinessCodeRef> {
-        val list = businessCodeRefService.pageFind(pageSize, pageNum)
-        return list
+    ): List<BusinessCodeRefListView> {
+        return businessCodeRefService.pageFindView(
+            byTriggerId,
+            byInterfaceId,
+            byCustomFunctionId,
+            bizObjectId,
+            fieldId,
+            customFunctionId,
+            pageSize,
+            pageNum
+        )
     }
 
     @Function(AccountType.ADMIN)
@@ -53,17 +68,6 @@ class BusinessCodeRefController {
     fun create(@RequestBody dto: BusinessCodeRefDto): String {
         val id = businessCodeRefService.create(dto)
         return id
-    }
-
-    @Function(AccountType.ADMIN)
-    @ApiOperation(value = "更新", notes = "")
-    @PutMapping("/{id}")
-    fun update(
-        @PathVariable("id") id: String,
-        @RequestBody dto: BusinessCodeRefDto
-    ): Int {
-        val count = businessCodeRefService.update(id, dto)
-        return count
     }
 
     @Function(AccountType.ADMIN)
