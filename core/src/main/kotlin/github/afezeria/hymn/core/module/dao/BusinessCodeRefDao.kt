@@ -25,17 +25,6 @@ class BusinessCodeRefDao(
         return select({ it.fieldId eq fieldId })
     }
 
-    fun selectByOrgId(
-        orgId: String,
-    ): MutableList<BusinessCodeRef> {
-        return select({ it.orgId eq orgId })
-    }
-
-    fun selectByRoleId(
-        roleId: String,
-    ): MutableList<BusinessCodeRef> {
-        return select({ it.roleId eq roleId })
-    }
 
 
 }

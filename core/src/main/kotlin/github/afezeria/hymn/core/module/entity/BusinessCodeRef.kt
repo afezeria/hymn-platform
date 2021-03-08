@@ -18,18 +18,14 @@ data class BusinessCodeRef(
     var triggerId: String? = null,
     @ApiModelProperty(value = "接口id ;;fk:[core_custom_interface cascade]")
     var interfaceId: String? = null,
-    @ApiModelProperty(value = "共享代码id ;;fk:[core_shared_code cascade]")
-    var sharedCodeId: String? = null,
+    @ApiModelProperty(value = "自定义函数id ;;fk:[core_shared_code cascade]")
+    var customFunctionId: String? = null,
     @ApiModelProperty(value = "被引用对象id ;;fk:[core_biz_object cascade]")
     var bizObjectId: String? = null,
     @ApiModelProperty(value = "被引用字段id ;;fk:[core_biz_object_field cascade];idx")
     var fieldId: String? = null,
-    @ApiModelProperty(value = "被引用组织id ;;fk:[core_org cascade];idx")
-    var orgId: String? = null,
-    @ApiModelProperty(value = "被引用角色id ;;fk:[core_role cascade];idx")
-    var roleId: String? = null,
-    @ApiModelProperty(value = "被引用共享代码id ;;fk:[core_shared_code cascade];idx")
-    var refSharedCodeId: String? = null,
+    @ApiModelProperty(value = "被引用自定义函数id ;;fk:[core_shared_code cascade];idx")
+    var refCustomFunctionId: String? = null,
 ) : AbstractEntity() {
 
     lateinit var createById: String

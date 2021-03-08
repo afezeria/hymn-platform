@@ -337,13 +337,24 @@ fun createBObject(
             LocalDateTime.now()
         )[0]
         val objId = obj["id"] as String
-        val type = it.execute(
+        val layout = it.execute(
             """
-                insert into hymn.core_biz_object_type  (biz_object_id, name, create_by_id, create_by, 
-                    modify_by_id, modify_by, create_date, modify_date) 
-                values (?, '默认类型',?,?,?,?,now(),now()) returning *;
+                insert into hymn.core_biz_object_layout (biz_object_id, name,rel_field_json_arr, 
+                    pc_read_layout_json, pc_edit_layout_json, mobile_read_layout_json, 
+                    mobile_edit_layout_json, preview_layout_json, 
+                    create_by_id, create_by, modify_by_id, modify_by) 
+                values (?,'默认布局','','','','','','',?,?,?,?) returning *;
             """,
             objId, *COMMON_INFO
+        )[0]
+        val layoutId = layout["id"] as String
+        val type = it.execute(
+            """
+                insert into hymn.core_biz_object_type  (biz_object_id, name,default_layout_id,
+                    create_by_id, create_by, modify_by_id, modify_by, create_date, modify_date) 
+                values (?, '默认类型',?,?,?,?,?,now(),now()) returning *;
+            """,
+            objId, layoutId, *COMMON_INFO
         )[0]
 //        生成默认字段
         it.execute(

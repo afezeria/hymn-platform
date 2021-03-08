@@ -18,12 +18,12 @@ values ('301c35c23be449abb5bdf6c80b6878af', '管理员角色', '', '911c60ea5d62
         '2020-01-01 00:00:00');
 
 insert into hymn.core_module (api, name, remark, version)
-values ('core','基础','','0.0.1');
+values ('core', '基础', '', '0.0.1');
 
 insert into hymn.core_biz_object (id, name, api, source_table, active, type, module_api, can_insert,
-                                can_update, remark,
-                                create_by_id, create_by, modify_by_id, modify_by, create_date,
-                                modify_date)
+                                  can_update, remark,
+                                  create_by_id, create_by, modify_by_id, modify_by, create_date,
+                                  modify_date)
 values ('bcf5f00c2e6c494ea2318912a639031a', '用户', 'account', 'core_account', true, 'module', 'core',
         false, true, '用户表',
         '911c60ea5d62420794d86eeecfddce7c', 'system admin', '911c60ea5d62420794d86eeecfddce7c',
@@ -58,12 +58,13 @@ values ('c31ec080066a432e9d1399b912c417c7', '4a6010cceea948d6856aac09e8aa19c0', 
         'system admin', '2020-01-01 00:00:00', '2020-01-01 00:00:00');
 
 insert into hymn.core_biz_object_field (id, source_column, biz_object_id, name, api, type, active,
-                                      history, default_value, formula, max_length, min_length,
-                                      visible_row, dict_id, master_field_id, optional_number,
-                                      ref_id, ref_list_label, ref_delete_policy, query_filter,
-                                      s_id, s_field_id, s_type, gen_rule, remark, help, filter_list,
-                                      standard_type, predefined, create_by_id, create_by,
-                                      modify_by_id, modify_by, create_date, modify_date)
+                                        history, default_value, formula, max_length, min_length,
+                                        visible_row, dict_id, master_field_id, optional_number,
+                                        ref_id, ref_list_label, ref_delete_policy, query_filter,
+                                        s_id, s_field_id, s_type, gen_rule, remark, help,
+                                        filter_list,
+                                        standard_type, predefined, create_by_id, create_by,
+                                        modify_by_id, modify_by, create_date, modify_date)
 values ('1bad12b79d114b18a9f1b3276992886e', 'name', 'bcf5f00c2e6c494ea2318912a639031a', '姓名',
         'name', 'text', true, false, null, null, 255, 1, 1, null, null, null, null, null, null,
         null, null, null, null, null, null, null, null, 'name', true,

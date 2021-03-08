@@ -1,9 +1,10 @@
 -- 代码生成脚本会忽略 comment 中以 ##ignore开头的字段
 -- comment中以 ;; 开始后面的部分用于代码生成，多个属性之间以 ; 分隔
--- 当 ;; 出现在表的说明中时
+-- 当 ;; 出现在表的注释中时
 -- uk:[[field_1 field_2][field_4 field_3]] 表示在field_1和field_2上创建多列唯一索引，字段间以空格分割，一个中括号表示一个索引
 -- idx:[[field_1 field_2][field_4 field_3]] 表示在field_1和field_2上创建多列索引，字段间以空格分割，一个中括号表示一个索引
--- 当 ;; 出现在字段的说明中时
+-- fk:[[field_1,field_2 table_name:field_1,field_2]]
+-- 当 ;; 出现在字段的注释中时
 -- idx 表示在该字段上创建索引
 -- uk 表示在该字段上创建唯一约束
 -- fk:[table_name action] 表示在该字段上创建外键约束，table_name 为关联的表名，该表必须在hymn schema中
@@ -601,7 +602,7 @@ remark: 格式同picture字段相同
 required: min_length （文件最大数量）, max_length （文件最大大小，单位：kb）
 optional:
 rule: min_length >= 1, max_length > 0
-;;uk:[[biz_object_id api]]
+;;uk:[[biz_object_id api][biz_object_id id]]
 ';
 comment on column hymn.core_biz_object_field.source_column is '字段对应的实际表中的列名,对象为远程对象时该字段填充空字符串';
 comment on column hymn.core_biz_object_field.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade];idx';
@@ -654,7 +655,7 @@ create table hymn.core_biz_object_layout
     create_date             timestamptz not null default now(),
     modify_date             timestamptz not null default now()
 );
-comment on table hymn.core_biz_object_layout is '业务对象详情页面布局 ;;uk:[[biz_object_id name]]';
+comment on table hymn.core_biz_object_layout is '业务对象详情页面布局 ;;uk:[[biz_object_id name][biz_object_id id]]';
 comment on column hymn.core_biz_object_layout.name is '布局名称';
 comment on column hymn.core_biz_object_layout.biz_object_id is '引用对象 ;;fk:[core_biz_object cascade]';
 comment on column hymn.core_biz_object_layout.rel_field_json_arr is '引用字段的数据的列表，用于根据权限对字段进行过滤，布局json中不能直接使用字段数据，在需要字段数据的部分通过rel_field_json_arr中的json对象的_id引用，找不到的场合下忽略该字段';
@@ -681,7 +682,7 @@ create table hymn.core_biz_object_type
     create_date       timestamptz not null default now(),
     modify_date       timestamptz not null default now()
 );
-comment on table hymn.core_biz_object_type is '业务对象记录类型 ;; uk:[[biz_object_id name]]';
+comment on table hymn.core_biz_object_type is '业务对象记录类型 ;; uk:[[biz_object_id name][biz_object_id id]]';
 comment on column hymn.core_biz_object_type.biz_object_id is '所属业务对象id ;;fk:[core_biz_object cascade]';
 comment on column hymn.core_biz_object_type.default_layout_id is '默认使用的页面布局的id ;;fk:[core_biz_object_layout restrict]';
 comment on column hymn.core_biz_object_type.name is '记录类型名称';
@@ -702,7 +703,7 @@ create table hymn.core_biz_object_type_field_option
     modify_date   timestamptz not null default now()
 );
 comment on table hymn.core_biz_object_type_field_option is '业务对象记录类型可选项限制
-限制指定记录类型时指定字段 （多选/单选）的可用选项';
+限制指定记录类型时指定字段 （多选/单选）的可用选项 ;;fk:[[biz_object_id,type_id core_biz_object_type:biz_object_id,id][biz_object_id,field_id core_biz_object_field:biz_object_id,id]]';
 comment on column hymn.core_biz_object_type_field_option.biz_object_id is '所属对象 ;;idx';
 comment on column hymn.core_biz_object_type_field_option.type_id is '记录类型id ;;fk:[core_biz_object_type cascade];idx';
 comment on column hymn.core_biz_object_type_field_option.dict_item_id is '字段关联的字典项id ;;fk:[core_dict_item cascade]';
@@ -724,7 +725,7 @@ create table hymn.core_biz_object_type_layout
     create_date   timestamptz not null default now(),
     modify_date   timestamptz not null default now()
 );
-comment on table hymn.core_biz_object_type_layout is '业务对象记录类型、角色和页面布局关联表 ;;uk:[[role_id type_id]]';
+comment on table hymn.core_biz_object_type_layout is '业务对象记录类型、角色和页面布局关联表 ;;uk:[[role_id type_id]];fk:[[biz_object_id,type_id core_biz_object_type:biz_object_id,id][biz_object_id,layout_id core_biz_object_layout:biz_object_id,id]]';
 comment on column hymn.core_biz_object_type_layout.role_id is '角色id ;;fk:[core_role cascade];idx';
 comment on column hymn.core_biz_object_type_layout.type_id is '记录类型id ;;fk:[core_biz_object_type cascade]';
 comment on column hymn.core_biz_object_type_layout.layout_id is '页面布局id ;;fk:[core_biz_object_layout cascade]';
@@ -734,7 +735,7 @@ comment on column hymn.core_biz_object_type_layout.layout_id is '页面布局id 
 drop table if exists hymn.core_biz_object_trigger cascade;
 create table hymn.core_biz_object_trigger
 (
-    id            text primary key default replace(public.uuid_generate_v4()::text, '-', ''),
+    id            text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     active        bool        not null,
     remark        text,
     biz_object_id text        not null,
@@ -965,7 +966,7 @@ create table hymn.core_biz_object_field_perm
     create_date  timestamptz not null default now(),
     modify_date  timestamptz not null default now()
 );
-comment on table hymn.core_biz_object_field_perm is '字段权限 ;;uk:[[role_id field_id]]';
+comment on table hymn.core_biz_object_field_perm is '字段权限 ;;uk:[[role_id field_id]];fk:[[]]';
 comment on column hymn.core_biz_object_field_perm.role_id is '角色id ;;fk:[core_role cascade];idx';
 comment on column hymn.core_biz_object_field_perm.field_id is '字段id ;;fk:[core_biz_object_field cascade];idx';
 comment on column hymn.core_biz_object_field_perm.p_read is '可读';
@@ -1018,13 +1019,14 @@ comment on column hymn.core_column_field_mapping.column_name is '表中的字段
 comment on column hymn.core_column_field_mapping.field_api is '视图中的字段名称';
 
 
-drop table if exists hymn.core_shared_code;
-create table hymn.core_shared_code
+drop table if exists hymn.core_custom_function;
+create table hymn.core_custom_function
 (
     id           text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
     api          text        not null,
     type         text        not null,
     code         text        not null,
+    params_type  text        not null,
     lang         text        not null,
     option_text  text,
     create_by_id text        not null,
@@ -1034,26 +1036,49 @@ create table hymn.core_shared_code
     create_date  timestamptz not null default now(),
     modify_date  timestamptz not null default now()
 );
-comment on table hymn.core_shared_code is '共享代码 可以在接口、触发器中调用或使用在定时任务中';
-comment on column hymn.core_shared_code.api is 'api名称,也是代码中的函数名称 ;;uk';
-comment on column hymn.core_shared_code.type is '代码类型 ;;optional_value:[function(函数代码),job(任务代码)]';
-comment on column hymn.core_shared_code.code is '代码';
-comment on column hymn.core_shared_code.lang is '语言 ;;optional_value:[javascript]';
-comment on column hymn.core_shared_code.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
+comment on table hymn.core_custom_function is '自定义函数 可以在接口、触发器中调用或使用在定时任务中';
+comment on column hymn.core_custom_function.api is 'api名称,也是代码中的函数名称 ;;uk';
+comment on column hymn.core_custom_function.type is '代码类型 ;;optional_value:[function(函数代码),job(任务代码)]';
+comment on column hymn.core_custom_function.code is '代码';
+comment on column hymn.core_custom_function.params_type is '参数类型数组，多个类型之间用英文逗号隔开，类型为java类型的全限定名';
+comment on column hymn.core_custom_function.lang is '语言 ;;optional_value:[javascript]';
+comment on column hymn.core_custom_function.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
 
 
 drop table if exists hymn.core_business_code_ref;
 create table hymn.core_business_code_ref
 (
+    id                     text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    trigger_id             text,
+    interface_id           text,
+    custom_function_id     text,
+    biz_object_id          text,
+    field_id               text,
+    ref_custom_function_id text,
+    create_by_id           text        not null,
+    create_by              text        not null,
+    modify_by_id           text        not null,
+    modify_by              text        not null,
+    create_date            timestamptz not null default now(),
+    modify_date            timestamptz not null default now()
+);
+comment on table hymn.core_business_code_ref is '业务代码引用关系表';
+comment on column hymn.core_business_code_ref.trigger_id is '触发器id ;;fk:[core_biz_object_trigger cascade]';
+comment on column hymn.core_business_code_ref.interface_id is '接口id ;;fk:[core_custom_interface cascade]';
+comment on column hymn.core_business_code_ref.custom_function_id is '自定义函数id ;;fk:[core_custom_function cascade]';
+comment on column hymn.core_business_code_ref.biz_object_id is '被引用对象id ;;fk:[core_biz_object restrict];idx';
+comment on column hymn.core_business_code_ref.field_id is '被引用字段id ;;fk:[core_biz_object_field restrict];idx';
+comment on column hymn.core_business_code_ref.ref_custom_function_id is '被引用共享代码id ;;fk:[core_custom_function restrict];idx';
+
+drop table if exists hymn.core_cron_job;
+create table hymn.core_cron_job
+(
     id                 text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
-    trigger_id         text,
-    interface_id       text,
-    shared_code_id     text,
-    biz_object_id      text,
-    field_id           text,
-    org_id             text,
-    role_id            text,
-    ref_shared_code_id text,
+    active             bool        not null,
+    custom_function_id text        not null,
+    cron               text        not null,
+    start_date_time    timestamptz not null,
+    end_date_time      timestamptz not null,
     create_by_id       text        not null,
     create_by          text        not null,
     modify_by_id       text        not null,
@@ -1061,38 +1086,12 @@ create table hymn.core_business_code_ref
     create_date        timestamptz not null default now(),
     modify_date        timestamptz not null default now()
 );
-comment on table hymn.core_business_code_ref is '业务代码引用关系表';
-comment on column hymn.core_business_code_ref.trigger_id is '触发器id ;;fk:[core_biz_object_trigger cascade]';
-comment on column hymn.core_business_code_ref.interface_id is '接口id ;;fk:[core_custom_interface cascade]';
-comment on column hymn.core_business_code_ref.shared_code_id is '共享代码id ;;fk:[core_shared_code cascade]';
-comment on column hymn.core_business_code_ref.biz_object_id is '被引用对象id ;;fk:[core_biz_object cascade]';
-comment on column hymn.core_business_code_ref.field_id is '被引用字段id ;;fk:[core_biz_object_field cascade];idx';
-comment on column hymn.core_business_code_ref.org_id is '被引用组织id ;;fk:[core_org cascade];idx';
-comment on column hymn.core_business_code_ref.role_id is '被引用角色id ;;fk:[core_role cascade];idx';
-comment on column hymn.core_business_code_ref.ref_shared_code_id is '被引用共享代码id ;;fk:[core_shared_code cascade]';
-
-drop table if exists hymn.core_cron_job;
-create table hymn.core_cron_job
-(
-    id              text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
-    active          bool        not null,
-    shared_code_id  text        not null,
-    cron            text        not null,
-    start_date_time timestamptz not null,
-    end_date_time   timestamptz not null,
-    create_by_id    text        not null,
-    create_by       text        not null,
-    modify_by_id    text        not null,
-    modify_by       text        not null,
-    create_date     timestamptz not null default now(),
-    modify_date     timestamptz not null default now()
-);
 comment on table hymn.core_cron_job is '定时任务';
 comment on column hymn.core_cron_job.start_date_time is '任务开始时间';
 comment on column hymn.core_cron_job.end_date_time is '任务结束时间';
 comment on column hymn.core_cron_job.active is '是否启用';
 comment on column hymn.core_cron_job.cron is '定时规则';
-comment on column hymn.core_cron_job.shared_code_id is '任务代码id ;;fk:[core_shared_code restrict];idx';
+comment on column hymn.core_cron_job.custom_function_id is '任务代码id ;;fk:[core_custom_function restrict];idx';
 
 
 drop table if exists hymn.sql_keyword;

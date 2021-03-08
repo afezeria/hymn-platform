@@ -173,10 +173,10 @@ create trigger a20_cannot_change_api
     on hymn.core_module_function
     for each row
 execute function hymn.cannot_change_api();
-drop trigger if exists a20_cannot_change_api on hymn.core_shared_code;
+drop trigger if exists a20_cannot_change_api on hymn.core_custom_function;
 create trigger a20_cannot_change_api
     before update
-    on hymn.core_shared_code
+    on hymn.core_custom_function
     for each row
 execute function hymn.cannot_change_api();
 

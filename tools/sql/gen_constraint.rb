@@ -47,6 +47,12 @@ conn.exec Constant::QUERY_TABLE do |r|
                on hymn.#{i['name']} (#{g[0].gsub /\s+/, ','});
          SQL
        end
+       declare.match(/fk:\[((\[[^\[\]]+\],?)+)\]/)&.[](1)&.scan(/\[([\w,]+) (\w+):([\w,]+)\]/) do |g|
+         io.write <<~SQL
+           alter table hymn.#{i['name']}
+               add constraint #{index_name 'fk', i['name'], *g[0].split(',')} foreign key (#{g[0]}) references hymn.#{g[1]} (#{g[2]});
+         SQL
+       end
      end
    }
 end

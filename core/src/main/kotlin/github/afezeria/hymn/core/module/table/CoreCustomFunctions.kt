@@ -1,19 +1,20 @@
 package github.afezeria.hymn.core.module.table
 
 import github.afezeria.hymn.common.db.AbstractTable
-import github.afezeria.hymn.core.module.entity.SharedCode
+import github.afezeria.hymn.core.module.entity.CustomFunction
 import org.ktorm.schema.datetime
 import org.ktorm.schema.varchar
 
 /**
  * @author afezeria
  */
-class CoreSharedCodes(alias: String? = null) :
-    AbstractTable<SharedCode>("core_shared_code", schema = "hymn", alias = alias) {
+class CoreCustomFunctions(alias: String? = null) :
+    AbstractTable<CustomFunction>("core_custom_function", schema = "hymn", alias = alias) {
 
     val api = varchar("api")
     val type = varchar("type")
     val code = varchar("code")
+    val paramsType = varchar("params_type")
     val lang = varchar("lang")
     val optionText = varchar("option_text")
     val createById = varchar("create_by_id")

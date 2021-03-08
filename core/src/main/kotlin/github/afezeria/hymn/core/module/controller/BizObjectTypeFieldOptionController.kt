@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.*
  */
 @ApiVersion
 @RestController
-@RequestMapping("/core/api/{version}/biz-object-type-options")
+@RequestMapping("/core/api/{version}/biz-object-type-field-option")
 @Api(tags = ["BizObjectTypeOptionsController"], description = "业务对象记录类型可选项限制接口")
-class BizObjectTypeOptionController {
+class BizObjectTypeFieldOptionController {
 
     @Autowired
     private lateinit var service: BizObjectTypeFieldOptionService

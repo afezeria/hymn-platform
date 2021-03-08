@@ -63,18 +63,6 @@ class BusinessCodeRefService {
         return businessCodeRefDao.selectByFieldId(fieldId)
     }
 
-    fun findByOrgId(
-        orgId: String,
-    ): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.selectByOrgId(orgId)
-    }
-
-    fun findByRoleId(
-        roleId: String,
-    ): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.selectByRoleId(roleId)
-    }
-
     fun pageFind(pageSize: Int, pageNum: Int): List<BusinessCodeRef> {
         return businessCodeRefDao.pageSelect(null, pageSize, pageNum)
     }
