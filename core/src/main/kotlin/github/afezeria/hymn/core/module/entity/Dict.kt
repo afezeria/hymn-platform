@@ -18,9 +18,9 @@ data class Dict(
     var fieldId: String? = null,
     @ApiModelProperty(value = "表明当前字典值依赖与其他字典")
     var parentDictId: String? = null,
-    @ApiModelProperty(value = "字典名称", required = true)
+    @ApiModelProperty(value = "字典名称")
     var name: String,
-    @ApiModelProperty(value = "api名称 ;;uk", required = true)
+    @ApiModelProperty(value = "api名称 ")
     var api: String,
     @ApiModelProperty(value = "")
     var remark: String? = null,

@@ -13,7 +13,7 @@ class DictDto(
     var parentDictId: String? = null,
     @ApiModelProperty(value = "字典名称", required = true)
     var name: String,
-    @ApiModelProperty(value = "api名称 ;;uk", required = true)
+    @ApiModelProperty(value = "api名称", required = true)
     var api: String,
     @ApiModelProperty(value = "")
     var remark: String? = null,

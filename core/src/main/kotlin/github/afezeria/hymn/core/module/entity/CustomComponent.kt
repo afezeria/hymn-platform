@@ -14,11 +14,11 @@ import java.time.LocalDateTime
 @ApiModel(value = "自定义组件", description = """自定义组件""")
 data class CustomComponent(
 
-    @ApiModelProperty(value = "api名称，唯一标识 ;; uk", required = true)
+    @ApiModelProperty(value = "api名称，唯一标识 ")
     var api: String,
-    @ApiModelProperty(value = "组件在页面上的显示名称", required = true)
+    @ApiModelProperty(value = "组件在页面上的显示名称")
     var name: String,
-    @ApiModelProperty(value = "组件html代码", required = true)
+    @ApiModelProperty(value = "组件html代码")
     var code: String,
 ) : AbstractEntity() {
 

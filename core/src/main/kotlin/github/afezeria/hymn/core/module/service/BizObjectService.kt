@@ -8,7 +8,6 @@ import github.afezeria.hymn.core.module.dao.BizObjectDao
 import github.afezeria.hymn.core.module.dto.BizObjectDto
 import github.afezeria.hymn.core.module.dto.BizObjectLayoutDto
 import github.afezeria.hymn.core.module.dto.BizObjectTypeDto
-import github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
 import github.afezeria.hymn.core.module.entity.BizObject
 import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
@@ -33,12 +32,6 @@ class BizObjectService {
 
     @Autowired
     private lateinit var layoutService: BizObjectLayoutService
-
-    @Autowired
-    private lateinit var typeLayoutService: BizObjectTypeLayoutService
-
-    @Autowired
-    private lateinit var roleService: RoleService
 
     @Autowired
     private lateinit var dbService: DatabaseService
@@ -101,16 +94,29 @@ class BizObjectService {
             val id = bizObjectDao.insert(e)
 //            创建默认字段
             fieldService.createDefaultField(id, dto.fieldName, dto.autoRule)
-            val typeId = typeService.create(BizObjectTypeDto(id, "默认类型", true))
 //            创建默认布局
             val layoutId =
-                layoutService.create(BizObjectLayoutDto(id, "默认布局", "", "", "", "", "", ""))
-
-//            创建角色、记录类型对应到布局的映射数据
-            val roleList = roleService.findAll()
-            typeLayoutService.batchCreate(roleList.map {
-                BizObjectTypeLayoutDto(it.id, id, typeId, layoutId)
-            })
+                layoutService.create(
+                    BizObjectLayoutDto(
+                        bizObjectId = id,
+                        name = "默认布局",
+                        relFieldJsonArr = "",
+                        pcReadLayoutJson = "",
+                        pcEditLayoutJson = "",
+                        mobileReadLayoutJson = "",
+                        mobileEditLayoutJson = "",
+                        previewLayoutJson = ""
+                    )
+                )
+//            创建默认类型
+            typeService.create(
+                BizObjectTypeDto(
+                    bizObjectId = id,
+                    name = "默认类型",
+                    defaultLayoutId = layoutId,
+                    active = true
+                )
+            )
 
             return id
         }

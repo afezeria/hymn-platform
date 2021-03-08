@@ -14,14 +14,13 @@ import java.time.LocalDateTime
 @ApiModel(value = "用户侧边栏菜单布局", description = """用户侧边栏菜单布局""")
 data class AccountMenuLayout(
 
-    @ApiModelProperty(value = "用户id ;; fk:[core_account cascade];idx", required = true)
+    @ApiModelProperty(value = "用户id ")
     var accountId: String,
     @ApiModelProperty(
-        value = "客户端类型 ;; optional_value:[browser(浏览器), mobile(移动端)]",
-        required = true
+        value = "客户端类型 ;; optional_value:[browser(浏览器), mobile(移动端)]"
     )
     var clientType: String,
-    @ApiModelProperty(value = "布局json字符串", required = true)
+    @ApiModelProperty(value = "布局json字符串")
     var layoutJson: String,
 ) : AbstractEntity() {
 

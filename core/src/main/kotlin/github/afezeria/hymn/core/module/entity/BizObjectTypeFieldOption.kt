@@ -18,13 +18,13 @@ import java.time.LocalDateTime
 )
 data class BizObjectTypeFieldOption(
 
-    @ApiModelProperty(value = "所属对象 ;;idx", required = true)
+    @ApiModelProperty(value = "所属对象 ")
     var bizObjectId: String,
-    @ApiModelProperty(value = "记录类型id ;;fk:[core_biz_object_type cascade];idx", required = true)
+    @ApiModelProperty(value = "记录类型id ")
     var typeId: String,
-    @ApiModelProperty(value = "字段id ;;fk:[core_biz_object_field cascade]", required = true)
+    @ApiModelProperty(value = "字段id ")
     var fieldId: String,
-    @ApiModelProperty(value = "字段关联的字典项id ;;fk:[core_dict_item cascade]", required = true)
+    @ApiModelProperty(value = "字段关联的字典项id ")
     var dictItemId: String,
 ) : AbstractEntity() {
 

@@ -17,17 +17,17 @@ data class AccountObjectView(
     var copyId: String? = null,
     @ApiModelProperty(value = "")
     var remark: String? = null,
-    @ApiModelProperty(value = "是否所有人可见", required = true)
+    @ApiModelProperty(value = "是否所有人可见")
     var globalView: Boolean,
-    @ApiModelProperty(value = "是否是默认视图，只有管理员可以设置", required = true)
+    @ApiModelProperty(value = "是否是默认视图，只有管理员可以设置")
     var defaultView: Boolean,
-    @ApiModelProperty(value = "所属用户id ;; fk:[core_account cascade];idx", required = true)
+    @ApiModelProperty(value = "所属用户id ")
     var accountId: String,
-    @ApiModelProperty(value = "所属对象id ;; fk:[core_biz_object cascade];idx", required = true)
+    @ApiModelProperty(value = "所属对象id ")
     var bizObjectId: String,
-    @ApiModelProperty(value = "视图名称", required = true)
+    @ApiModelProperty(value = "视图名称")
     var name: String,
-    @ApiModelProperty(value = "视图结构", required = true)
+    @ApiModelProperty(value = "视图结构")
     var viewJson: String,
 ) : AbstractEntity() {
 

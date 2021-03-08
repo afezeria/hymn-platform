@@ -13,7 +13,7 @@ class CustomButtonDto(
     var bizObjectId: String? = null,
     @ApiModelProperty(value = "", required = true)
     var name: String,
-    @ApiModelProperty(value = "唯一标识 ;; uk", required = true)
+    @ApiModelProperty(value = "唯一标识", required = true)
     var api: String,
     @ApiModelProperty(
         value = "客户端类型，表示只能用在特定类型客户端中 ;; optional_value:[browser(pc端), mobile(移动端)]",

@@ -14,17 +14,17 @@ import java.time.LocalDateTime
 @ApiModel(value = "业务代码引用关系表", description = """业务代码引用关系表""")
 data class BusinessCodeRef(
 
-    @ApiModelProperty(value = "触发器id ;;fk:[core_biz_object_trigger cascade]")
+    @ApiModelProperty(value = "触发器id ")
     var byTriggerId: String? = null,
-    @ApiModelProperty(value = "接口id ;;fk:[core_custom_interface cascade]")
+    @ApiModelProperty(value = "接口id ")
     var byInterfaceId: String? = null,
-    @ApiModelProperty(value = "自定义函数id ;;fk:[core_shared_code cascade]")
+    @ApiModelProperty(value = "自定义函数id ")
     var byCustomFunctionId: String? = null,
-    @ApiModelProperty(value = "被引用对象id ;;fk:[core_biz_object cascade]")
+    @ApiModelProperty(value = "被引用对象id ")
     var bizObjectId: String? = null,
-    @ApiModelProperty(value = "被引用字段id ;;fk:[core_biz_object_field cascade];idx")
+    @ApiModelProperty(value = "被引用字段id ")
     var fieldId: String? = null,
-    @ApiModelProperty(value = "被引用自定义函数id ;;fk:[core_shared_code cascade];idx")
+    @ApiModelProperty(value = "被引用自定义函数id ")
     var customFunctionId: String? = null,
 ) : AbstractEntity() {
 

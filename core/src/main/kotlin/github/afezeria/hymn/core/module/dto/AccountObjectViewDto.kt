@@ -15,9 +15,9 @@ class AccountObjectViewDto(
     var globalView: Boolean,
     @ApiModelProperty(value = "是否是默认视图，只有管理员可以设置", required = true)
     var defaultView: Boolean,
-    @ApiModelProperty(value = "所属用户id ;; fk:[core_account cascade];idx", required = true)
+    @ApiModelProperty(value = "所属用户id", required = true)
     var accountId: String,
-    @ApiModelProperty(value = "所属对象id ;; fk:[core_biz_object cascade];idx", required = true)
+    @ApiModelProperty(value = "所属对象id", required = true)
     var bizObjectId: String,
     @ApiModelProperty(value = "视图名称", required = true)
     var name: String,

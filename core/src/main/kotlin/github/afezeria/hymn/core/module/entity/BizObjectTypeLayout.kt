@@ -13,17 +13,17 @@ import java.time.LocalDateTime
  */
 @ApiModel(
     value = "业务对象记录类型、角色和页面布局关联表",
-    description = """业务对象记录类型、角色和页面布局关联表 ;;uk:[[role_id type_id layout_id]]"""
+    description = """业务对象记录类型、角色和页面布局关联表 """
 )
 data class BizObjectTypeLayout(
 
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
+    @ApiModelProperty(value = "角色id ")
     var roleId: String,
-    @ApiModelProperty(value = "业务对象id ;;fk:[core_biz_object cascade];idx", required = true)
+    @ApiModelProperty(value = "业务对象id ")
     var bizObjectId: String,
-    @ApiModelProperty(value = "记录类型id ;;fk:[core_biz_object_type cascade]", required = true)
+    @ApiModelProperty(value = "记录类型id ")
     var typeId: String,
-    @ApiModelProperty(value = "页面布局id ;;fk:[core_biz_object_layout cascade]", required = true)
+    @ApiModelProperty(value = "页面布局id ")
     var layoutId: String,
 ) : AbstractEntity() {
 

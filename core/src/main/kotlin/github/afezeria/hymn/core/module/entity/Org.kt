@@ -14,13 +14,13 @@ import java.time.LocalDateTime
 @ApiModel(value = "组织", description = """组织""")
 data class Org(
 
-    @ApiModelProperty(value = "", required = true)
+    @ApiModelProperty(value = "")
     var name: String,
     @ApiModelProperty(value = "部门领导id")
     var directorId: String? = null,
     @ApiModelProperty(value = "部门副领导id")
     var deputyDirectorId: String? = null,
-    @ApiModelProperty(value = "上级组织id ;; fk:[core_org restrict];idx")
+    @ApiModelProperty(value = "上级组织id ")
     var parentId: String? = null,
 ) : AbstractEntity() {
 

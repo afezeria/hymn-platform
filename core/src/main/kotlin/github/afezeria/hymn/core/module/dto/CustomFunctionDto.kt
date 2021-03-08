@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class CustomFunctionDto(
-    @ApiModelProperty(value = "api名称,也是代码中的函数名称 ;;uk", required = true)
+    @ApiModelProperty(value = "api名称,也是代码中的函数名称", required = true)
     var api: String,
     @ApiModelProperty(value = "代码类型 ;;optional_value:[function(函数代码),job(任务代码)]", required = true)
     var type: String,

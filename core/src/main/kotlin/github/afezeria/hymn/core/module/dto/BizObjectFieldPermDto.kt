@@ -7,10 +7,10 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class BizObjectFieldPermDto(
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
+    @ApiModelProperty(value = "角色id", required = true)
     var roleId: String,
     @ApiModelProperty(
-        value = "字段id，新建自定义字段时该字段用空字符串占位 ;;fk:[core_biz_object_field cascade];idx",
+        value = "字段id，新建自定义字段时该字段用空字符串占位",
         required = true
     )
     var fieldId: String,

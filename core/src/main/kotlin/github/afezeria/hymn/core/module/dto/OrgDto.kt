@@ -13,7 +13,7 @@ class OrgDto(
     var directorId: String? = null,
     @ApiModelProperty(value = "部门副领导id")
     var deputyDirectorId: String? = null,
-    @ApiModelProperty(value = "上级组织id ;; fk:[core_org restrict];idx")
+    @ApiModelProperty(value = "上级组织id")
     var parentId: String? = null,
 ) {
     fun toEntity(): Org {

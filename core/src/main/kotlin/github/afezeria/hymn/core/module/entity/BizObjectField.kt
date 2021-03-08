@@ -125,15 +125,14 @@ rule: min_length >= 1, max_length > 0
 data class BizObjectField(
 
 
-    @ApiModelProperty(value = "所属业务对象id ;;fk:[core_biz_object cascade];idx", required = true)
+    @ApiModelProperty(value = "所属业务对象id ")
     var bizObjectId: String,
-    @ApiModelProperty(value = "名称，用于页面显示", required = true)
+    @ApiModelProperty(value = "名称，用于页面显示")
     var name: String,
-    @ApiModelProperty(value = "api名称，用于触发器和自定义接口", required = true)
+    @ApiModelProperty(value = "api名称，用于触发器和自定义接口")
     var api: String,
     @ApiModelProperty(
-        value = "字段类型 ;;optional_value:[text(文本),check_box(复选框),check_box_group(复选框组),select(下拉菜单),integer(整型),float(浮点型),money(货币),date(日期),datetime(日期时间),master_slave(主详),reference(关联关系),mreference(多选关联关系),areference(任意关联),summary(汇总),auto(自动编号),picture(图片),files(文件)];",
-        required = true
+        value = "字段类型 ;;optional_value:[text(文本),check_box(复选框),check_box_group(复选框组),select(下拉菜单),integer(整型),float(浮点型),money(货币),date(日期),datetime(日期时间),master_slave(主详),reference(关联关系),mreference(多选关联关系),areference(任意关联),summary(汇总),auto(自动编号),picture(图片),files(文件)];"
     )
     var type: String,
     @ApiModelProperty(value = "字段启用状态，false表示停用，字段停用时从视图中移除，删除时清空没一行中对应字段数据")
@@ -193,8 +192,7 @@ data class BizObjectField(
     )
     var standardType: String? = null,
     @ApiModelProperty(
-        value = "是否是预定义字段，区分对象中的自定义字段与预定义字段，预定义字段该值为true且source_column与api相等，后台对象管理界面中不能删除和修改",
-        required = true
+        value = "是否是预定义字段，区分对象中的自定义字段与预定义字段，预定义字段该值为true且source_column与api相等，后台对象管理界面中不能删除和修改"
     )
     var predefined: Boolean,
     @ApiModelProperty(value = "字段对应的实际表中的列名,对象为远程对象时该字段填充空字符串")

@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty
 class BizObjectDto(
     @ApiModelProperty(value = "业务对象名称，用于页面显示", required = true)
     var name: String,
-    @ApiModelProperty(value = "业务对象api，唯一标识 ;;uk", required = true)
+    @ApiModelProperty(value = "业务对象api，唯一标识", required = true)
     var api: String,
     @ApiModelProperty(value = "实际表名，例： core_data_table_500")
     var sourceTable: String? = null,
@@ -25,7 +25,7 @@ class BizObjectDto(
     @ApiModelProperty(value = "远程rest验证信息")
     var remoteToken: String? = null,
     @ApiModelProperty(
-        value = "模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]"
+        value = "模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作"
     )
     var moduleApi: String? = null,
     @ApiModelProperty(value = "", required = true)

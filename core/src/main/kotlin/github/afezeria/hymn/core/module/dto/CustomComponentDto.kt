@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class CustomComponentDto(
-    @ApiModelProperty(value = "api名称，唯一标识 ;; uk", required = true)
+    @ApiModelProperty(value = "api名称，唯一标识", required = true)
     var api: String,
     @ApiModelProperty(value = "组件在页面上的显示名称", required = true)
     var name: String,

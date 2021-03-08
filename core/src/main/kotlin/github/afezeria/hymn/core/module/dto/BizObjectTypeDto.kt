@@ -7,12 +7,12 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class BizObjectTypeDto(
-    @ApiModelProperty(value = "所属业务对象id ;;fk:[core_biz_object cascade]", required = true)
+    @ApiModelProperty(value = "所属业务对象id", required = true)
     var bizObjectId: String,
     @ApiModelProperty(value = "记录类型名称", required = true)
     var name: String,
     @ApiModelProperty(
-        value = "默认使用的页面布局的id ;;fk:[core_biz_object_layout restrict]",
+        value = "默认使用的页面布局的id",
         required = true
     )
     var defaultLayoutId: String,

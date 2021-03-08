@@ -8,6 +8,7 @@ import github.afezeria.hymn.common.exception.ResourceNotFoundException
 import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dto.BizObjectMappingDto
 import github.afezeria.hymn.core.module.service.BizObjectMappingService
+import github.afezeria.hymn.core.module.view.BizObjectMappingListView
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,8 +35,8 @@ class BizObjectMappingController {
         @RequestParam("target_biz_object_id", required = false) targetBizObjectId: String?,
         @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
         @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
-    ): List<BizObjectMappingDto> {
-        return bizObjectMappingService.pageFindDto(
+    ): MutableList<BizObjectMappingListView> {
+        return bizObjectMappingService.pageFindView(
             sourceBizObjectId,
             targetBizObjectId,
             pageSize,
@@ -46,8 +47,8 @@ class BizObjectMappingController {
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "根据id查询", notes = "")
     @GetMapping("/{id}")
-    fun findById(@PathVariable("id") id: String): BizObjectMappingDto {
-        val result = bizObjectMappingService.findDtoById(id)
+    fun findById(@PathVariable("id") id: String): BizObjectMappingListView {
+        val result = bizObjectMappingService.findViewById(id)
             ?: throw ResourceNotFoundException("对象映射关系".msgById(id))
         return result
     }

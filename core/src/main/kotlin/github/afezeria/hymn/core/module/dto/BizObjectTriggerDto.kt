@@ -19,7 +19,7 @@ class BizObjectTriggerDto(
     var api: String,
     @ApiModelProperty(value = "语言 ;;optional_value:[javascript]", required = true)
     var lang: String,
-    @ApiModelProperty(value = "用于给编译器或其他组件设置参数(格式参照具体实现）")
+    @ApiModelProperty(value = "用于给编译器或其他组件设置参数(格式参照具体实现)")
     var optionText: String? = null,
     @ApiModelProperty(value = "优先级", required = true)
     var ord: Int,

@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class ConfigDto(
-    @ApiModelProperty(value = "键 ;; idx", required = true)
+    @ApiModelProperty(value = "键", required = true)
     var key: String,
     @ApiModelProperty(value = "", required = true)
     var value: String,

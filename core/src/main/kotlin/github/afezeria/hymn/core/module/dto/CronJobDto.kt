@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 class CronJobDto(
     @ApiModelProperty(value = "是否启用", required = true)
     var active: Boolean,
-    @ApiModelProperty(value = "任务代码id ;;fk:[core_shared_code restrict];idx", required = true)
+    @ApiModelProperty(value = "任务代码id", required = true)
     var sharedCodeId: String,
     @ApiModelProperty(value = "定时规则", required = true)
     var cron: String,

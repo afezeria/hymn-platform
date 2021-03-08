@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class BizObjectFieldDto(
-    @ApiModelProperty(value = "所属业务对象id ;;fk:[core_biz_object cascade];idx", required = true)
+    @ApiModelProperty(value = "所属业务对象id", required = true)
     var bizObjectId: String,
     @ApiModelProperty(value = "名称，用于页面显示", required = true)
     var name: String,

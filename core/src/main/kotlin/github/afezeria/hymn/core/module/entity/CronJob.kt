@@ -14,15 +14,15 @@ import java.time.LocalDateTime
 @ApiModel(value = "定时任务", description = """定时任务""")
 data class CronJob(
 
-    @ApiModelProperty(value = "是否启用", required = true)
+    @ApiModelProperty(value = "是否启用")
     var active: Boolean,
-    @ApiModelProperty(value = "任务代码id ;;fk:[core_shared_code restrict];idx", required = true)
+    @ApiModelProperty(value = "任务代码id ")
     var sharedCodeId: String,
-    @ApiModelProperty(value = "定时规则", required = true)
+    @ApiModelProperty(value = "定时规则")
     var cron: String,
-    @ApiModelProperty(value = "任务开始时间", required = true)
+    @ApiModelProperty(value = "任务开始时间")
     var startDateTime: LocalDateTime,
-    @ApiModelProperty(value = "任务结束时间", required = true)
+    @ApiModelProperty(value = "任务结束时间")
     var endDateTime: LocalDateTime,
 ) : AbstractEntity() {
 

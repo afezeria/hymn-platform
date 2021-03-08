@@ -7,6 +7,7 @@ import github.afezeria.hymn.core.module.dao.BizObjectMappingDao
 import github.afezeria.hymn.core.module.dto.BizObjectMappingDto
 import github.afezeria.hymn.core.module.entity.BizObjectMapping
 import github.afezeria.hymn.core.module.table.CoreBizObjectMappings
+import github.afezeria.hymn.core.module.view.BizObjectMappingListView
 import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
 import org.ktorm.schema.ColumnDeclaring
@@ -80,16 +81,16 @@ class BizObjectMappingService {
         return bizObjectMappingDao.pageSelect(expr, pageSize, pageNum)
     }
 
-    fun findDtoById(id: String): BizObjectMappingDto? {
+    fun findViewById(id: String): BizObjectMappingListView? {
         return bizObjectMappingDao.selectDto({ it.id eq id }, 0, 1).firstOrNull()
     }
 
-    fun pageFindDto(
+    fun pageFindView(
         sourceBizObjectId: String?,
         targetBizObjectId: String?,
         pageSize: Int,
         pageNum: Int
-    ): MutableList<BizObjectMappingDto> {
+    ): MutableList<BizObjectMappingListView> {
         if (pageSize < 1) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
         if (pageNum < 1) throw IllegalArgumentException("pageNum must be greater than 0, current value $pageNum")
         val expr: ((CoreBizObjectMappings) -> ColumnDeclaring<Boolean>)? =

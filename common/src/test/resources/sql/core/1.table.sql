@@ -762,7 +762,7 @@ comment on column hymn.core_biz_object_trigger.ord is '优先级';
 comment on column hymn.core_biz_object_trigger.event is '触发时间 ;;optional_value:[BEFORE_INSERT,BEFORE_UPDATE,BEFORE_UPSERT,BEFORE_DELETE,AFTER_INSERT,AFTER_UPDATE,AFTER_UPSERT,AFTER_DELETE]';
 comment on column hymn.core_biz_object_trigger.code is '触发器代码';
 comment on column hymn.core_biz_object_trigger.lang is '语言 ;;optional_value:[javascript]';
-comment on column hymn.core_biz_object_trigger.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
+comment on column hymn.core_biz_object_trigger.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现)';
 
 
 
@@ -1048,27 +1048,27 @@ comment on column hymn.core_custom_function.option_text is '用于给编译器�
 drop table if exists hymn.core_business_code_ref;
 create table hymn.core_business_code_ref
 (
-    id                     text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
-    trigger_id             text,
-    interface_id           text,
-    custom_function_id     text,
-    biz_object_id          text,
-    field_id               text,
-    ref_custom_function_id text,
-    create_by_id           text        not null,
-    create_by              text        not null,
-    modify_by_id           text        not null,
-    modify_by              text        not null,
-    create_date            timestamptz not null default now(),
-    modify_date            timestamptz not null default now()
+    id                    text primary key     default replace(public.uuid_generate_v4()::text, '-', ''),
+    by_trigger_id         text,
+    by_interface_id       text,
+    by_custom_function_id text,
+    biz_object_id         text,
+    field_id              text,
+    custom_function_id    text,
+    create_by_id          text        not null,
+    create_by             text        not null,
+    modify_by_id          text        not null,
+    modify_by             text        not null,
+    create_date           timestamptz not null default now(),
+    modify_date           timestamptz not null default now()
 );
 comment on table hymn.core_business_code_ref is '业务代码引用关系表';
-comment on column hymn.core_business_code_ref.trigger_id is '触发器id ;;fk:[core_biz_object_trigger cascade]';
-comment on column hymn.core_business_code_ref.interface_id is '接口id ;;fk:[core_custom_interface cascade]';
-comment on column hymn.core_business_code_ref.custom_function_id is '自定义函数id ;;fk:[core_custom_function cascade]';
+comment on column hymn.core_business_code_ref.by_trigger_id is '触发器id ;;fk:[core_biz_object_trigger cascade]';
+comment on column hymn.core_business_code_ref.by_interface_id is '接口id ;;fk:[core_custom_interface cascade]';
+comment on column hymn.core_business_code_ref.by_custom_function_id is '自定义函数id ;;fk:[core_custom_function cascade]';
 comment on column hymn.core_business_code_ref.biz_object_id is '被引用对象id ;;fk:[core_biz_object restrict];idx';
 comment on column hymn.core_business_code_ref.field_id is '被引用字段id ;;fk:[core_biz_object_field restrict];idx';
-comment on column hymn.core_business_code_ref.ref_custom_function_id is '被引用共享代码id ;;fk:[core_custom_function restrict];idx';
+comment on column hymn.core_business_code_ref.custom_function_id is '被引用共享代码id ;;fk:[core_custom_function restrict];idx';
 
 drop table if exists hymn.core_cron_job;
 create table hymn.core_cron_job

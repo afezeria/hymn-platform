@@ -69,7 +69,7 @@ class BizObjectTypeLayoutDao(
                 )
                 .where {
                     (bizObjects.active eq true) and
-                        whereExpr(this, types)
+                        whereExpr(this)
                 }
                 .mapTo(ArrayList()) {
                     BizObjectTypeLayoutListView(

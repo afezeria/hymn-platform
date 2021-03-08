@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class DictItemDto(
-    @ApiModelProperty(value = "所属字典id ;;fk:[core_dict cascade];idx", required = true)
+    @ApiModelProperty(value = "所属字典id", required = true)
     var dictId: String,
     @ApiModelProperty(value = "字典项名称", required = true)
     var name: String,

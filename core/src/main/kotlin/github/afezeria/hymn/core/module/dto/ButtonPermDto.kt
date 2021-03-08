@@ -7,10 +7,10 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class ButtonPermDto(
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
+    @ApiModelProperty(value = "角色id", required = true)
     var roleId: String,
     @ApiModelProperty(
-        value = "按钮id，新建按钮时该字段用空字符串占位;;fk:[core_custom_button cascade];idx",
+        value = "按钮id，新建按钮时该字段用空字符串占位",
         required = true
     )
     var buttonId: String,

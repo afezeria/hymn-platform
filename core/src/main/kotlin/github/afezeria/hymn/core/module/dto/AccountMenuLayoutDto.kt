@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class AccountMenuLayoutDto(
-    @ApiModelProperty(value = "用户id ;; fk:[core_account cascade];idx", required = true)
+    @ApiModelProperty(value = "用户id", required = true)
     var accountId: String,
     @ApiModelProperty(
         value = "客户端类型 ;; optional_value:[browser(浏览器), mobile(移动端)]",

@@ -11,16 +11,15 @@ import java.time.LocalDateTime
  * 业务对象记录类型 ;; uk:[[biz_object_id name]]
  * @author afezeria
  */
-@ApiModel(value = "业务对象记录类型", description = """业务对象记录类型 ;; uk:[[biz_object_id name]]""")
+@ApiModel(value = "业务对象记录类型", description = """业务对象记录类型 """)
 data class BizObjectType(
 
-    @ApiModelProperty(value = "所属业务对象id ;;fk:[core_biz_object cascade]", required = true)
+    @ApiModelProperty(value = "所属业务对象id ")
     var bizObjectId: String,
-    @ApiModelProperty(value = "记录类型名称", required = true)
+    @ApiModelProperty(value = "记录类型名称")
     var name: String,
     @ApiModelProperty(
-        value = "默认使用的页面布局的id ;;fk:[core_biz_object_layout restrict]",
-        required = true
+        value = "默认使用的页面布局的id "
     )
     var defaultLayoutId: String,
     @ApiModelProperty(value = "")

@@ -2,11 +2,11 @@ package github.afezeria.hymn.core.module.dao
 
 import github.afezeria.hymn.common.db.AbstractDao
 import github.afezeria.hymn.common.platform.DatabaseService
-import github.afezeria.hymn.core.module.dto.BizObjectMappingDto
 import github.afezeria.hymn.core.module.entity.BizObjectMapping
 import github.afezeria.hymn.core.module.table.CoreBizObjectMappings
 import github.afezeria.hymn.core.module.table.CoreBizObjectTypes
 import github.afezeria.hymn.core.module.table.CoreBizObjects
+import github.afezeria.hymn.core.module.view.BizObjectMappingListView
 import org.ktorm.dsl.*
 import org.ktorm.schema.ColumnDeclaring
 import org.springframework.stereotype.Component
@@ -36,12 +36,12 @@ class BizObjectMappingDao(
     val dtoColumns = listOf(
         table.id,
         table.sourceBizObjectId,
-        table.sourceTypeId,
-        table.targetBizObjectId,
-        table.targetTypeId,
         sourceObjects.name,
+        table.sourceTypeId,
         sourceTypes.name,
+        table.targetBizObjectId,
         targetObjects.name,
+        table.targetTypeId,
         targetTypes.name,
     )
     val baseExpr = (sourceObjects.active eq true) and
@@ -51,7 +51,7 @@ class BizObjectMappingDao(
         expr: ((CoreBizObjectMappings) -> ColumnDeclaring<Boolean>)?,
         offset: Int,
         limit: Int
-    ): MutableList<BizObjectMappingDto> {
+    ): MutableList<BizObjectMappingListView> {
         return table.run {
             databaseService.db().from(table)
                 .innerJoin(sourceObjects, sourceObjects.id eq sourceBizObjectId)
@@ -74,18 +74,17 @@ class BizObjectMappingDao(
                 }
                 .limit(offset, limit)
                 .mapTo(ArrayList()) {
-                    BizObjectMappingDto(
+                    BizObjectMappingListView(
+                        id = requireNotNull(it[table.id]),
                         sourceBizObjectId = requireNotNull(it[sourceBizObjectId]),
                         sourceTypeId = requireNotNull(it[sourceTypeId]),
                         targetBizObjectId = requireNotNull(it[targetBizObjectId]),
                         targetTypeId = requireNotNull(it[targetTypeId]),
-                    ).apply {
-                        id = requireNotNull(it[table.id])
-                        sourceBizObjectName = requireNotNull(it[sourceObjects.name])
-                        sourceTypeName = requireNotNull(it[sourceTypes.name])
-                        targetBizObjectName = requireNotNull(it[targetObjects.name])
-                        targetTypeName = requireNotNull(it[targetTypes.name])
-                    }
+                        sourceBizObjectName = requireNotNull(it[sourceObjects.name]),
+                        sourceTypeName = requireNotNull(it[sourceTypes.name]),
+                        targetBizObjectName = requireNotNull(it[targetObjects.name]),
+                        targetTypeName = requireNotNull(it[targetTypes.name]),
+                    )
                 }
         }
     }

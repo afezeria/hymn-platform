@@ -11,14 +11,14 @@ import java.time.LocalDateTime
  * 记录类型权限 ;;uk:[[role_id type_id]]
  * @author afezeria
  */
-@ApiModel(value = "记录类型权限", description = """记录类型权限 ;;uk:[[role_id type_id]]""")
+@ApiModel(value = "记录类型权限", description = """记录类型权限 """)
 data class BizObjectTypePerm(
 
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade]", required = true)
+    @ApiModelProperty(value = "角色id ")
     var roleId: String,
-    @ApiModelProperty(value = "类型id ;;fk:[core_biz_object_type cascade];idx", required = true)
+    @ApiModelProperty(value = "类型id ")
     var typeId: String,
-    @ApiModelProperty(value = "创建数据时选择特定记录类型的权限", required = true)
+    @ApiModelProperty(value = "创建数据时选择特定记录类型的权限")
     var visible: Boolean,
 ) : AbstractEntity() {
 

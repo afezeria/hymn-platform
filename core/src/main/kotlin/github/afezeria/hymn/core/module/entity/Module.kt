@@ -9,14 +9,14 @@ import java.time.LocalDateTime
  */
 @ApiModel(value = "模块", description = """模块""")
 data class Module(
-    @ApiModelProperty(value = "模块api", required = true)
+    @ApiModelProperty(value = "模块api")
     val api: String,
-    @ApiModelProperty(value = "模块名称", required = true)
+    @ApiModelProperty(value = "模块名称")
     val name: String,
-    @ApiModelProperty(value = "模块备注", required = true)
+    @ApiModelProperty(value = "模块备注")
     val remark: String,
-    @ApiModelProperty(value = "版本号", required = true)
+    @ApiModelProperty(value = "版本号")
     val version: String,
-    @ApiModelProperty(value = "添加时间", required = true)
+    @ApiModelProperty(value = "添加时间")
     val create_date: LocalDateTime,
 )

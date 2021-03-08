@@ -24,11 +24,11 @@ class AccountDto(
     var admin: Boolean,
     @ApiModelProperty(value = "是否是初始帐号", required = true)
     var root: Boolean,
-    @ApiModelProperty(value = "直接上级id ;;idx")
+    @ApiModelProperty(value = "直接上级id")
     var leaderId: String? = null,
-    @ApiModelProperty(value = "所属组织id ;; fk:[core_org restrict];idx", required = true)
+    @ApiModelProperty(value = "所属组织id", required = true)
     var orgId: String,
-    @ApiModelProperty(value = "所属角色id ;; fk:[core_role restrict];idx", required = true)
+    @ApiModelProperty(value = "所属角色id", required = true)
     var roleId: String,
 ) {
     fun toEntity(): Account {

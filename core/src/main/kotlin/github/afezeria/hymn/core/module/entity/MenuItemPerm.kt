@@ -14,11 +14,11 @@ import java.time.LocalDateTime
 @ApiModel(value = "菜单项权限", description = """菜单项权限""")
 data class MenuItemPerm(
 
-    @ApiModelProperty(value = "角色id ;;fk:[core_role cascade];idx", required = true)
+    @ApiModelProperty(value = "角色id ")
     var roleId: String,
-    @ApiModelProperty(value = "菜单项id ;;fk:[core_custom_menu_item cascade];idx", required = true)
+    @ApiModelProperty(value = "菜单项id ")
     var menuItemId: String,
-    @ApiModelProperty(value = "是否可见", required = true)
+    @ApiModelProperty(value = "是否可见")
     var visible: Boolean,
 ) : AbstractEntity() {
 

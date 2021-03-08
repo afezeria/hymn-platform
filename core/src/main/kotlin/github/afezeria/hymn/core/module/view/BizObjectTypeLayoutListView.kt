@@ -12,10 +12,10 @@ class BizObjectTypeLayoutListView(
     var typeId: String,
     @ApiModelProperty(value = "页面布局id")
     var layoutId: String,
-    @ApiModelProperty(value = "角色名称", notes = "只用于后端返回数据")
+    @ApiModelProperty(value = "角色名称")
     var roleName: String,
-    @ApiModelProperty(value = "类型名称", notes = "只用于后端返回数据")
+    @ApiModelProperty(value = "类型名称")
     var typeName: String,
-    @ApiModelProperty(value = "布局名称", notes = "只用于后端返回数据")
+    @ApiModelProperty(value = "布局名称")
     var layoutName: String,
 )

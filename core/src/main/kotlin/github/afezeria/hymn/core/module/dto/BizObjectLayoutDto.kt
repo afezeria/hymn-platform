@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty
  * @author afezeria
  */
 class BizObjectLayoutDto(
-    @ApiModelProperty(value = "引用对象 ;;fk:[core_biz_object cascade]", required = true)
+    @ApiModelProperty(value = "引用对象", required = true)
     var bizObjectId: String,
     @ApiModelProperty(value = "布局名称", required = true)
     var name: String,
