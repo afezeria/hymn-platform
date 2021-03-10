@@ -44,7 +44,7 @@ class BizObjectService {
         return bizObjectDao.singleRowSelect({ (it.active eq true) and (it.id eq id) })
     }
 
-    fun findActiveObjectByIds(ids: List<String>): MutableList<BizObject> {
+    fun findActiveObjectByIds(ids: Collection<String>): MutableList<BizObject> {
         return bizObjectDao.select({ (it.active eq true) and (it.id inList ids) })
     }
 
@@ -97,16 +97,7 @@ class BizObjectService {
 //            创建默认布局
             val layoutId =
                 layoutService.create(
-                    BizObjectLayoutDto(
-                        bizObjectId = id,
-                        name = "默认布局",
-                        relFieldJsonArr = "",
-                        pcReadLayoutJson = "",
-                        pcEditLayoutJson = "",
-                        mobileReadLayoutJson = "",
-                        mobileEditLayoutJson = "",
-                        previewLayoutJson = ""
-                    )
+                    BizObjectLayoutDto.defaultLayout(id)
                 )
 //            创建默认类型
             typeService.create(

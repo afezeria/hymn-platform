@@ -16,7 +16,7 @@ data class CustomButton(
 
     @ApiModelProperty(value = "")
     var remark: String? = null,
-    @ApiModelProperty(value = "业务对象id，不为空时表示该按钮只能在该对象相关页面中使用;idx")
+    @ApiModelProperty(value = "业务对象id，不为空时表示该按钮只能在该对象相关页面中使用")
     var bizObjectId: String? = null,
     @ApiModelProperty(value = "")
     var name: String,

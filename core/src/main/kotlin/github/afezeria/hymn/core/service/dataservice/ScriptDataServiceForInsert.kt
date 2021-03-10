@@ -66,9 +66,9 @@ interface ScriptDataServiceForInsert : ScriptDataService {
                 throw PermissionDeniedException("缺少对象 [api:$objectApiName] 新建权限")
             }
             val writeableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, edit = true)
-            fields.removeIf { !writeableFieldApiSet.contains(it.api) }
+            fields.removeAll { !writeableFieldApiSet.contains(it.api) }
             val visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
-            typeIdSet.removeIf { !visibleTypeIdSet.contains(it) }
+            typeIdSet.removeAll { !visibleTypeIdSet.contains(it) }
         }
 
 

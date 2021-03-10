@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 /**
  *
- * 对象映射关系 描述以一个对象的数据为基础新建其他对象的数据时字段间的映射关系，比如根据订单创建发货单时将订单中的字段映射到发货单中 ;;uk[[source_biz_object_id source_type_id target_biz_object_id target_type_id]]
+ * 对象映射关系 描述以一个对象的数据为基础新建其他对象的数据时字段间的映射关系，比如根据订单创建发货单时将订单中的字段映射到发货单中
  * @author afezeria
  */
 @ApiModel(

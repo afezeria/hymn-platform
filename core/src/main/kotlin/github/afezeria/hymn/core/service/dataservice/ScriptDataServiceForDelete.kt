@@ -93,7 +93,7 @@ interface ScriptDataServiceForDelete : ScriptDataService {
             }
             val readableFieldApiSet =
                 getFieldApiSetWithPerm(Session.getInstance().roleId, objectApiName, read = true)
-            fieldInfoList.removeIf { !readableFieldApiSet.contains(it.api) }
+            fieldInfoList.removeAll { !readableFieldApiSet.contains(it.api) }
         } else {
             oldDataList = queryByIds(objectApiName, ids)
         }

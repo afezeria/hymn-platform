@@ -41,7 +41,7 @@ class BizObjectTypeController {
     @ApiOperation(value = "根据id查询", notes = "")
     @GetMapping("/{id}")
     fun findById(@PathVariable("id") id: String): BizObjectType {
-        val entity = bizObjectTypeService.findById(id)
+        val entity = bizObjectTypeService.findAvailableById(id)
             ?: throw ResourceNotFoundException("业务对象记录类型".msgById(id))
         return entity
     }

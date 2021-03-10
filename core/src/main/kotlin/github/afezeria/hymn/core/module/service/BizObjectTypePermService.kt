@@ -41,7 +41,7 @@ class BizObjectTypePermService {
             val availableRoleIdSet =
                 roleService.findByIds(inRoleIdSet).mapTo(mutableSetOf()) { it.id }
             val availableTypeIdSet =
-                typeService.findByIds(inTypeIdSet).mapTo(mutableSetOf()) { it.id }
+                typeService.findAvailableByIds(inTypeIdSet).mapTo(mutableSetOf()) { it.id }
             val entityList = dtoList.mapNotNull {
                 if (availableTypeIdSet.contains(it.typeId) &&
                     availableRoleIdSet.contains(it.roleId)

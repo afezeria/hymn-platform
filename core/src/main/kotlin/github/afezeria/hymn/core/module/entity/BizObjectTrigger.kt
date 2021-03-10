@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 /**
  *
- * 触发器 ;;uk:[[biz_object_id api]]
+ * 触发器
  * @author afezeria
  */
 @ApiModel(value = "触发器", description = """触发器 """)

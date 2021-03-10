@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 /**
  *
- * 按钮权限 ;;uk:[[role_id button_id]]
+ * 按钮权限
  * @author afezeria
  */
 @ApiModel(value = "按钮权限", description = """按钮权限 """)

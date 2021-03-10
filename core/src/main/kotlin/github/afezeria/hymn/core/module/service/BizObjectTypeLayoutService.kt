@@ -7,6 +7,7 @@ import github.afezeria.hymn.common.util.msgById
 import github.afezeria.hymn.core.module.dao.BizObjectTypeLayoutDao
 import github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
 import github.afezeria.hymn.core.module.view.BizObjectTypeLayoutListView
+import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -34,6 +35,14 @@ class BizObjectTypeLayoutService {
 
     @Autowired
     private lateinit var dbService: DatabaseService
+
+    fun findLayoutIdByRoleIdAndTypeId(roleId: String, typeId: String): String {
+        roleService.findById(roleId) ?: throw DataNotFoundException("Role".msgById(roleId))
+        val type = typeService.findAvailableById(typeId)
+            ?: throw DataNotFoundException("BizObjectType".msgById(typeId))
+        return bizObjectTypeLayoutDao.singleRowSelect({ (it.roleId eq roleId) and (it.typeId eq typeId) })?.id
+            ?: type.defaultLayoutId
+    }
 
     fun findViewByBizObjectId(bizObjectId: String): MutableList<BizObjectTypeLayoutListView> {
         val allRole = roleService.findAll()

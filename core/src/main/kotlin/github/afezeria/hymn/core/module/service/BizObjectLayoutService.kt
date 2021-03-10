@@ -11,6 +11,7 @@ import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
+
 /**
  * @author afezeria
  */
@@ -22,6 +23,15 @@ class BizObjectLayoutService {
 
     @Autowired
     private lateinit var roleService: RoleService
+
+    @Autowired
+    private lateinit var bizObjectService: BizObjectService
+
+    @Autowired
+    private lateinit var fieldService: BizObjectFieldService
+
+    @Autowired
+    private lateinit var buttonService: CustomButtonService
 
     @Autowired
     private lateinit var typeService: BizObjectTypeService
@@ -46,6 +56,24 @@ class BizObjectLayoutService {
     }
 
     fun create(dto: BizObjectLayoutDto): String {
+        val components = dto.components
+        dto.components.apply {
+            val objectIdSet = bizObjectService.findActiveObjectByIds(objects.map { it.id })
+                .mapTo(mutableSetOf()) { it.id }
+            objects.removeAll { !objectIdSet.contains(it.id) }
+            for (obj in objects) {
+                val fieldIdSet =
+                    fieldService.findByBizObjectId(obj.id).mapTo(mutableSetOf()) { it.id }
+                obj.fields.removeAll { !fieldIdSet.contains(it.id) }
+                val typeIdSet = typeService.findAvailableTypeByBizObjectId(obj.id)
+                    .mapTo(mutableSetOf()) { it.id }
+                obj.types.removeAll { !typeIdSet.contains(it) }
+            }
+            val buttonIdSet =
+                buttonService.findByIds(components.buttons).mapTo(mutableSetOf()) { it.id }
+            components.buttons.removeAll { !buttonIdSet.contains(it) }
+        }
+
         val e = dto.toEntity()
         val id = bizObjectLayoutDao.insert(e)
         return id
@@ -58,18 +86,6 @@ class BizObjectLayoutService {
 
     fun findByBizObjectId(bizObjectId: String): MutableList<BizObjectLayout> {
         return bizObjectLayoutDao.select({ it.bizObjectId eq bizObjectId })
-    }
-
-    /**
-     * 根据当前角色和数据的业务类型返回对应的布局
-     */
-    fun findByRoleIdAndTypeId(roleId: String, typeId: String): BizObjectLayout {
-        roleService.findById(roleId) ?: throw DataNotFoundException("角色".msgById(roleId))
-        val type =
-            typeService.findById(typeId) ?: throw DataNotFoundException("业务类型".msgById(roleId))
-        val layout = bizObjectLayoutDao.selectByRoleIdAndTypeId(roleId, typeId)
-            ?: requireNotNull(bizObjectLayoutDao.selectById(type.defaultLayoutId))
-        return layout
     }
 
     fun findListViewByBizObjectId(bizObjectId: String): MutableList<BizObjectLayoutListView> {

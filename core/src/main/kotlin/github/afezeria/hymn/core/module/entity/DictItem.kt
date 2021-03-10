@@ -8,13 +8,13 @@ import java.time.LocalDateTime
 
 /**
  *
- * 字典项 ;;uk:[[dict_id code]]
+ * 字典项
  * @author afezeria
  */
 @ApiModel(value = "字典项", description = """字典项 """)
 data class DictItem(
 
-    @ApiModelProperty(value = "所属字典id ")
+    @ApiModelProperty(value = "所属字典id")
     var dictId: String,
     @ApiModelProperty(value = "字典项名称")
     var name: String,

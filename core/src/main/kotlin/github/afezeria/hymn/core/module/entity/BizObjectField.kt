@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 /**
  *
  * 业务对象字段
- * ;;uk:[[biz_object_id api]]
+ *
  * @author afezeria
  */
 @ApiModel(
@@ -119,7 +119,7 @@ remark: 格式同picture字段相同
 required: min_length （文件最大数量）, max_length （文件最大大小，单位：kb）
 optional:
 rule: min_length >= 1, max_length > 0
-;;uk:[[biz_object_id api]]
+
 """
 )
 data class BizObjectField(

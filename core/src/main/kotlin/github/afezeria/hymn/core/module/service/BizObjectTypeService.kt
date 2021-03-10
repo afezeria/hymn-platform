@@ -51,11 +51,11 @@ class BizObjectTypeService {
         }
     }
 
-    fun findById(id: String): BizObjectType? {
+    fun findAvailableById(id: String): BizObjectType? {
         return bizObjectTypeDao.selectAvailableType { it.id eq id }.firstOrNull()
     }
 
-    fun findByIds(ids: Collection<String>): MutableList<BizObjectType> {
+    fun findAvailableByIds(ids: Collection<String>): MutableList<BizObjectType> {
         return bizObjectTypeDao.selectAvailableType { it.id inList ids }
     }
 

@@ -107,10 +107,10 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
                     session.accountId,
                     false
                 ).mapTo(mutableSetOf()) { it.dataId }
-                oldDataList.removeIf { !updatableDataIdSet.contains(it["id"]) }
+                oldDataList.removeAll { !updatableDataIdSet.contains(it["id"]) }
             } else {
                 if (!objectPerm.editAll) {
-                    oldDataList.removeIf { it["owner_id"] == session.accountId }
+                    oldDataList.removeAll { it["owner_id"] == session.accountId }
                 }
             }
         } else {

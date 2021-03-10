@@ -108,7 +108,7 @@ class BizObjectTypeFieldOptionService {
             val objectId = field.bizObjectId
 
             val typeId = dtoList.first().typeId
-            typeService.findById(typeId)
+            typeService.findAvailableById(typeId)
                 ?: throw DataNotFoundException("BizObjectType".msgById(typeId))
 
             val dictId = requireNotNull(field.dictId)

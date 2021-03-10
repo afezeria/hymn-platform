@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 /**
  *
- * 对象权限 ;;uk:[[role_id biz_object_id]]
+ * 对象权限
  * @author afezeria
  */
 @ApiModel(value = "对象权限", description = """对象权限 """)

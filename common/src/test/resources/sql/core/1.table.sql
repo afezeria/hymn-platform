@@ -642,7 +642,7 @@ create table hymn.core_biz_object_layout
     biz_object_id           text        not null,
     name                    text        not null,
     remark                  text,
-    rel_field_json_arr      text        not null,
+    component_json          text        not null,
     pc_read_layout_json     text        not null,
     pc_edit_layout_json     text        not null,
     mobile_read_layout_json text        not null,
@@ -658,7 +658,7 @@ create table hymn.core_biz_object_layout
 comment on table hymn.core_biz_object_layout is '业务对象详情页面布局 ;;uk:[[biz_object_id name][biz_object_id id]]';
 comment on column hymn.core_biz_object_layout.name is '布局名称';
 comment on column hymn.core_biz_object_layout.biz_object_id is '引用对象 ;;fk:[core_biz_object cascade]';
-comment on column hymn.core_biz_object_layout.rel_field_json_arr is '引用字段的数据的列表，用于根据权限对字段进行过滤，布局json中不能直接使用字段数据，在需要字段数据的部分通过rel_field_json_arr中的json对象的_id引用，找不到的场合下忽略该字段';
+comment on column hymn.core_biz_object_layout.component_json is '布局中使用的对象/字段/按钮列表，后端用于根据权限对字段进行过滤，布局json中相关位置使用id占位，不保存名称、api、函数等信息，渲染页面时根据id在components中查找,找不到的场合下忽略该字段';
 comment on column hymn.core_biz_object_layout.pc_read_layout_json is 'pc端查看页面页面布局';
 comment on column hymn.core_biz_object_layout.pc_edit_layout_json is 'pc端新建、编辑页面页面布局';
 comment on column hymn.core_biz_object_layout.mobile_read_layout_json is '移动端查看页面页面布局';

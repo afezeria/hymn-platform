@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 /**
  *
- * 业务对象详情页面布局 ;;uk:[[biz_object_id name]]
+ * 业务对象详情页面布局
  * @author afezeria
  */
 @ApiModel(value = "业务对象详情页面布局", description = """业务对象详情页面布局 """)
@@ -20,10 +20,8 @@ data class BizObjectLayout(
     var name: String,
     @ApiModelProperty(value = "")
     var remark: String? = null,
-    @ApiModelProperty(
-        value = "引用字段的数据的列表，用于根据权限对字段进行过滤，布局json中不能直接使用字段数据，在需要字段数据的部分通过rel_field_json_arr中的json对象的_id引用，找不到的场合下忽略该字段"
-    )
-    var relFieldJsonArr: String,
+    @ApiModelProperty(value = "布局中使用的对象/字段/按钮列表，后端用于根据权限对字段进行过滤，布局json中相关位置使用id占位，不保存名称、api、函数等信息，渲染页面时根据id在components中查找,找不到的场合下忽略该字段")
+    var componentJson: String,
     @ApiModelProperty(value = "pc端查看页面页面布局")
     var pcReadLayoutJson: String,
     @ApiModelProperty(value = "pc端新建、编辑页面页面布局")

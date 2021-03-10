@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 /**
  *
- * 模块功能权限表 ;;uk:[[role_id module_api function_api]]
+ * 模块功能权限表
  * @author afezeria
  */
 @ApiModel(value = "模块功能权限表", description = """模块功能权限表 """)

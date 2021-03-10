@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 
 /**
  *
- * 业务对象记录类型、角色和页面布局关联表 ;;uk:[[role_id type_id layout_id]]
+ * 业务对象记录类型、角色和页面布局关联表
  * @author afezeria
  */
 @ApiModel(
