@@ -176,11 +176,11 @@ alter table hymn.core_biz_object_type_perm
 create index core_biz_object_type_perm_type_id_idx
     on hymn.core_biz_object_type_perm (type_id);
 alter table hymn.core_business_code_ref
-    add foreign key (trigger_id) references hymn.core_biz_object_trigger on delete cascade;
+    add foreign key (by_trigger_id) references hymn.core_biz_object_trigger on delete cascade;
 alter table hymn.core_business_code_ref
-    add foreign key (interface_id) references hymn.core_custom_interface on delete cascade;
+    add foreign key (by_interface_id) references hymn.core_custom_interface on delete cascade;
 alter table hymn.core_business_code_ref
-    add foreign key (custom_function_id) references hymn.core_custom_function on delete cascade;
+    add foreign key (by_custom_function_id) references hymn.core_custom_function on delete cascade;
 alter table hymn.core_business_code_ref
     add foreign key (biz_object_id) references hymn.core_biz_object on delete restrict;
 create index core_business_code_ref_biz_object_id_idx
@@ -190,9 +190,9 @@ alter table hymn.core_business_code_ref
 create index core_business_code_ref_field_id_idx
     on hymn.core_business_code_ref (field_id);
 alter table hymn.core_business_code_ref
-    add foreign key (ref_custom_function_id) references hymn.core_custom_function on delete restrict;
-create index core_business_code_ref_ref_custom_function_id_idx
-    on hymn.core_business_code_ref (ref_custom_function_id);
+    add foreign key (custom_function_id) references hymn.core_custom_function on delete restrict;
+create index core_business_code_ref_custom_function_id_idx
+    on hymn.core_business_code_ref (custom_function_id);
 alter table hymn.core_button_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
 create index core_button_perm_role_id_idx

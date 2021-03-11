@@ -419,7 +419,7 @@ internal class AbstractDaoTest {
         shouldThrow<IllegalArgumentException> {
             dao.pageSelect(null, 1, 0, listOf(table.id.asc()))
         }.apply {
-            message shouldBe "pageNumber must be greater than 0, current value 0"
+            message shouldBe "pageNum must be greater than 0, current value 0"
         }
     }
 

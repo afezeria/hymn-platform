@@ -435,7 +435,7 @@ create table hymn.core_biz_object_layout_history
     biz_object_id           text,
     name                    text,
     remark                  text,
-    rel_field_json_arr      text,
+    component_json          text,
     pc_read_layout_json     text,
     pc_edit_layout_json     text,
     mobile_read_layout_json text,
@@ -984,21 +984,21 @@ execute function hymn.core_biz_object_type_perm_history_del();
 drop table if exists hymn.core_business_code_ref_history cascade;
 create table hymn.core_business_code_ref_history
 (
-    operation              text,
-    stamp                  timestamp,
-    id                     text,
-    trigger_id             text,
-    interface_id           text,
-    custom_function_id     text,
-    biz_object_id          text,
-    field_id               text,
-    ref_custom_function_id text,
-    create_by_id           text,
-    create_by              text,
-    modify_by_id           text,
-    modify_by              text,
-    create_date            timestamptz,
-    modify_date            timestamptz
+    operation             text,
+    stamp                 timestamp,
+    id                    text,
+    by_trigger_id         text,
+    by_interface_id       text,
+    by_custom_function_id text,
+    biz_object_id         text,
+    field_id              text,
+    custom_function_id    text,
+    create_by_id          text,
+    create_by             text,
+    modify_by_id          text,
+    modify_by             text,
+    create_date           timestamptz,
+    modify_date           timestamptz
 );
 create or replace function hymn.core_business_code_ref_history_ins() returns trigger
     language plpgsql as

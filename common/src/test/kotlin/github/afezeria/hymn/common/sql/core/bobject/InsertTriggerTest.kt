@@ -89,7 +89,7 @@ class InsertTriggerTest : BaseDbTest() {
     fun `the number of custom objects reaches the upper limit`() {
         adminConn.use {
             val e = shouldThrow<PSQLException> {
-                for (i in (1..10)) {
+                for (i in (1..50)) {
                     it.execute(
                         """
                         insert into hymn.core_biz_object(type,name,api,create_by_id,create_by,modify_by_id,

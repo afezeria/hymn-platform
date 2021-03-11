@@ -40,7 +40,6 @@ fun Connection.execute(
     return execute(sql, *params.toTypedArray())
 }
 
-
 /**
  * 执行sql，支持 ? 占位符
  * @param sql 待执行sql语句
@@ -50,7 +49,20 @@ fun Connection.execute(
     @Language("sql") sql: String,
     vararg params: Any?
 ): MutableList<MutableMap<String, Any?>> {
-    return if (params.isNotEmpty()) {
+    var result: MutableList<MutableMap<String, Any?>>? = null
+    execute(sql, *params) {
+        result = it.toList()
+    }
+    return requireNotNull(result)
+}
+
+
+fun Connection.execute(
+    @Language("sql") sql: String,
+    vararg params: Any?,
+    handler: (ResultSet?) -> Unit
+) {
+    if (params.isNotEmpty()) {
         prepareStatement(sql).use {
             params.forEachIndexed { index, any ->
                 when (any) {
@@ -84,7 +96,7 @@ fun Connection.execute(
                     }
                 }
             }
-            it.resultSet.toList()
+            handler(it.resultSet)
         }
     } else {
         createStatement().use {
@@ -99,10 +111,11 @@ fun Connection.execute(
                     }
                 }
             }
-            it.resultSet.toList()
+            handler(it.resultSet)
         }
     }
 }
+
 
 fun ResultSet?.toList(): MutableList<MutableMap<String, Any?>> {
     if (this == null) return mutableListOf()

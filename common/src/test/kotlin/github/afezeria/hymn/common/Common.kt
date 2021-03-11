@@ -244,9 +244,9 @@ data class CustomBizObject(
 
 }
 
-fun customBizObject(fn: CustomBizObject.(Connection) -> Unit) {
+fun customBizObject(nameFieldName: String? = null, fn: CustomBizObject.(Connection) -> Unit) {
     adminConn.use {
-        val data = createBObject()
+        val data = createBObject(nameFieldName)
         try {
             CustomBizObject(
                 data["id"] as String,
@@ -265,7 +265,8 @@ data class RefBizObject(
     val refApi: String,
     val refSourceTable: String,
     val refTypeId: String,
-    val masterFieldId: String?
+    val masterFieldId: String?,
+    val masterFieldApi: String?,
 ) {
     val standardField =
         arrayOf(DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_ID, refTypeId)
@@ -288,10 +289,15 @@ data class RefBizObject(
 
 }
 
-fun Connection.refBizObject(masterId: String = "", fn: RefBizObject.(Connection) -> Unit) {
-    val data = createBObject()
+fun Connection.refBizObject(
+    masterId: String = "",
+    nameFieldName: String? = null,
+    fn: RefBizObject.(Connection) -> Unit
+) {
+    val data = createBObject(nameFieldName)
     try {
         var masterFieldId: String? = null
+        var masterFieldApi: String? = null
         if (masterId.isNotEmpty()) {
             val field = execute(
                 """
@@ -302,13 +308,15 @@ fun Connection.refBizObject(masterId: String = "", fn: RefBizObject.(Connection)
                 data["id"], masterId, *COMMON_INFO
             )[0]
             masterFieldId = field["id"] as String
+            masterFieldApi = field["api"] as String
         }
         RefBizObject(
             data["id"] as String,
             data["api"] as String,
             data["source_table"] as String,
             data["type_id"] as String,
-            masterFieldId
+            masterFieldId,
+            masterFieldApi,
         ).fn(this)
     } finally {
         deleteBObject(data["id"] as String)
@@ -317,6 +325,7 @@ fun Connection.refBizObject(masterId: String = "", fn: RefBizObject.(Connection)
 
 
 fun createBObject(
+    nameFieldName: String? = null,
     can_insert: Boolean = true,
     can_update: Boolean = true,
     can_delete: Boolean = true
@@ -339,7 +348,7 @@ fun createBObject(
         val objId = obj["id"] as String
         val layout = it.execute(
             """
-                insert into hymn.core_biz_object_layout (biz_object_id, name,rel_field_json_arr, 
+                insert into hymn.core_biz_object_layout (biz_object_id, name,component_json, 
                     pc_read_layout_json, pc_edit_layout_json, mobile_read_layout_json, 
                     mobile_edit_layout_json, preview_layout_json, 
                     create_by_id, create_by, modify_by_id, modify_by) 
@@ -357,16 +366,30 @@ fun createBObject(
             objId, layoutId, *COMMON_INFO
         )[0]
 //        生成默认字段
-        it.execute(
-            """
+        if (nameFieldName == null) {
+            it.execute(
+                """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, gen_rule, 
                 standard_type, predefined, create_by_id, create_by, modify_by_id, modify_by, 
                 create_date, modify_date) 
             values ('name', ?, '编号', 'name', 'auto', '{yyyy}{mm}{000}', 'name', true, ?, ?, ?, ?,
                 now(),now());
             """,
-            objId, *COMMON_INFO
-        )
+                objId, *COMMON_INFO
+            )
+        } else {
+            it.execute(
+                """
+            insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, 
+                max_length,min_length,visible_row,
+                standard_type, predefined, create_by_id, create_by, modify_by_id, modify_by, 
+                create_date, modify_date) 
+            values ('name', ?, ?, 'name', 'text',255,1,1, 'name', true, ?, ?, ?, ?,
+                now(),now());
+            """,
+                objId, nameFieldName, *COMMON_INFO
+            )
+        }
         it.execute(
             """
             insert into hymn.core_biz_object_field  (source_column, biz_object_id, name, api, type, ref_id, 

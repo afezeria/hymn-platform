@@ -2342,3 +2342,37 @@ create trigger c20_summary_field_before
     on hymn.core_biz_object_field
     for each row
 execute function hymn.summary_field_trigger_fun();
+
+
+create or replace function hymn.query_data_name(object_id_2_data_id_arr json)
+    returns setof record
+    language plpgsql
+as
+$$
+declare
+    object_table text;
+    kv           record;
+    row          record;
+    sql_str      text;
+begin
+    for kv in select key as object_id, array(select json_array_elements_text(value)) as data_id_arr
+              from json_each(object_id_2_data_id_arr)
+        loop
+            select api
+            into object_table
+            from hymn.core_biz_object
+            where id = kv.object_id
+              and active = true;
+            if FOUND then
+                sql_str := format('select %L,id,name from hymn_view.%I where id = any ($1)',
+                                  kv.object_id, object_table);
+                for row in execute sql_str using kv.data_id_arr
+                    loop
+                        return next row;
+                    end loop;
+            end if;
+        end loop;
+    return;
+end;
+$$;
+comment on function hymn.query_data_name(json) is '根据对象id和数据id查询数据name字段的值，参数为json，key为自定义对象id，value为数据id数组，参数有效性由调用者保证';
