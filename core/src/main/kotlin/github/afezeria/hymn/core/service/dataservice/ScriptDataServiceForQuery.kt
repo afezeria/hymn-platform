@@ -1,5 +1,6 @@
 package github.afezeria.hymn.core.service.dataservice
 
+import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.common.exception.PermissionDeniedException
@@ -18,6 +19,7 @@ import net.sf.jsqlparser.statement.select.SubSelect
  * @author afezeria
  */
 interface ScriptDataServiceForQuery : ScriptDataService {
+
     companion object : KLogging() {
         val qualifyTableForColumns = object : ExpressionVisitorAdapter() {
             override fun visit(subSelect: SubSelect?) {
@@ -32,6 +34,7 @@ interface ScriptDataServiceForQuery : ScriptDataService {
             }
         }
     }
+
 
     override fun query(
         objectApiName: String,
@@ -73,7 +76,8 @@ interface ScriptDataServiceForQuery : ScriptDataService {
         getObjectByApi(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
 
         val summaryFields = mutableListOf<FieldInfo>()
-        val columns = getFieldApiMap(objectApiName).mapNotNullTo(ArrayList()) { (k, v) ->
+        val fieldApiMap = getFieldApiMap(objectApiName)
+        val columns = fieldApiMap.mapNotNullTo(ArrayList()) { (k, v) ->
             var key: String? = when {
                 fieldSet.isEmpty() -> k
                 fieldSet.contains(k) -> k
@@ -107,18 +111,13 @@ interface ScriptDataServiceForQuery : ScriptDataService {
             }
         }
 //        查询汇总数据
-        if (resultIdMap.isNotEmpty()) {
-            for (field in summaryFields) {
-                val summaryResult = getSummaryValue(field, resultIdMap.keys)
-                for (map in summaryResult) {
-                    val id = requireNotNull(map["_master_id"])
-                    val value = map["_summary"]
-                    resultIdMap[id]!![field.api] = value
-                }
-            }
-        }
+        processSummaryField(resultIdMap, summaryFields)
+//        查询关联数据
+        processRefField(resultIdMap, fieldApiMap.values)
+
         return resultIdMap.mapTo(ArrayList()) { it.value }
     }
+
 
     override fun queryWithPerm(
         objectApiName: String,
@@ -160,6 +159,9 @@ interface ScriptDataServiceForQuery : ScriptDataService {
         limit: Long,
         fieldSet: Set<String>,
     ): MutableList<MutableMap<String, Any?>> {
+        if (offset < 0) throw BusinessException("offset must be greater than or equal to 0")
+        if (limit in 1..500) throw BusinessException("limit must be between 1 and 500")
+
 //        查询对象及权限
         val bizObject = getObjectByApi(objectApiName)
             ?: throw DataNotFoundException("对象 [api:$objectApiName]")
@@ -186,24 +188,21 @@ interface ScriptDataServiceForQuery : ScriptDataService {
 
 
 //        获取有读权限的字段集合
-        val summaryFields =
-            getFieldApiMap(objectApiName).mapNotNullTo(ArrayList()) { if (it.value.type == "summary") it.value else null }
+        var fieldApiMap = getFieldApiMap(objectApiName)
         val readAbleFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, read = true)
-        val columnFields =
-            if (fieldSet.isEmpty()) {
-                readAbleFieldApiSet
-            } else {
-                readAbleFieldApiSet.filter { fieldSet.contains(it) }
-            }.toMutableSet()
-        for (summaryField in summaryFields) {
-            columnFields.remove(summaryField.api)
+        fieldApiMap = if (fieldSet.isNotEmpty()) {
+            fieldApiMap.filterKeys { fieldSet.contains(it) && readAbleFieldApiSet.contains(it) }
+        } else {
+            fieldApiMap.filterKeys { readAbleFieldApiSet.contains(it) }
         }
+        val summaryFields =
+            fieldApiMap.values.filter { it.type == "summary" }
 
         val columns =
-            "id, " + columnFields.joinToString(", ") { "main.\"$it\"" }
+            "id, " + fieldApiMap.values.filter { it.type == "summary" }
+                .joinToString { "main.\"${it.api}\"" }
 
-        val limitAndOffset =
-            "${if (limit != null) "limit $limit" else ""} ${if (offset != null) "offset $offset" else ""}"
+        val limitAndOffset = "limit $limit offset $offset"
 
         val whereExpression = if (expr.isNotBlank()) {
             " and (" + CCJSqlParserUtil.parseCondExpression(expr).apply {
@@ -369,17 +368,30 @@ interface ScriptDataServiceForQuery : ScriptDataService {
             }
         }
 //        查询汇总数据
-        if (resultIdMap.isNotEmpty()) {
+        processSummaryField(resultIdMap, summaryFields)
+//        查询关联数据
+        processRefField(resultIdMap, fieldApiMap.values)
+
+        return resultIdMap.mapTo(ArrayList()) { it.value }
+    }
+
+    /**
+     * 将汇总字段的值插入查询结果中
+     */
+    private fun processSummaryField(
+        result: MutableMap<String, MutableMap<String, Any?>>,
+        summaryFields: Collection<FieldInfo>
+    ) {
+        if (result.isNotEmpty()) {
             for (field in summaryFields) {
-                val summaryResult = getSummaryValue(field, resultIdMap.keys)
+                val summaryResult = getSummaryValue(field, result.keys)
                 for (map in summaryResult) {
                     val id = requireNotNull(map["_master_id"])
                     val value = map["_summary"]
-                    resultIdMap[id]!![field.api] = value
+                    result[id]!![field.api] = value
                 }
             }
         }
-        return resultIdMap.mapTo(ArrayList()) { it.value }
     }
 
     private fun getSummaryValue(
@@ -414,4 +426,97 @@ interface ScriptDataServiceForQuery : ScriptDataService {
             return it.execute(sql, ids) as List<Map<String, String?>>
         }
     }
+
+    private fun processRefField(
+        result: MutableMap<String, MutableMap<String, Any?>>,
+        fields: Collection<FieldInfo>
+    ) {
+        val objectId2DataIdSet = mutableMapOf<String, MutableSet<String>>()
+        val refFields = fields.filter { it.refId != null }
+        for (field in refFields) {
+            val dataIdSet =
+                objectId2DataIdSet.getOrPut(requireNotNull(field.refId)) { mutableSetOf() }
+            if (field.type == "mreference") {
+                for (data in result.values) {
+                    val value = data[field.api] as String?
+                    if (value != null) {
+                        dataIdSet.addAll(value.split(","))
+                    }
+                }
+            } else {
+                for (data in result.values) {
+                    val value = data[field.api] as String?
+                    if (value != null) {
+                        dataIdSet.add(value)
+                    }
+                }
+            }
+        }
+        if (objectId2DataIdSet.isEmpty()) {
+            return
+        }
+        val objectId2Id2Name = queryName(objectId2DataIdSet)
+        for (field in refFields) {
+            val id2Name = objectId2Id2Name[field.refId] ?: continue
+            if (field.type == "mreference") {
+                for (data in result.values) {
+                    val value = data[field.api]?.run {
+                        this as String
+                        val builder = StringBuilder()
+                        for (s in split(",")) {
+                            val name = id2Name[s]
+                            if (name != null) {
+                                builder.append("${id2Name[s]}($this),")
+                            }
+                        }
+                        if (builder.isEmpty()) {
+                            null
+                        } else {
+                            builder.toString()
+                        }
+                    }
+                    data[field.api + "_name"] = value
+                }
+            } else {
+                for (data in result.values) {
+                    val id = data[field.api] as String?
+                    if (id != null) {
+                        val name = id2Name[id]
+                        if (name != null) {
+                            data[field.api + "_name"] = name
+                            continue
+                        }
+                    }
+                    data[field.api + "_name"] = null
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 用于 query 系列方法根据字段关联的对象id和数据id查询的对应的数据的name字段值
+     * 不限制权限
+     */
+    private fun queryName(objectId2DataIdSet: Map<String, Set<String>>): Map<String, Map<String, String>> {
+        database.useConnection {
+            val result = mutableMapOf<String, MutableMap<String, String>>()
+            it.execute(
+                "select * from hymn.query_data_name(cast(? as json)) t(object_id text,data_id text,data_name text)",
+                objectId2DataIdSet.toJson()
+            ) {
+                requireNotNull(it)
+                it.apply {
+                    while (next()) {
+                        result.getOrPut(getString(1)) { mutableMapOf() }
+                            .also {
+                                it[getString(2)] = getString(3)
+                            }
+                    }
+                }
+            }
+            return result
+        }
+    }
+
 }

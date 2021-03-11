@@ -105,6 +105,11 @@ class ScriptDataServiceImpl(
             database.useConnection {
                 result = it.execute(sql, params).firstOrNull()
             }
+            if (type == WriteType.DELETE) {
+                //删除对象数据时执行删除策略
+                //被删除的子对象的数据会触发触发器，不论删除主数据时是否触发了触发器
+                processingDeletePolicy(objectApiName, requireNotNull(old))
+            }
             event = when (type) {
                 WriteType.INSERT -> AFTER_INSERT
                 WriteType.UPDATE -> AFTER_UPDATE
@@ -124,11 +129,11 @@ class ScriptDataServiceImpl(
             database.useConnection {
                 result = it.execute(sql, params).firstOrNull()
             }
-        }
-        if (type == WriteType.DELETE) {
-            //删除对象数据时执行删除策略
-            //被删除的子对象的数据会触发触发器，不论删除主数据时是否触发了触发器
-            processingDeletePolicy(objectApiName, requireNotNull(old))
+            if (type == WriteType.DELETE) {
+                //删除对象数据时执行删除策略
+                //被删除的子对象的数据会触发触发器，不论删除主数据时是否触发了触发器
+                processingDeletePolicy(objectApiName, requireNotNull(old))
+            }
         }
         if (result == null) {
             val str = when (type) {
