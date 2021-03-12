@@ -48,17 +48,24 @@ interface ScriptDataServiceForInsert : ScriptDataService {
         dataList: List<Map<String, Any?>>,
         withPerm: Boolean = true,
     ): MutableList<MutableMap<String, Any?>> {
-        if (dataList.isEmpty()) throw BusinessException("插入数据不能为空")
+        if (dataList.isEmpty()) return mutableListOf()
         if (dataList.size > 100) throw BusinessException("批量插入数据一次不能大于100条")
 
-        getObjectByApi(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        val objectInfo =
+            getObjectByApi(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (objectInfo.type != "custom" && objectInfo.canInsert != true) {
+            throw BusinessException("对象 [objectApiName:$objectApiName] 不支持新增操作")
+        }
+
         val session = Session.getInstance()
         val roleId = session.roleId
 
         val fieldApiMap = getFieldApiMap(objectApiName)
         val fields: MutableList<FieldInfo> = fieldApiMap
-            .mapNotNullTo(mutableListOf()) { if (it.value.type != "auto" && it.value.type != "summary") it.value else null }
+            .values.filterTo(ArrayList()) { it.type != "auto" && it.type != "summary" }
+
         val typeIdSet = getTypeList(objectApiName).mapTo(mutableListOf()) { it.id }
+        var readableFieldApiSet: Set<String>? = null
         if (withPerm) {
             val objectPerm = getObjectPerm(roleId, objectApiName)
                 ?: throw PermissionDeniedException("缺少对象 [api:$objectApiName] 新建权限")
@@ -69,11 +76,17 @@ interface ScriptDataServiceForInsert : ScriptDataService {
             fields.removeAll { !writeableFieldApiSet.contains(it.api) }
             val visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
             typeIdSet.removeAll { !visibleTypeIdSet.contains(it) }
+
+            readableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, read = true)
         }
 
 
         val insertDataList = mutableListOf<NewRecordMap>()
+        val now = LocalDateTime.now()
         for (data in dataList) {
+            if (data.isEmpty()) {
+                continue
+            }
             val typeId = data["type_id"] as String?
             if (typeId == null) {
                 logger.info("$objectApiName data:${data.toJson()}")
@@ -90,10 +103,9 @@ interface ScriptDataServiceForInsert : ScriptDataService {
             }
 
             val insertData = NewRecordMap(fieldApiMap)
-            val now = LocalDateTime.now()
             for (field in fields) {
                 var any = data[field.api]
-                if (field.predefined) {
+                if (field.predefined && field.standardType != null) {
                     any = when (field.standardType) {
                         "create_by_id" -> session.accountId
                         "modify_by_id" -> session.accountId
@@ -112,27 +124,59 @@ interface ScriptDataServiceForInsert : ScriptDataService {
             insertDataList.add(insertData)
         }
 
-        return insertDataList.mapTo(ArrayList()) { insertHelper(objectApiName, it) }
+        return insertDataList.mapTo(ArrayList()) {
+            insertHelper(
+                objectApiName,
+                it,
+                readableFieldApiSet
+            )
+        }
     }
 
     private fun insertHelper(
         objectApiName: String,
         new: NewRecordMap,
+        readableFieldApiSet: Set<String>?,
     ): MutableMap<String, Any?> {
-
-        return execute({ _, newData ->
+        val before = { _: Map<String, Any?>?,
+                       newData: MutableMap<String, Any?>? ->
             requireNotNull(newData)
             val columns = newData.keys.joinToString("\",\"", "\"", "\"")
             val placeholder = "?" + ",?".repeat(newData.keys.size - 1)
-            val returnColumns = "\"id\"" + newData.keys.joinToString("\",\"", ",\"", "\"")
 
             //language=PostgreSQL
             val sql = """
-            insert into hymn_view.$objectApiName ($columns) values ($placeholder) 
-            returning $returnColumns
-        """
+                insert into hymn_view."$objectApiName" ($columns) values ($placeholder) 
+                returning id
+            """
             sql to newData.values
-        }, WriteType.INSERT, objectApiName, null, new, true)
+        }
+        val after: (MutableMap<String, Any?>?) -> Pair<MutableMap<String, Any?>, MutableMap<String, Any?>?> =
+            {
+                val newDataId = requireNotNull(it?.get("id")) as String
+                val newData = database.useConnection {
+                    it.execute(
+                        """
+                        select * from hymn_view."$objectApiName" where id = ?
+                    """, newDataId
+                    ).firstOrNull()
+                }
+                requireNotNull(newData)
+                if (readableFieldApiSet == null) {
+                    newData
+                } else {
+                    newData.filterTo(mutableMapOf()) { readableFieldApiSet.contains(it.key) }
+                } to newData
+            }
+        return execute(
+            beforeExecutingSql = before,
+            afterExecutingSql = after,
+            type = WriteType.INSERT,
+            objectApiName = objectApiName,
+            oldData = null,
+            newData = new,
+            withTrigger = true
+        )
     }
 
     override fun insertWithoutTrigger(
@@ -146,37 +190,58 @@ interface ScriptDataServiceForInsert : ScriptDataService {
         objectApiName: String,
         dataList: List<Map<String, Any?>>,
     ): MutableList<MutableMap<String, Any?>> {
-        if (dataList.isEmpty()) throw BusinessException("插入数据不能为空")
-        if (dataList.size > 100) throw BusinessException("批量插入数据一次不能大于100条")
+        if (dataList.isEmpty()) return mutableListOf()
+        if (dataList.size > 500) throw BusinessException("批量插入数据一次不能大于500条")
 
-        getObjectByApi(objectApiName)
-            ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        val objectInfo = (getObjectByApi(objectApiName)
+            ?: throw DataNotFoundException("对象 [api:$objectApiName]"))
+        if (objectInfo.type != "custom" && objectInfo.canInsert != true) {
+            throw BusinessException("对象 [objectApiName:$objectApiName] 不支持新增操作")
+        }
 
         val session = Session.getInstance()
-        val now = LocalDateTime.now()
 
         val fieldMap = getFieldApiMap(objectApiName)
-            .filter { it.value.type != "auto" && it.value.type != "summary" }
-
 
         val insertDataList = mutableListOf<LinkedHashMap<String, Any?>>()
+        val now = LocalDateTime.now()
         for (data in dataList) {
+            if (data.isEmpty()) continue
             val typeId = data["type_id"] as String?
             if (typeId == null) {
                 logger.info("$objectApiName data:${data.toJson()}")
                 throw BusinessException("新增数据未指定业务类型")
             }
 
-            val insertData = LinkedHashMap<String, Any?>()
+            val insertData = NewRecordMap(fieldMap)
             for (field in fieldMap.values) {
-                insertData[field.api] = checkNewDataValue(field, data[field.api], session, now)
+                var any = data[field.api]
+                if (field.predefined && field.standardType != null) {
+                    any = when (field.standardType) {
+                        "create_by_id" -> session.accountId
+                        "modify_by_id" -> session.accountId
+                        "create_date" -> now
+                        "modify_date" -> now
+                        "org_id" -> session.orgId
+                        "lock_state" -> false
+                        "name" -> any
+                        "type_id" -> any
+                        "owner_id" -> session.accountId
+                        else -> throw InnerException("错误的标准字段类型")
+                    }
+                }
+                insertData[field.api] = any
             }
+
             insertDataList.add(insertData)
         }
 
 
-        val columns = fieldMap.keys.joinToString(", ")
-        val rowPlaceholder = "(?${",?".repeat(fieldMap.size - 1)}),"
+        val insertFields = fieldMap.values.filter { it.type != "summary" && it.type != "auto" }
+        val insertColumns = insertFields.joinToString("\",\"", "\"", "\"")
+        val returnColumns = fieldMap.values.filter { it.type != "summary" }
+
+        val rowPlaceholder = "(?${",?".repeat(insertFields.size - 1)}),"
         var idx = 0
         var batchSize = 50
         val size = insertDataList.size
@@ -192,9 +257,9 @@ interface ScriptDataServiceForInsert : ScriptDataService {
                     val ph = rowPlaceholder.repeat(batchSize).substringBeforeLast(",")
                     //language=PostgreSQL
                     sql = """
-                        insert into hymn_view.$objectApiName ($columns)
+                        insert into hymn_view.$objectApiName ($insertColumns)
                         values $ph
-                        returning id,$columns
+                        returning id,$returnColumns
                     """.trimIndent()
                 }
                 val list = mutableListOf<Any?>()

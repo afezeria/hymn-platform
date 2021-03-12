@@ -1537,8 +1537,8 @@ begin
                 end if;
                 --                 关联字段及引用的对象的数据被删除时，执行删除操作的用户可能没有删除当前数据的权限
 --                 所以关联字段和多选关联字段的删除策略只能是 restrict 或 null
-                if record_new.ref_delete_policy not in ('restrict', 'set_null') then
-                    raise exception '[f:inner:04700] 删除策略必须为 restrict/set_null';
+                if record_new.ref_delete_policy not in ('restrict', 'no_action') then
+                    raise exception '[f:inner:04700] 删除策略必须为 restrict/no_action';
                 end if;
                 select * into ref_obj from hymn.core_biz_object where id = record_new.ref_id;
                 if not FOUND then

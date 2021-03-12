@@ -45,6 +45,10 @@ class FieldInfo(
      */
     val refId: String? = null,
     /**
+     * 当字段为关联字段时，引用数据被删除时的动作 ;;optional_value:[cascade(级联删除引用当前数据的数据),restrict(阻止删除被引用数据),set_null(删除引用字段的值),no_action(无动作)]
+     */
+    var refDeletePolicy: String? = null,
+    /**
      * 汇总对象id
      */
     val sId: String? = null,

@@ -43,7 +43,7 @@ class BizObjectFieldDto(
     @ApiModelProperty(value = "相关列表标签，当前对象在被关联对象的相关列表中显示的标签，为空时表示不能显示在被关联对象的相关列表中")
     var refListLabel: String? = null,
     @ApiModelProperty(
-        value = "当字段为关联字段时，引用数据被删除时的动作。 cascade 级联删除当前对象数据, restrict 阻止删除被引用对象, null 无动作"
+        value = "当字段为关联字段时，引用数据被删除时的动作 ;;optional_value:[cascade(级联删除引用当前数据的数据),restrict(阻止删除被引用数据),set_null(删除引用字段的值),no_action(无动作)]"
     )
     var refDeletePolicy: String? = null,
     @ApiModelProperty(

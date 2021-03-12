@@ -59,18 +59,20 @@ class DataServiceConfiguration {
             )
         }
         val impl = createImpl(false)
-        val regex = Regex("^(query|get|has)")
+        val regex = Regex("^(insert|batchInsert|bulkInsert|update|batchUpdate|delete|batchDelete)")
         val proxy = Proxy.newProxyInstance(
             DataService::class.java.classLoader,
             arrayOf(DataService::class.java),
         ) { proxy, method, args ->
             if (regex.containsMatchIn(method.name)) {
+                databaseService.useTransaction {
+                    method?.invoke(createImpl(true), *(args ?: arrayOfNulls<Any>(0)))
+                }
+            } else {
                 method?.invoke(
                     impl,
                     *(args ?: arrayOfNulls<Any>(0))
                 )
-            } else {
-                method?.invoke(createImpl(true), *(args ?: arrayOfNulls<Any>(0)))
             }
         } as DataService
         return proxy

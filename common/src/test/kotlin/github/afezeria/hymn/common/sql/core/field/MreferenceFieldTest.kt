@@ -84,7 +84,7 @@ class MreferenceFieldTest : BaseDbTest() {
                     """,
                     objId, randomUUIDStr(), *COMMON_INFO
                 )
-            }.message shouldContain "[f:inner:04700] 删除策略必须为 restrict/set_null"
+            }.message shouldContain "[f:inner:04700] 删除策略必须为 restrict/no_action"
         }
 
     }

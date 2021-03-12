@@ -24,7 +24,7 @@ interface ScriptService {
         event: TriggerEvent,
         objectApiName: String,
         old: Map<String, Any?>?,
-        new: MutableMap<String, Any?>?,
+        new: Map<String, Any?>?,
         tmpMap: MutableMap<String, Any?>,
         around: (TriggerInfo, () -> Unit) -> Unit = { _, trigger -> trigger.invoke() },
     )

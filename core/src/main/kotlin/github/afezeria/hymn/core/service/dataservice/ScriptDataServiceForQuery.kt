@@ -35,6 +35,29 @@ interface ScriptDataServiceForQuery : ScriptDataService {
         }
     }
 
+    override fun count(
+        objectApiName: String,
+        expr: String,
+        params: Collection<Any>
+    ): Long {
+        getObjectByApi(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+
+        val whereExpression = if (expr.isNotBlank()) {
+            " where " + CCJSqlParserUtil.parseCondExpression(expr).apply {
+                accept(qualifyTableForColumns)
+            }.toString()
+        } else {
+            ""
+        }
+        val sql = """
+            select count(*) count from hymn_view."$objectApiName" main $whereExpression
+        """
+        val resultMap = database.useConnection {
+            it.execute(sql, params).firstOrNull()
+        }
+        return requireNotNull(resultMap?.get("count")) as Long
+    }
+
 
     override fun query(
         objectApiName: String,
@@ -75,20 +98,23 @@ interface ScriptDataServiceForQuery : ScriptDataService {
     ): MutableList<MutableMap<String, Any?>> {
         getObjectByApi(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
 
-        val summaryFields = mutableListOf<FieldInfo>()
         val fieldApiMap = getFieldApiMap(objectApiName)
-        val columns = fieldApiMap.mapNotNullTo(ArrayList()) { (k, v) ->
-            var key: String? = when {
-                fieldSet.isEmpty() -> k
-                fieldSet.contains(k) -> k
-                else -> null
+        val summaryFields = mutableListOf<FieldInfo>()
+
+        val columns = StringBuilder("id").apply {
+            fieldApiMap.asIterable().run {
+                if (fieldSet.isEmpty()) this
+                else filter { fieldSet.contains(it.key) }
+            }.forEach {
+                if (it.value.type == "summary") {
+                    summaryFields.add(it.value)
+                } else {
+                    append(",main.\"")
+                    append(it.value.api)
+                    append("\"")
+                }
             }
-            if (v.type == "summary") {
-                key = null
-                summaryFields.add(v)
-            }
-            key
-        }.joinToString("\", \"", prefix = "\"", postfix = "\"")
+        }.toString()
 
         val whereExpression = if (expr.isNotBlank()) {
             " where " + CCJSqlParserUtil.parseCondExpression(expr).apply {
@@ -101,7 +127,7 @@ interface ScriptDataServiceForQuery : ScriptDataService {
         val limitAndOffset = "limit $limit offset $offset"
 
         val sql = """
-            select "id", $columns from hymn_view."$objectApiName" $whereExpression
+            select $columns from hymn_view."$objectApiName" main $whereExpression
             $limitAndOffset
         """
         val resultIdMap = mutableMapOf<String, MutableMap<String, Any?>>()
@@ -188,19 +214,42 @@ interface ScriptDataServiceForQuery : ScriptDataService {
 
 
 //        获取有读权限的字段集合
-        var fieldApiMap = getFieldApiMap(objectApiName)
+        val fieldApiMap = getFieldApiMap(objectApiName)
+        val fieldList = mutableListOf<FieldInfo>()
         val readAbleFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, read = true)
-        fieldApiMap = if (fieldSet.isNotEmpty()) {
-            fieldApiMap.filterKeys { fieldSet.contains(it) && readAbleFieldApiSet.contains(it) }
-        } else {
-            fieldApiMap.filterKeys { readAbleFieldApiSet.contains(it) }
-        }
-        val summaryFields =
-            fieldApiMap.values.filter { it.type == "summary" }
+        val summaryFields = mutableListOf<FieldInfo>()
 
-        val columns =
-            "id, " + fieldApiMap.values.filter { it.type == "summary" }
-                .joinToString { "main.\"${it.api}\"" }
+//        过滤并分离普通字段和汇总字段
+        if (fieldSet.isNotEmpty()) {
+            for (value in fieldApiMap.values) {
+                if (fieldSet.contains(value.api) && readAbleFieldApiSet.contains(value.api)) {
+                    if (value.type == "summary") {
+                        summaryFields.add(value)
+                    } else {
+                        fieldList.add(value)
+                    }
+                }
+            }
+        } else {
+            for (value in fieldApiMap.values) {
+                if (readAbleFieldApiSet.contains(value.api)) {
+                    if (value.type == "summary") {
+                        summaryFields.add(value)
+                    } else {
+                        fieldList.add(value)
+                    }
+                }
+            }
+        }
+
+        val columns = StringBuilder("id").apply {
+            for (field in fieldList) {
+                append(",main.\"")
+                append(field.api)
+                append("\"")
+            }
+        }.toString()
+
 
         val limitAndOffset = "limit $limit offset $offset"
 
@@ -370,7 +419,7 @@ interface ScriptDataServiceForQuery : ScriptDataService {
 //        查询汇总数据
         processSummaryField(resultIdMap, summaryFields)
 //        查询关联数据
-        processRefField(resultIdMap, fieldApiMap.values)
+        processRefField(resultIdMap, fieldList)
 
         return resultIdMap.mapTo(ArrayList()) { it.value }
     }

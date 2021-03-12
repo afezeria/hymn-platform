@@ -29,6 +29,11 @@ interface DataService {
     fun getFieldApiMap(objectApiName: String): Map<String, FieldInfo>
 
     /**
+     * 根据被关联对象id获取关联该对象的所有字段
+     */
+    fun getFieldByRefObjectId(objectId: String): List<FieldInfo>
+
+    /**
      * 返回指定角色拥有指定权限的对象的字段
      * edit为true时返回有编辑权限的字段，read为true时返回有读权限的字段
      * 同时为false时返回没有权限的字段
@@ -98,6 +103,15 @@ interface DataService {
         orgId: String?,
         readOnly: Boolean,
     ): Boolean
+
+    /**
+     * 获取符合条件的数据的数量
+     */
+    fun count(
+        objectApiName: String,
+        expr: String,
+        params: Collection<Any>
+    ): Long
 
     fun query(
         objectApiName: String, expr: String, params: Collection<Any>,
@@ -219,6 +233,7 @@ interface DataService {
 
     /**
      * 批量插入
+     * 一次最多插入500条
      * 不触发触发器
      * @param objectApiName 对象api名称
      * @param dataList 待插入的数据列表，插入成功后列表的每一项中将新增key为id的键值对

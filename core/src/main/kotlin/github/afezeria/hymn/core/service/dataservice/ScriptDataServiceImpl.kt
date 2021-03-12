@@ -1,7 +1,6 @@
 package github.afezeria.hymn.core.service.dataservice
 
 import github.afezeria.hymn.common.constant.TriggerEvent.*
-import github.afezeria.hymn.common.exception.BusinessException
 import github.afezeria.hymn.common.exception.DataNotFoundException
 import github.afezeria.hymn.common.exception.InnerException
 import github.afezeria.hymn.common.platform.DatabaseService
@@ -57,29 +56,28 @@ class ScriptDataServiceImpl(
         get() = databaseService.user()
 
     override fun execute(
-        sqlBuilder: (
+        beforeExecutingSql: (
             oldData: Map<String, Any?>?,
-            newData: NewRecordMap?,
+            newData: MutableMap<String, Any?>?,
         ) -> Pair<String, Collection<Any?>>,
+        afterExecutingSql: (MutableMap<String, Any?>?) -> Pair<MutableMap<String, Any?>, MutableMap<String, Any?>?>,
         type: WriteType,
         objectApiName: String,
         oldData: Map<String, Any?>?,
         newData: NewRecordMap?,
         withTrigger: Boolean,
     ): MutableMap<String, Any?> {
-        var old: Map<String, Any?>? = oldData
-        val new: NewRecordMap? = newData
-        if (type == WriteType.DELETE || type == WriteType.UPDATE) {
-            old = Collections.unmodifiableMap(old)
-        }
-        val result: MutableMap<String, Any?>?
+        val old: Map<String, Any?>? = oldData?.let { Collections.unmodifiableMap(it) }
+        var new: MutableMap<String, Any?>? = newData
+
+        var callback: ((TriggerInfo, () -> Unit) -> Unit)? = null
         if (withTrigger) {
-            var event = when (type) {
+            val event = when (type) {
                 WriteType.INSERT -> BEFORE_INSERT
                 WriteType.UPDATE -> BEFORE_UPDATE
                 WriteType.DELETE -> BEFORE_DELETE
             }
-            val callback = { info: TriggerInfo, trigger: () -> Unit ->
+            callback = { info: TriggerInfo, trigger: () -> Unit ->
                 val flag = "$objectApiName:${info.api}"
                 if (stack.count { it == flag } == 6) {
                     logger.info("当前触发器调用栈:{}", stack)
@@ -101,16 +99,17 @@ class ScriptDataServiceImpl(
                 tmpMap = tmpMap,
                 around = callback,
             )
-            val (sql, params) = sqlBuilder(old, new)
-            database.useConnection {
-                result = it.execute(sql, params).firstOrNull()
-            }
-            if (type == WriteType.DELETE) {
-                //删除对象数据时执行删除策略
-                //被删除的子对象的数据会触发触发器，不论删除主数据时是否触发了触发器
-                processingDeletePolicy(objectApiName, requireNotNull(old))
-            }
-            event = when (type) {
+        }
+        val (sql, params) = beforeExecutingSql(old, new)
+        var result: MutableMap<String, Any?>? = database.useConnection {
+            it.execute(sql, params).firstOrNull()
+        }
+        val pair = afterExecutingSql(result)
+        result = pair.first
+        new = pair.second?.let { Collections.unmodifiableMap(it) }
+
+        if (withTrigger) {
+            val event = when (type) {
                 WriteType.INSERT -> AFTER_INSERT
                 WriteType.UPDATE -> AFTER_UPDATE
                 WriteType.DELETE -> AFTER_DELETE
@@ -122,26 +121,8 @@ class ScriptDataServiceImpl(
                 old = old,
                 new = new,
                 tmpMap = tmpMap,
-                around = callback,
+                around = requireNotNull(callback),
             )
-        } else {
-            val (sql, params) = sqlBuilder(old, new)
-            database.useConnection {
-                result = it.execute(sql, params).firstOrNull()
-            }
-            if (type == WriteType.DELETE) {
-                //删除对象数据时执行删除策略
-                //被删除的子对象的数据会触发触发器，不论删除主数据时是否触发了触发器
-                processingDeletePolicy(objectApiName, requireNotNull(old))
-            }
-        }
-        if (result == null) {
-            val str = when (type) {
-                WriteType.INSERT -> "插入失败" //正常情况不会出现这个
-                WriteType.UPDATE -> "更新失败，数据不存在"
-                WriteType.DELETE -> "删除失败，数据不存在"
-            }
-            throw BusinessException(str)
         }
         return result
     }
@@ -248,6 +229,7 @@ class ScriptDataServiceImpl(
                     dictId = dictId,
                     optionalNumber = optionalNumber,
                     refId = refId,
+                    refDeletePolicy = refDeletePolicy,
                     sId = sId,
                     sFieldId = sFieldId,
                     sType = sType,
@@ -259,6 +241,36 @@ class ScriptDataServiceImpl(
         result = Collections.unmodifiableMap(result)
         cache[key] = result
         return result
+    }
+
+    override fun getFieldByRefObjectId(objectId: String): List<FieldInfo> {
+        val key = "getFieldByRefObjectId:$objectId"
+        cache[key]?.apply {
+            @Suppress("UNCHECKED_CAST")
+            return this as List<FieldInfo>
+        }
+        val list = fieldService.findReferenceFieldByRefId(objectId).map {
+            FieldInfo(
+                id = it.id,
+                objectId = it.bizObjectId,
+                name = it.name,
+                api = it.api,
+                type = it.type,
+                maxLength = it.maxLength,
+                minLength = it.minLength,
+                dictId = it.dictId,
+                optionalNumber = it.optionalNumber,
+                refId = it.refId,
+                refDeletePolicy = it.refDeletePolicy,
+                sId = it.sId,
+                sFieldId = it.sFieldId,
+                sType = it.sType,
+                standardType = it.standardType,
+                predefined = it.predefined
+            )
+        }
+        cache[key] = list
+        return list
     }
 
     override fun getFieldApiSetWithPerm(
@@ -381,49 +393,6 @@ class ScriptDataServiceImpl(
         return true
     }
 
-    /**
-     * 处理删除时的级联和阻止动作
-     */
-    private fun processingDeletePolicy(objectApiName: String, oldData: Map<String, Any?>) {
-        val objectInfo = requireNotNull(getObjectByApi(objectApiName))
-        val masterDataId = requireNotNull(oldData["id"]) as String
-        val refFieldList = fieldService.findReferenceFieldByRefId(objectInfo.id)
-        if (refFieldList.isEmpty()) return
-        val refFieldMap = refFieldList.groupBy { it.refDeletePolicy }
-        refFieldMap["restrict"]?.let {
-            for (bizObjectField in it) {
-                val refObjectInfo = requireNotNull(getObjectById(bizObjectField.bizObjectId))
-                val subDataList =
-                    query(refObjectInfo.api, "\"${bizObjectField.api}\" = ?", listOf(masterDataId))
-                if (subDataList.isNotEmpty()) {
-                    throw BusinessException("删除失败，当前数据被${refObjectInfo.name}对象的数据引用，请删除所有引用数据后再执行删除操作")
-                }
-            }
-        }
-        refFieldMap["cascade"]?.let {
-            for (bizObjectField in it) {
-                val refObjectInfo = requireNotNull(getObjectById(bizObjectField.bizObjectId))
-                val subDataList =
-                    query(refObjectInfo.api, "\"${bizObjectField.api}\" = ?", listOf(masterDataId))
-                for (subData in subDataList) {
-                    delete(refObjectInfo.api, requireNotNull(subData["id"]) as String)
-                }
-            }
-        }
-        refFieldMap["set_null"]?.let {
-            for (bizObjectField in it) {
-                val refObjectInfo = requireNotNull(getObjectById(bizObjectField.bizObjectId))
-                //language=PostgreSQL
-                sql(
-                    """
-                    update hymn_view."${refObjectInfo.api}"
-                    set "${bizObjectField.api}" = null
-                    where "${bizObjectField.api}" = ?
-                """, masterDataId
-                )
-            }
-        }
-    }
 
     private fun processingOssValueChange(
         objectApiName: String,

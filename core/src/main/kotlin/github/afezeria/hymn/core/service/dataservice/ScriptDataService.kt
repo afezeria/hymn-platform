@@ -17,11 +17,22 @@ interface ScriptDataService : DataService {
     val logger: KLogger
     val database: Database
 
+    /**
+     * @param beforeExecutingSql sql执行前的回调，输入参数为旧数据和新数据，返回值为待执行sql和sql参数
+     * @param afterExecutingSql sql执行后回调，输入参数为sql执行结果，返回值为希望execute函数返回的map
+     * 和要传给after触发器使用的新数据的map
+     * @param type 类型，插入/更新/删除
+     * @param objectApiName 对象api
+     * @param oldData 旧数据，[type] 为insert时为null
+     * @param newData 新数据, [type] 为delete时为null
+     * @param withTrigger 是否触发触发器
+     */
     fun execute(
-        sqlBuilder: (
+        beforeExecutingSql: (
             oldData: Map<String, Any?>?,
-            newData: NewRecordMap?,
+            newData: MutableMap<String, Any?>?,
         ) -> Pair<String, Collection<Any?>>,
+        afterExecutingSql: (MutableMap<String, Any?>?) -> Pair<MutableMap<String, Any?>, MutableMap<String, Any?>?>,
         type: WriteType,
         objectApiName: String,
         oldData: Map<String, Any?>?,

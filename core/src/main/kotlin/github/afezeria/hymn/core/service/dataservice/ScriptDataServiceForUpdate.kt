@@ -61,6 +61,9 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
     ): MutableList<MutableMap<String, Any?>> {
         val objectInfo =
             getObjectByApi(objectApiName) ?: throw DataNotFoundException("对象 [api:$objectApiName]")
+        if (objectInfo.type != "custom" && objectInfo.canUpdate != true) {
+            throw BusinessException("对象 [objectApiName:$objectApiName] 不支持更新操作")
+        }
 
         val session = Session.getInstance()
         val roleId = session.roleId
@@ -93,6 +96,9 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
             }
 
             writeableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, edit = true)
+            if (writeableFieldApiSet.isEmpty()) {
+                throw PermissionDeniedException("缺少对象 [api:$objectApiName] 任意字段的编辑权限")
+            }
             readableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, read = true)
             visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
             oldDataList = queryWithPerm(
@@ -179,30 +185,43 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
         objectApiName: String,
         old: MutableMap<String, Any?>,
         new: NewRecordMap,
-        fields: Collection<String>? = null,
+        readableFieldApiSet: Set<String>? = null,
         trigger: Boolean = true,
     ): MutableMap<String, Any?> {
-
-        return execute({ _, newData ->
+        val before = { _: Map<String, Any?>?,
+                       newData: MutableMap<String, Any?>? ->
             requireNotNull(newData)
-            val returnColumns = if (fields == null) {
-                newData.keys.joinToString("\",\"", ",\"", "\"")
-            } else {
-                "\"id\"" + fields.joinToString("\",\"", ",\"", "\"")
-            }
 
-//            new是LinkHashMap的实例，填充new变量数据的时候id是最后一个填入的
+//            newData是LinkHashMap的实例，填充newData变量数据的时候id是最后一个填入的
 //            所以截断最后一个逗号之前的字符串来避免id出现在set语句中
             val setStr = newData.keys.joinToString(", ") { "$it = ?" }.substringBeforeLast(",")
             //language=PostgreSQL
             val sql = """
-            update hymn_view."$objectApiName" 
-            set $setStr
-            where id = ?
-            returning $returnColumns
-        """
+                update hymn_view."$objectApiName" 
+                set $setStr
+                where id = ?
+                returning *
+            """
             sql to newData.values
-        }, WriteType.UPDATE, objectApiName, old, new, trigger)
+        }
+        val after: (MutableMap<String, Any?>?) -> Pair<MutableMap<String, Any?>, MutableMap<String, Any?>?> =
+            { returning ->
+                requireNotNull(returning)
+                if (readableFieldApiSet == null) {
+                    returning
+                } else {
+                    returning.filterTo(mutableMapOf()) { readableFieldApiSet.contains(it.key) }
+                } to returning
+            }
+        return execute(
+            beforeExecutingSql = before,
+            afterExecutingSql = after,
+            type = WriteType.UPDATE,
+            objectApiName = objectApiName,
+            oldData = old,
+            newData = new,
+            withTrigger = trigger
+        )
     }
 
 }
