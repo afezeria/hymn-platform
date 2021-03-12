@@ -69,6 +69,7 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
         val roleId = session.roleId
         val fieldApiMap = getFieldApiMap(objectApiName)
 
+//
         val updateDataMap = mutableMapOf<String, Map<String, Any?>>()
         val ids = mutableSetOf<String>()
         for (map in dataList) {
@@ -85,7 +86,7 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
         var readableFieldApiSet: Set<String>? = null
         val oldAndNewData =
             mutableListOf<Pair<MutableMap<String, Any?>, NewRecordMap>>()
-        val oldDataList: MutableList<MutableMap<String, Any?>>
+        var oldDataList: MutableList<MutableMap<String, Any?>>
         val writeableFieldApiSet: Set<String>
         val visibleTypeIdSet: Set<String>
         if (withPerm) {
@@ -104,20 +105,33 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
             oldDataList = queryWithPerm(
                 objectApiName, "id = any (?)", ids,
             )
-            if (objectInfo.type == "custom") {
-                val updatableDataIdSet = getShare(
-                    objectApiName,
-                    ids,
-                    session.roleId,
-                    session.orgId,
-                    session.accountId,
-                    false
-                ).mapTo(mutableSetOf()) { it.dataId }
-                oldDataList.removeAll { !updatableDataIdSet.contains(it["id"]) }
-            } else {
-                if (!objectPerm.editAll) {
-                    oldDataList.removeAll { it["owner_id"] == session.accountId }
+//            判断是否有更新权限
+//            有对象的编辑全部权限则不过滤数据
+            if (!objectPerm.editAll) {
+                val map = oldDataList.groupBy { it["owner_id"] == session.accountId }
+                val ownData = map[true]
+                var otherAccountsData = map[false]?.toMutableList()
+                if (otherAccountsData != null) {
+//                    如果待更新数据中有其他人的数据则检查是否有被共享编辑权限
+                    if (objectInfo.type == "custom") {
+                        val updatableDataIdSet = getShare(
+                            objectApiName,
+                            otherAccountsData.map { it["id"] as String },
+                            session.roleId,
+                            session.orgId,
+                            session.accountId,
+                            false
+                        ).mapTo(mutableSetOf()) { it.dataId }
+                        otherAccountsData.removeAll { !updatableDataIdSet.contains(it["id"]) }
+                    } else {
+//                        只有自定义对象能被共享，
+//                        当前对象不是自定义对象则将属于其他帐号的待更新数据移除
+                        otherAccountsData = null
+                    }
                 }
+                oldDataList = mutableListOf()
+                oldDataList.addAll(ownData ?: emptyList())
+                oldDataList.addAll(otherAccountsData ?: emptyList())
             }
         } else {
             oldDataList = queryByIds(objectApiName, ids)
