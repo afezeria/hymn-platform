@@ -24,6 +24,7 @@ subprojects {
         plugin("kotlin")
         plugin("org.jetbrains.kotlin.plugin.spring")
         plugin("io.spring.dependency-management")
+        plugin(SerialTestPlugin::class)
     }
 
     configurations {
@@ -69,14 +70,13 @@ subprojects {
 allprojects {
     tasks {
         val listrepos by registering {
-            doLast{
+            doLast {
                 project.repositories
-                    .map { it as  MavenArtifactRepository}
+                    .map { it as MavenArtifactRepository }
                     .forEach {
-                    println("name: ${it.name}, url: ${it.url}")
-                }
+                        println("name: ${it.name}, url: ${it.url}")
+                    }
             }
-
         }
     }
 }
