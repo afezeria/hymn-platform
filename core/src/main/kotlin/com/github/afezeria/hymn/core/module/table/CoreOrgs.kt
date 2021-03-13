@@ -1,0 +1,25 @@
+package com.github.afezeria.hymn.core.module.table
+
+import com.github.afezeria.hymn.common.db.AbstractTable
+import com.github.afezeria.hymn.core.module.entity.Org
+import org.ktorm.schema.datetime
+import org.ktorm.schema.varchar
+
+/**
+ * @author afezeria
+ */
+class CoreOrgs(alias: String? = null) :
+    AbstractTable<Org>("core_org", schema = "hymn", alias = alias) {
+
+    val name = varchar("name")
+    val directorId = varchar("director_id")
+    val deputyDirectorId = varchar("deputy_director_id")
+    val parentId = varchar("parent_id")
+    val createById = varchar("create_by_id")
+    val createBy = varchar("create_by")
+    val modifyById = varchar("modify_by_id")
+    val modifyBy = varchar("modify_by")
+    val createDate = datetime("create_date")
+    val modifyDate = datetime("modify_date")
+
+}
