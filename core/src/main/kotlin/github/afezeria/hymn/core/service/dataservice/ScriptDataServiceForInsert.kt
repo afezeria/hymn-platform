@@ -163,7 +163,7 @@ interface ScriptDataServiceForInsert : ScriptDataService {
                 }
                 requireNotNull(newData)
                 if (readableFieldApiSet == null) {
-                    newData
+                    LinkedHashMap(newData)
                 } else {
                     newData.filterTo(mutableMapOf()) { readableFieldApiSet.contains(it.key) }
                 } to newData

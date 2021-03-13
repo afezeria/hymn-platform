@@ -222,7 +222,7 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
             { returning ->
                 requireNotNull(returning)
                 if (readableFieldApiSet == null) {
-                    returning
+                    LinkedHashMap(returning)
                 } else {
                     returning.filterTo(mutableMapOf()) { readableFieldApiSet.contains(it.key) }
                 } to returning
