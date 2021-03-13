@@ -5,6 +5,7 @@ import com.github.afezeria.hymn.common.platform.DatabaseService
 import com.github.afezeria.hymn.common.util.msgById
 import com.github.afezeria.hymn.core.module.dao.CustomFunctionDao
 import com.github.afezeria.hymn.core.module.dto.CustomFunctionDto
+import com.github.afezeria.hymn.core.module.entity.CustomFunction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -42,30 +43,30 @@ class CustomFunctionService {
         return id
     }
 
-    fun findAll(): MutableList<github.afezeria.hymn.core.module.entity.CustomFunction> {
+    fun findAll(): MutableList<CustomFunction> {
         return customFunction.selectAll()
     }
 
 
-    fun findById(id: String): com.github.afezeria.hymn.core.module.entity.CustomFunction? {
+    fun findById(id: String): CustomFunction? {
         return customFunction.selectById(id)
     }
 
-    fun findByIds(ids: List<String>): MutableList<github.afezeria.hymn.core.module.entity.CustomFunction> {
+    fun findByIds(ids: List<String>): MutableList<CustomFunction> {
         return customFunction.selectByIds(ids)
     }
 
 
     fun findByApi(
         api: String,
-    ): com.github.afezeria.hymn.core.module.entity.CustomFunction? {
+    ): CustomFunction? {
         return customFunction.selectByApi(api)
     }
 
     fun pageFind(
         pageSize: Int,
         pageNum: Int
-    ): List<github.afezeria.hymn.core.module.entity.CustomFunction> {
+    ): List<CustomFunction> {
         return customFunction.pageSelect(null, pageSize, pageNum)
     }
 
