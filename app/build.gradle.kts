@@ -2,7 +2,7 @@ dependencies {
 
     implementation(project(":common"))
     implementation(project(":core"))
-    implementation(project(":api"))
+    implementation(project(":biz"))
     implementation(project(":oss"))
     implementation(project(":script"))
 
