@@ -9,28 +9,34 @@ import java.time.LocalDateTime
 import java.util.*
 
 /**
- * @author afezeria
- */
+* @author afezeria
+*/
 interface {{name}} {
 
-    fun removeById(id: String): Int
+fun findAll(): MutableList<{{entity_class}}>
+
+fun pageFind(pageSize: Int, pageNum: Int): MutableList<{{entity_class}}>
+
+fun findById(id: String): {{entity_class}}?
+
+fun findByIds(ids: List
+<String>): MutableList<{{entity_class}}>
+
+  fun removeById(id: String): Int
+
+  fun removeByIds(ids: List
+  <String>): Int
 
     fun update(id: String, dto: {{dto_class}}): Int
 
     fun create(dto: {{dto_class}}): String
 
-    fun findAll(): MutableList<{{entity_class}}>
+    {{#table.index_arr}}
+      fun findBy{{fun_name}}(
+      {{#column_arr}}        {{field_name}}: {{java_type}},
+      {{/column_arr}}
+      ): {{#is_uk}}{{entity_class}}?{{/is_uk}}{{^is_uk}}MutableList<{{entity_class}}>{{/is_uk}}
 
-    fun findById(id: String): {{entity_class}}?
+    {{/table.index_arr}}
 
-    fun findByIds(ids: List<String>): MutableList<{{entity_class}}>
-
-{{#table.index_arr}}
-    fun findBy{{fun_name}}(
-{{#column_arr}}        {{field_name}}: {{java_type}},
-{{/column_arr}}
-    ): {{#is_uk}}{{entity_class}}?{{/is_uk}}{{^is_uk}}MutableList<{{entity_class}}>{{/is_uk}}
-
-{{/table.index_arr}}
-
-}
+    }

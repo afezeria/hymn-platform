@@ -1,7 +1,7 @@
 require 'stringio'
 require_relative '../config'
 
-table_count = 5
+table_count = 30
 io = StringIO.new
 
 def table_name i

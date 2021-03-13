@@ -19,7 +19,8 @@ data class {{name}}(
 ) {
 
 {{#table.standard_fields}}
-    lateinit var {{field_name}}: {{java_type}}
+  @field:AutoFill(fillOnUpdate = false, type = AutoFillType.ACCOUNT_NAME)
+  lateinit var {{field_name}}: {{java_type}}
 {{/table.standard_fields}}
 
 }

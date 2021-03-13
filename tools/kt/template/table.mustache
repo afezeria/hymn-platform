@@ -1,39 +1,20 @@
 package {{package}}
 
-import org.ktorm.dsl.QueryRowSet
+import github.afezeria.hymn.common.db.AbstractTable
 import org.ktorm.schema.*
 import {{entity_package}}.{{entity_class}}
 
 /**
- * @author afezeria
- */
+* @author afezeria
+*/
 class {{name}}(alias: String? = null) :
-    BaseTable<{{entity_class}}>("{{table.name}}", schema = "hymn", alias = alias) {
+AbstractTable<{{entity_class}}>("{{table.name}}", schema = "hymn", alias = alias) {
 
 {{#table.fields}}
-    val {{field_name}} = {{ktorm_type}}("{{column_name}}")
+  val {{field_name}} = {{ktorm_type}}("{{column_name}}")
 {{/table.fields}}
 {{#table.standard_fields}}
-    val {{field_name}} = {{ktorm_type}}("{{column_name}}")
+  val {{field_name}} = {{ktorm_type}}("{{column_name}}")
 {{/table.standard_fields}}
 
-    override fun doCreateEntity(row: QueryRowSet, withReferences: Boolean) = {{entity_class}}(
-{{#table.fields}}
-  {{#not_null}}
-        {{field_name}} = requireNotNull(row[this.{{field_name}}]) { "field {{entity_class}}.{{field_name}} should not be null" },
-  {{/not_null}}
-  {{^not_null}}
-        {{field_name}} = row[this.{{field_name}}]{{default}},
-  {{/not_null}}
-{{/table.fields}}
-    ).also {
-{{#table.standard_fields}}
-  {{#not_null}}
-        it.{{field_name}} = requireNotNull(row[this.{{field_name}}]) { "field {{entity_class}}.{{field_name}} should not be null" }
-  {{/not_null}}
-  {{^not_null}}
-        it.{{field_name}} = row[this.{{field_name}}]{{default}}
-  {{/not_null}}
-{{/table.standard_fields}}
-    }
 }

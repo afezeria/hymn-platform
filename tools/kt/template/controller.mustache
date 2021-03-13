@@ -1,77 +1,75 @@
 package {{package}}
 
+import github.afezeria.hymn.common.ann.ApiVersion
+import github.afezeria.hymn.common.ann.Function
+import github.afezeria.hymn.common.constant.AccountType
+import github.afezeria.hymn.common.exception.ResourceNotFoundException
+import github.afezeria.hymn.common.util.*
 import {{service_package}}.{{service_class}}
 import {{entity_package}}.{{entity_class}}
 import {{dto_package}}.{{dto_class}}
-import github.afezeria.hymn.common.util.*
-import github.afezeria.hymn.common.util.msgById
-import github.afezeria.hymn.common.exception.DataNotFoundException
-import org.springframework.web.bind.annotation.*
-import java.time.LocalDateTime
 import io.swagger.annotations.*
-import github.afezeria.hymn.common.ann.Function
-import github.afezeria.hymn.common.constant.AccountType
+import org.springframework.web.bind.annotation.*
+import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
 
 /**
- * @author afezeria
- */
+* @author afezeria
+*/
+@ApiVersion
 @RestController
 @RequestMapping("{{router}}")
-@Api({{#table}}{{#tag}}tags = ["{{.}}接口"]{{/tag}}{{/table}})
+@Api(tags = ["{{name}}"], {{#table}}{{#tag}}description = "{{.}}接口"{{/tag}}{{/table}})
 class {{name}} {
 
-    private lateinit var {{service_name}}: {{service_class}}
+@Autowired
+private lateinit var {{service_name}}: {{service_class}}
 
-    @Function(AccountType.ADMIN)
-    @ApiOperation
-(value = "查询全部数据", notes = "")
-    @GetMapping
-    fun findAll(): List<{{entity_class}}> {
-        val all = {{service_name}}.findAll()
-        return successApiResp(all)
-    }
+@Function(AccountType.ADMIN)
+@ApiOperation(value = "分页查询数据", notes = "")
+@GetMapping
+fun findAll(
+@RequestParam("pageSize", defaultValue = "50") pageSize: Int,
+@RequestParam("pageNum", defaultValue = "1") pageNum: Int,
+): List<{{entity_class}}> {
+val list = {{service_name}}.pageFind(pageSize, pageNum)
+return list
+}
 
+@Function(AccountType.ADMIN)
+@ApiOperation(value = "根据id查询", notes = "")
+@GetMapping("/{id}")
+fun findById(@PathVariable("id") id: String): {{entity_class}} {
+val entity = {{service_name}}.findById(id)
+?: throw ResourceNotFoundException("{{#table}}{{tag}}{{/table}}".msgById(id))
+return entity
+}
 
-    @Function(AccountType.ADMIN)
-    @ApiOperation
-(value = "根据id查询", notes = "无参数时查询全部数据")
-    @GetMapping("/{id}")
-    fun findById(@PathVariable("id") id: String): {{entity_class}} {
-        val entity = {{service_name}}.findById(id)
-            ?: throw DataNotFoundException("CoreAccount".msgById(id))
-        return successApiResp(entity)
-    }
+@Function(AccountType.ADMIN)
+@ApiOperation(value = "新建", notes = "")
+@PostMapping
+fun create(@RequestBody dto: {{dto_class}}): String {
+val id = {{service_name}}.create(dto)
+return id
+}
 
+@Function(AccountType.ADMIN)
+@ApiOperation(value = "更新", notes = "")
+@PutMapping("/{id}")
+fun update(
+@PathVariable("id") id: String,
+@RequestBody dto: {{dto_class}}
+): Int {
+val count = {{service_name}}.update(id, dto)
+return count
+}
 
-    @Function(AccountType.ADMIN)
-    @ApiOperation
-(value = "新建", notes = "")
-    @PostMapping
-    fun create(@RequestBody dto: {{dto_class}}): String {
-        val id = {{service_name}}.create(dto)
-        return successApiResp(id)
-    }
-
-
-    @Function(AccountType.ADMIN)
-    @ApiOperation
-(value = "更新", notes = "")
-    @PutMapping("/{id}")
-    fun update(@PathVariable("id") id: String,
-               @RequestBody dto: {{dto_class}}): Int {
-        val count = {{service_name}}.update(id, dto)
-        return successApiResp(count)
-    }
-
-
-    @Function(AccountType.ADMIN)
-    @ApiOperation
-(value = "根据id删除", notes = "")
-    @DeleteMapping("/{id}")
-    fun delete(@PathVariable("id") id: String): Int {
-        val count = {{service_name}}.removeById(id)
-        return successApiResp(count)
-    }
+@Function(AccountType.ADMIN)
+@ApiOperation(value = "根据id删除", notes = "")
+@DeleteMapping("/{id}")
+fun delete(@PathVariable("id") id: String): Int {
+val count = {{service_name}}.removeById(id)
+return count
+}
 }

@@ -123,7 +123,7 @@ module Db
     end
 
     def standard_fields
-      @column_arr.filter { |f| Constant::STANDARD_FIELD.include?(f.column_name) }
+      @column_arr.filter { |f| Constant::STANDARD_FIELD.include?(f.column_name) && f.column_name != 'id' }
     end
   end
 
@@ -198,7 +198,7 @@ end
 
 class Controller < Gen
   def router
-    "/module/#{Config::MODULE}/api/#{entity_class.dasherize}"
+    "/#{Config::MODULE}/api/{version}/#{entity_class.dasherize}"
   end
 end
 
