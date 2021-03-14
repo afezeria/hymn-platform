@@ -16,6 +16,7 @@ open class BaseDbTest {
 
         init {
             println("========== db init start ==========")
+            adminConn.use {}
             val classLoader = this::class.java.classLoader
             prop.load(
                 classLoader.getResourceAsStream("admin-database.properties")
