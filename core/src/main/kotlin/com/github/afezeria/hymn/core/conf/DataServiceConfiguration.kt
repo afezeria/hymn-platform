@@ -4,6 +4,7 @@ import com.github.afezeria.hymn.common.platform.DatabaseService
 import com.github.afezeria.hymn.common.platform.dataservice.DataService
 import com.github.afezeria.hymn.common.platform.script.ScriptService
 import com.github.afezeria.hymn.core.module.service.*
+import com.github.afezeria.hymn.core.service.dataservice.ScriptDataService
 import com.github.afezeria.hymn.core.service.dataservice.ScriptDataServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -42,23 +43,24 @@ class DataServiceConfiguration {
     @Autowired
     lateinit var scriptService: ScriptService
 
+    fun createDataServiceImpl(memorize: Boolean): ScriptDataService {
+        return ScriptDataServiceImpl(
+            accountService,
+            bizObjectService,
+            typeService,
+            fieldService,
+            objectPermService,
+            typePermService,
+            fieldPermService,
+            databaseService,
+            scriptService,
+            memorize
+        )
+    }
+
     @Bean
     fun dataService(): DataService {
-        val createImpl = { memorize: Boolean ->
-            ScriptDataServiceImpl(
-                accountService,
-                bizObjectService,
-                typeService,
-                fieldService,
-                objectPermService,
-                typePermService,
-                fieldPermService,
-                databaseService,
-                scriptService,
-                memorize
-            )
-        }
-        val impl = createImpl(false)
+        val impl = createDataServiceImpl(false)
         val regex = Regex("^(insert|batchInsert|bulkInsert|update|batchUpdate|delete|batchDelete)")
         val proxy = Proxy.newProxyInstance(
             DataService::class.java.classLoader,
@@ -66,7 +68,7 @@ class DataServiceConfiguration {
         ) { proxy, method, args ->
             if (regex.containsMatchIn(method.name)) {
                 databaseService.useTransaction {
-                    method?.invoke(createImpl(true), *(args ?: arrayOfNulls<Any>(0)))
+                    method?.invoke(createDataServiceImpl(true), *(args ?: arrayOfNulls<Any>(0)))
                 }
             } else {
                 method?.invoke(

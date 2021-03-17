@@ -49,6 +49,11 @@ interface ScriptService {
     ): Any?
 
     /**
+     * 根据api获取一个包装了脚本的函数
+     */
+    fun getScript(api: String): ((Array<Any?>) -> Any?)?
+
+    /**
      * 编译脚本
      *
      * [txCallback]会在脚本编译完成并没有错误时执行，调用后将提交事务并清空所有节点关于该脚本的缓存
