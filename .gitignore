@@ -32,3 +32,5 @@ out
 .idea
 
 *.iml
+
+!/libs/*
