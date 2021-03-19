@@ -1,4 +1,4 @@
-package com.github.afezeria.hymn.core.service.dataservice
+package com.github.afezeria.hymn.core.platform.dataservice
 
 import com.github.afezeria.hymn.common.platform.dataservice.FieldInfo
 import java.util.function.BiFunction

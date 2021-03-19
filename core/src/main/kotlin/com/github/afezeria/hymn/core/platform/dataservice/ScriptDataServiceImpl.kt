@@ -1,4 +1,4 @@
-package com.github.afezeria.hymn.core.service.dataservice
+package com.github.afezeria.hymn.core.platform.dataservice
 
 import com.github.afezeria.hymn.common.constant.TriggerEvent.*
 import com.github.afezeria.hymn.common.exception.DataNotFoundException

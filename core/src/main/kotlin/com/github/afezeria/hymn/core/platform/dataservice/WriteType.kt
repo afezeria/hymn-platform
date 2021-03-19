@@ -1,4 +1,4 @@
-package com.github.afezeria.hymn.core.service.dataservice
+package com.github.afezeria.hymn.core.platform.dataservice
 
 /**
  * @author afezeria

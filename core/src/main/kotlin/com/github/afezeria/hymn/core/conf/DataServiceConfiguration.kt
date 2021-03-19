@@ -4,8 +4,8 @@ import com.github.afezeria.hymn.common.platform.DatabaseService
 import com.github.afezeria.hymn.common.platform.dataservice.DataService
 import com.github.afezeria.hymn.common.platform.script.ScriptService
 import com.github.afezeria.hymn.core.module.service.*
-import com.github.afezeria.hymn.core.service.dataservice.ScriptDataService
-import com.github.afezeria.hymn.core.service.dataservice.ScriptDataServiceImpl
+import com.github.afezeria.hymn.core.platform.dataservice.ScriptDataService
+import com.github.afezeria.hymn.core.platform.dataservice.ScriptDataServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

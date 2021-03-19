@@ -1,4 +1,4 @@
-package com.github.afezeria.hymn.core.service
+package com.github.afezeria.hymn.core.platform
 
 import com.github.afezeria.hymn.common.platform.PermService
 import com.github.afezeria.hymn.common.platform.dataservice.DataService
