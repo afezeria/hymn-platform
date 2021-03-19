@@ -64,6 +64,13 @@ object Deps {
         const val api = "javax.servlet:javax.servlet-api:4.0.1"
     }
 
+    object Graal {
+        const val js = "org.graalvm.js:js:21.0.0.2"
+        const val jsScriptEngine = "org.graalvm.js:js-scriptengine:21.0.0.2"
+        const val sdk = "org.graalvm.sdk:graal-sdk:21.0.0.2"
+
+    }
+
     object Kotest {
         const val assertions = "io.kotest:kotest-assertions-core-jvm:4.3.1"
     }

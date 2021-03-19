@@ -1,4 +1,4 @@
-package com.github.afezeria.hymn.common.platform.script
+package com.github.afezeria.hymn.core.platform.script
 
 /**
  * @author afezeria

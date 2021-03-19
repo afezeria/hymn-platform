@@ -47,9 +47,6 @@ fun main() {
     @Language("JavaScript")
     val js = """
 
-function tt(a:String){
-
-}
         function test(a,b) {
         abc.bb([1,2]);
         abc.bb({1:2});

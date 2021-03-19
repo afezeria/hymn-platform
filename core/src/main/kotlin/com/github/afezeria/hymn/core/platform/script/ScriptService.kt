@@ -1,14 +1,15 @@
-package com.github.afezeria.hymn.common.platform.script
+package com.github.afezeria.hymn.core.platform.script
 
 import com.github.afezeria.hymn.common.constant.TriggerEvent
 import com.github.afezeria.hymn.common.platform.dataservice.DataService
+import com.github.afezeria.hymn.common.platform.script.ScriptFunctionService
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
  * @author afezeria
  */
-interface ScriptService {
+interface ScriptService : ScriptFunctionService {
     /**
      * 执行触发器
      *
@@ -42,7 +43,7 @@ interface ScriptService {
     /**
      * 执行其他脚本
      */
-    fun executeScript(
+    fun executeFunction(
         dataService: DataService,
         api: String,
         params: MutableMap<String, Any?>,
@@ -77,4 +78,5 @@ interface ScriptService {
         code: String,
         txCallback: () -> T
     ): T
+
 }

@@ -1,7 +1,7 @@
 package com.github.afezeria.hymn.core.conf
 
 import com.github.afezeria.hymn.common.platform.StaticTimedTask
-import com.github.afezeria.hymn.common.platform.script.ScriptService
+import com.github.afezeria.hymn.core.platform.script.ScriptService
 import com.github.afezeria.simplescheduler.ActionProvider
 import com.github.afezeria.simplescheduler.Scheduler
 import org.springframework.beans.factory.annotation.Autowired
