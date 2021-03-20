@@ -68,7 +68,7 @@ object Deps {
         const val js = "org.graalvm.js:js:21.0.0.2"
         const val jsScriptEngine = "org.graalvm.js:js-scriptengine:21.0.0.2"
         const val sdk = "org.graalvm.sdk:graal-sdk:21.0.0.2"
-
+        const val truffleApi = "org.graalvm.truffle:truffle-api:21.0.0.2"
     }
 
     object Kotest {

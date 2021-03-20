@@ -42,6 +42,14 @@ class ScriptServiceImpl : ScriptService {
     @Autowired
     private lateinit var dataServiceConfiguration: DataServiceConfiguration
 
+    private val pool: ContextWrapperPool
+
+
+    init {
+        val factory = ContextWrapperFactory()
+        pool = ContextWrapperPool(factory)
+    }
+
     companion object {
         private val triggerCache: MutableMap<String, Value> = ConcurrentHashMap()
         private val interfaceCache: MutableMap<String, Value> = ConcurrentHashMap()

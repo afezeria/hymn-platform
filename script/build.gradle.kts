@@ -9,6 +9,10 @@ dependencies {
     implementation(Deps.Graal.js)
     implementation(Deps.Graal.jsScriptEngine)
     implementation(Deps.Graal.sdk)
+    implementation(Deps.Graal.truffleApi)
+
+
+    implementation(Deps.Apache.pool)
 
     implementation(Deps.SpringBoot.web)
 
