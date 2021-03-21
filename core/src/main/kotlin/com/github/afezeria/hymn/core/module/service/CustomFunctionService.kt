@@ -52,7 +52,7 @@ class CustomFunctionService {
         return customFunction.selectById(id)
     }
 
-    fun findByIds(ids: List<String>): MutableList<CustomFunction> {
+    fun findByIds(ids: Collection<String>): MutableList<CustomFunction> {
         return customFunction.selectByIds(ids)
     }
 

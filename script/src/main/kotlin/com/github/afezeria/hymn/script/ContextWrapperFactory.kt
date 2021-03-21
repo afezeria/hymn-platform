@@ -26,11 +26,11 @@ class ContextWrapperFactory : BasePooledObjectFactory<ContextWrapper>() {
     }
 
     override fun validateObject(p: PooledObject<ContextWrapper>): Boolean {
-        try {
+        return try {
             val wrapper = p.`object`
-            return wrapper.available()
+            wrapper.available()
         } catch (e: IOException) {
-            return false
+            false
         }
     }
 }

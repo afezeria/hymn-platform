@@ -14,20 +14,20 @@ interface ScriptService : ScriptFunctionService {
      * 执行触发器
      *
      * @param event 触发时机
-     * @param objectApiName 业务对象api
+     * @param objectId 业务对象id
      * @param new 新数据
      * @param old 旧数据
      * @param tmpMap 共享map，用于在多个触发器之间共享数据
-     * @param around 触发器执行方法，可在触发器执行前后执行逻辑或者跳过触发器
+     * @param around 第一个为触发器api，第二个参数为触发器执行方法，可在触发器执行前后执行逻辑或者跳过触发器
      */
     fun executeTrigger(
         dataService: DataService,
         event: TriggerEvent,
-        objectApiName: String,
+        objectId: String,
         old: Map<String, Any?>?,
         new: Map<String, Any?>?,
         tmpMap: MutableMap<String, Any?>,
-        around: (TriggerInfo, () -> Unit) -> Unit = { _, trigger -> trigger.invoke() },
+        around: (String, () -> Unit) -> Unit = { _, trigger -> trigger.invoke() },
     )
 
     /**
@@ -46,7 +46,7 @@ interface ScriptService : ScriptFunctionService {
     fun executeFunction(
         dataService: DataService,
         api: String,
-        params: MutableMap<String, Any?>,
+        vararg params: Any?,
     ): Any?
 
     /**

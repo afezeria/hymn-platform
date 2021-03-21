@@ -1,6 +1,5 @@
 package com.github.afezeria.hymn.script
 
-import com.github.afezeria.hymn.common.platform.dataservice.DataService
 import org.graalvm.polyglot.Context
 import org.graalvm.polyglot.HostAccess
 import org.graalvm.polyglot.Source
@@ -51,11 +50,11 @@ class ContextWrapper {
     }
 
     fun execute(
-        dataService: DataService,
-        api: String,
+        main: SourceWithTime,
         sources: List<SourceWithTime>,
         vararg params: Any?
     ): Any? {
+//        检查依赖的自定义函数是否已求值且且代码为最新版本
         for (source in sources) {
             val contextSource = evaluated[source.api]
             if (contextSource == null || contextSource.timestamp < source.timestamp) {
@@ -63,7 +62,15 @@ class ContextWrapper {
                 evaluated[source.api] = source
             }
         }
-        val scriptFunction = requireNotNull(bindings.getMember(api))
+
+//        检查主函数是否已求值且代码为最新版本
+        val contextSource = evaluated[main.api]
+        if (contextSource == null || contextSource.timestamp < main.timestamp) {
+            context.eval(main.source)
+            evaluated[main.api] = main
+        }
+
+        val scriptFunction = requireNotNull(bindings.getMember(main.api))
         val result = scriptFunction.execute(*params)
         return if (result.isNull) {
             null

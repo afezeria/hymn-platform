@@ -7,6 +7,8 @@ import com.github.afezeria.hymn.core.module.dao.BusinessCodeRefDao
 import com.github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
 import com.github.afezeria.hymn.core.module.entity.BusinessCodeRef
 import com.github.afezeria.hymn.core.module.view.BusinessCodeRefListView
+import org.ktorm.dsl.eq
+import org.ktorm.dsl.inList
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -42,6 +44,18 @@ class BusinessCodeRefService {
 
     fun findById(id: String): BusinessCodeRef? {
         return businessCodeRefDao.selectById(id)
+    }
+
+    fun findByTriggerIds(triggerIds: List<String>): MutableList<BusinessCodeRef> {
+        return businessCodeRefDao.select({ it.byTriggerId inList triggerIds })
+    }
+
+    fun findByApiId(apiId: String): MutableList<BusinessCodeRef> {
+        return businessCodeRefDao.select({ it.byInterfaceId eq apiId })
+    }
+
+    fun findByFunctionId(apiId: String): MutableList<BusinessCodeRef> {
+        return businessCodeRefDao.select({ it.byCustomFunctionId eq apiId })
     }
 
     fun pageFindView(

@@ -8,7 +8,6 @@ import com.github.afezeria.hymn.common.platform.dataservice.*
 import com.github.afezeria.hymn.common.util.execute
 import com.github.afezeria.hymn.core.module.service.*
 import com.github.afezeria.hymn.core.platform.script.ScriptService
-import com.github.afezeria.hymn.core.platform.script.TriggerInfo
 import mu.KLoggable
 import mu.KLogger
 import org.ktorm.database.Database
@@ -70,15 +69,16 @@ class ScriptDataServiceImpl(
         val old: Map<String, Any?>? = oldData?.let { Collections.unmodifiableMap(it) }
         var new: MutableMap<String, Any?>? = newData
 
-        var callback: ((TriggerInfo, () -> Unit) -> Unit)? = null
+        val bizObjectId = requireNotNull(getObjectByApi(objectApiName)).id
+        var callback: ((String, () -> Unit) -> Unit)? = null
         if (withTrigger) {
             val event = when (type) {
                 WriteType.INSERT -> BEFORE_INSERT
                 WriteType.UPDATE -> BEFORE_UPDATE
                 WriteType.DELETE -> BEFORE_DELETE
             }
-            callback = { info: TriggerInfo, trigger: () -> Unit ->
-                val flag = "$objectApiName:${info.api}"
+            callback = { triggerApi: String, trigger: () -> Unit ->
+                val flag = "$objectApiName:$triggerApi"
                 if (stack.count { it == flag } == 6) {
                     logger.info("当前触发器调用栈:{}", stack)
                     throw InnerException("可能存在递归调用，终止执行触发器")
@@ -93,7 +93,7 @@ class ScriptDataServiceImpl(
             scriptService.executeTrigger(
                 dataService = wrapper,
                 event = event,
-                objectApiName = objectApiName,
+                objectId = bizObjectId,
                 old = old,
                 new = new,
                 tmpMap = tmpMap,
@@ -117,7 +117,7 @@ class ScriptDataServiceImpl(
             scriptService.executeTrigger(
                 dataService = wrapper,
                 event = event,
-                objectApiName = objectApiName,
+                objectId = bizObjectId,
                 old = old,
                 new = new,
                 tmpMap = tmpMap,
