@@ -12,7 +12,6 @@ import com.github.afezeria.hymn.core.module.service.CustomInterfaceService
 import com.github.afezeria.hymn.core.platform.script.CompileType
 import com.github.afezeria.hymn.core.platform.script.ScriptService
 import org.graalvm.polyglot.Source
-import org.graalvm.polyglot.Value
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
@@ -98,7 +97,6 @@ class ScriptServiceImpl : ScriptService {
         val offset = OffsetDateTime.now().offset
         val currentTimeMillis = System.currentTimeMillis()
 
-//        获取待执行的触发器source
         var sourceWithTime = interfaceCache[customInterface.api]
         if (sourceWithTime == null ||
             sourceWithTime.timestamp < customInterface.modifyDate.toInstant(offset)
@@ -121,7 +119,6 @@ class ScriptServiceImpl : ScriptService {
         val offset = OffsetDateTime.now().offset
         val currentTimeMillis = System.currentTimeMillis()
 
-//        获取待执行的触发器source
         var sourceWithTime = interfaceCache[function.api]
         if (sourceWithTime == null ||
             sourceWithTime.timestamp < function.modifyDate.toInstant(offset)
@@ -234,32 +231,6 @@ class ScriptServiceImpl : ScriptService {
         TODO("Not yet implemented")
     }
 
-    private fun compileTrigger(
-        id: String?,
-        lang: String,
-        option: String?,
-        code: String,
-    ): Value {
-        TODO()
-    }
-
-    private fun compileInterface(
-        id: String?,
-        lang: String,
-        option: String?,
-        code: String,
-    ): Value {
-        TODO()
-    }
-
-    private fun compileFunction(
-        id: String?,
-        lang: String,
-        option: String?,
-        code: String,
-    ): Value {
-        TODO()
-    }
 
     override fun execute(api: String, vararg params: Any?): Any? {
         return executeFunction(

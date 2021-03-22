@@ -8,6 +8,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool
 internal object ContextWrapperPool :
     GenericObjectPool<ContextWrapper>(ContextWrapperFactory()) {
     init {
+        maxTotal
         testOnCreate = true
         testOnBorrow = true
         testOnReturn = true
