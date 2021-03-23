@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModelProperty
 /**
  * @author afezeria
  */
-class CustomInterfaceDto(
+class CustomApiDto(
     @ApiModelProperty(value = "接口api名称，唯一标识", required = true)
     var api: String,
     @ApiModelProperty(value = "接口名称", required = true)

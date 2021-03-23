@@ -4,7 +4,7 @@ import com.github.afezeria.hymn.common.exception.DataNotFoundException
 import com.github.afezeria.hymn.common.platform.DatabaseService
 import com.github.afezeria.hymn.common.util.msgById
 import com.github.afezeria.hymn.core.module.dao.CustomApiDao
-import com.github.afezeria.hymn.core.module.dto.CustomInterfaceDto
+import com.github.afezeria.hymn.core.module.dto.CustomApiDto
 import com.github.afezeria.hymn.core.module.entity.CustomApi
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -29,7 +29,7 @@ class CustomApiService {
         return i
     }
 
-    fun update(id: String, dto: CustomInterfaceDto): Int {
+    fun update(id: String, dto: CustomApiDto): Int {
         val e = customApiDao.selectById(id)
             ?: throw DataNotFoundException("CustomInterface".msgById(id))
         dto.update(e)
@@ -37,7 +37,7 @@ class CustomApiService {
         return i
     }
 
-    fun create(dto: CustomInterfaceDto): String {
+    fun create(dto: CustomApiDto): String {
         val e = dto.toEntity()
         val id = customApiDao.insert(e)
         return id

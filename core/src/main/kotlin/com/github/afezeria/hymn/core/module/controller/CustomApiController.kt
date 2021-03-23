@@ -6,7 +6,7 @@ import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.common.exception.ResourceNotFoundException
 import com.github.afezeria.hymn.common.util.msgById
-import com.github.afezeria.hymn.core.module.dto.CustomInterfaceDto
+import com.github.afezeria.hymn.core.module.dto.CustomApiDto
 import com.github.afezeria.hymn.core.module.entity.CustomApi
 import com.github.afezeria.hymn.core.module.service.CustomApiService
 import io.swagger.annotations.Api
@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.*
  */
 @ApiVersion
 @RestController
-@RequestMapping("/core/api/{version}/custom-interface")
-@Api(tags = ["CustomInterfaceController"], description = "自定义接口接口")
-class CustomInterfaceController {
+@RequestMapping("/core/api/{version}/custom-api")
+@Api(tags = ["CustomApiController"], description = "自定义接口接口")
+class CustomApiController {
 
     @Autowired
     private lateinit var customApiService: CustomApiService
@@ -50,7 +50,7 @@ class CustomInterfaceController {
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "新建", notes = "")
     @PostMapping
-    fun create(@RequestBody dto: CustomInterfaceDto): String {
+    fun create(@RequestBody dto: CustomApiDto): String {
         val id = customApiService.create(dto)
         return id
     }
@@ -60,7 +60,7 @@ class CustomInterfaceController {
     @PutMapping("/{id}")
     fun update(
         @PathVariable("id") id: String,
-        @RequestBody dto: CustomInterfaceDto
+        @RequestBody dto: CustomApiDto
     ): Int {
         val count = customApiService.update(id, dto)
         return count
