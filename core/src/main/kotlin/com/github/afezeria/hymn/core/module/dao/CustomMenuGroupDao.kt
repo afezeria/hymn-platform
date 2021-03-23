@@ -15,11 +15,4 @@ class CustomMenuGroupDao(
 ) : AbstractDao<CustomMenuGroup, CoreCustomMenuGroup>(
     table = CoreCustomMenuGroup(),
     databaseService = databaseService
-) {
-
-    fun selectByAccountId(
-        accountId: String,
-    ): MutableList<CustomMenuGroup> {
-        return select({ it.accountId eq accountId })
-    }
-}
+)

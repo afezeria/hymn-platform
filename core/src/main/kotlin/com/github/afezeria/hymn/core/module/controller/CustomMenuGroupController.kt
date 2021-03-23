@@ -28,13 +28,10 @@ class CustomMenuGroupController {
     private lateinit var customMenuGroupService: CustomMenuGroupService
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "分页查询数据", notes = "")
+    @ApiOperation(value = "查询全部数据", notes = "")
     @GetMapping
-    fun findAll(
-        @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
-        @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
-    ): List<CustomMenuGroup> {
-        val list = customMenuGroupService.pageFind(pageSize, pageNum)
+    fun findAll(): List<CustomMenuGroup> {
+        val list = customMenuGroupService.findAll()
         return list
     }
 
