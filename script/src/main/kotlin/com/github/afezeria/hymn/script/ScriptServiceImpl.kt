@@ -1,16 +1,20 @@
 package com.github.afezeria.hymn.script
 
 import com.github.afezeria.hymn.common.constant.TriggerEvent
+import com.github.afezeria.hymn.common.exception.DataNotFoundException
 import com.github.afezeria.hymn.common.exception.InnerException
 import com.github.afezeria.hymn.common.platform.CacheService
 import com.github.afezeria.hymn.common.platform.dataservice.DataService
+import com.github.afezeria.hymn.common.util.msgById
+import com.github.afezeria.hymn.common.util.toClass
 import com.github.afezeria.hymn.core.conf.DataServiceConfiguration
 import com.github.afezeria.hymn.core.module.service.BizObjectTriggerService
 import com.github.afezeria.hymn.core.module.service.BusinessCodeRefService
+import com.github.afezeria.hymn.core.module.service.CustomApiService
 import com.github.afezeria.hymn.core.module.service.CustomFunctionService
-import com.github.afezeria.hymn.core.module.service.CustomInterfaceService
-import com.github.afezeria.hymn.core.platform.script.CompileType
 import com.github.afezeria.hymn.core.platform.script.ScriptService
+import com.github.afezeria.hymn.core.platform.script.ScriptType
+import com.github.afezeria.hymn.core.platform.script.ScriptType.*
 import org.graalvm.polyglot.Source
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -32,7 +36,7 @@ class ScriptServiceImpl : ScriptService {
     private lateinit var triggerService: BizObjectTriggerService
 
     @Autowired
-    private lateinit var interfaceService: CustomInterfaceService
+    private lateinit var apiService: CustomApiService
 
     @Autowired
     private lateinit var functionService: CustomFunctionService
@@ -65,7 +69,7 @@ class ScriptServiceImpl : ScriptService {
         val triggerList = triggerService.findByBizObjectId(objectId)
             .filter { it.event == event.name }.sortedBy { it.ord }
         val functionIdSet = businessCodeRefService.findByTriggerIds(triggerList.map { it.id })
-            .mapTo(mutableSetOf()) { it.customFunctionId!! }
+            .mapTo(mutableSetOf()) { it.refFunctionId!! }
         val offset = OffsetDateTime.now().offset
         val currentTimeMillis = System.currentTimeMillis()
 
@@ -91,9 +95,9 @@ class ScriptServiceImpl : ScriptService {
     }
 
     private fun getApiSource(api: String): Pair<SourceWithTime, List<SourceWithTime>>? {
-        val customInterface = interfaceService.findByApi(api) ?: return null
+        val customInterface = apiService.findByApi(api) ?: return null
         val functionIdSet = businessCodeRefService.findByApiId(customInterface.id)
-            .mapTo(mutableSetOf()) { it.byInterfaceId!! }
+            .mapTo(mutableSetOf()) { it.byApiId!! }
         val offset = OffsetDateTime.now().offset
         val currentTimeMillis = System.currentTimeMillis()
 
@@ -115,7 +119,7 @@ class ScriptServiceImpl : ScriptService {
     private fun getFunctionSource(api: String): Pair<SourceWithTime, List<SourceWithTime>>? {
         val function = functionService.findByApi(api) ?: return null
         val functionIdSet = businessCodeRefService.findByFunctionId(function.id)
-            .mapTo(mutableSetOf()) { it.byInterfaceId!! }
+            .mapTo(mutableSetOf()) { it.byApiId!! }
         val offset = OffsetDateTime.now().offset
         val currentTimeMillis = System.currentTimeMillis()
 
@@ -221,14 +225,61 @@ class ScriptServiceImpl : ScriptService {
     }
 
     override fun <T> compile(
-        type: CompileType,
+        type: ScriptType,
         id: String?,
         lang: String,
         option: String?,
         code: String,
         txCallback: () -> T
     ): T {
+        return if (id == null) {
+            compileNew(type, code, txCallback)
+        } else {
+            compileUpdate(type, id, code, txCallback)
+        }
+    }
+
+    fun <T> compileNew(
+        type: ScriptType,
+        code: String,
+        txCallback: () -> T
+    ): T {
+        val context = buildContext(false, true)
+        val parse = context.getBindings("js").getMember("parse")
+        val info = parse.execute("js", code).asString().toClass<ScriptInfo>()!!
+
+        println()
+
         TODO("Not yet implemented")
+
+    }
+
+    fun <T> compileUpdate(
+        type: ScriptType,
+        id: String,
+        code: String,
+        txCallback: () -> T
+    ): T {
+        val oldCode = when (type) {
+            TRIGGER -> {
+                triggerService.findById(id)?.code
+                    ?: throw DataNotFoundException("trigger".msgById(id))
+            }
+            INTERFACE -> {
+                apiService.findById(id)?.code
+                    ?: throw DataNotFoundException("interface".msgById(id))
+            }
+            FUNCTION -> {
+                functionService.findById(id)?.code
+                    ?: throw DataNotFoundException("function".msgById(id))
+            }
+        }
+        val context = buildContext(false, true)
+        val parse = context.getBindings("js").getMember("parse")
+        val newInfo = parse.execute("js", code).asString().toClass<ScriptInfo>()!!
+        val oldInfo = parse.execute("js", oldCode).asString().toClass<ScriptInfo>()!!
+
+        TODO()
     }
 
 

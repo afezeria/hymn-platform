@@ -1,19 +1,14 @@
-function analysis(type, api, newCode, oldCode) {
-  let program = acorn.parse(newCode);
-  beforeWalk(api, program);
-  commonWalk(program)
-  if (type === 'trigger') {
-    triggerWalk(program)
-  } else if (type === 'api') {
-    apiWalk(program)
-  } else if (type === 'function') {
-    functionWalk(program, oldCode)
-  } else {
-    throw new Error("错误的代码类型");
-  }
+function parse(api, code) {
+  let program = acorn.parse(code);
+  let declareInfo = getDeclareInfo(api, program);
+  let invokeInfo = getMethodInvoke(program);
+  return JSON.stringify({
+    ...declareInfo,
+    ...invokeInfo
+  })
 }
 
-function beforeWalk(api, node) {
+function getDeclareInfo(api, node) {
   if (node.body.length !== 1) {
     console.log(node.body.length)
     throw new Error("脚本中只能只能声明一个顶层语句");
@@ -25,35 +20,47 @@ function beforeWalk(api, node) {
   if (fun.id.name !== api) {
     throw new Error("顶层函数名称必须与api相同");
   }
-
+  return {
+    name: fun.id.name,
+    params: fun.params.map(it => {
+      return it.name
+    })
+  }
 }
 
-function commonWalk(node) {
-  acorn.walk.full(node, (item, type) => {
-
-  });
-}
-
-function triggerWalk(node) {
-
-  acorn.walk.full(node, (item, type) => {
-
-  });
-}
-
-function apiWalk(node) {
-
-  acorn.walk.full(node, (item, type) => {
-
-  });
-}
-
-function functionWalk(node, oldCode) {
-  acorn.walk.full(acorn.parse(oldCode))
-
-  acorn.walk.full(node, (item, type) => {
-
-  });
+function getMethodInvoke(body) {
+  let result = {
+    globalInvoke: [],
+    memberInvoke: [],
+  };
+  acorn.walk.full(body, (node, state, type) => {
+    if (type === 'CallExpression') {
+      let receiver = node.callee
+      if (receiver.type === 'MemberExpression') {
+        if (receiver.object.type === 'CallExpression') {
+          //链式调用
+        } else if (receiver.object.type === 'Identifier') {
+          //变量上的调用
+          result.memberInvoke.push({
+            obj: receiver.object.name,
+            method: receiver.property.name,
+            arguments: node.arguments.map((item) => {
+              return item.value
+            }),
+          })
+        }
+      } else if (receiver.type === 'Identifier') {
+        //调用全局函数
+        result.globalInvoke.push({
+          method: receiver.name,
+          arguments: node.arguments.map((item) => {
+            return item.value
+          }),
+        })
+      }
+    }
+  })
+  return result
 }
 
 function getFirstFunctionInfo(node) {

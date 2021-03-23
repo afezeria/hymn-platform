@@ -1,6 +1,7 @@
 package com.github.afezeria.hymn.script
 
 import com.github.afezeria.hymn.common.exception.BusinessException
+import com.github.afezeria.hymn.script.scriptutil.ScriptTools
 import org.graalvm.polyglot.*
 
 /**
@@ -26,10 +27,14 @@ val hostAccess =
         .allowArrayAccess(true)
         .allowListAccess(true)
         .targetTypeMapping(List::class.java, List::class.java, {
+            println("list")
+            println(it)
             true
         }, { it })
         .targetTypeMapping(Map::class.java, Map::class.java,
             {
+                println("map")
+                println(it)
                 val v = Value.asValue(it)
                 v.hasMembers() && v.hasArrayElements().not()
             }, { it }
@@ -60,7 +65,7 @@ fun buildContext(debug: Boolean = false, compile: Boolean = false): Context {
 //        禁止js访问graal的Ployglot对象
         .option("js.polyglot-builtin", "false")
 //        启用严格模式
-        .option("js.strict", "true")
+//        .option("js.strict", "true")
         .allowHostClassLookup { true }
         .allowExperimentalOptions(true)
 
@@ -90,6 +95,7 @@ fun buildContext(debug: Boolean = false, compile: Boolean = false): Context {
         putMember("quit", null)
         putMember("exit", null)
         putMember("eval", null)
+        putMember("tools", ScriptTools)
     }
     return context
 }

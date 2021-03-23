@@ -3,8 +3,8 @@ package com.github.afezeria.hymn.script.web.controller
 import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.platform.CacheService
 import com.github.afezeria.hymn.core.module.service.BizObjectTriggerService
+import com.github.afezeria.hymn.core.module.service.CustomApiService
 import com.github.afezeria.hymn.core.module.service.CustomFunctionService
-import com.github.afezeria.hymn.core.module.service.CustomInterfaceService
 import com.github.afezeria.hymn.script.ScriptType
 import io.swagger.annotations.Api
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,7 +28,7 @@ class ScriptController {
     private lateinit var triggerService: BizObjectTriggerService
 
     @Autowired
-    private lateinit var interfaceService: CustomInterfaceService
+    private lateinit var apiService: CustomApiService
 
     @Autowired
     private lateinit var functionService: CustomFunctionService
