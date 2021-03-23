@@ -3,7 +3,7 @@
 -- 当 ;; 出现在表的注释中时
 -- uk:[[field_1 field_2][field_4 field_3]] 表示在field_1和field_2上创建多列唯一索引，字段间以空格分割，一个中括号表示一个索引
 -- idx:[[field_1 field_2][field_4 field_3]] 表示在field_1和field_2上创建多列索引，字段间以空格分割，一个中括号表示一个索引
--- fk:[[field_1,field_2 table_name:field_1,field_2]]
+-- fk:[[field_1,field_2 table_name:field_1,field_2]] 表示在field_1和field_2上创建多列外键约束，一个中括号表示一个索引
 -- 当 ;; 出现在字段的注释中时
 -- idx 表示在该字段上创建索引
 -- uk 表示在该字段上创建唯一约束
@@ -187,27 +187,6 @@ create table hymn.core_config
 comment on table hymn.core_config is '系统配置表';
 comment on column hymn.core_config.key is '键 ;; idx';
 
-drop table if exists hymn.core_account_menu_layout cascade;
-create table hymn.core_account_menu_layout
-(
-    id           text primary key     default replace(gen_random_uuid()::text, '-', ''),
-    account_id   text        not null,
-    client_type  text        not null,
-    layout_json  text        not null,
-    create_by_id text        not null,
-    create_by    text        not null,
-    modify_by_id text        not null,
-    modify_by    text        not null,
-    create_date  timestamptz not null default now(),
-    modify_date  timestamptz not null default now()
-);
-comment on table hymn.core_account_menu_layout is '用户侧边栏菜单布局';
-comment on column hymn.core_account_menu_layout.account_id is '用户id ;; fk:[core_account cascade];idx';
-comment on column hymn.core_account_menu_layout.client_type is '客户端类型 ;; optional_value:[browser(浏览器), mobile(移动端)]';
-comment on column hymn.core_account_menu_layout.layout_json is '布局json字符串';
-
-
-
 drop table if exists hymn.core_account_object_view cascade;
 create table hymn.core_account_object_view
 (
@@ -313,11 +292,26 @@ comment on column hymn.core_custom_api.lang is '语言 ;; optional_value:[javasc
 comment on column hymn.core_custom_api.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
 
 
+drop table if exists hymn.core_custom_menu_group cascade;
+create table hymn.core_custom_menu_group
+(
+    id           text primary key     default replace(gen_random_uuid()::text, '-', ''),
+    name         text,
+    create_by_id text        not null,
+    create_by    text        not null,
+    modify_by_id text        not null,
+    modify_by    text        not null,
+    create_date  timestamptz not null default now(),
+    modify_date  timestamptz not null default now()
+);
+comment on table hymn.core_custom_menu_group is '菜单项分组';
+comment on column hymn.core_custom_menu_group.name is '分组名 ;;uk';
 
 drop table if exists hymn.core_custom_menu_item cascade;
 create table hymn.core_custom_menu_item
 (
     id           text primary key     default replace(gen_random_uuid()::text, '-', ''),
+    group_id     text,
     api          text        not null,
     name         text        not null,
     path         text        not null,
@@ -341,6 +335,7 @@ comment on column hymn.core_custom_menu_item.action is '菜单点击行为 ;; op
 
 comment on column hymn.core_custom_menu_item.client_type is '客户端类型  ;; optional_value:[browser(浏览器), mobile(移动端)]';
 comment on column hymn.core_custom_menu_item.icon is '图标';
+comment on column hymn.core_custom_menu_item.group_id is '分组id ;; fk:[core_custom_menu_group set null]';
 
 
 

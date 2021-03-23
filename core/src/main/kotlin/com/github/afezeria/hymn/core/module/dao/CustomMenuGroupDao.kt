@@ -2,25 +2,24 @@ package com.github.afezeria.hymn.core.module.dao
 
 import com.github.afezeria.hymn.common.db.AbstractDao
 import com.github.afezeria.hymn.common.platform.DatabaseService
-import com.github.afezeria.hymn.core.module.entity.AccountMenuLayout
-import com.github.afezeria.hymn.core.module.table.CoreAccountMenuLayouts
-import org.ktorm.dsl.eq
+import com.github.afezeria.hymn.core.module.entity.CustomMenuGroup
+import com.github.afezeria.hymn.core.module.table.CoreCustomMenuGroup
 import org.springframework.stereotype.Component
 
 /**
  * @author afezeria
  */
 @Component
-class AccountMenuLayoutDao(
+class CustomMenuGroupDao(
     databaseService: DatabaseService
-) : AbstractDao<AccountMenuLayout, CoreAccountMenuLayouts>(
-    table = CoreAccountMenuLayouts(),
+) : AbstractDao<CustomMenuGroup, CoreCustomMenuGroup>(
+    table = CoreCustomMenuGroup(),
     databaseService = databaseService
 ) {
 
     fun selectByAccountId(
         accountId: String,
-    ): MutableList<AccountMenuLayout> {
+    ): MutableList<CustomMenuGroup> {
         return select({ it.accountId eq accountId })
     }
 }

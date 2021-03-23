@@ -9,6 +9,8 @@ import io.swagger.annotations.ApiModelProperty
 class CustomMenuItemDto(
     @ApiModelProperty(value = "唯一标识", required = true)
     var api: String,
+    @ApiModelProperty(value = "分组id")
+    var groupId: String? = null,
     @ApiModelProperty(value = "菜单项名称", required = true)
     var name: String,
     @ApiModelProperty(value = "url path", required = true)
@@ -31,6 +33,7 @@ class CustomMenuItemDto(
     fun toEntity(): CustomMenuItem {
         return CustomMenuItem(
             name = name,
+            groupId = groupId,
             path = path,
             pathType = pathType,
             action = action,
@@ -45,6 +48,7 @@ class CustomMenuItemDto(
             it.name = name
             it.api = api
             it.path = path
+            it.groupId = groupId
             it.pathType = pathType
             it.action = action
             it.clientType = clientType

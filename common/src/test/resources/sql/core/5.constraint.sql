@@ -52,12 +52,6 @@ alter table hymn.core_account
     add foreign key (role_id) references hymn.core_role on delete restrict;
 create index core_account_role_id_idx
     on hymn.core_account (role_id);
-alter table hymn.core_account_menu_layout
-    add foreign key (account_id) references hymn.core_account on delete cascade;
-create index core_account_menu_layout_account_id_idx
-    on hymn.core_account_menu_layout (account_id);
-alter table hymn.core_account_menu_layout
-    add check ( client_type in ('browser', 'mobile') );
 alter table hymn.core_account_object_view
     add foreign key (account_id) references hymn.core_account on delete cascade;
 create index core_account_object_view_account_id_idx
@@ -230,6 +224,10 @@ alter table hymn.core_custom_function
     add check ( type in ('function', 'job') );
 alter table hymn.core_custom_function
     add check ( lang in ('javascript') );
+alter table hymn.core_custom_menu_group
+    add constraint core_custom_menu_group_name_uk unique (name);
+alter table hymn.core_custom_menu_item
+    add foreign key (group_id) references hymn.core_custom_menu_group on delete set null;
 alter table hymn.core_custom_menu_item
     add constraint core_custom_menu_item_api_uk unique (api);
 alter table hymn.core_custom_menu_item

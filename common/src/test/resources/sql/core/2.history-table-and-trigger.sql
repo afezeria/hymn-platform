@@ -94,64 +94,6 @@ create trigger core_account_history_del
     on hymn.core_account
     for each row
 execute function hymn.core_account_history_del();
-drop table if exists hymn.core_account_menu_layout_history cascade;
-create table hymn.core_account_menu_layout_history
-(
-    operation    text,
-    stamp        timestamp,
-    id           text,
-    account_id   text,
-    client_type  text,
-    layout_json  text,
-    create_by_id text,
-    create_by    text,
-    modify_by_id text,
-    modify_by    text,
-    create_date  timestamptz,
-    modify_date  timestamptz
-);
-create or replace function hymn.core_account_menu_layout_history_ins() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_account_menu_layout_history select 'i', now(), new.*;
-    return null;
-end
-$$;
-create or replace function hymn.core_account_menu_layout_history_upd() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_account_menu_layout_history select 'u', now(), new.*;
-    return null;
-end
-$$;
-create or replace function hymn.core_account_menu_layout_history_del() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_account_menu_layout_history select 'd', now(), old.*;
-    return null;
-end
-$$;
-drop trigger if exists core_account_menu_layout_history_ins on hymn.core_account_menu_layout;
-create trigger core_account_menu_layout_history_ins
-    after insert
-    on hymn.core_account_menu_layout
-    for each row
-execute function hymn.core_account_menu_layout_history_ins();
-drop trigger if exists core_account_menu_layout_history_upd on hymn.core_account_menu_layout;
-create trigger core_account_menu_layout_history_upd
-    after update
-    on hymn.core_account_menu_layout
-    for each row
-execute function hymn.core_account_menu_layout_history_upd();
-drop trigger if exists core_account_menu_layout_history_del on hymn.core_account_menu_layout;
-create trigger core_account_menu_layout_history_del
-    after delete
-    on hymn.core_account_menu_layout
-    for each row
-execute function hymn.core_account_menu_layout_history_del();
 drop table if exists hymn.core_account_object_view_history cascade;
 create table hymn.core_account_object_view_history
 (
@@ -1514,12 +1456,69 @@ create trigger core_custom_function_history_del
     on hymn.core_custom_function
     for each row
 execute function hymn.core_custom_function_history_del();
+drop table if exists hymn.core_custom_menu_group_history cascade;
+create table hymn.core_custom_menu_group_history
+(
+    operation    text,
+    stamp        timestamp,
+    id           text,
+    name         text,
+    create_by_id text,
+    create_by    text,
+    modify_by_id text,
+    modify_by    text,
+    create_date  timestamptz,
+    modify_date  timestamptz
+);
+create or replace function hymn.core_custom_menu_group_history_ins() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_custom_menu_group_history select 'i', now(), new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_custom_menu_group_history_upd() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_custom_menu_group_history select 'u', now(), new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_custom_menu_group_history_del() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_custom_menu_group_history select 'd', now(), old.*;
+    return null;
+end
+$$;
+drop trigger if exists core_custom_menu_group_history_ins on hymn.core_custom_menu_group;
+create trigger core_custom_menu_group_history_ins
+    after insert
+    on hymn.core_custom_menu_group
+    for each row
+execute function hymn.core_custom_menu_group_history_ins();
+drop trigger if exists core_custom_menu_group_history_upd on hymn.core_custom_menu_group;
+create trigger core_custom_menu_group_history_upd
+    after update
+    on hymn.core_custom_menu_group
+    for each row
+execute function hymn.core_custom_menu_group_history_upd();
+drop trigger if exists core_custom_menu_group_history_del on hymn.core_custom_menu_group;
+create trigger core_custom_menu_group_history_del
+    after delete
+    on hymn.core_custom_menu_group
+    for each row
+execute function hymn.core_custom_menu_group_history_del();
 drop table if exists hymn.core_custom_menu_item_history cascade;
 create table hymn.core_custom_menu_item_history
 (
     operation    text,
     stamp        timestamp,
     id           text,
+    group_id     text,
     api          text,
     name         text,
     path         text,

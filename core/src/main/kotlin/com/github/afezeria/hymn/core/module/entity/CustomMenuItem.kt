@@ -16,6 +16,8 @@ data class CustomMenuItem(
 
     @ApiModelProperty(value = "唯一标识")
     var api: String,
+    @ApiModelProperty(value = "分组id")
+    var groupId: String? = null,
     @ApiModelProperty(value = "菜单项名称")
     var name: String,
     @ApiModelProperty(value = "url path")
