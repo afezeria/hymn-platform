@@ -51,11 +51,11 @@ class BusinessCodeRefService {
     }
 
     fun findByApiId(apiId: String): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.select({ it.byInterfaceId eq apiId })
+        return businessCodeRefDao.select({ it.byApiId eq apiId })
     }
 
     fun findByFunctionId(apiId: String): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.select({ it.byCustomFunctionId eq apiId })
+        return businessCodeRefDao.select({ it.byFunctionId eq apiId })
     }
 
     fun pageFindView(

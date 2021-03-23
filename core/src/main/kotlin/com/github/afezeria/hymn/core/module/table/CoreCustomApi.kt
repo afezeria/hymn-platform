@@ -1,7 +1,7 @@
 package com.github.afezeria.hymn.core.module.table
 
 import com.github.afezeria.hymn.common.db.AbstractTable
-import com.github.afezeria.hymn.core.module.entity.CustomInterface
+import com.github.afezeria.hymn.core.module.entity.CustomApi
 import org.ktorm.schema.boolean
 import org.ktorm.schema.datetime
 import org.ktorm.schema.varchar
@@ -9,8 +9,8 @@ import org.ktorm.schema.varchar
 /**
  * @author afezeria
  */
-class CoreCustomInterfaces(alias: String? = null) :
-    AbstractTable<CustomInterface>("core_custom_interface", schema = "hymn", alias = alias) {
+class CoreCustomApi(alias: String? = null) :
+    AbstractTable<CustomApi>("core_custom_api", schema = "hymn", alias = alias) {
 
     val api = varchar("api")
     val name = varchar("name")

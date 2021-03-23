@@ -20,6 +20,8 @@ class BizObjectDto(
         required = true
     )
     var type: String,
+    @ApiModelProperty(value = "远程对象逻辑处理函数的id")
+    val functionId: String? = null,
     @ApiModelProperty(value = "远程rest接口地址，系统通过该地址调用远程数据")
     var remoteUrl: String? = null,
     @ApiModelProperty(value = "远程rest验证信息")
@@ -48,6 +50,7 @@ class BizObjectDto(
             sourceTable = sourceTable,
             active = active,
             type = type,
+            functionId = functionId,
             remoteUrl = remoteUrl,
             remoteToken = remoteToken,
             moduleApi = moduleApi,
@@ -65,6 +68,7 @@ class BizObjectDto(
             it.sourceTable = sourceTable
             it.active = active
             it.type = type
+            it.functionId = functionId
             it.remoteUrl = remoteUrl
             it.remoteToken = remoteToken
             it.moduleApi = moduleApi

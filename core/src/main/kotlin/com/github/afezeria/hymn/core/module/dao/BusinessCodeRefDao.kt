@@ -23,35 +23,40 @@ class BusinessCodeRefDao(
     fun selectByFieldId(
         fieldId: String,
     ): MutableList<BusinessCodeRef> {
-        return select({ it.fieldId eq fieldId })
+        return select({ it.refFieldId eq fieldId })
     }
 
+
+    private val byObjects = CoreBizObjects("by_objects")
     private val byTriggers = CoreBizObjectTriggers("by_triggers")
     private val byTriggerObjects = CoreBizObjects("by_trigger_objects")
-    private val byInterfaces = CoreCustomInterfaces("by_interfaces")
+    private val byInterfaces = CoreCustomApi("by_interfaces")
     private val byCustomFunctions = CoreCustomFunctions("by_functions")
     private val objects = CoreBizObjects()
     private val fields = CoreBizObjectFields()
     private val customFunctions = CoreCustomFunctions()
     private val columns = listOf(
         table.id,
+        table.byObjectId,
+        byObjects.api,
+        byObjects.name,
         table.byTriggerId,
         byTriggers.api,
         byTriggerObjects.id,
         byTriggerObjects.api,
         byTriggerObjects.name,
-        table.byInterfaceId,
+        table.byApiId,
         byInterfaces.name,
         byInterfaces.api,
-        table.byCustomFunctionId,
+        table.byFunctionId,
         byCustomFunctions.api,
-        table.bizObjectId,
+        table.refObjectId,
         objects.api,
         objects.name,
-        table.fieldId,
+        table.refFieldId,
         fields.api,
         fields.name,
-        table.customFunctionId,
+        table.refFunctionId,
         customFunctions.api,
     )
 
@@ -68,22 +73,23 @@ class BusinessCodeRefDao(
         val expr: ColumnDeclaring<Boolean>? = table.let {
             when {
                 byTriggerId != null -> it.byTriggerId eq byTriggerId
-                byInterfaceId != null -> it.byInterfaceId eq byInterfaceId
-                byCustomFunctionId != null -> it.byCustomFunctionId eq byCustomFunctionId
-                bizObjectId != null -> it.bizObjectId eq bizObjectId
-                fieldId != null -> it.fieldId eq fieldId
-                customFunctionId != null -> it.customFunctionId eq customFunctionId
+                byInterfaceId != null -> it.byApiId eq byInterfaceId
+                byCustomFunctionId != null -> it.byFunctionId eq byCustomFunctionId
+                bizObjectId != null -> it.refObjectId eq bizObjectId
+                fieldId != null -> it.refFieldId eq fieldId
+                customFunctionId != null -> it.refFunctionId eq customFunctionId
                 else -> null
             }
         }
         return databaseService.db().from(table)
+            .leftJoin(byObjects, byObjects.id eq table.byObjectId)
             .leftJoin(byTriggers, byTriggers.id eq table.byTriggerId)
             .leftJoin(byTriggerObjects, byTriggerObjects.id eq byTriggers.bizObjectId)
-            .leftJoin(byInterfaces, byInterfaces.id eq table.byInterfaceId)
-            .leftJoin(byCustomFunctions, byCustomFunctions.id eq table.byCustomFunctionId)
-            .leftJoin(objects, objects.id eq table.bizObjectId)
-            .leftJoin(fields, fields.id eq table.fieldId)
-            .leftJoin(customFunctions, customFunctions.id eq table.customFunctionId)
+            .leftJoin(byInterfaces, byInterfaces.id eq table.byApiId)
+            .leftJoin(byCustomFunctions, byCustomFunctions.id eq table.byFunctionId)
+            .leftJoin(objects, objects.id eq table.refObjectId)
+            .leftJoin(fields, fields.id eq table.refFieldId)
+            .leftJoin(customFunctions, customFunctions.id eq table.refFunctionId)
             .select(columns).run {
                 expr?.let { where(expr) } ?: this
             }
@@ -91,24 +97,27 @@ class BusinessCodeRefDao(
             .mapTo(ArrayList()) {
                 BusinessCodeRefListView(
                     id = requireNotNull(it[table.id]),
+                    byObjectId = it[table.byObjectId],
+                    byObjectApi = it[byObjects.api],
+                    byObjectName = it[byObjects.name],
                     byTriggerId = it[table.byTriggerId],
                     byTriggerApi = it[byTriggers.api],
                     byTriggerObjectId = it[byTriggerObjects.id],
                     byTriggerObjectApi = it[byTriggerObjects.api],
                     byTriggerObjectName = it[byTriggerObjects.name],
-                    byInterfaceId = it[table.byInterfaceId],
+                    byInterfaceId = it[table.byApiId],
                     byInterfaceName = it[byInterfaces.name],
                     byInterfaceApi = it[byInterfaces.api],
-                    byCustomFunctionId = it[table.byCustomFunctionId],
-                    byCustomFunctionApi = it[byCustomFunctions.api],
-                    bizObjectId = it[table.bizObjectId],
-                    bizObjectApi = it[objects.api],
-                    bizObjectName = it[objects.name],
-                    fieldId = it[table.fieldId],
-                    fieldApi = it[fields.api],
-                    fieldName = it[fields.name],
-                    customFunctionId = it[table.customFunctionId],
-                    customFunctionApi = it[customFunctions.api],
+                    byFunctionId = it[table.byFunctionId],
+                    byFunctionApi = it[byCustomFunctions.api],
+                    refObjectId = it[table.refObjectId],
+                    refObjectApi = it[objects.api],
+                    refObjectName = it[objects.name],
+                    refFieldId = it[table.refFieldId],
+                    refFieldApi = it[fields.api],
+                    refFieldName = it[fields.name],
+                    refFunctionId = it[table.refFunctionId],
+                    refFunctionApi = it[customFunctions.api],
                 )
             }
     }

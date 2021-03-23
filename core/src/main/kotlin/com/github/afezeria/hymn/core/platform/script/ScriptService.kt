@@ -71,7 +71,7 @@ interface ScriptService : ScriptFunctionService {
      * @param txCallback 事务回调，调用者提供的执行数据库更新的函数，
      */
     fun <T> compile(
-        type: CompileType,
+        type: ScriptType,
         id: String?,
         lang: String,
         option: String?,

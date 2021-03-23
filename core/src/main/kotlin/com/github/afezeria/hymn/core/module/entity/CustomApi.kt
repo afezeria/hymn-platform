@@ -12,7 +12,7 @@ import java.time.LocalDateTime
  * @author afezeria
  */
 @ApiModel(value = "自定义接口", description = """自定义接口""")
-data class CustomInterface(
+data class CustomApi(
 
     @ApiModelProperty(value = "接口api名称，唯一标识 ")
     var api: String,

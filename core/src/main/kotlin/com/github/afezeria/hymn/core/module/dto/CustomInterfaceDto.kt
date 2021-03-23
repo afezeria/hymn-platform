@@ -1,6 +1,6 @@
 package com.github.afezeria.hymn.core.module.dto
 
-import com.github.afezeria.hymn.core.module.entity.CustomInterface
+import com.github.afezeria.hymn.core.module.entity.CustomApi
 import io.swagger.annotations.ApiModelProperty
 
 /**
@@ -22,8 +22,8 @@ class CustomInterfaceDto(
     @ApiModelProperty(value = "")
     var remark: String? = null,
 ) {
-    fun toEntity(): CustomInterface {
-        return CustomInterface(
+    fun toEntity(): CustomApi {
+        return CustomApi(
             api = api,
             name = name,
             code = code,
@@ -34,7 +34,7 @@ class CustomInterfaceDto(
         )
     }
 
-    fun update(entity: CustomInterface) {
+    fun update(entity: CustomApi) {
         entity.also {
             it.api = api
             it.name = name

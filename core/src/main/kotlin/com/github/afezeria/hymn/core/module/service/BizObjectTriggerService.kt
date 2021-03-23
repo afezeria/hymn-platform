@@ -6,8 +6,8 @@ import com.github.afezeria.hymn.common.util.msgById
 import com.github.afezeria.hymn.core.module.dao.BizObjectTriggerDao
 import com.github.afezeria.hymn.core.module.dto.BizObjectTriggerDto
 import com.github.afezeria.hymn.core.module.entity.BizObjectTrigger
-import com.github.afezeria.hymn.core.platform.script.CompileType
 import com.github.afezeria.hymn.core.platform.script.ScriptService
+import com.github.afezeria.hymn.core.platform.script.ScriptType
 import org.ktorm.dsl.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -43,7 +43,7 @@ class BizObjectTriggerService {
                 ?: throw DataNotFoundException("BizObjectTrigger".msgById(id))
             dto.update(e)
             scriptService.compile(
-                type = CompileType.TRIGGER,
+                type = ScriptType.TRIGGER,
                 id = id,
                 lang = dto.lang,
                 option = dto.optionText,
@@ -57,7 +57,7 @@ class BizObjectTriggerService {
     fun create(dto: BizObjectTriggerDto): String {
         val e = dto.toEntity()
         val id = scriptService.compile(
-            type = CompileType.TRIGGER,
+            type = ScriptType.TRIGGER,
             id = null,
             lang = dto.lang,
             option = dto.optionText,

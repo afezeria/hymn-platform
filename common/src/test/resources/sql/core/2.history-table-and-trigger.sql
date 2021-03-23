@@ -226,6 +226,7 @@ create table hymn.core_biz_object_history
     source_table    text,
     active          bool,
     type            text,
+    function_id     text,
     remote_url      text,
     remote_token    text,
     module_api      text,
@@ -984,21 +985,23 @@ execute function hymn.core_biz_object_type_perm_history_del();
 drop table if exists hymn.core_business_code_ref_history cascade;
 create table hymn.core_business_code_ref_history
 (
-    operation             text,
-    stamp                 timestamp,
-    id                    text,
-    by_trigger_id         text,
-    by_interface_id       text,
-    by_custom_function_id text,
-    biz_object_id         text,
-    field_id              text,
-    custom_function_id    text,
-    create_by_id          text,
-    create_by             text,
-    modify_by_id          text,
-    modify_by             text,
-    create_date           timestamptz,
-    modify_date           timestamptz
+    operation       text,
+    stamp           timestamp,
+    id              text,
+    by_object_id    text,
+    by_trigger_id   text,
+    by_api_id       text,
+    by_function_id  text,
+    ref_object_id   text,
+    ref_field_id    text,
+    ref_function_id text,
+    auto_gen        bool,
+    create_by_id    text,
+    create_by       text,
+    modify_by_id    text,
+    modify_by       text,
+    create_date     timestamptz,
+    modify_date     timestamptz
 );
 create or replace function hymn.core_business_code_ref_history_ins() returns trigger
     language plpgsql as
@@ -1268,6 +1271,68 @@ create trigger core_cron_job_history_del
     on hymn.core_cron_job
     for each row
 execute function hymn.core_cron_job_history_del();
+drop table if exists hymn.core_custom_api_history cascade;
+create table hymn.core_custom_api_history
+(
+    operation    text,
+    stamp        timestamp,
+    id           text,
+    api          text,
+    name         text,
+    code         text,
+    active       bool,
+    lang         text,
+    option_text  text,
+    remark       text,
+    create_by_id text,
+    create_by    text,
+    modify_by_id text,
+    modify_by    text,
+    create_date  timestamptz,
+    modify_date  timestamptz
+);
+create or replace function hymn.core_custom_api_history_ins() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_custom_api_history select 'i', now(), new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_custom_api_history_upd() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_custom_api_history select 'u', now(), new.*;
+    return null;
+end
+$$;
+create or replace function hymn.core_custom_api_history_del() returns trigger
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_custom_api_history select 'd', now(), old.*;
+    return null;
+end
+$$;
+drop trigger if exists core_custom_api_history_ins on hymn.core_custom_api;
+create trigger core_custom_api_history_ins
+    after insert
+    on hymn.core_custom_api
+    for each row
+execute function hymn.core_custom_api_history_ins();
+drop trigger if exists core_custom_api_history_upd on hymn.core_custom_api;
+create trigger core_custom_api_history_upd
+    after update
+    on hymn.core_custom_api
+    for each row
+execute function hymn.core_custom_api_history_upd();
+drop trigger if exists core_custom_api_history_del on hymn.core_custom_api;
+create trigger core_custom_api_history_del
+    after delete
+    on hymn.core_custom_api
+    for each row
+execute function hymn.core_custom_api_history_del();
 drop table if exists hymn.core_custom_button_history cascade;
 create table hymn.core_custom_button_history
 (
@@ -1449,68 +1514,6 @@ create trigger core_custom_function_history_del
     on hymn.core_custom_function
     for each row
 execute function hymn.core_custom_function_history_del();
-drop table if exists hymn.core_custom_interface_history cascade;
-create table hymn.core_custom_interface_history
-(
-    operation    text,
-    stamp        timestamp,
-    id           text,
-    api          text,
-    name         text,
-    code         text,
-    active       bool,
-    lang         text,
-    option_text  text,
-    remark       text,
-    create_by_id text,
-    create_by    text,
-    modify_by_id text,
-    modify_by    text,
-    create_date  timestamptz,
-    modify_date  timestamptz
-);
-create or replace function hymn.core_custom_interface_history_ins() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_custom_interface_history select 'i', now(), new.*;
-    return null;
-end
-$$;
-create or replace function hymn.core_custom_interface_history_upd() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_custom_interface_history select 'u', now(), new.*;
-    return null;
-end
-$$;
-create or replace function hymn.core_custom_interface_history_del() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_custom_interface_history select 'd', now(), old.*;
-    return null;
-end
-$$;
-drop trigger if exists core_custom_interface_history_ins on hymn.core_custom_interface;
-create trigger core_custom_interface_history_ins
-    after insert
-    on hymn.core_custom_interface
-    for each row
-execute function hymn.core_custom_interface_history_ins();
-drop trigger if exists core_custom_interface_history_upd on hymn.core_custom_interface;
-create trigger core_custom_interface_history_upd
-    after update
-    on hymn.core_custom_interface
-    for each row
-execute function hymn.core_custom_interface_history_upd();
-drop trigger if exists core_custom_interface_history_del on hymn.core_custom_interface;
-create trigger core_custom_interface_history_del
-    after delete
-    on hymn.core_custom_interface
-    for each row
-execute function hymn.core_custom_interface_history_del();
 drop table if exists hymn.core_custom_menu_item_history cascade;
 create table hymn.core_custom_menu_item_history
 (

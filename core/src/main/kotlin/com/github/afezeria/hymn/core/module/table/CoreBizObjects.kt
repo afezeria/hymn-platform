@@ -17,6 +17,7 @@ class CoreBizObjects(alias: String? = null) :
     val sourceTable = varchar("source_table")
     val active = boolean("active")
     val type = varchar("type")
+    val functionId = varchar("function_id")
     val remoteUrl = varchar("remote_url")
     val remoteToken = varchar("remote_token")
     val moduleApi = varchar("module_api")

@@ -14,18 +14,20 @@ import java.time.LocalDateTime
 @ApiModel(value = "业务代码引用关系表", description = """业务代码引用关系表""")
 data class BusinessCodeRef(
 
+    @ApiModelProperty(value = "远程对象id ")
+    var byObjectId: String? = null,
     @ApiModelProperty(value = "触发器id ")
     var byTriggerId: String? = null,
     @ApiModelProperty(value = "接口id ")
-    var byInterfaceId: String? = null,
+    var byApiId: String? = null,
     @ApiModelProperty(value = "自定义函数id ")
-    var byCustomFunctionId: String? = null,
+    var byFunctionId: String? = null,
     @ApiModelProperty(value = "被引用对象id ")
-    var bizObjectId: String? = null,
+    var refObjectId: String? = null,
     @ApiModelProperty(value = "被引用字段id ")
-    var fieldId: String? = null,
+    var refFieldId: String? = null,
     @ApiModelProperty(value = "被引用自定义函数id ")
-    var customFunctionId: String? = null,
+    var refFunctionId: String? = null,
 ) : AbstractEntity() {
 
     lateinit var createById: String

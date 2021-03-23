@@ -71,7 +71,9 @@ alter table hymn.core_biz_object
 alter table hymn.core_biz_object
     add check ( type in ('custom', 'module', 'remote') );
 alter table hymn.core_biz_object
-    add foreign key (module_api) references hymn.core_module on delete cascade;
+    add foreign key (function_id) references hymn.core_custom_function on delete restrict;
+alter table hymn.core_biz_object
+    add foreign key (module_api) references hymn.core_module on delete restrict;
 alter table hymn.core_biz_object_field
     add foreign key (biz_object_id) references hymn.core_biz_object on delete cascade;
 create index core_biz_object_field_biz_object_id_idx
@@ -176,23 +178,25 @@ alter table hymn.core_biz_object_type_perm
 create index core_biz_object_type_perm_type_id_idx
     on hymn.core_biz_object_type_perm (type_id);
 alter table hymn.core_business_code_ref
+    add foreign key (by_object_id) references hymn.core_biz_object on delete cascade;
+alter table hymn.core_business_code_ref
     add foreign key (by_trigger_id) references hymn.core_biz_object_trigger on delete cascade;
 alter table hymn.core_business_code_ref
-    add foreign key (by_interface_id) references hymn.core_custom_interface on delete cascade;
+    add foreign key (by_api_id) references hymn.core_custom_api on delete cascade;
 alter table hymn.core_business_code_ref
-    add foreign key (by_custom_function_id) references hymn.core_custom_function on delete cascade;
+    add foreign key (by_function_id) references hymn.core_custom_function on delete cascade;
 alter table hymn.core_business_code_ref
-    add foreign key (biz_object_id) references hymn.core_biz_object on delete restrict;
-create index core_business_code_ref_biz_object_id_idx
-    on hymn.core_business_code_ref (biz_object_id);
+    add foreign key (ref_object_id) references hymn.core_biz_object on delete restrict;
+create index core_business_code_ref_ref_object_id_idx
+    on hymn.core_business_code_ref (ref_object_id);
 alter table hymn.core_business_code_ref
-    add foreign key (field_id) references hymn.core_biz_object_field on delete restrict;
-create index core_business_code_ref_field_id_idx
-    on hymn.core_business_code_ref (field_id);
+    add foreign key (ref_field_id) references hymn.core_biz_object_field on delete restrict;
+create index core_business_code_ref_ref_field_id_idx
+    on hymn.core_business_code_ref (ref_field_id);
 alter table hymn.core_business_code_ref
-    add foreign key (custom_function_id) references hymn.core_custom_function on delete restrict;
-create index core_business_code_ref_custom_function_id_idx
-    on hymn.core_business_code_ref (custom_function_id);
+    add foreign key (ref_function_id) references hymn.core_custom_function on delete restrict;
+create index core_business_code_ref_ref_function_id_idx
+    on hymn.core_business_code_ref (ref_function_id);
 alter table hymn.core_button_perm
     add foreign key (role_id) references hymn.core_role on delete cascade;
 create index core_button_perm_role_id_idx
@@ -207,6 +211,10 @@ alter table hymn.core_cron_job
     add foreign key (custom_function_id) references hymn.core_custom_function on delete restrict;
 create index core_cron_job_custom_function_id_idx
     on hymn.core_cron_job (custom_function_id);
+alter table hymn.core_custom_api
+    add constraint core_custom_api_api_uk unique (api);
+alter table hymn.core_custom_api
+    add check ( lang in ('javascript') );
 alter table hymn.core_custom_button
     add constraint core_custom_button_api_uk unique (api);
 alter table hymn.core_custom_button
@@ -221,10 +229,6 @@ alter table hymn.core_custom_function
 alter table hymn.core_custom_function
     add check ( type in ('function', 'job') );
 alter table hymn.core_custom_function
-    add check ( lang in ('javascript') );
-alter table hymn.core_custom_interface
-    add constraint core_custom_interface_api_uk unique (api);
-alter table hymn.core_custom_interface
     add check ( lang in ('javascript') );
 alter table hymn.core_custom_menu_item
     add constraint core_custom_menu_item_api_uk unique (api);

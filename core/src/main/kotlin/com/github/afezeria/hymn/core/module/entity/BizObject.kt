@@ -1,7 +1,6 @@
 package com.github.afezeria.hymn.core.module.entity
 
 import com.github.afezeria.hymn.common.db.AbstractEntity
-
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import java.time.LocalDateTime
@@ -26,6 +25,8 @@ data class BizObject(
         value = "对象类型, 模块对象不能在系统后台进行新增删除，底层表单和相关数据需要手动创建，外部对象没有底层表，通过url调用外部接口，只能在应用层脚本中使用 ;; optional_value:[custom(自定义对象),module(模块对象),remote(远程对象)]"
     )
     var type: String,
+    @ApiModelProperty(value = "远程对象逻辑处理函数的id")
+    var functionId: String? = null,
     @ApiModelProperty(value = "远程rest接口地址，系统通过该地址调用远程数据")
     var remoteUrl: String? = null,
     @ApiModelProperty(value = "远程rest验证信息")

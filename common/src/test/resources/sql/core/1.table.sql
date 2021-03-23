@@ -286,8 +286,8 @@ comment on column hymn.core_custom_component.code is '组件html代码';
 
 
 
-drop table if exists hymn.core_custom_interface cascade;
-create table hymn.core_custom_interface
+drop table if exists hymn.core_custom_api cascade;
+create table hymn.core_custom_api
 (
     id           text primary key     default replace(gen_random_uuid()::text, '-', ''),
     api          text        not null,
@@ -304,13 +304,13 @@ create table hymn.core_custom_interface
     create_date  timestamptz not null default now(),
     modify_date  timestamptz not null default now()
 );
-comment on table hymn.core_custom_interface is '自定义接口';
-comment on column hymn.core_custom_interface.api is '接口api名称，唯一标识 ;; uk';
-comment on column hymn.core_custom_interface.name is '接口名称';
-comment on column hymn.core_custom_interface.code is '接口代码';
-comment on column hymn.core_custom_interface.active is '是否启用';
-comment on column hymn.core_custom_interface.lang is '语言 ;; optional_value:[javascript]';
-comment on column hymn.core_custom_interface.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
+comment on table hymn.core_custom_api is '自定义接口';
+comment on column hymn.core_custom_api.api is '接口api名称，唯一标识 ;; uk';
+comment on column hymn.core_custom_api.name is '接口名称';
+comment on column hymn.core_custom_api.code is '接口代码';
+comment on column hymn.core_custom_api.active is '是否启用';
+comment on column hymn.core_custom_api.lang is '语言 ;; optional_value:[javascript]';
+comment on column hymn.core_custom_api.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
 
 
 
@@ -422,6 +422,7 @@ create table hymn.core_biz_object
     source_table    text,
     active          bool                 default true not null,
     type            text        not null,
+    function_id     text,
     remote_url      text,
     remote_token    text,
     module_api      text,
@@ -442,7 +443,7 @@ comment on column hymn.core_biz_object.name is '业务对象名称，用于页�
 comment on column hymn.core_biz_object.api is '业务对象api，唯一标识 ;;uk';
 comment on column hymn.core_biz_object.active is '是否启用，停用后无法进行增删改查等操作';
 comment on column hymn.core_biz_object.source_table is '实际表名，例： core_data_table_500';
-comment on column hymn.core_biz_object.module_api is '模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module cascade]';
+comment on column hymn.core_biz_object.module_api is '模块api，所有自定义对象该字段都为null，不为null表示该对象属于指定模块，通过添加模块对象的 core_biz_object 和 core_biz_object_field 数据来支持在触发器中使用DataService提供的通用操作 ;;fk:[core_module restrict]';
 comment on column hymn.core_biz_object.can_insert is '模块对象及远程对象是否可以新增数据';
 comment on column hymn.core_biz_object.can_update is '模块对象是及远程对象否可以更新数据';
 comment on column hymn.core_biz_object.can_delete is '模块对象是及远程对象否可以删除数据';
@@ -450,6 +451,7 @@ comment on column hymn.core_biz_object.can_soft_delete is '是否支持软删除
 comment on column hymn.core_biz_object.type is '对象类型, 模块对象不能在系统后台进行新增删除，底层表单和相关数据需要手动创建，外部对象没有底层表，通过url调用外部接口，只能在应用层脚本中使用 ;; optional_value:[custom(自定义对象),module(模块对象),remote(远程对象)]';
 comment on column hymn.core_biz_object.remote_url is '远程rest接口地址，系统通过该地址调用远程数据';
 comment on column hymn.core_biz_object.remote_token is '远程rest验证信息';
+comment on column hymn.core_biz_object.function_id is '远程对象逻辑处理函数的id，关联到 hymn.core_custom_function ;;fk:[core_custom_function restrict]';
 
 
 
@@ -1048,27 +1050,30 @@ comment on column hymn.core_custom_function.option_text is '用于给编译器�
 drop table if exists hymn.core_business_code_ref;
 create table hymn.core_business_code_ref
 (
-    id                    text primary key     default replace(gen_random_uuid()::text, '-', ''),
-    by_trigger_id         text,
-    by_interface_id       text,
-    by_custom_function_id text,
-    biz_object_id         text,
-    field_id              text,
-    custom_function_id    text,
-    create_by_id          text        not null,
-    create_by             text        not null,
-    modify_by_id          text        not null,
-    modify_by             text        not null,
-    create_date           timestamptz not null default now(),
-    modify_date           timestamptz not null default now()
+    id              text primary key     default replace(gen_random_uuid()::text, '-', ''),
+    by_object_id    text,
+    by_trigger_id   text,
+    by_api_id       text,
+    by_function_id  text,
+    ref_object_id   text,
+    ref_field_id    text,
+    ref_function_id text,
+    auto_gen        bool                 default true,
+    create_by_id    text        not null,
+    create_by       text        not null,
+    modify_by_id    text        not null,
+    modify_by       text        not null,
+    create_date     timestamptz not null default now(),
+    modify_date     timestamptz not null default now()
 );
 comment on table hymn.core_business_code_ref is '业务代码引用关系表';
+comment on column hymn.core_business_code_ref.by_object_id is '远程对象id ;;fk:[core_biz_object cascade]';
 comment on column hymn.core_business_code_ref.by_trigger_id is '触发器id ;;fk:[core_biz_object_trigger cascade]';
-comment on column hymn.core_business_code_ref.by_interface_id is '接口id ;;fk:[core_custom_interface cascade]';
-comment on column hymn.core_business_code_ref.by_custom_function_id is '自定义函数id ;;fk:[core_custom_function cascade]';
-comment on column hymn.core_business_code_ref.biz_object_id is '被引用对象id ;;fk:[core_biz_object restrict];idx';
-comment on column hymn.core_business_code_ref.field_id is '被引用字段id ;;fk:[core_biz_object_field restrict];idx';
-comment on column hymn.core_business_code_ref.custom_function_id is '被引用共享代码id ;;fk:[core_custom_function restrict];idx';
+comment on column hymn.core_business_code_ref.by_api_id is '接口id ;;fk:[core_custom_api cascade]';
+comment on column hymn.core_business_code_ref.by_function_id is '自定义函数id ;;fk:[core_custom_function cascade]';
+comment on column hymn.core_business_code_ref.ref_object_id is '被引用对象id ;;fk:[core_biz_object restrict];idx';
+comment on column hymn.core_business_code_ref.ref_field_id is '被引用字段id ;;fk:[core_biz_object_field restrict];idx';
+comment on column hymn.core_business_code_ref.ref_function_id is '被引用函数id ;;fk:[core_custom_function restrict];idx';
 
 drop table if exists hymn.core_cron_job;
 create table hymn.core_cron_job

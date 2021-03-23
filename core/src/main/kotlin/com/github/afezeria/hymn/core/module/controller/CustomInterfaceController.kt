@@ -7,8 +7,8 @@ import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.common.exception.ResourceNotFoundException
 import com.github.afezeria.hymn.common.util.msgById
 import com.github.afezeria.hymn.core.module.dto.CustomInterfaceDto
-import com.github.afezeria.hymn.core.module.entity.CustomInterface
-import com.github.afezeria.hymn.core.module.service.CustomInterfaceService
+import com.github.afezeria.hymn.core.module.entity.CustomApi
+import com.github.afezeria.hymn.core.module.service.CustomApiService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*
 class CustomInterfaceController {
 
     @Autowired
-    private lateinit var customInterfaceService: CustomInterfaceService
+    private lateinit var customApiService: CustomApiService
 
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "分页查询数据", notes = "")
@@ -33,16 +33,16 @@ class CustomInterfaceController {
     fun findAll(
         @RequestParam("pageSize", defaultValue = "50") pageSize: Int,
         @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
-    ): List<CustomInterface> {
-        val list = customInterfaceService.pageFind(pageSize, pageNum)
+    ): List<CustomApi> {
+        val list = customApiService.pageFind(pageSize, pageNum)
         return list
     }
 
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "根据id查询", notes = "")
     @GetMapping("/{id}")
-    fun findById(@PathVariable("id") id: String): CustomInterface {
-        val entity = customInterfaceService.findById(id)
+    fun findById(@PathVariable("id") id: String): CustomApi {
+        val entity = customApiService.findById(id)
             ?: throw ResourceNotFoundException("自定义接口".msgById(id))
         return entity
     }
@@ -51,7 +51,7 @@ class CustomInterfaceController {
     @ApiOperation(value = "新建", notes = "")
     @PostMapping
     fun create(@RequestBody dto: CustomInterfaceDto): String {
-        val id = customInterfaceService.create(dto)
+        val id = customApiService.create(dto)
         return id
     }
 
@@ -62,7 +62,7 @@ class CustomInterfaceController {
         @PathVariable("id") id: String,
         @RequestBody dto: CustomInterfaceDto
     ): Int {
-        val count = customInterfaceService.update(id, dto)
+        val count = customApiService.update(id, dto)
         return count
     }
 
@@ -70,7 +70,7 @@ class CustomInterfaceController {
     @ApiOperation(value = "根据id删除", notes = "")
     @DeleteMapping("/{id}")
     fun delete(@PathVariable("id") id: String): Int {
-        val count = customInterfaceService.removeById(id)
+        val count = customApiService.removeById(id)
         return count
     }
 }
