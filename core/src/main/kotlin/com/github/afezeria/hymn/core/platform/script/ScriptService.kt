@@ -73,6 +73,7 @@ interface ScriptService : ScriptFunctionService {
     fun <T> compile(
         type: ScriptType,
         id: String?,
+        api: String,
         lang: String,
         option: String?,
         code: String,

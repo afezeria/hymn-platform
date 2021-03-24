@@ -1,24 +1,24 @@
-function parse(api, code) {
-  let program = acorn.parse(code);
-  let declareInfo = getDeclareInfo(api, program);
-  let invokeInfo = getMethodInvoke(program);
+var CompileError = Java.type(
+    'com.github.afezeria.hymn.script.CompileException');
+
+function parse(code) {
+  let declareInfo = getDeclareInfo(code);
+  let invokeInfo = getMethodInvoke(code);
   return JSON.stringify({
     ...declareInfo,
     ...invokeInfo
   })
 }
 
-function getDeclareInfo(api, node) {
+function getDeclareInfo(code) {
+  let node = acorn.parse(code);
   if (node.body.length !== 1) {
     console.log(node.body.length)
-    throw new Error("脚本中只能只能声明一个顶层语句");
+    throw new CompileError("脚本中只能只能声明一个顶层语句");
   }
   let fun = node.body[0];
   if (fun.type !== 'FunctionDeclaration') {
-    throw new Error("脚本中顶层语句必须是一个函数");
-  }
-  if (fun.id.name !== api) {
-    throw new Error("顶层函数名称必须与api相同");
+    throw new CompileError("脚本中顶层语句必须是一个函数");
   }
   return {
     name: fun.id.name,
@@ -28,7 +28,8 @@ function getDeclareInfo(api, node) {
   }
 }
 
-function getMethodInvoke(body) {
+function getMethodInvoke(code) {
+  let body = acorn.parse(code);
   let result = {
     globalInvoke: [],
     memberInvoke: [],
@@ -44,6 +45,7 @@ function getMethodInvoke(body) {
           result.memberInvoke.push({
             obj: receiver.object.name,
             method: receiver.property.name,
+            line: getLineNumber(code, node),
             arguments: node.arguments.map((item) => {
               return item.value
             }),
@@ -53,6 +55,7 @@ function getMethodInvoke(body) {
         //调用全局函数
         result.globalInvoke.push({
           method: receiver.name,
+          line: getLineNumber(code, node),
           arguments: node.arguments.map((item) => {
             return item.value
           }),
@@ -61,6 +64,15 @@ function getMethodInvoke(body) {
     }
   })
   return result
+}
+
+/**
+ * 获取节点行号
+ * @param str {String}
+ * @param node
+ */
+function getLineNumber(str, node) {
+  return str.substr(0, node.start).match(/\n/g).length
 }
 
 function getFirstFunctionInfo(node) {

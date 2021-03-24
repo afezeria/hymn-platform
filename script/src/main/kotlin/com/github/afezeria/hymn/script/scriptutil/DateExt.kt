@@ -2,7 +2,6 @@ package com.github.afezeria.hymn.script.scriptutil
 
 import java.time.*
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 import java.time.temporal.IsoFields
 import java.time.temporal.TemporalAdjusters
 
@@ -11,12 +10,8 @@ import java.time.temporal.TemporalAdjusters
  * @author afezeria
  */
 object DateExt {
-    val yyyyMMddHHmmss = DateTimeFormatter
+    val defaultFormatter = DateTimeFormatter
         .ofPattern("yyyy-MM-dd HH:mm:ss")
-
-    val yyyyMMdd = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-    val hhmmss = DateTimeFormatter.ofPattern("HH:mm:ss")
 
     val defaultZoneId = ZoneId.systemDefault()
 
@@ -51,9 +46,9 @@ object DateExt {
         return if (day == null) {
             LocalDateTime.now().dayOfWeek.value
         } else if (day.length > 10) {
-            LocalDateTime.parse(day, yyyyMMddHHmmss).dayOfWeek.value
+            LocalDateTime.parse(day, defaultFormatter).dayOfWeek.value
         } else {
-            LocalDate.parse(day, yyyyMMdd).dayOfWeek.value
+            LocalDate.parse(day).dayOfWeek.value
         }
     }
 
@@ -72,9 +67,9 @@ object DateExt {
 
     fun nextWeekDay(dow: Int, day: String): LocalDate {
         return if (day.length > 10) {
-            nextWeekDay(dow, LocalDateTime.parse(day, yyyyMMddHHmmss))
+            nextWeekDay(dow, LocalDateTime.parse(day, defaultFormatter))
         } else {
-            nextWeekDay(dow, LocalDate.parse(day, yyyyMMdd))
+            nextWeekDay(dow, LocalDate.parse(day))
         }
     }
 
@@ -92,9 +87,9 @@ object DateExt {
 
     fun weekOfYear(day: String): Int {
         return if (day.length > 10) {
-            weekOfYear(LocalDateTime.parse(day, yyyyMMddHHmmss))
+            weekOfYear(LocalDateTime.parse(day, defaultFormatter))
         } else {
-            weekOfYear(LocalDate.parse(day, yyyyMMdd))
+            weekOfYear(LocalDate.parse(day))
         }
     }
 
@@ -102,29 +97,7 @@ object DateExt {
         return weekOfYear(LocalDate.now())
     }
 
-    fun parseDateTime(str: String): LocalDateTime? {
-        return try {
-            LocalDateTime.parse(str, yyyyMMddHHmmss)
-        } catch (e: DateTimeParseException) {
-            null
-        }
-    }
 
-    fun parseDate(str: String): LocalDate? {
-        return try {
-            LocalDate.parse(str)
-        } catch (e: DateTimeParseException) {
-            null
-        }
-    }
-
-    fun pareTime(str: String): LocalTime? {
-        return try {
-            LocalTime.parse(str)
-        } catch (e: DateTimeParseException) {
-            null
-        }
-    }
 
     fun format(time: LocalTime, format: String): String {
         return time.format(DateTimeFormatter.ofPattern(format))

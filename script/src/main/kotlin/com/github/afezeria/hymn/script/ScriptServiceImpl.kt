@@ -22,6 +22,7 @@ import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import kotlin.reflect.full.memberFunctions
 
 
 /**
@@ -60,6 +61,15 @@ class ScriptServiceImpl : ScriptService {
             ConcurrentHashMap()
         private val codeReferenceByFunction: MutableMap<String, MutableList<String>> =
             ConcurrentHashMap()
+
+        private val dataServiceQueryMethod =
+            DataService::class.memberFunctions.toList().filter { it.name.startsWith("query") }
+                .map { it.name }
+        private val dataServiceCrudMethod =
+            DataService::class.memberFunctions.toList()
+                .filter { it.name.matches(Regex("^(query|insert|update|delete)")) }
+                .map { it.name }
+
     }
 
     private fun getTriggerSource(
@@ -227,45 +237,80 @@ class ScriptServiceImpl : ScriptService {
     override fun <T> compile(
         type: ScriptType,
         id: String?,
+        api: String,
         lang: String,
         option: String?,
         code: String,
         txCallback: () -> T
     ): T {
-        return if (id == null) {
-            compileNew(type, code, txCallback)
+        if (id == null) {
+            compileNew(type, api, code, true)
         } else {
-            compileUpdate(type, id, code, txCallback)
+            compileUpdate(type, id, api, code, true)
+        }
+        return txCallback()
+    }
+
+    private fun checkApi(type: ScriptType, api: String) {
+        when (type) {
+            TRIGGER -> if (!api.startsWith("htri_")) throw CompileException("触发器api必须以 htri_ 开头")
+            API -> if (!api.startsWith("hapi_")) throw CompileException("接口api必须以 hapi_ 开头")
+            FUNCTION -> if (!api.startsWith("hfun_")) throw CompileException("自定义函数api必须以 hfun_ 开头")
         }
     }
 
-    fun <T> compileNew(
+    fun compileNew(
         type: ScriptType,
+        api: String,
         code: String,
-        txCallback: () -> T
-    ): T {
-        val context = buildContext(false, true)
+        updateDb: Boolean,
+    ) {
+        checkApi(type, api)
+        val context = buildContext(debug = false, compile = true)
         val parse = context.getBindings("js").getMember("parse")
         val info = parse.execute("js", code).asString().toClass<ScriptInfo>()!!
+        val warnings = mutableListOf<String>()
+        info.apply {
+            if (api != name) throw CompileException("函数名称和api不一致")
+            if (type == TRIGGER) {
+                if (params != listOf("dataService", "old_record", "new_record"))
+                    throw CompileException("触发器参数必须为 dataService,old_record,new_record")
+            }
+            globalInvoke.filter { it.method.startsWith("hfun_") }
+                .forEach {
+                    functionService.findByApi(it.method)
+                        ?: throw CompileException("line:${it.line}，自定义函数 ${it.method} 不存在")
+                    if (it.arguments.isEmpty() || it.arguments[0] != "dataService") {
+                        warnings.add("line:${it.line}，函数 ${it.method} 应该为 dataService")
+                    }
+                }
+            memberInvoke.filter { it.obj == "dataService" }
+                .forEach {
+                    it.method
 
-        println()
+                }
+
+        }
+
 
         TODO("Not yet implemented")
 
     }
 
-    fun <T> compileUpdate(
+    fun compileUpdate(
         type: ScriptType,
         id: String,
+        api: String,
         code: String,
-        txCallback: () -> T
-    ): T {
+        updateDb: Boolean,
+    ) {
+        checkApi(type, api)
         val oldCode = when (type) {
             TRIGGER -> {
                 triggerService.findById(id)?.code
                     ?: throw DataNotFoundException("trigger".msgById(id))
             }
-            INTERFACE -> {
+            API -> {
                 apiService.findById(id)?.code
                     ?: throw DataNotFoundException("interface".msgById(id))
             }
@@ -274,7 +319,7 @@ class ScriptServiceImpl : ScriptService {
                     ?: throw DataNotFoundException("function".msgById(id))
             }
         }
-        val context = buildContext(false, true)
+        val context = buildContext(debug = false, compile = true)
         val parse = context.getBindings("js").getMember("parse")
         val newInfo = parse.execute("js", code).asString().toClass<ScriptInfo>()!!
         val oldInfo = parse.execute("js", oldCode).asString().toClass<ScriptInfo>()!!

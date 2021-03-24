@@ -11,6 +11,7 @@ dependencies {
     implementation(Deps.Graal.sdk)
     implementation(Deps.Graal.truffleApi)
 
+    implementation(Deps.Sql.jsqlparser)
 
     implementation(Deps.Apache.pool)
 

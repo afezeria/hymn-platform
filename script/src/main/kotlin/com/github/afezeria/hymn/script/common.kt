@@ -1,6 +1,7 @@
 package com.github.afezeria.hymn.script
 
 import com.github.afezeria.hymn.common.exception.BusinessException
+import com.github.afezeria.hymn.common.exception.InnerException
 import com.github.afezeria.hymn.script.scriptutil.ScriptTools
 import org.graalvm.polyglot.*
 
@@ -17,6 +18,9 @@ fun getSource(file: String): Source? {
 }
 
 class ScriptBusinessException(msg: String) : BusinessException(msg)
+class CompileException(msg: String) : InnerException(msg)
+
+private val tools = ScriptTools()
 
 val hostAccess =
     HostAccess.newBuilder()
@@ -24,17 +28,18 @@ val hostAccess =
         .denyAccess(System::class.java)
         .denyAccess(Class::class.java)
         .allowAllImplementations(true)
+//        .allowImplementationsAnnotatedBy()
+//        .allowImplementations(String::class.java)
+        .allowAllClassImplementations(true)
         .allowArrayAccess(true)
         .allowListAccess(true)
+//        .targetTypeMapping(Int::class.java, String::class.java,
+//            { true }, { it?.toString() })
         .targetTypeMapping(List::class.java, List::class.java, {
-            println("list")
-            println(it)
             true
         }, { it })
         .targetTypeMapping(Map::class.java, Map::class.java,
             {
-                println("map")
-                println(it)
                 val v = Value.asValue(it)
                 v.hasMembers() && v.hasArrayElements().not()
             }, { it }
@@ -53,7 +58,7 @@ fun buildContext(debug: Boolean = false, compile: Boolean = false): Context {
         .allowHostClassLoading(false)
         .allowHostAccess(hostAccess)
 //        nashor兼容模式
-        .option("js.nashorn-compat", "true")
+//        .option("js.nashorn-compat", "false")
 //        禁用Regexp静态属性
         .option("js.regexp-static-result", "false")
 //        指定js版本
@@ -75,9 +80,9 @@ fun buildContext(debug: Boolean = false, compile: Boolean = false): Context {
 //        不使用ssl，为true时需要指定密钥
             .option("inspect.Secure", "false")
 //        程序初始化时挂起
-            .option("inspect.Suspend", "true")
+            .option("inspect.Suspend", "false")
 //        调试器连接前暂停，在连接后立刻开始执行
-            .option("inspect.WaitAttached", "false")
+            .option("inspect.WaitAttached", "true")
 //        .option("inspect.Internal", "true")
 //        语言初始化时挂起
 //        .option("inspect.Initialization", "true")
@@ -89,13 +94,34 @@ fun buildContext(debug: Boolean = false, compile: Boolean = false): Context {
         context.eval(getSource("analysis.js"))
     }
     context.eval(getSource("hymn-extends.js"))
+    context.eval(getSource("ext-string.js"))
     val bindings = context.getBindings("js")
     bindings.apply {
 //        开启nashorn兼容模式后需要把这几个函数覆盖，避免从脚本引擎关闭虚拟机
         putMember("quit", null)
         putMember("exit", null)
         putMember("eval", null)
-        putMember("tools", ScriptTools)
+        putMember("tools", tools)
     }
     return context
 }
+
+class ScriptInfo(
+    val name: String,
+    val params: List<String>,
+    val memberInvoke: List<MemberInvoke>,
+    val globalInvoke: List<GlobalInvoke>,
+)
+
+class MemberInvoke(
+    val obj: String?,
+    val method: String,
+    val line: Int,
+    val arguments: List<String>
+)
+
+class GlobalInvoke(
+    val method: String,
+    val line: Int,
+    val arguments: List<String>
+)

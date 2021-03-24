@@ -47,6 +47,7 @@ class BizObjectTriggerServiceImpl : BizObjectTriggerService {
             scriptService.compile(
                 type = ScriptType.TRIGGER,
                 id = id,
+                api = e.api,
                 lang = dto.lang,
                 option = dto.optionText,
                 code = dto.code
@@ -61,6 +62,7 @@ class BizObjectTriggerServiceImpl : BizObjectTriggerService {
         val id = scriptService.compile(
             type = ScriptType.TRIGGER,
             id = null,
+            api = e.api,
             lang = dto.lang,
             option = dto.optionText,
             code = dto.code,
