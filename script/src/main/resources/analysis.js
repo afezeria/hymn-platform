@@ -1,6 +1,3 @@
-var CompileError = Java.type(
-    'com.github.afezeria.hymn.script.CompileException');
-
 function parse(code) {
   let declareInfo = getDeclareInfo(code);
   let invokeInfo = getMethodInvoke(code);
@@ -14,11 +11,11 @@ function getDeclareInfo(code) {
   let node = acorn.parse(code);
   if (node.body.length !== 1) {
     console.log(node.body.length)
-    throw new CompileError("脚本中只能只能声明一个顶层语句");
+    throw new SyntaxError("脚本中只能只能声明一个顶层语句");
   }
   let fun = node.body[0];
   if (fun.type !== 'FunctionDeclaration') {
-    throw new CompileError("脚本中顶层语句必须是一个函数");
+    throw new SyntaxError("脚本中顶层语句必须是一个函数");
   }
   return {
     name: fun.id.name,
@@ -46,9 +43,7 @@ function getMethodInvoke(code) {
             obj: receiver.object.name,
             method: receiver.property.name,
             line: getLineNumber(code, node),
-            arguments: node.arguments.map((item) => {
-              return item.value
-            }),
+            params: getParameters(node),
           })
         }
       } else if (receiver.type === 'Identifier') {
@@ -56,9 +51,7 @@ function getMethodInvoke(code) {
         result.globalInvoke.push({
           method: receiver.name,
           line: getLineNumber(code, node),
-          arguments: node.arguments.map((item) => {
-            return item.value
-          }),
+          params: getParameters(node),
         })
       }
     }
@@ -73,6 +66,26 @@ function getMethodInvoke(code) {
  */
 function getLineNumber(str, node) {
   return str.substr(0, node.start).match(/\n/g).length
+}
+
+function getParameters(node) {
+  return node.arguments.map((item) => {
+    if (item.type === 'Literal') {
+      return {
+        type: 'Literal',
+        raw: item.raw
+      }
+    } else if (item.type === 'Identifier') {
+      return {
+        type: 'Identifier',
+        raw: item.name
+      }
+    } else {
+      return {
+        type: 'Unknown'
+      }
+    }
+  })
 }
 
 function getFirstFunctionInfo(node) {

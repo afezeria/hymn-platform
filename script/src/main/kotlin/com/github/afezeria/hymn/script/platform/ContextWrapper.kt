@@ -1,4 +1,4 @@
-package com.github.afezeria.hymn.script
+package com.github.afezeria.hymn.script.platform
 
 import org.graalvm.polyglot.Context
 import org.graalvm.polyglot.HostAccess

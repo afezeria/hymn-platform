@@ -1,17 +1,15 @@
-package com.github.afezeria.hymn.script
+package com.github.afezeria.hymn.script.platform
 
 import com.github.afezeria.hymn.common.constant.TriggerEvent
 import com.github.afezeria.hymn.common.exception.DataNotFoundException
 import com.github.afezeria.hymn.common.exception.InnerException
 import com.github.afezeria.hymn.common.platform.CacheService
+import com.github.afezeria.hymn.common.platform.DatabaseService
 import com.github.afezeria.hymn.common.platform.dataservice.DataService
 import com.github.afezeria.hymn.common.util.msgById
-import com.github.afezeria.hymn.common.util.toClass
+import com.github.afezeria.hymn.common.util.toJson
 import com.github.afezeria.hymn.core.conf.DataServiceConfiguration
-import com.github.afezeria.hymn.core.module.service.BizObjectTriggerService
-import com.github.afezeria.hymn.core.module.service.BusinessCodeRefService
-import com.github.afezeria.hymn.core.module.service.CustomApiService
-import com.github.afezeria.hymn.core.module.service.CustomFunctionService
+import com.github.afezeria.hymn.core.module.service.*
 import com.github.afezeria.hymn.core.platform.script.ScriptService
 import com.github.afezeria.hymn.core.platform.script.ScriptType
 import com.github.afezeria.hymn.core.platform.script.ScriptType.*
@@ -22,7 +20,8 @@ import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.full.declaredMemberFunctions
+import kotlin.reflect.full.valueParameters
 
 
 /**
@@ -37,6 +36,9 @@ class ScriptServiceImpl : ScriptService {
     private lateinit var triggerService: BizObjectTriggerService
 
     @Autowired
+    private lateinit var bizObjectService: BizObjectService
+
+    @Autowired
     private lateinit var apiService: CustomApiService
 
     @Autowired
@@ -47,6 +49,9 @@ class ScriptServiceImpl : ScriptService {
 
     @Autowired
     private lateinit var dataServiceConfiguration: DataServiceConfiguration
+
+    @Autowired
+    private lateinit var databaseService: DatabaseService
 
     private val pool = ContextWrapperPool
 
@@ -62,13 +67,12 @@ class ScriptServiceImpl : ScriptService {
         private val codeReferenceByFunction: MutableMap<String, MutableList<String>> =
             ConcurrentHashMap()
 
+        private val dataServiceDeclaredMemberFunctions = DataService::class.declaredMemberFunctions
+            .map { it.name to it.valueParameters.map { it.name } }.toMap()
         private val dataServiceQueryMethod =
-            DataService::class.memberFunctions.toList().filter { it.name.startsWith("query") }
-                .map { it.name }
-        private val dataServiceCrudMethod =
-            DataService::class.memberFunctions.toList()
-                .filter { it.name.matches(Regex("^(query|insert|update|delete)")) }
-                .map { it.name }
+            dataServiceDeclaredMemberFunctions
+                .filter { it.key.contains("query") }
+                .toMap()
 
     }
 
@@ -177,7 +181,7 @@ class ScriptServiceImpl : ScriptService {
         tmpMap: MutableMap<String, Any?>,
         around: (String, () -> Unit) -> Unit
     ) {
-        pool.use {
+        ContextWrapperPool.use {
             val (triggers, functions) = getTriggerSource(objectId, event)
             var i = 0
             for (trigger in triggers) {
@@ -205,7 +209,7 @@ class ScriptServiceImpl : ScriptService {
         request: HttpServletRequest,
         response: HttpServletResponse,
     ) {
-        pool.use {
+        ContextWrapperPool.use {
             val (main, functions) = getApiSource(api) ?: return@use null
             it.execute(main, functions, dataService, request, response)
         }
@@ -216,7 +220,7 @@ class ScriptServiceImpl : ScriptService {
         api: String,
         vararg params: Any?
     ): Any? {
-        return pool.use {
+        return ContextWrapperPool.use {
             val (main, others) = getFunctionSource(api)
                 ?: throw InnerException()
             it.execute(main, others, dataService, *params)
@@ -226,7 +230,7 @@ class ScriptServiceImpl : ScriptService {
     override fun getScript(api: String): ((Array<Any?>) -> Any?)? {
         getFunctionSource(api) ?: return null
         return { params ->
-            pool.use {
+            ContextWrapperPool.use {
                 val (main, others) = getFunctionSource(api)
                     ?: throw InnerException("")
                 it.execute(main, others, *params)
@@ -234,99 +238,67 @@ class ScriptServiceImpl : ScriptService {
         }
     }
 
+    /**
+     * 清空集群缓存
+     */
+    fun cleanClusterCache(type: ScriptType, id: String?, objectId: String?) {
+        if (id == null && objectId == null) return
+        TODO()
+    }
+
+    fun cleanClusterAllCache() {
+        TODO()
+    }
+
     override fun <T> compile(
         type: ScriptType,
         id: String?,
+        objectId: String?,
         api: String,
         lang: String,
         option: String?,
         code: String,
         txCallback: () -> T
     ): T {
-        if (id == null) {
-            compileNew(type, api, code, true)
-        } else {
-            compileUpdate(type, id, api, code, true)
+        val compiler = ScriptCompiler(type, api, code)
+        if (compiler.errors.isNotEmpty()) {
+            throw CompileException(compiler.errors.toJson())
         }
-        return txCallback()
-    }
-
-    private fun checkApi(type: ScriptType, api: String) {
-        when (type) {
-            TRIGGER -> if (!api.startsWith("htri_")) throw CompileException("触发器api必须以 htri_ 开头")
-            API -> if (!api.startsWith("hapi_")) throw CompileException("接口api必须以 hapi_ 开头")
-            FUNCTION -> if (!api.startsWith("hfun_")) throw CompileException("自定义函数api必须以 hfun_ 开头")
-        }
-    }
-
-    fun compileNew(
-        type: ScriptType,
-        api: String,
-        code: String,
-        updateDb: Boolean,
-    ) {
-        checkApi(type, api)
-        val context = buildContext(debug = false, compile = true)
-        val parse = context.getBindings("js").getMember("parse")
-        val info = parse.execute("js", code).asString().toClass<ScriptInfo>()!!
-        val warnings = mutableListOf<String>()
-        info.apply {
-            if (api != name) throw CompileException("函数名称和api不一致")
-            if (type == TRIGGER) {
-                if (params != listOf("dataService", "old_record", "new_record"))
-                    throw CompileException("触发器参数必须为 dataService,old_record,new_record")
-            }
-            globalInvoke.filter { it.method.startsWith("hfun_") }
-                .forEach {
-                    functionService.findByApi(it.method)
-                        ?: throw CompileException("line:${it.line}，自定义函数 ${it.method} 不存在")
-                    if (it.arguments.isEmpty() || it.arguments[0] != "dataService") {
-                        warnings.add("line:${it.line}，函数 ${it.method} 应该为 dataService")
+        if (id != null) {
+            when (type) {
+                TRIGGER -> {
+                    triggerService.findById(id)?.code
+                        ?: throw DataNotFoundException("trigger".msgById(id))
+                }
+                API -> {
+                    apiService.findById(id)?.code
+                        ?: throw DataNotFoundException("interface".msgById(id))
+                }
+                FUNCTION -> {
+                    val old = functionService.findById(id)?.code
+                        ?: throw DataNotFoundException("function".msgById(id))
+                    val oldCompiler = ScriptCompiler(type, api, old)
+                    if (oldCompiler.api != compiler.api) {
+                        throw CompileException("不能修改函数api")
+                    }
+                    if (oldCompiler.info != null) {
+                        val nParamsNumber = requireNotNull(compiler.info).params.size
+                        val oParamsNumber = oldCompiler.info!!.params.size
+                        if (nParamsNumber != oParamsNumber) {
+                            throw CompileException("不能修改参数个数")
+                        }
                     }
                 }
-            memberInvoke.filter { it.obj == "dataService" }
-                .forEach {
-                    it.method
-
-                }
-
-        }
-
-
-        TODO("Not yet implemented")
-
-    }
-
-    fun compileUpdate(
-        type: ScriptType,
-        id: String,
-        api: String,
-        code: String,
-        updateDb: Boolean,
-    ) {
-        checkApi(type, api)
-        val oldCode = when (type) {
-            TRIGGER -> {
-                triggerService.findById(id)?.code
-                    ?: throw DataNotFoundException("trigger".msgById(id))
-            }
-            API -> {
-                apiService.findById(id)?.code
-                    ?: throw DataNotFoundException("interface".msgById(id))
-            }
-            FUNCTION -> {
-                functionService.findById(id)?.code
-                    ?: throw DataNotFoundException("function".msgById(id))
             }
         }
-        val context = buildContext(debug = false, compile = true)
-        val parse = context.getBindings("js").getMember("parse")
-        val newInfo = parse.execute("js", code).asString().toClass<ScriptInfo>()!!
-        val oldInfo = parse.execute("js", oldCode).asString().toClass<ScriptInfo>()!!
-
-        TODO()
+        return databaseService.useTransaction {
+            cleanClusterCache(type, id, objectId)
+            val res = txCallback()
+            it.commit()
+            cleanClusterCache(type, id, objectId)
+            res
+        }
     }
-
 
     override fun execute(api: String, vararg params: Any?): Any? {
         return executeFunction(

@@ -65,6 +65,7 @@ interface ScriptService : ScriptFunctionService {
      *
      * @param type 编译代码的类型
      * @param id 脚本id
+     * @param objectId 触发器所属对象id，type不为TRIGGER时为null
      * @param lang 脚本使用
      * @param option 编译选项
      * @param code 脚本代码
@@ -73,6 +74,7 @@ interface ScriptService : ScriptFunctionService {
     fun <T> compile(
         type: ScriptType,
         id: String?,
+        objectId: String?,
         api: String,
         lang: String,
         option: String?,

@@ -1,4 +1,4 @@
-package com.github.afezeria.hymn.script
+package com.github.afezeria.hymn.script.platform
 
 import mu.KLogging
 import org.apache.commons.pool2.BasePooledObjectFactory

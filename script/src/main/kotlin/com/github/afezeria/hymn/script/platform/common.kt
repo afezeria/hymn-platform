@@ -1,4 +1,4 @@
-package com.github.afezeria.hymn.script
+package com.github.afezeria.hymn.script.platform
 
 import com.github.afezeria.hymn.common.exception.BusinessException
 import com.github.afezeria.hymn.common.exception.InnerException
@@ -114,14 +114,23 @@ class ScriptInfo(
 )
 
 class MemberInvoke(
-    val obj: String?,
+    val obj: String,
     val method: String,
     val line: Int,
-    val arguments: List<String>
+    val params: List<Parameter>
 )
 
 class GlobalInvoke(
     val method: String,
     val line: Int,
-    val arguments: List<String>
+    val params: List<Parameter>
 )
+
+class Parameter(
+    val type: ParameterType,
+    val raw: String?,
+)
+
+enum class ParameterType {
+    Literal, Identifier, Unknown
+}

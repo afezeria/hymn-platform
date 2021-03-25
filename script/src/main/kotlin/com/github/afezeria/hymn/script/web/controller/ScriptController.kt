@@ -5,7 +5,8 @@ import com.github.afezeria.hymn.common.platform.CacheService
 import com.github.afezeria.hymn.core.module.service.BizObjectTriggerService
 import com.github.afezeria.hymn.core.module.service.CustomApiService
 import com.github.afezeria.hymn.core.module.service.CustomFunctionService
-import com.github.afezeria.hymn.script.ScriptType
+import com.github.afezeria.hymn.script.platform.ScriptServiceImpl
+import com.github.afezeria.hymn.script.platform.ScriptType
 import io.swagger.annotations.Api
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.PostMapping
@@ -33,8 +34,10 @@ class ScriptController {
     @Autowired
     private lateinit var functionService: CustomFunctionService
 
-    fun cleanCache() {
+    @Autowired
+    private lateinit var scriptServiceImpl: ScriptServiceImpl
 
+    fun cleanCache() {
     }
 
     @PostMapping("clean-cache")
