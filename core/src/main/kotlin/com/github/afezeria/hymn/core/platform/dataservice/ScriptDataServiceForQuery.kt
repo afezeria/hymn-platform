@@ -199,13 +199,13 @@ interface ScriptDataServiceForQuery : ScriptDataService {
         }
         val session = Session.getInstance()
         val roleId = session.roleId
-        val objectPerm = getObjectPerm(roleId, objectApiName)
+        val objectPerm = getObjectPerm(objectApiName, roleId)
             ?: throw PermissionDeniedException("缺少对象 [api:$objectApiName] 查看权限")
         if (!objectPerm.que) {
             throw PermissionDeniedException("缺少对象 [api:$objectApiName] 查看权限")
         }
 
-        val visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
+        val visibleTypeIdSet = getVisibleTypeIdSet(objectApiName, roleId)
         val typeWhereStr = if (getTypeList(objectApiName).size == visibleTypeIdSet.size) {
             ""
         } else {
@@ -216,7 +216,7 @@ interface ScriptDataServiceForQuery : ScriptDataService {
 //        获取有读权限的字段集合
         val fieldApiMap = getFieldApiMap(objectApiName)
         val fieldList = mutableListOf<FieldInfo>()
-        val readAbleFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, read = true)
+        val readAbleFieldApiSet = getFieldApiSetWithPerm(objectApiName, roleId, read = true)
         val summaryFields = mutableListOf<FieldInfo>()
 
 //        过滤并分离普通字段和汇总字段

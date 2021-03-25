@@ -90,18 +90,18 @@ interface ScriptDataServiceForUpdate : ScriptDataService {
         val writeableFieldApiSet: Set<String>
         val visibleTypeIdSet: Set<String>
         if (withPerm) {
-            val objectPerm = getObjectPerm(roleId, objectApiName)
+            val objectPerm = getObjectPerm(objectApiName, roleId)
                 ?: throw PermissionDeniedException("缺少对象 [api:$objectApiName] 更新权限")
             if (!objectPerm.upd) {
                 throw PermissionDeniedException("缺少对象 [api:$objectApiName] 更新权限")
             }
 
-            writeableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, edit = true)
+            writeableFieldApiSet = getFieldApiSetWithPerm(objectApiName, roleId, edit = true)
             if (writeableFieldApiSet.isEmpty()) {
                 throw PermissionDeniedException("缺少对象 [api:$objectApiName] 任意字段的编辑权限")
             }
-            readableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, read = true)
-            visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
+            readableFieldApiSet = getFieldApiSetWithPerm(objectApiName, roleId, read = true)
+            visibleTypeIdSet = getVisibleTypeIdSet(objectApiName, roleId)
             oldDataList = queryWithPerm(
                 objectApiName, "id = any (?)", ids,
             )

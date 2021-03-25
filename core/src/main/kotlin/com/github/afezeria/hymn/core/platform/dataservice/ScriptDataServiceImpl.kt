@@ -128,12 +128,12 @@ class ScriptDataServiceImpl(
     }
 
 
-    override fun getObjectByApi(api: String): ObjectInfo? {
-        val apiKey = "getObjectByApi:$api"
+    override fun getObjectByApi(objectApiName: String): ObjectInfo? {
+        val apiKey = "getObjectByApi:$objectApiName"
         cache[apiKey]?.apply {
             return this as ObjectInfo
         }
-        val bizObject = bizObjectService.findActiveObjectByApi(api) ?: return null
+        val bizObject = bizObjectService.findActiveObjectByApi(objectApiName) ?: return null
         val info = bizObject.run {
             ObjectInfo(
                 id = id,
@@ -178,7 +178,7 @@ class ScriptDataServiceImpl(
         return info
     }
 
-    override fun getObjectPerm(roleId: String, objectApiName: String): ObjectPerm? {
+    override fun getObjectPerm(objectApiName: String, roleId: String): ObjectPerm? {
         val key = "getObjectPerm:$roleId:$objectApiName"
         cache[key]?.apply {
             return this as ObjectPerm
@@ -274,8 +274,8 @@ class ScriptDataServiceImpl(
     }
 
     override fun getFieldApiSetWithPerm(
-        roleId: String,
         objectApiName: String,
+        roleId: String,
         read: Boolean,
         edit: Boolean
     ): Set<String> {
@@ -325,7 +325,7 @@ class ScriptDataServiceImpl(
         return result
     }
 
-    override fun getVisibleTypeIdSet(roleId: String, objectApiName: String): Set<String> {
+    override fun getVisibleTypeIdSet(objectApiName: String, roleId: String): Set<String> {
         val key = "getVisibleTypeIdSet:$roleId:$objectApiName"
         cache[key]?.apply {
             @Suppress("UNCHECKED_CAST")

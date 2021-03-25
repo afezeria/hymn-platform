@@ -10,7 +10,7 @@ interface DataService {
     /**
      * 根据api查询对象
      */
-    fun getObjectByApi(api: String): ObjectInfo?
+    fun getObjectByApi(objectApiName: String): ObjectInfo?
 
     /**
      *  根据id查询对象
@@ -20,7 +20,7 @@ interface DataService {
     /**
      * 获取对象权限
      */
-    fun getObjectPerm(roleId: String, objectApiName: String): ObjectPerm?
+    fun getObjectPerm(objectApiName: String, roleId: String): ObjectPerm?
 
     /**
      * 获取对象字段
@@ -39,8 +39,8 @@ interface DataService {
      * 同时为false时返回没有权限的字段
      */
     fun getFieldApiSetWithPerm(
-        roleId: String,
         objectApiName: String,
+        roleId: String,
         read: Boolean = false,
         edit: Boolean = false,
     ): Set<String>
@@ -53,7 +53,7 @@ interface DataService {
     /**
      * 返回指定对象下指定角色可用的权限的id列表
      */
-    fun getVisibleTypeIdSet(roleId: String, objectApiName: String): Set<String>
+    fun getVisibleTypeIdSet(objectApiName: String, roleId: String): Set<String>
 
     /**
      * 查询共享数据

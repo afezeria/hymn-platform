@@ -67,17 +67,17 @@ interface ScriptDataServiceForInsert : ScriptDataService {
         val typeIdSet = getTypeList(objectApiName).mapTo(mutableListOf()) { it.id }
         var readableFieldApiSet: Set<String>? = null
         if (withPerm) {
-            val objectPerm = getObjectPerm(roleId, objectApiName)
+            val objectPerm = getObjectPerm(objectApiName, roleId)
                 ?: throw PermissionDeniedException("缺少对象 [api:$objectApiName] 新建权限")
             if (!objectPerm.ins) {
                 throw PermissionDeniedException("缺少对象 [api:$objectApiName] 新建权限")
             }
-            val writeableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, edit = true)
+            val writeableFieldApiSet = getFieldApiSetWithPerm(objectApiName, roleId, edit = true)
             fields.removeAll { !writeableFieldApiSet.contains(it.api) }
-            val visibleTypeIdSet = getVisibleTypeIdSet(roleId, objectApiName)
+            val visibleTypeIdSet = getVisibleTypeIdSet(objectApiName, roleId)
             typeIdSet.removeAll { !visibleTypeIdSet.contains(it) }
 
-            readableFieldApiSet = getFieldApiSetWithPerm(roleId, objectApiName, read = true)
+            readableFieldApiSet = getFieldApiSetWithPerm(objectApiName, roleId, read = true)
         }
 
 

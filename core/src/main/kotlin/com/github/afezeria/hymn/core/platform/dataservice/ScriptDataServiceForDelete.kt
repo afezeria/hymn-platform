@@ -90,7 +90,7 @@ interface ScriptDataServiceForDelete : ScriptDataService {
         var readableFieldApiSet: Set<String>? = null
         if (withPerm) {
             val session = Session.getInstance()
-            val objectPerm = getObjectPerm(session.roleId, objectApiName)
+            val objectPerm = getObjectPerm(objectApiName, session.roleId)
                 ?: throw PermissionDeniedException("缺少对象 [api:$objectApiName] 删除权限")
             if (!objectPerm.del) {
                 throw PermissionDeniedException("缺少对象 [api:$objectApiName] 删除权限")
@@ -105,7 +105,7 @@ interface ScriptDataServiceForDelete : ScriptDataService {
                 }
             }
             readableFieldApiSet =
-                getFieldApiSetWithPerm(Session.getInstance().roleId, objectApiName, read = true)
+                getFieldApiSetWithPerm(objectApiName, Session.getInstance().roleId, read = true)
         } else {
             oldDataList = queryByIds(objectApiName, ids)
         }
