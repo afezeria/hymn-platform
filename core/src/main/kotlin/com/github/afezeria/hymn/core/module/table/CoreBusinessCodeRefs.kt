@@ -2,6 +2,7 @@ package com.github.afezeria.hymn.core.module.table
 
 import com.github.afezeria.hymn.common.db.AbstractTable
 import com.github.afezeria.hymn.core.module.entity.BusinessCodeRef
+import org.ktorm.schema.boolean
 import org.ktorm.schema.datetime
 import org.ktorm.schema.varchar
 
@@ -18,6 +19,7 @@ class CoreBusinessCodeRefs(alias: String? = null) :
     val refObjectId = varchar("ref_object_id")
     val refFieldId = varchar("ref_field_id")
     val refFunctionId = varchar("ref_function_id")
+    val autoGen = boolean("auto_gen")
     val createById = varchar("create_by_id")
     val createBy = varchar("create_by")
     val modifyById = varchar("modify_by_id")

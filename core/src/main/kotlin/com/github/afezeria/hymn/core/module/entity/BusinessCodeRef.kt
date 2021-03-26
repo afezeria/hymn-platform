@@ -28,6 +28,8 @@ data class BusinessCodeRef(
     var refFieldId: String? = null,
     @ApiModelProperty(value = "被引用自定义函数id ")
     var refFunctionId: String? = null,
+    @ApiModelProperty(value = "是否为自动生成的数据")
+    var autoGen: Boolean = true,
 ) : AbstractEntity() {
 
     lateinit var createById: String

@@ -6,6 +6,6 @@ package com.github.afezeria.hymn.common.exception
 open class PlatformException(
     val httpCode: Int = 500,
     val code: String = "",
-    override val message: String,
+    override var message: String,
     cause: Throwable? = null
 ) : RuntimeException(message, cause)

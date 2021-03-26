@@ -32,6 +32,28 @@ class BusinessCodeRefServiceImpl : BusinessCodeRefService {
         return i
     }
 
+    override fun removeAutoGenData(
+        byTriggerId: String?,
+        byApiId: String?,
+        byFunctionId: String?
+    ): Int {
+        var count = 0
+        if (byTriggerId != null) {
+            count += businessCodeRefDao.delete { it.byTriggerId eq byTriggerId }
+        }
+        if (byApiId != null) {
+            count += businessCodeRefDao.delete { it.byApiId eq byApiId }
+        }
+        if (byFunctionId != null) {
+            count += businessCodeRefDao.delete { it.byFunctionId eq byFunctionId }
+        }
+        return count
+    }
+
+    override fun save(dtoList: Collection<BusinessCodeRefDto>): Int {
+        return businessCodeRefDao.save(dtoList.map { it.toEntity() })
+    }
+
     override fun create(dto: BusinessCodeRefDto): String {
         val e = dto.toEntity()
         val id = businessCodeRefDao.insert(e)
@@ -60,24 +82,26 @@ class BusinessCodeRefServiceImpl : BusinessCodeRefService {
     }
 
     override fun pageFindView(
+        byObjectId: String?,
         byTriggerId: String?,
-        byInterfaceId: String?,
-        byCustomFunctionId: String?,
-        bizObjectId: String?,
-        fieldId: String?,
-        customFunctionId: String?,
+        byApiId: String?,
+        byFunctionId: String?,
+        refObjectId: String?,
+        refFieldId: String?,
+        refFunctionId: String?,
         pageSize: Int,
         pageNum: Int
     ): List<BusinessCodeRefListView> {
         if (pageSize < 1) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
         if (pageNum < 1) throw IllegalArgumentException("pageNum must be greater than 0, current value $pageNum")
         return businessCodeRefDao.pageSelectView(
+            byObjectId,
             byTriggerId,
-            byInterfaceId,
-            byCustomFunctionId,
-            bizObjectId,
-            fieldId,
-            customFunctionId,
+            byApiId,
+            byFunctionId,
+            refObjectId,
+            refFieldId,
+            refFunctionId,
             (pageNum - 1) * pageSize,
             pageSize,
         )

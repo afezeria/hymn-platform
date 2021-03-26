@@ -9,6 +9,8 @@ import com.github.afezeria.hymn.common.platform.dataservice.DataService
 import com.github.afezeria.hymn.common.util.msgById
 import com.github.afezeria.hymn.common.util.toJson
 import com.github.afezeria.hymn.core.conf.DataServiceConfiguration
+import com.github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
+import com.github.afezeria.hymn.core.module.entity.BizObjectField
 import com.github.afezeria.hymn.core.module.service.*
 import com.github.afezeria.hymn.core.platform.script.ScriptService
 import com.github.afezeria.hymn.core.platform.script.ScriptType
@@ -39,6 +41,9 @@ class ScriptServiceImpl : ScriptService {
     private lateinit var bizObjectService: BizObjectService
 
     @Autowired
+    private lateinit var fieldService: BizObjectFieldService
+
+    @Autowired
     private lateinit var apiService: CustomApiService
 
     @Autowired
@@ -66,6 +71,7 @@ class ScriptServiceImpl : ScriptService {
             ConcurrentHashMap()
         private val codeReferenceByFunction: MutableMap<String, MutableList<String>> =
             ConcurrentHashMap()
+        private val thread = ThreadLocal<Int>()
 
         private val dataServiceDeclaredMemberFunctions = DataService::class.declaredMemberFunctions
             .map { it.name to it.valueParameters.map { it.name } }.toMap()
@@ -250,16 +256,47 @@ class ScriptServiceImpl : ScriptService {
         TODO()
     }
 
-    override fun <T> compile(
-        type: ScriptType,
+    fun compileFunction(
         id: String?,
-        objectId: String?,
+        baseFun: Boolean?,
         api: String,
         lang: String,
         option: String?,
         code: String,
-        txCallback: () -> T
-    ): T {
+    ) {
+        val compiler = ScriptCompiler(FUNCTION, api, code)
+        if (compiler.errors.isNotEmpty()) {
+            throw CompileException(compiler.errors.toJson())
+        }
+        if (id != null) {
+            val old = functionService.findById(id)?.code
+                ?: throw DataNotFoundException("function".msgById(id))
+            val oldCompiler = ScriptCompiler(FUNCTION, api, old)
+            if (oldCompiler.api != compiler.api) {
+                throw CompileException("不能修改函数api")
+            }
+            if (oldCompiler.info != null) {
+                val nParamsNumber = requireNotNull(compiler.info).params.size
+                val oParamsNumber = oldCompiler.info!!.params.size
+                if (nParamsNumber != oParamsNumber) {
+                    throw CompileException("不能修改参数个数")
+                }
+            }
+        }
+
+    }
+
+    override fun compile(
+        type: ScriptType,
+        id: String?,
+        objectId: String?,
+        baseFun: Boolean?,
+        api: String,
+        lang: String,
+        option: String?,
+        code: String,
+        txCallback: () -> String
+    ): String {
         val compiler = ScriptCompiler(type, api, code)
         if (compiler.errors.isNotEmpty()) {
             throw CompileException(compiler.errors.toJson())
@@ -291,13 +328,110 @@ class ScriptServiceImpl : ScriptService {
                 }
             }
         }
-        return databaseService.useTransaction {
+        //检查使用到的自定义函数是否都存在
+        val functionList = functionService.findByApiList(compiler.functionUsageList.map { it.api })
+        if (compiler.functionUsageList.size != functionList.size) {
+            val functionApiSet = functionList.mapTo(mutableSetOf()) { it.api }
+            val errors =
+                compiler.functionUsageList.mapNotNull { if (functionApiSet.contains(it.api)) null else "line:${it.line}，自定义函数 ${it.api} 不存在" }
+            if (errors.isNotEmpty()) {
+                throw CompileException(errors.toJson())
+            }
+        }
+
+//        检查使用到的业务对象
+        val bizObjectList =
+            bizObjectService.findActiveObjectByApiList(compiler.objectUsageList.map { it.api }
+                .toSet())
+        if (compiler.objectUsageList.size != bizObjectList.size) {
+            val objectApiSet = bizObjectList.mapTo(mutableSetOf()) { it.api }
+            val errors =
+                compiler.objectUsageList.mapNotNull { if (objectApiSet.contains(it.api)) null else "line:${it.line}，业务对象 ${it.api} 不存在" }
+            if (errors.isNotEmpty()) {
+                throw CompileException(errors.toJson())
+            }
+        }
+
+        //检查使用到的字段
+        val obj2Fields = mutableMapOf<String, MutableList<ScriptCompiler.FieldUsage>>()
+        for (usage in compiler.objectUsageList) {
+            val list = obj2Fields.getOrPut(usage.api) { mutableListOf() }
+            for (field in usage.fields) {
+                list.add(field)
+            }
+        }
+        val errors = mutableListOf<String>()
+        val usedBizObjectFieldList = mutableListOf<BizObjectField>()
+        for ((objApi, fieldList) in obj2Fields) {
+            val bizObject = requireNotNull(bizObjectList.find { it.api == objApi })
+            val fieldApiMap =
+                fieldService.findByBizObjectId(bizObject.id).map { it.api to it }.toMap()
+            for (field in fieldList) {
+                if (fieldApiMap.containsKey(field.api)) {
+                    usedBizObjectFieldList.add(fieldApiMap[field.api]!!)
+                } else {
+                    errors.add("line:${field.line}，字段 [objectApi:${objApi},api:${field.api}] 不存在")
+                }
+            }
+        }
+        if (errors.isNotEmpty()) {
+            throw CompileException(errors.toJson())
+        }
+
+
+        val result = databaseService.useTransaction {
             cleanClusterCache(type, id, objectId)
             val res = txCallback()
             it.commit()
+            val apiId = if (type == API) res else null
+            val triggerId = if (type == TRIGGER) res else null
+            val functionId = if (type == FUNCTION) res else null
+            val businessCodeRefDtoList = mutableListOf<BusinessCodeRefDto>()
+            for (customFunction in functionList) {
+                businessCodeRefDtoList.add(
+                    BusinessCodeRefDto(
+                        byObjectId = null,
+                        byTriggerId = triggerId,
+                        byApiId = apiId,
+                        byFunctionId = functionId,
+                        refObjectId = null,
+                        refFieldId = null,
+                        refFunctionId = customFunction.id
+                    )
+                )
+            }
+            for (bizObject in bizObjectList) {
+                businessCodeRefDtoList.add(
+                    BusinessCodeRefDto(
+                        byObjectId = null,
+                        byTriggerId = triggerId,
+                        byApiId = apiId,
+                        byFunctionId = functionId,
+                        refObjectId = bizObject.id,
+                        refFieldId = null,
+                        refFunctionId = null
+                    )
+                )
+            }
+            for (field in usedBizObjectFieldList) {
+                businessCodeRefDtoList.add(
+                    BusinessCodeRefDto(
+                        byObjectId = null,
+                        byTriggerId = triggerId,
+                        byApiId = apiId,
+                        byFunctionId = functionId,
+                        refObjectId = null,
+                        refFieldId = field.id,
+                        refFunctionId = null
+                    )
+                )
+            }
+            businessCodeRefService.removeAutoGenData(triggerId, apiId, functionId)
+            businessCodeRefService.save(businessCodeRefDtoList)
             cleanClusterCache(type, id, objectId)
             res
         }
+        return result
     }
 
     override fun execute(api: String, vararg params: Any?): Any? {

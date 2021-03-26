@@ -66,20 +66,22 @@ interface ScriptService : ScriptFunctionService {
      * @param type 编译代码的类型
      * @param id 脚本id
      * @param objectId 触发器所属对象id，type不为TRIGGER时为null
+     * @param baseFun 是否为基础函数，type不为FUNCTION时为null
      * @param lang 脚本使用
      * @param option 编译选项
      * @param code 脚本代码
-     * @param txCallback 事务回调，调用者提供的执行数据库更新的函数，
+     * @param txCallback 事务回调，调用者提供的执行数据库更新的函数，返回新增/更新数据的id
      */
-    fun <T> compile(
+    fun compile(
         type: ScriptType,
         id: String?,
         objectId: String?,
+        baseFun: Boolean?,
         api: String,
         lang: String,
         option: String?,
         code: String,
-        txCallback: () -> T
-    ): T
+        txCallback: () -> String
+    ): String
 
 }

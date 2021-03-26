@@ -58,6 +58,10 @@ class BizObjectServiceImpl : BizObjectService {
         return bizObjectDao.singleRowSelect({ (it.api eq api) and (it.active eq true) })
     }
 
+    override fun findActiveObjectByApiList(apiList: Collection<String>): List<BizObject> {
+        return bizObjectDao.select({ (it.api inList apiList) and (it.active eq true) })
+    }
+
     override fun pageFind(pageSize: Int, pageNum: Int): List<BizObject> {
         return bizObjectDao.pageSelect({ it.active eq true }, pageSize, pageNum)
     }

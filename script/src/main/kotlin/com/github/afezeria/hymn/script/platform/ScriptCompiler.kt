@@ -40,6 +40,7 @@ class ScriptCompiler(
     class FieldUsage(val line: Int, val api: String)
     class ObjectUsage(
         val api: String,
+        val line: Int,
         val fields: MutableList<FieldUsage> = mutableListOf()
     )
 
@@ -104,7 +105,7 @@ class ScriptCompiler(
                         && it.params[0].raw != null
                         && regex.matches(it.params[0].raw!!)
                     ) {
-                        val usage = ObjectUsage(it.params[0].raw!!.trim('\'', '"'))
+                        val usage = ObjectUsage(it.params[0].raw!!.trim('\'', '"'), it.line)
                         objectUsageList.add(usage)
                         if (it.method.startsWith("query")
                             && !it.method.startsWith("queryById")

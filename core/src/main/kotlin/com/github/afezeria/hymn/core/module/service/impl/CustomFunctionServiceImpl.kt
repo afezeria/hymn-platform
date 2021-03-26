@@ -7,6 +7,7 @@ import com.github.afezeria.hymn.core.module.dao.CustomFunctionDao
 import com.github.afezeria.hymn.core.module.dto.CustomFunctionDto
 import com.github.afezeria.hymn.core.module.entity.CustomFunction
 import com.github.afezeria.hymn.core.module.service.CustomFunctionService
+import org.ktorm.dsl.inList
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -62,6 +63,10 @@ class CustomFunctionServiceImpl : CustomFunctionService {
         api: String,
     ): CustomFunction? {
         return customFunction.selectByApi(api)
+    }
+
+    override fun findByApiList(apiList: Collection<String>): List<CustomFunction> {
+        return customFunction.select({ it.api inList apiList })
     }
 
     override fun pageFind(

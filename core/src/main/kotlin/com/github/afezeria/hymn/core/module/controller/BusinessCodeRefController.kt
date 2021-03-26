@@ -31,7 +31,8 @@ class BusinessCodeRefController {
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "分页查询数据", notes = "")
     @GetMapping
-    fun findAll(
+    fun pageFind(
+        @RequestParam("byObjectId", required = false) byObjectId: String? = null,
         @RequestParam("byTriggerId", required = false) byTriggerId: String? = null,
         @RequestParam("byInterfaceId", required = false) byInterfaceId: String? = null,
         @RequestParam("byCustomFunctionId", required = false) byCustomFunctionId: String? = null,
@@ -42,6 +43,7 @@ class BusinessCodeRefController {
         @RequestParam("pageNum", defaultValue = "1") pageNum: Int,
     ): List<BusinessCodeRefListView> {
         return businessCodeRefService.pageFindView(
+            byObjectId,
             byTriggerId,
             byInterfaceId,
             byCustomFunctionId,

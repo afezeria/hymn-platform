@@ -14,6 +14,10 @@ interface BizObjectService {
         api: String,
     ): BizObject?
 
+    fun findActiveObjectByApiList(
+        apiList: Collection<String>,
+    ): List<BizObject>
+
     fun pageFind(pageSize: Int, pageNum: Int): List<BizObject>
     fun findAllInactiveObject(): List<BizObject>
     fun removeById(id: String): Int

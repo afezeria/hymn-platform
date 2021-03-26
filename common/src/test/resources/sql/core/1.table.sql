@@ -1061,7 +1061,8 @@ create table hymn.core_business_code_ref
     create_date     timestamptz not null default now(),
     modify_date     timestamptz not null default now()
 );
-comment on table hymn.core_business_code_ref is '业务代码引用关系表';
+
+comment on table hymn.core_business_code_ref is '业务代码引用关系表 ;;uk:[[by_object_id by_trigger_id by_api_id by_function_id ref_object_id ref_field_id ref_function_id]]';
 comment on column hymn.core_business_code_ref.by_object_id is '远程对象id ;;fk:[core_biz_object cascade]';
 comment on column hymn.core_business_code_ref.by_trigger_id is '触发器id ;;fk:[core_biz_object_trigger cascade]';
 comment on column hymn.core_business_code_ref.by_api_id is '接口id ;;fk:[core_custom_api cascade]';
@@ -1069,6 +1070,7 @@ comment on column hymn.core_business_code_ref.by_function_id is '自定义函数
 comment on column hymn.core_business_code_ref.ref_object_id is '被引用对象id ;;fk:[core_biz_object restrict];idx';
 comment on column hymn.core_business_code_ref.ref_field_id is '被引用字段id ;;fk:[core_biz_object_field restrict];idx';
 comment on column hymn.core_business_code_ref.ref_function_id is '被引用函数id ;;fk:[core_custom_function restrict];idx';
+comment on column hymn.core_business_code_ref.auto_gen is '是否为自动生成的数据';
 
 drop table if exists hymn.core_cron_job;
 create table hymn.core_cron_job

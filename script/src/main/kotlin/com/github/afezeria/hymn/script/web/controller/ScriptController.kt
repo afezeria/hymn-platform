@@ -5,14 +5,12 @@ import com.github.afezeria.hymn.common.platform.CacheService
 import com.github.afezeria.hymn.core.module.service.BizObjectTriggerService
 import com.github.afezeria.hymn.core.module.service.CustomApiService
 import com.github.afezeria.hymn.core.module.service.CustomFunctionService
+import com.github.afezeria.hymn.core.platform.script.ScriptType
+import com.github.afezeria.hymn.script.platform.ScriptCompiler
 import com.github.afezeria.hymn.script.platform.ScriptServiceImpl
-import com.github.afezeria.hymn.script.platform.ScriptType
 import io.swagger.annotations.Api
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 /**
  * @author afezeria
@@ -43,6 +41,17 @@ class ScriptController {
     @PostMapping("clean-cache")
     fun cleanLocalCache() {
         TODO()
+    }
+
+    @PutMapping("")
+    fun compile(
+        @RequestParam("type") type: ScriptType,
+        @RequestParam("api") api: String,
+        @RequestParam("code") code: String,
+    ) {
+        val compiler = ScriptCompiler(type, api, code)
+        compiler.functionUsageList
+        compiler.objectUsageList
     }
 
     @PostMapping("debug")

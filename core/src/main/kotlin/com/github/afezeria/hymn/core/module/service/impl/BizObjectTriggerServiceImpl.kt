@@ -44,17 +44,21 @@ class BizObjectTriggerServiceImpl : BizObjectTriggerService {
             val e = bizObjectTriggerDao.selectAvailableTypeWithLock { it.id eq id }.firstOrNull()
                 ?: throw DataNotFoundException("BizObjectTrigger".msgById(id))
             dto.update(e)
+            var result = 0
             scriptService.compile(
                 type = ScriptType.TRIGGER,
                 id = id,
                 objectId = dto.bizObjectId,
+                baseFun = false,
                 api = e.api,
                 lang = dto.lang,
                 option = dto.optionText,
                 code = dto.code
             ) {
-                bizObjectTriggerDao.update(e)
+                result = bizObjectTriggerDao.update(e)
+                id
             }
+            result
         }
     }
 
@@ -64,6 +68,7 @@ class BizObjectTriggerServiceImpl : BizObjectTriggerService {
             type = ScriptType.TRIGGER,
             id = null,
             objectId = dto.bizObjectId,
+            baseFun = false,
             api = e.api,
             lang = dto.lang,
             option = dto.optionText,

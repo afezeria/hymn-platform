@@ -20,6 +20,19 @@ class BusinessCodeRefDao(
     databaseService = databaseService
 ) {
 
+    fun save(entityList: List<BusinessCodeRef>): Int {
+        return bulkInsertOrUpdate(
+            entityList,
+            table.byObjectId,
+            table.byTriggerId,
+            table.byApiId,
+            table.byFunctionId,
+            table.refObjectId,
+            table.refFieldId,
+            table.refFunctionId
+        )
+    }
+
     fun selectByFieldId(
         fieldId: String,
     ): MutableList<BusinessCodeRef> {
@@ -61,23 +74,25 @@ class BusinessCodeRefDao(
     )
 
     fun pageSelectView(
+        byObjectId: String?,
         byTriggerId: String?,
-        byInterfaceId: String?,
-        byCustomFunctionId: String?,
-        bizObjectId: String?,
-        fieldId: String?,
-        customFunctionId: String?,
+        byApiId: String?,
+        byFunctionId: String?,
+        refObjectId: String?,
+        refFieldId: String?,
+        refFunctionId: String?,
         offset: Int,
         limit: Int
     ): MutableList<BusinessCodeRefListView> {
         val expr: ColumnDeclaring<Boolean>? = table.let {
             when {
+                byObjectId != null -> it.byObjectId eq byObjectId
                 byTriggerId != null -> it.byTriggerId eq byTriggerId
-                byInterfaceId != null -> it.byApiId eq byInterfaceId
-                byCustomFunctionId != null -> it.byFunctionId eq byCustomFunctionId
-                bizObjectId != null -> it.refObjectId eq bizObjectId
-                fieldId != null -> it.refFieldId eq fieldId
-                customFunctionId != null -> it.refFunctionId eq customFunctionId
+                byApiId != null -> it.byApiId eq byApiId
+                byFunctionId != null -> it.byFunctionId eq byFunctionId
+                refObjectId != null -> it.refObjectId eq refObjectId
+                refFieldId != null -> it.refFieldId eq refFieldId
+                refFunctionId != null -> it.refFunctionId eq refFunctionId
                 else -> null
             }
         }

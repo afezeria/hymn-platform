@@ -17,6 +17,10 @@ interface CustomFunctionService {
         api: String,
     ): CustomFunction?
 
+    fun findByApiList(
+        apiList: Collection<String>,
+    ): List<CustomFunction>
+
     fun pageFind(
         pageSize: Int,
         pageNum: Int
