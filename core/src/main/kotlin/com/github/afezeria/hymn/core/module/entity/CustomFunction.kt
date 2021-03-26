@@ -20,8 +20,8 @@ data class CustomFunction(
     var type: String,
     @ApiModelProperty(value = "代码")
     var code: String,
-    @ApiModelProperty(value = "参数类型数组，多个类型之间用英文逗号隔开，类型为java类型的全限定名")
-    var paramsType: String,
+    @ApiModelProperty(value = "是否是基础函数，只有基础函数能够被其他脚本代码引用，并且基础函数不能引用其他自定义函数")
+    var baseFun: Boolean = true,
     @ApiModelProperty(value = "语言 ;;optional_value:[javascript]")
     var lang: String,
     @ApiModelProperty(value = "用于给编译器或其他组件设置参数(格式参照具体实现）")

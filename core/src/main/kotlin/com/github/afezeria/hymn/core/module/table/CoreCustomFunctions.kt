@@ -2,6 +2,7 @@ package com.github.afezeria.hymn.core.module.table
 
 import com.github.afezeria.hymn.common.db.AbstractTable
 import com.github.afezeria.hymn.core.module.entity.CustomFunction
+import org.ktorm.schema.boolean
 import org.ktorm.schema.datetime
 import org.ktorm.schema.varchar
 
@@ -14,7 +15,7 @@ class CoreCustomFunctions(alias: String? = null) :
     val api = varchar("api")
     val type = varchar("type")
     val code = varchar("code")
-    val paramsType = varchar("params_type")
+    val baseFun = boolean("base_fun")
     val lang = varchar("lang")
     val optionText = varchar("option_text")
     val createById = varchar("create_by_id")

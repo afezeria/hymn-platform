@@ -1023,8 +1023,8 @@ create table hymn.core_custom_function
     api          text        not null,
     type         text        not null,
     code         text        not null,
-    params_type  text        not null,
     lang         text        not null,
+    base_fun     boolean     not null default true,
     option_text  text,
     create_by_id text        not null,
     create_by    text        not null,
@@ -1037,7 +1037,7 @@ comment on table hymn.core_custom_function is '自定义函数 可以在接口�
 comment on column hymn.core_custom_function.api is 'api名称,也是代码中的函数名称 ;;uk';
 comment on column hymn.core_custom_function.type is '代码类型 ;;optional_value:[function(函数代码),job(任务代码)]';
 comment on column hymn.core_custom_function.code is '代码';
-comment on column hymn.core_custom_function.params_type is '参数类型数组，多个类型之间用英文逗号隔开，类型为java类型的全限定名';
+comment on column hymn.core_custom_function.base_fun is '是否是基础函数，只有基础函数能够被其他脚本代码引用，并且基础函数不能引用其他自定义函数';
 comment on column hymn.core_custom_function.lang is '语言 ;;optional_value:[javascript]';
 comment on column hymn.core_custom_function.option_text is '用于给编译器或其他组件设置参数(格式参照具体实现）';
 
