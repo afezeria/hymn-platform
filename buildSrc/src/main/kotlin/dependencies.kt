@@ -60,6 +60,11 @@ object Deps {
         const val redis = "org.springframework.boot:spring-boot-starter-data-redis"
     }
 
+    object Cache {
+        const val ehcache = "org.ehcache:ehcache:3.8.1"
+
+    }
+
     object Servlet {
         const val api = "javax.servlet:javax.servlet-api:4.0.1"
     }

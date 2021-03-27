@@ -27,7 +27,6 @@ class ScriptCompiler(
 
     val functionUsageList = mutableListOf<FunctionUsage>()
     val objectUsageList = mutableListOf<ObjectUsage>()
-    val warnings = mutableListOf<String>()
     val errors = mutableListOf<String>()
     var info: ScriptInfo? = null
 
@@ -88,7 +87,7 @@ class ScriptCompiler(
                     if (it.params.isEmpty() ||
                         (it.params[0].type == ParameterType.Identifier && it.params[0].raw != "dataService")
                     ) {
-                        warnings.add("line:${it.line}，函数 ${it.method} 的第一个参数应该为 dataService")
+                        errors.add("line:${it.line}，函数 ${it.method} 的第一个参数应该为 dataService")
                     }
                 }
             memberInvoke.filter { it.obj == "dataService" }

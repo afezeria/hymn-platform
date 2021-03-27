@@ -14,7 +14,7 @@ interface BusinessCodeRefService {
     fun create(dto: BusinessCodeRefDto): String
     fun findAll(): MutableList<BusinessCodeRef>
     fun findById(id: String): BusinessCodeRef?
-    fun findByTriggerIds(triggerIds: List<String>): MutableList<BusinessCodeRef>
+    fun findByTriggerIdsAndRefFunctionIdNotNull(triggerIds: List<String>): MutableList<BusinessCodeRef>
     fun findByApiId(apiId: String): MutableList<BusinessCodeRef>
     fun findByFunctionId(apiId: String): MutableList<BusinessCodeRef>
     fun pageFindView(

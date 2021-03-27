@@ -13,6 +13,8 @@ dependencies {
 
     implementation(Deps.Sql.jsqlparser)
 
+    implementation(Deps.Cache.ehcache)
+
     implementation(Deps.Apache.pool)
 
     implementation(Deps.SpringBoot.web)

@@ -8,8 +8,10 @@ import com.github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
 import com.github.afezeria.hymn.core.module.entity.BusinessCodeRef
 import com.github.afezeria.hymn.core.module.service.BusinessCodeRefService
 import com.github.afezeria.hymn.core.module.view.BusinessCodeRefListView
+import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.inList
+import org.ktorm.dsl.isNotNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -39,13 +41,13 @@ class BusinessCodeRefServiceImpl : BusinessCodeRefService {
     ): Int {
         var count = 0
         if (byTriggerId != null) {
-            count += businessCodeRefDao.delete { it.byTriggerId eq byTriggerId }
+            count += businessCodeRefDao.delete { (it.byTriggerId eq byTriggerId) and (it.autoGen eq true) }
         }
         if (byApiId != null) {
-            count += businessCodeRefDao.delete { it.byApiId eq byApiId }
+            count += businessCodeRefDao.delete { (it.byApiId eq byApiId) and (it.autoGen eq true) }
         }
         if (byFunctionId != null) {
-            count += businessCodeRefDao.delete { it.byFunctionId eq byFunctionId }
+            count += businessCodeRefDao.delete { (it.byFunctionId eq byFunctionId) and (it.autoGen eq true) }
         }
         return count
     }
@@ -69,8 +71,8 @@ class BusinessCodeRefServiceImpl : BusinessCodeRefService {
         return businessCodeRefDao.selectById(id)
     }
 
-    override fun findByTriggerIds(triggerIds: List<String>): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.select({ it.byTriggerId inList triggerIds })
+    override fun findByTriggerIdsAndRefFunctionIdNotNull(triggerIds: List<String>): MutableList<BusinessCodeRef> {
+        return businessCodeRefDao.select({ (it.byTriggerId inList triggerIds) and it.refFunctionId.isNotNull() })
     }
 
     override fun findByApiId(apiId: String): MutableList<BusinessCodeRef> {

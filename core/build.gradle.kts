@@ -13,7 +13,7 @@ dependencies {
 
     implementation(Deps.Sql.jsqlparser)
 
-    implementation(Deps.Ktorm.core)
+    api(Deps.Ktorm.core)
     implementation(Deps.Ktorm.postgresql)
     testImplementation(project(":common", "testArtifacts"))
 }
