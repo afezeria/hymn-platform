@@ -13,6 +13,8 @@ dependencies {
 
     implementation(Deps.Sql.jsqlparser)
 
+    implementation(Deps.OkHttp3.okhttp)
+
     implementation(Deps.Cache.ehcache)
 
     implementation(Deps.Apache.pool)

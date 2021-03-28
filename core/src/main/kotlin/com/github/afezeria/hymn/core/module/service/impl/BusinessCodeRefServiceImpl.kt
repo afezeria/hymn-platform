@@ -71,16 +71,24 @@ class BusinessCodeRefServiceImpl : BusinessCodeRefService {
         return businessCodeRefDao.selectById(id)
     }
 
-    override fun findByTriggerIdsAndRefFunctionIdNotNull(triggerIds: List<String>): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.select({ (it.byTriggerId inList triggerIds) and it.refFunctionId.isNotNull() })
+    override fun findPairByTriggerIds(triggerIds: List<String>): MutableList<Pair<String, String>> {
+        return businessCodeRefDao.table.run {
+            businessCodeRefDao.select(listOf(byTriggerId, refFunctionId),
+                { (byTriggerId inList triggerIds) and refFunctionId.isNotNull() })
+                .mapTo(mutableListOf()) {
+                    requireNotNull(it[byTriggerId.name]) as String to requireNotNull(
+                        it[refFunctionId.name]
+                    ) as String
+                }
+        }
     }
 
-    override fun findByApiId(apiId: String): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.select({ it.byApiId eq apiId })
+    override fun findBaseFunctionIdsByApiId(apiId: String): MutableList<String> {
+        return businessCodeRefDao.selectBaseFunctionIds { it.byApiId eq apiId }
     }
 
-    override fun findByFunctionId(apiId: String): MutableList<BusinessCodeRef> {
-        return businessCodeRefDao.select({ it.byFunctionId eq apiId })
+    override fun findBaseFunctionIdsByFunctionId(apiId: String): MutableList<String> {
+        return businessCodeRefDao.selectBaseFunctionIds { it.byFunctionId eq apiId }
     }
 
     override fun pageFindView(

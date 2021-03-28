@@ -1,7 +1,5 @@
 package com.github.afezeria.hymn.script.platform
 
-import com.github.afezeria.hymn.common.exception.BusinessException
-import com.github.afezeria.hymn.common.exception.InnerException
 import com.github.afezeria.hymn.script.scriptutil.ScriptTools
 import org.graalvm.polyglot.*
 
@@ -17,8 +15,6 @@ fun getSource(file: String): Source? {
     return Source.newBuilder("js", fileStr, "$file.js").build()
 }
 
-class ScriptBusinessException(msg: String) : BusinessException(msg)
-class CompileException(msg: String) : InnerException(msg)
 
 private val tools = ScriptTools()
 

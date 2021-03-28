@@ -32,6 +32,19 @@ abstract class SourceCache<V> {
     )
     private val sourceCache: MutableMap<String, V> = ConcurrentHashMap()
 
+    fun clean(key: String) {
+        val lock = ReentrantLock(true).let {
+            lockCache.putIfAbsent(key, it) ?: it
+        }
+        if (lock.tryLock()) {
+            try {
+                sourceCache.remove(key)
+            } finally {
+                lock.unlock()
+            }
+        }
+    }
+
     fun getOrPut(key: String, dataProvider: () -> V): V {
         var value = sourceCache[key]
         if (value == null) {
@@ -55,8 +68,17 @@ abstract class SourceCache<V> {
 
 }
 
+/**
+ * key为对象id
+ */
 object TriggerCache : SourceCache<List<TriggerSourceWithTime>>()
 
+/**
+ * key为接口api
+ */
 object ApiCache : SourceCache<SourceWithTime>()
 
+/**
+ * key为函数id
+ */
 object FunctionCache : SourceCache<SourceWithTime>()

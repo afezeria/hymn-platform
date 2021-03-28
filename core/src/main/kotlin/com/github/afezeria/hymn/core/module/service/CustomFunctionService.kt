@@ -12,6 +12,7 @@ interface CustomFunctionService {
     fun create(dto: CustomFunctionDto): String
     fun findAll(): MutableList<CustomFunction>
     fun findById(id: String): CustomFunction?
+    fun findBaseFunctionById(id: String): CustomFunction?
     fun findByIds(ids: Collection<String>): MutableList<CustomFunction>
     fun findByApi(
         api: String,

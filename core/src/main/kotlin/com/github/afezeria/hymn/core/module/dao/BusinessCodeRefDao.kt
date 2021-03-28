@@ -33,6 +33,13 @@ class BusinessCodeRefDao(
         )
     }
 
+    fun selectBaseFunctionIds(condition: ((CoreBusinessCodeRefs) -> ColumnDeclaring<Boolean>)): MutableList<String> {
+        return select(
+            listOf(table.refFunctionId),
+            { condition(table) and table.refFunctionId.isNotNull() })
+            .mapTo(mutableListOf()) { requireNotNull(it[table.refFunctionId.name]) as String }
+    }
+
     fun selectByFieldId(
         fieldId: String,
     ): MutableList<BusinessCodeRef> {

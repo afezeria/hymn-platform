@@ -7,6 +7,8 @@ import com.github.afezeria.hymn.core.module.dao.CustomFunctionDao
 import com.github.afezeria.hymn.core.module.dto.CustomFunctionDto
 import com.github.afezeria.hymn.core.module.entity.CustomFunction
 import com.github.afezeria.hymn.core.module.service.CustomFunctionService
+import org.ktorm.dsl.and
+import org.ktorm.dsl.eq
 import org.ktorm.dsl.inList
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -52,6 +54,10 @@ class CustomFunctionServiceImpl : CustomFunctionService {
 
     override fun findById(id: String): CustomFunction? {
         return customFunction.selectById(id)
+    }
+
+    override fun findBaseFunctionById(id: String): CustomFunction? {
+        return customFunction.singleRowSelect({ (it.id eq id) and (it.baseFun eq true) })
     }
 
     override fun findByIds(ids: Collection<String>): MutableList<CustomFunction> {
