@@ -1101,3 +1101,17 @@ create table hymn.sql_keyword
 (
     keyword text primary key
 );
+
+drop table if exists hymn.core_cache;
+create table hymn.core_cache
+(
+    c_group   text,
+    c_key     text,
+    c_value   text,
+    last_time timestamptz,
+    expiry    bigint,
+    primary key (c_group, c_key)
+);
+create index cache_c_key_pattern_idx on hymn.core_cache (c_key varchar_pattern_ops);
+comment on table hymn.core_cache is '缓存表';
+

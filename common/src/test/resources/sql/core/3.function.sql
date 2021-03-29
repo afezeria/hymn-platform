@@ -64,6 +64,52 @@ end;
 $$;
 
 
+-- 缓存表相关函数
+create or replace function hymn.get_cache(f_group text, f_pattern text) returns setof hymn.core_cache
+    language plpgsql as
+$$
+declare
+    row hymn.core_cache;
+begin
+    for row in select *
+               from hymn.core_cache
+               where c_group = f_group
+                 and c_key like f_pattern for update
+        loop
+            if now() > row.last_time + row.expiry * interval '1 second' then
+                delete from hymn.core_cache where c_key = row.c_key;
+            else
+                return next row;
+            end if;
+        end loop;
+    return;
+end;
+$$;
+
+create or replace function hymn.set_cache(f_group text, f_key text, f_value text, f_expiry bigint) returns void
+    language plpgsql as
+$$
+begin
+    insert into hymn.core_cache (c_group, c_key, c_value, last_time, expiry)
+    values (f_group, f_key, f_value, now(), f_expiry)
+    on conflict (c_group,c_key) do update set c_value=excluded.c_value,
+                                              expiry = excluded.expiry,
+                                              last_time=now();
+end;
+$$;
+create or replace function hymn.remove_cache(f_group text, f_key text) returns int
+    language plpgsql as
+$$
+declare
+    count int;
+begin
+    delete from hymn.core_cache where c_group = f_group and c_key = f_key;
+    get diagnostics count= row_count;
+    return count;
+end;
+$$;
+
+
 
 -- 阻止改变所属对象id
 create or replace function hymn.cannot_change_biz_object_id() returns trigger
@@ -877,6 +923,7 @@ begin
 end;
 $$;
 comment on function hymn.dict_before_delete_trigger_fun() is '当字典被引用时阻止删除字典';
+drop trigger if exists c10_dict_before_delete on hymn.core_dict;
 create trigger c10_dict_before_delete
     before delete
     on hymn.core_dict

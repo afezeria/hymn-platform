@@ -1,8 +1,8 @@
 package com.github.afezeria.hymn.core.platform.script
 
 import com.github.afezeria.hymn.common.constant.TriggerEvent
+import com.github.afezeria.hymn.common.platform.ScriptFunctionService
 import com.github.afezeria.hymn.common.platform.dataservice.DataService
-import com.github.afezeria.hymn.common.platform.script.ScriptFunctionService
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 

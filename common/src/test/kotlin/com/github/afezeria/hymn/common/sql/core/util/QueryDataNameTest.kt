@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
  */
 class QueryDataNameTest : BaseDbTest() {
     @Test
-    fun abc() {
+    fun test() {
         val tableCount = 20
         val dataCount = 50
         val objects = mutableListOf<String>()

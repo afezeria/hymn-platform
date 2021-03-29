@@ -31,6 +31,9 @@ alter table hymn.core_biz_object_type_layout
     add constraint core_biz_object_type_layout_biz_object_id_layout_id_fk foreign key (biz_object_id, layout_id) references hymn.core_biz_object_layout (biz_object_id, id);
 alter table hymn.core_biz_object_type_perm
     add unique (role_id, type_id);
+alter table hymn.core_business_code_ref
+    add unique (by_object_id, by_trigger_id, by_api_id, by_function_id, ref_object_id, ref_field_id,
+                ref_function_id);
 alter table hymn.core_button_perm
     add unique (role_id, button_id);
 alter table hymn.core_dict_item
