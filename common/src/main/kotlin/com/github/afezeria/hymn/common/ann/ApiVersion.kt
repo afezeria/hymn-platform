@@ -5,4 +5,8 @@ package com.github.afezeria.hymn.common.ann
  */
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @MustBeDocumented
-annotation class ApiVersion(val value: Int = 2104)
+annotation class ApiVersion(val value: Int = 2104) {
+    companion object {
+        const val lowest = 2104
+    }
+}
