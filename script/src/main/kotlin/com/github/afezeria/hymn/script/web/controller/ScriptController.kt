@@ -1,14 +1,16 @@
 package com.github.afezeria.hymn.script.web.controller
 
 import com.github.afezeria.hymn.common.ann.ApiVersion
+import com.github.afezeria.hymn.common.ann.Function
+import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.common.platform.CacheService
 import com.github.afezeria.hymn.core.module.service.BizObjectTriggerService
 import com.github.afezeria.hymn.core.module.service.CustomApiService
 import com.github.afezeria.hymn.core.module.service.CustomFunctionService
 import com.github.afezeria.hymn.core.platform.script.ScriptType
-import com.github.afezeria.hymn.script.platform.ScriptCompiler
 import com.github.afezeria.hymn.script.platform.ScriptServiceImpl
 import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
@@ -35,23 +37,15 @@ class ScriptController {
     @Autowired
     private lateinit var scriptServiceImpl: ScriptServiceImpl
 
-    fun cleanCache() {
-    }
-
-    @PostMapping("clean-cache")
-    fun cleanLocalCache() {
-        TODO()
-    }
-
-    @PutMapping("")
-    fun compile(
+    @DeleteMapping("cache")
+    @Function(AccountType.ADMIN)
+    @ApiOperation(value = "清空脚本缓存", notes = "")
+    @ResponseBody
+    fun cleanLocalCache(
         @RequestParam("type") type: ScriptType,
-        @RequestParam("api") api: String,
-        @RequestParam("code") code: String,
+        @RequestParam("key") key: String,
     ) {
-        val compiler = ScriptCompiler(type, api, code)
-        compiler.functionUsageList
-        compiler.objectUsageList
+        scriptServiceImpl.cleanLocalCache(type, key)
     }
 
     @PostMapping("debug")

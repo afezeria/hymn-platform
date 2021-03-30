@@ -12,7 +12,7 @@ fun getSource(file: String): Source? {
             .getResourceAsStream(file)
     ).readAllBytes()
         .decodeToString()
-    return Source.newBuilder("js", fileStr, "$file.js").build()
+    return Source.newBuilder("js", fileStr, file).build()
 }
 
 

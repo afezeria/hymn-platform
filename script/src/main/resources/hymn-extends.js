@@ -22,4 +22,4 @@ var JIsoFields = Java.type('java.time.temporal.IsoFields');
 
 //exception
 var BizError = Java.type(
-    'com.github.afezeria.hymn.script.ScriptBusinessException');
+    'com.github.afezeria.hymn.script.platform.ScriptBusinessException');

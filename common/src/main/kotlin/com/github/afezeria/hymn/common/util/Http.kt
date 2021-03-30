@@ -1,6 +1,7 @@
 package com.github.afezeria.hymn.common.util
 
 import okhttp3.ConnectionPool
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -16,9 +17,14 @@ var httpClient: OkHttpClient = OkHttpClient.Builder()
     .callTimeout(10, TimeUnit.SECONDS)
     .build()
 
-fun OkHttpClient.get(url: String): String? {
+fun OkHttpClient.get(url: String, params: Map<String, String?>? = null): String? {
+    val httpUrl = url.toHttpUrl().newBuilder().apply {
+        params?.forEach { (k, v) ->
+            addQueryParameter(k, v)
+        }
+    }.build()
     val request = Request.Builder()
-        .url(url)
+        .url(httpUrl)
         .get().build()
     newCall(request).execute()
         .use { response: Response -> return response.body?.string() }
@@ -40,9 +46,18 @@ fun OkHttpClient.post(url: String, content: String): String? {
     newCall(request).execute().use { response -> return response.body?.string() }
 }
 
-fun OkHttpClient.delete(url: String, content: String?): String? {
+fun OkHttpClient.delete(
+    url: String,
+    content: String? = null,
+    params: Map<String, String?>? = null
+): String? {
+    val httpUrl = url.toHttpUrl().newBuilder().apply {
+        params?.forEach { (k, v) ->
+            addQueryParameter(k, v)
+        }
+    }.build()
     val request: Request = Request.Builder()
-        .url(url)
+        .url(httpUrl)
         .delete(content?.toRequestBody())
         .build()
     newCall(request).execute().use { response -> return response.body?.string() }

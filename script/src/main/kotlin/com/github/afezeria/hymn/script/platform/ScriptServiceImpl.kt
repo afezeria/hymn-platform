@@ -1,13 +1,15 @@
 package com.github.afezeria.hymn.script.platform
 
+import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.constant.TriggerEvent
 import com.github.afezeria.hymn.common.exception.DataNotFoundException
 import com.github.afezeria.hymn.common.platform.CacheService
 import com.github.afezeria.hymn.common.platform.DatabaseService
+import com.github.afezeria.hymn.common.platform.DbCache
 import com.github.afezeria.hymn.common.platform.dataservice.DataService
+import com.github.afezeria.hymn.common.util.delete
 import com.github.afezeria.hymn.common.util.httpClient
 import com.github.afezeria.hymn.common.util.msgById
-import com.github.afezeria.hymn.common.util.post
 import com.github.afezeria.hymn.common.util.toJson
 import com.github.afezeria.hymn.core.conf.DataServiceConfiguration
 import com.github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
@@ -24,7 +26,6 @@ import org.springframework.stereotype.Service
 import java.time.OffsetDateTime
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-
 
 /**
  * @author afezeria
@@ -57,6 +58,10 @@ class ScriptServiceImpl : ScriptService {
 
     @Autowired
     private lateinit var databaseService: DatabaseService
+
+    private val cache: DbCache by lazy {
+        databaseService.getCache("module", 300)
+    }
 
     companion object {
         private val defaultOffset = OffsetDateTime.now().offset
@@ -233,19 +238,27 @@ class ScriptServiceImpl : ScriptService {
      * 清空集群缓存
      */
     fun cleanClusterCache(type: ScriptType, id: String?, objectId: String?, api: String?) {
-        cleanLocalCache(
-            type, when (type) {
-                TRIGGER -> requireNotNull(objectId)
-                API -> requireNotNull(api)
-                FUNCTION -> requireNotNull(id)
+        val key = requireNotNull(
+            when (type) {
+                TRIGGER -> objectId
+                API -> api
+                FUNCTION -> id
             }
         )
-        cacheService.get("script")
-        httpClient.post("/script/api/{version}/script")
-        TODO()
+        cleanLocalCache(type, key)
+        val urls = cache.get("script:%")
+        urls.forEach {
+            httpClient.delete(
+                "http://${it.second}/module/script/api/v${ApiVersion.lowest}/script/cache",
+                params = mapOf(
+                    "type" to type.name,
+                    "key" to key
+                )
+            )
+        }
     }
 
-    private fun cleanLocalCache(type: ScriptType, key: String) {
+    fun cleanLocalCache(type: ScriptType, key: String) {
         when (type) {
             TRIGGER -> TriggerCache.clean(key)
             API -> ApiCache.clean(key)
