@@ -2,6 +2,9 @@ package com.github.afezeria.hymn.script.platform
 
 import com.github.afezeria.hymn.common.platform.dataservice.DataService
 import com.github.afezeria.hymn.common.util.toClass
+import com.github.afezeria.hymn.core.module.entity.BizObject
+import com.github.afezeria.hymn.core.module.entity.BizObjectField
+import com.github.afezeria.hymn.core.module.entity.CustomFunction
 import com.github.afezeria.hymn.core.platform.script.ScriptType
 import net.sf.jsqlparser.expression.ExpressionVisitorAdapter
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
@@ -29,6 +32,10 @@ class ScriptCompiler(
     val objectUsageList = mutableListOf<ObjectUsage>()
     val errors = mutableListOf<String>()
     var info: ScriptInfo? = null
+
+    var customFunctionList: List<CustomFunction> = emptyList()
+    var bizObjectList: List<BizObject> = emptyList()
+    var bizObjectFieldList: List<BizObjectField> = emptyList()
 
     init {
         compile()

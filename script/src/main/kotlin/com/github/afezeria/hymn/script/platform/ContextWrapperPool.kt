@@ -1,6 +1,12 @@
 package com.github.afezeria.hymn.script.platform
 
+import com.github.afezeria.hymn.common.exception.InnerException
+import com.github.afezeria.hymn.common.platform.Session
 import org.apache.commons.pool2.impl.GenericObjectPool
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 /**
  * @author afezeria
@@ -8,7 +14,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool
 internal object ContextWrapperPool :
     GenericObjectPool<ContextWrapper>(ContextWrapperFactory()) {
     init {
-        maxTotal
+        maxTotal = 1000
         testOnCreate = true
         testOnBorrow = true
         testOnReturn = true
@@ -24,7 +30,7 @@ internal object ContextWrapperPool :
         try {
             threadDept.set(dept + 1)
             context = if (dept == 0) {
-                borrowObject(borrowMaxWaitMillis)!!.also { threadContext.set(it) }
+                borrowObject(borrowMaxWaitMillis).also { threadContext.set(it) }
             } else {
                 requireNotNull(threadContext.get())
             }
@@ -34,6 +40,70 @@ internal object ContextWrapperPool :
             if (dept == 0) {
                 threadContext.set(null)
                 returnObject(context)
+            }
+        }
+    }
+
+    data class WrapperWithTimestamp(var timestamp: Long, val wrapper: ContextWrapper)
+
+    internal val debugContextCache = ConcurrentHashMap<String, WrapperWithTimestamp>()
+    private val debugContextTimeoutDetectionPool = ThreadPoolExecutor(
+        5,
+        5,
+        0,
+        TimeUnit.SECONDS,
+        SynchronousQueue()
+    ) { _, _ ->
+        throw InnerException("一个节点最多允许5个用户同时debug")
+    }
+
+    fun createDebugContext() {
+        val accountId = Session.getInstance().accountId
+        debugContextTimeoutDetectionPool.execute {
+            while (true) {
+                Thread.sleep(1000 * 60)
+                val (timestamp, wrapper) = debugContextCache[accountId] ?: break
+//                超过半小时未使用强制关闭
+                if ((System.currentTimeMillis() - timestamp) > 1800 * 1000) {
+                    debugContextCache.remove(accountId)
+                    wrapper.destroy()
+                    break
+                }
+            }
+        }
+        debugContextCache[accountId] = WrapperWithTimestamp(
+            System.currentTimeMillis(),
+            ContextWrapper(
+                debug = true,
+                compile = true
+            )
+        )
+    }
+
+    fun closeDebugContext() {
+        val accountId = Session.getInstance().accountId
+        debugContextCache.remove(accountId)?.apply { wrapper.destroy() }
+    }
+
+    override fun borrowObject(borrowMaxWaitMillis: Long): ContextWrapper {
+        val accountId = Session.getInstance().accountId
+        return debugContextCache[accountId]?.let {
+            if (!it.wrapper.available()) {
+                debugContextCache.remove(accountId)
+                it.wrapper.destroy()
+                null
+            } else {
+                it.timestamp = System.currentTimeMillis()
+                it.wrapper
+            }
+        } ?: super.borrowObject(borrowMaxWaitMillis)
+    }
+
+    override fun returnObject(obj: ContextWrapper?) {
+        obj?.apply {
+//        debug用context不需要返还给池
+            if (!debug) {
+                super.returnObject(this)
             }
         }
     }

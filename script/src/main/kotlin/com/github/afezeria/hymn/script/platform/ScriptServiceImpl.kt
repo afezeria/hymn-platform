@@ -266,6 +266,20 @@ class ScriptServiceImpl : ScriptService {
         }
     }
 
+    fun getCompiler(
+        type: ScriptType,
+        id: String?,
+        baseFun: Boolean?,
+        api: String,
+        code: String,
+    ): ScriptCompiler {
+        val compiler = when (type) {
+            TRIGGER -> compileTrigger(id, api, code)
+            API -> compileApi(id, api, code)
+            FUNCTION -> compileFunction(id, requireNotNull(baseFun), api, code)
+        }
+        return compiler
+    }
 
     override fun compile(
         type: ScriptType,
@@ -278,13 +292,14 @@ class ScriptServiceImpl : ScriptService {
         code: String,
         txCallback: () -> String
     ): String {
-        val compiler = when (type) {
-            TRIGGER -> compileTrigger(id, api, code)
-            API -> compileApi(id, api, code)
-            FUNCTION -> compileFunction(id, requireNotNull(baseFun), api, code)
-        }
-        val functionList = getRefFunInfo(compiler)
-        val (objectList, fieldList) = getRefObjectAndFieldInfo(compiler)
+//        val compiler = when (type) {
+//            TRIGGER -> compileTrigger(id, api, code)
+//            API -> compileApi(id, api, code)
+//            FUNCTION -> compileFunction(id, requireNotNull(baseFun), api, code)
+//        }
+//        val functionList = getRefFunInfo(compiler)
+//        val (objectList, fieldList) = getRefObjectAndFieldInfo(compiler)
+        val compiler = getCompiler(type, id, baseFun, api, code)
         if (compiler.errors.isNotEmpty()) {
             throw CompileException(compiler.errors.toJson())
         }
@@ -297,7 +312,7 @@ class ScriptServiceImpl : ScriptService {
             val triggerId = if (type == TRIGGER) res else null
             val functionId = if (type == FUNCTION) res else null
             val businessCodeRefDtoList = mutableListOf<BusinessCodeRefDto>()
-            for (customFunction in functionList) {
+            for (customFunction in compiler.customFunctionList) {
                 businessCodeRefDtoList.add(
                     BusinessCodeRefDto(
                         byObjectId = null,
@@ -310,7 +325,7 @@ class ScriptServiceImpl : ScriptService {
                     )
                 )
             }
-            for (bizObject in objectList) {
+            for (bizObject in compiler.bizObjectList) {
                 businessCodeRefDtoList.add(
                     BusinessCodeRefDto(
                         byObjectId = null,
@@ -323,7 +338,7 @@ class ScriptServiceImpl : ScriptService {
                     )
                 )
             }
-            for (field in fieldList) {
+            for (field in compiler.bizObjectFieldList) {
                 businessCodeRefDtoList.add(
                     BusinessCodeRefDto(
                         byObjectId = null,
@@ -351,8 +366,11 @@ class ScriptServiceImpl : ScriptService {
     ): ScriptCompiler {
         val compiler = ScriptCompiler(API, api, code)
         if (id != null) {
-            apiService.findById(id)?.code
+            val oldApi = apiService.findById(id)
                 ?: throw DataNotFoundException("interface".msgById(id))
+            if (oldApi.api != api) {
+                compiler.errors.add("不能修改api")
+            }
         }
         return compiler
     }
@@ -364,8 +382,11 @@ class ScriptServiceImpl : ScriptService {
     ): ScriptCompiler {
         val compiler = ScriptCompiler(TRIGGER, api, code)
         if (id != null) {
-            triggerService.findById(id)?.code
+            val oldTrigger = triggerService.findById(id)
                 ?: throw DataNotFoundException("trigger".msgById(id))
+            if (oldTrigger.api != api) {
+                compiler.errors.add("不能修改api")
+            }
         }
         return compiler
     }
@@ -413,6 +434,7 @@ class ScriptServiceImpl : ScriptService {
                 if (!functionApiSet.contains(it.api)) compiler.errors.add("line:${it.line}，自定义函数 ${it.api} 不存在")
             }
         }
+        compiler.customFunctionList = functionList
         return functionList
     }
 
@@ -453,6 +475,8 @@ class ScriptServiceImpl : ScriptService {
                 }
             }
         }
+        compiler.bizObjectList = bizObjectMap.values.toList()
+        compiler.bizObjectFieldList = usedBizObjectFieldList
         return bizObjectMap.values to usedBizObjectFieldList
     }
 }

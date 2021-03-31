@@ -29,8 +29,6 @@ val hostAccess =
         .allowAllClassImplementations(true)
         .allowArrayAccess(true)
         .allowListAccess(true)
-//        .targetTypeMapping(Int::class.java, String::class.java,
-//            { true }, { it?.toString() })
         .targetTypeMapping(List::class.java, List::class.java, {
             true
         }, { it })
@@ -53,7 +51,7 @@ fun buildContext(debug: Boolean = false, compile: Boolean = false): Context {
         .allowPolyglotAccess(PolyglotAccess.NONE)
         .allowHostClassLoading(false)
         .allowHostAccess(hostAccess)
-//        nashor兼容模式
+//        nashorn兼容模式
 //        .option("js.nashorn-compat", "false")
 //        禁用Regexp静态属性
         .option("js.regexp-static-result", "false")

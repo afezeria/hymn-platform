@@ -23,8 +23,8 @@ abstract class SourceCache<V> {
     private val lockCache: Cache<String, Lock> = cacheManager.createCache(
         this::class.java.simpleName,
         CacheConfigurationBuilder.newCacheConfigurationBuilder(
-            String::class.java,
-            Lock::class.java,
+            String::class.javaObjectType,
+            Lock::class.javaObjectType,
             ResourcePoolsBuilder.heap(1000)
         ).withExpiry(
             ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofSeconds(30))

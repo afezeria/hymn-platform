@@ -1,27 +1,18 @@
 package com.github.afezeria.hymn.script.platform
 
 import org.graalvm.polyglot.Context
-import org.graalvm.polyglot.HostAccess
 import org.graalvm.polyglot.Source
 import org.graalvm.polyglot.Value
 
 /**
  * @author afezeria
  */
-class ContextWrapper {
+class ContextWrapper(val debug: Boolean = false, compile: Boolean = false) {
     val context: Context
     val bindings: Value
 
     init {
-        context = Context.newBuilder("js")
-            .allowAllAccess(true)
-            .allowHostAccess(
-                hostAccess
-            )
-            .option("js.nashorn-compat", "true")
-            .allowHostClassLookup { true }
-            .allowExperimentalOptions(true)
-            .build()
+        context = buildContext(debug, compile)
         bindings = context.getBindings("js")
     }
 
@@ -29,24 +20,6 @@ class ContextWrapper {
 
     companion object {
         private val checkSource = Source.create("js", "1")
-        private val hostAccess =
-            HostAccess.newBuilder()
-                .allowPublicAccess(true)
-                .denyAccess(System::class.java)
-                .denyAccess(Class::class.java)
-                .allowAllImplementations(true)
-                .allowArrayAccess(true)
-                .allowListAccess(true)
-                .targetTypeMapping(List::class.java, List::class.java, {
-                    true
-                }, { it })
-                .targetTypeMapping(Map::class.java, Map::class.java,
-                    {
-                        val v = Value.asValue(it)
-                        v.hasMembers() && v.hasArrayElements().not()
-                    }, { it }
-                )
-                .build()
     }
 
     fun execute(
