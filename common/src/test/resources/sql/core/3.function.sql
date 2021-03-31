@@ -2422,4 +2422,4 @@ begin
     return;
 end;
 $$;
-comment on function hymn.query_data_name(json) is '根据对象id和数据id查询数据name字段的值，参数为json，key为自定义对象id，value为数据id数组，参数有效性由调用者保证';
+comment on function hymn.query_data_name(json) is '根据对象id和数据id查询数据name字段的值，参数为json，key为自定义对象id，value为数据id数组，参数有效性由调用者保证，用于dataService的query方法';

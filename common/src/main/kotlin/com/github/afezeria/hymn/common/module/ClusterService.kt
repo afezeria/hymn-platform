@@ -29,12 +29,14 @@ class ClusterService : CommandLineRunner {
     @Value("\${nodeAddress:}")
     private lateinit var nodeAddress: String
 
+    companion object {
+        private val modules = mutableListOf<String>()
 
-    private val modules = mutableListOf<String>()
-
-    fun addModule(name: String) {
-        modules.add(name)
+        internal fun addModule(name: String) {
+            modules.add(name)
+        }
     }
+
 
     fun getNodeAddress(): String {
         return if (nodeAddress.isEmpty()) {
