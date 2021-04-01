@@ -1,5 +1,6 @@
 package com.github.afezeria.hymn.script.platform
 
+import com.github.afezeria.hymn.common.util.randomUUIDStr
 import com.github.afezeria.hymn.script.scriptutil.ScriptTools
 import org.graalvm.polyglot.*
 
@@ -40,7 +41,11 @@ val hostAccess =
         )
         .build()
 
-fun buildContext(debug: Boolean = false, compile: Boolean = false): Context {
+fun buildContext(
+    debug: Boolean = false,
+    compile: Boolean = false,
+    lanIp: String = "",
+): Pair<Context, String> {
     val builder = Context.newBuilder("js")
 //        .allowAllAccess(true)
         .allowIO(false)
@@ -68,9 +73,17 @@ fun buildContext(debug: Boolean = false, compile: Boolean = false): Context {
         .allowHostClassLookup { true }
         .allowExperimentalOptions(true)
 
+    var debugUrl = ""
     if (debug) {
+        val uuid = randomUUIDStr()
+        val host = if (lanIp.isEmpty()) "localhost" else lanIp
+        debugUrl = String.format(
+            "devtools://devtools/bundled/js_app.html?ws=%s:%s/%s",
+            host, 9229, uuid
+        )
         builder
-            .option("inspect", "0.0.0.0:9229")
+            .option("inspect", "$host:9229")
+            .option("inspect.Path", uuid)
 //        不使用ssl，为true时需要指定密钥
             .option("inspect.Secure", "false")
 //        程序初始化时挂起
@@ -80,6 +93,8 @@ fun buildContext(debug: Boolean = false, compile: Boolean = false): Context {
 //        .option("inspect.Internal", "true")
 //        语言初始化时挂起
 //        .option("inspect.Initialization", "true")
+
+
     }
     val context = builder.build()
     if (compile) {
@@ -97,7 +112,7 @@ fun buildContext(debug: Boolean = false, compile: Boolean = false): Context {
         putMember("eval", null)
         putMember("tools", tools)
     }
-    return context
+    return context to debugUrl
 }
 
 class ScriptInfo(

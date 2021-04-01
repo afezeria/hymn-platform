@@ -17,7 +17,7 @@ import kotlin.reflect.full.valueParameters
 /**
  * @author afezeria
  */
-class ScriptCompiler(
+class CompilerResult(
     val type: ScriptType,
     val api: String,
     val code: String,
@@ -51,15 +51,13 @@ class ScriptCompiler(
     )
 
     private fun compile() {
-        val context = buildContext(debug = false, compile = true)
+        val context = buildContext(debug = false, compile = true).first
         val parse = context.getBindings("js").getMember("parse")
 
         info = try {
             parse.execute(code).asString().toClass<ScriptInfo>()!!
         } catch (e: PolyglotException) {
-            if (e.isGuestException) {
-                errors.add(e.message ?: "")
-            }
+            errors.add(requireNotNull(e.message))
             return
         }
         info?.apply {
@@ -113,6 +111,7 @@ class ScriptCompiler(
                     ) {
                         val usage = ObjectUsage(it.params[0].raw!!.trim('\'', '"'), it.line)
                         objectUsageList.add(usage)
+//                        检查dataService的query系列方法的调用中使用到的字段
                         if (it.method.startsWith("query")
                             && !it.method.startsWith("queryById")
                             && it.params[1].type == ParameterType.Literal

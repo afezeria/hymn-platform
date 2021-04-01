@@ -7,12 +7,15 @@ import org.graalvm.polyglot.Value
 /**
  * @author afezeria
  */
-class ContextWrapper(val debug: Boolean = false, compile: Boolean = false) {
+class ContextWrapper(val debug: Boolean = false, lanIp: String = "") {
     val context: Context
     val bindings: Value
+    val url: String
 
     init {
-        context = buildContext(debug, compile)
+        val pair = buildContext(debug, false, lanIp)
+        context = pair.first
+        url = pair.second
         bindings = context.getBindings("js")
     }
 

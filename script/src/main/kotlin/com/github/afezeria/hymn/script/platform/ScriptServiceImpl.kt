@@ -3,14 +3,10 @@ package com.github.afezeria.hymn.script.platform
 import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.constant.TriggerEvent
 import com.github.afezeria.hymn.common.exception.DataNotFoundException
-import com.github.afezeria.hymn.common.platform.CacheService
 import com.github.afezeria.hymn.common.platform.DatabaseService
 import com.github.afezeria.hymn.common.platform.DbCache
 import com.github.afezeria.hymn.common.platform.dataservice.DataService
-import com.github.afezeria.hymn.common.util.delete
-import com.github.afezeria.hymn.common.util.httpClient
-import com.github.afezeria.hymn.common.util.msgById
-import com.github.afezeria.hymn.common.util.toJson
+import com.github.afezeria.hymn.common.util.*
 import com.github.afezeria.hymn.core.conf.DataServiceConfiguration
 import com.github.afezeria.hymn.core.module.dto.BusinessCodeRefDto
 import com.github.afezeria.hymn.core.module.entity.BizObject
@@ -23,7 +19,6 @@ import com.github.afezeria.hymn.core.platform.script.ScriptType.*
 import org.graalvm.polyglot.Source
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.time.OffsetDateTime
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -32,8 +27,6 @@ import javax.servlet.http.HttpServletResponse
  */
 @Service
 class ScriptServiceImpl : ScriptService {
-    @Autowired
-    private lateinit var cacheService: CacheService
 
     @Autowired
     private lateinit var triggerService: BizObjectTriggerService
@@ -63,9 +56,6 @@ class ScriptServiceImpl : ScriptService {
         databaseService.getCache("module", 300)
     }
 
-    companion object {
-        private val defaultOffset = OffsetDateTime.now().offset
-    }
 
 
     override fun executeTrigger(
@@ -158,7 +148,7 @@ class ScriptServiceImpl : ScriptService {
                     ord = it.ord,
                     api = it.api,
                     source = Source.newBuilder("js", it.code, "trigger/${it.api}.js").build(),
-                    timestamp = it.modifyDate.toInstant(defaultOffset).toEpochMilli(),
+                    timestamp = it.modifyDate.toInstant(DEFAULT_OFFSET).toEpochMilli(),
                     functionIds = functionMap[it.id]?.map { requireNotNull(it.second) }
                         ?: emptyList()
                 )
@@ -183,7 +173,7 @@ class ScriptServiceImpl : ScriptService {
             SourceWithTime(
                 api = api,
                 source = Source.newBuilder("js", customApi.code, "api/${api}.js").build(),
-                timestamp = customApi.modifyDate.toInstant(defaultOffset).toEpochMilli(),
+                timestamp = customApi.modifyDate.toInstant(DEFAULT_OFFSET).toEpochMilli(),
                 functionIds = functionIds,
             )
         }
@@ -209,7 +199,7 @@ class ScriptServiceImpl : ScriptService {
                     customFunction.code,
                     "fun/${customFunction.api}.js"
                 ).build(),
-                timestamp = customFunction.modifyDate.toInstant(defaultOffset).toEpochMilli(),
+                timestamp = customFunction.modifyDate.toInstant(DEFAULT_OFFSET).toEpochMilli(),
                 functionIds = functionIds,
             )
         }
@@ -227,7 +217,7 @@ class ScriptServiceImpl : ScriptService {
                     api = customApi.api,
                     source = Source.newBuilder("js", customApi.code, "fun/${customApi.api}.js")
                         .build(),
-                    timestamp = customApi.modifyDate.toInstant(defaultOffset).toEpochMilli(),
+                    timestamp = customApi.modifyDate.toInstant(DEFAULT_OFFSET).toEpochMilli(),
                     functionIds = emptyList(),
                 )
             }
@@ -266,19 +256,62 @@ class ScriptServiceImpl : ScriptService {
         }
     }
 
-    fun getCompiler(
+    fun getCompilerResult(
         type: ScriptType,
         id: String?,
-        baseFun: Boolean?,
+        baseFun: Boolean = true,
         api: String,
         code: String,
-    ): ScriptCompiler {
-        val compiler = when (type) {
-            TRIGGER -> compileTrigger(id, api, code)
-            API -> compileApi(id, api, code)
-            FUNCTION -> compileFunction(id, requireNotNull(baseFun), api, code)
+    ): CompilerResult {
+        val result = when (type) {
+            TRIGGER -> {
+                val compiler = CompilerResult(TRIGGER, api, code)
+                if (id != null) {
+                    val oldTrigger = triggerService.findById(id)
+                        ?: throw DataNotFoundException("trigger".msgById(id))
+                    if (oldTrigger.api != api) {
+                        compiler.errors.add("不能修改api")
+                    }
+                }
+                compiler
+            }
+            API -> {
+                val compiler = CompilerResult(API, api, code)
+                if (id != null) {
+                    val oldApi = apiService.findById(id)
+                        ?: throw DataNotFoundException("interface".msgById(id))
+                    if (oldApi.api != api) {
+                        compiler.errors.add("不能修改api")
+                    }
+                }
+                compiler
+            }
+            FUNCTION -> {
+                val compiler = CompilerResult(FUNCTION, api, code)
+                if (id != null) {
+                    val old = functionService.findById(id)?.code
+                        ?: throw DataNotFoundException("function".msgById(id))
+                    val oldCompiler = CompilerResult(FUNCTION, api, old)
+                    if (oldCompiler.api != compiler.api) {
+                        compiler.errors.add("不能修改函数api")
+                    }
+                    if (oldCompiler.info != null) {
+                        val nParamsNumber = requireNotNull(compiler.info).params.size
+                        val oParamsNumber = oldCompiler.info!!.params.size
+                        if (nParamsNumber != oParamsNumber) {
+                            compiler.errors.add("不能修改参数个数")
+                        }
+                    }
+                }
+                if (baseFun && compiler.functionUsageList.isNotEmpty()) {
+                    compiler.errors.add("基础函数不能引用其他自定义函数")
+                }
+                compiler
+            }
         }
-        return compiler
+        getRefFunInfo(result)
+        getRefObjectAndFieldInfo(result)
+        return result
     }
 
     override fun compile(
@@ -292,14 +325,7 @@ class ScriptServiceImpl : ScriptService {
         code: String,
         txCallback: () -> String
     ): String {
-//        val compiler = when (type) {
-//            TRIGGER -> compileTrigger(id, api, code)
-//            API -> compileApi(id, api, code)
-//            FUNCTION -> compileFunction(id, requireNotNull(baseFun), api, code)
-//        }
-//        val functionList = getRefFunInfo(compiler)
-//        val (objectList, fieldList) = getRefObjectAndFieldInfo(compiler)
-        val compiler = getCompiler(type, id, baseFun, api, code)
+        val compiler = getCompilerResult(type, id, baseFun ?: true, api, code)
         if (compiler.errors.isNotEmpty()) {
             throw CompileException(compiler.errors.toJson())
         }
@@ -359,103 +385,44 @@ class ScriptServiceImpl : ScriptService {
         return result
     }
 
-    private fun compileApi(
-        id: String?,
-        api: String,
-        code: String,
-    ): ScriptCompiler {
-        val compiler = ScriptCompiler(API, api, code)
-        if (id != null) {
-            val oldApi = apiService.findById(id)
-                ?: throw DataNotFoundException("interface".msgById(id))
-            if (oldApi.api != api) {
-                compiler.errors.add("不能修改api")
-            }
-        }
-        return compiler
-    }
-
-    private fun compileTrigger(
-        id: String?,
-        api: String,
-        code: String,
-    ): ScriptCompiler {
-        val compiler = ScriptCompiler(TRIGGER, api, code)
-        if (id != null) {
-            val oldTrigger = triggerService.findById(id)
-                ?: throw DataNotFoundException("trigger".msgById(id))
-            if (oldTrigger.api != api) {
-                compiler.errors.add("不能修改api")
-            }
-        }
-        return compiler
-    }
-
-    private fun compileFunction(
-        id: String?,
-        baseFun: Boolean,
-        api: String,
-        code: String,
-    ): ScriptCompiler {
-        val compiler = ScriptCompiler(FUNCTION, api, code)
-        if (id != null) {
-            val old = functionService.findById(id)?.code
-                ?: throw DataNotFoundException("function".msgById(id))
-            val oldCompiler = ScriptCompiler(FUNCTION, api, old)
-            if (oldCompiler.api != compiler.api) {
-                compiler.errors.add("不能修改函数api")
-            }
-            if (oldCompiler.info != null) {
-                val nParamsNumber = requireNotNull(compiler.info).params.size
-                val oParamsNumber = oldCompiler.info!!.params.size
-                if (nParamsNumber != oParamsNumber) {
-                    compiler.errors.add("不能修改参数个数")
-                }
-            }
-        }
-        if (baseFun && compiler.functionUsageList.isNotEmpty()) {
-            compiler.errors.add("基础函数不能引用其他自定义函数")
-        }
-        return compiler
-    }
-
     /**
      * 获取脚本中使用的函数数据
      */
-    private fun getRefFunInfo(compiler: ScriptCompiler): List<CustomFunction> {
+    private fun getRefFunInfo(compilerResult: CompilerResult): List<CustomFunction> {
         //检查使用到的自定义函数是否都存在
-        if (compiler.functionUsageList.isEmpty()) {
+        if (compilerResult.functionUsageList.isEmpty()) {
             return emptyList()
         }
-        val functionList = functionService.findByApiList(compiler.functionUsageList.map { it.api })
-        if (compiler.functionUsageList.size != functionList.size) {
+        val functionList =
+            functionService.findByApiList(compilerResult.functionUsageList.map { it.api })
+        if (compilerResult.functionUsageList.size != functionList.size) {
             val functionApiSet = functionList.mapTo(mutableSetOf()) { it.api }
-            compiler.functionUsageList.forEach {
-                if (!functionApiSet.contains(it.api)) compiler.errors.add("line:${it.line}，自定义函数 ${it.api} 不存在")
+            compilerResult.functionUsageList.forEach {
+                if (!functionApiSet.contains(it.api)) compilerResult.errors.add("line:${it.line}，自定义函数 ${it.api} 不存在")
             }
         }
-        compiler.customFunctionList = functionList
+        compilerResult.customFunctionList = functionList
         return functionList
     }
 
     /**
      * 获取脚本中使用的对象/字段数据
      */
-    private fun getRefObjectAndFieldInfo(compiler: ScriptCompiler): Pair<Collection<BizObject>, List<BizObjectField>> {
-        if (compiler.objectUsageList.isEmpty()) {
+    private fun getRefObjectAndFieldInfo(compilerResult: CompilerResult): Pair<Collection<BizObject>, List<BizObjectField>> {
+        if (compilerResult.objectUsageList.isEmpty()) {
             return emptyList<BizObject>() to emptyList()
         }
 //        检查使用到的业务对象
         val bizObjectMap =
-            bizObjectService.findActiveObjectByApiList(compiler.objectUsageList.map { it.api }
+            bizObjectService.findActiveObjectByApiList(compilerResult.objectUsageList.map { it.api }
                 .toSet()).map { it.api to it }.toMap()
-        compiler.objectUsageList.takeIf { it.size != bizObjectMap.size }?.forEach {
-            if (!bizObjectMap.containsKey(it.api)) compiler.errors.add("line:${it.line}，业务对象 ${it.api} 不存在")
+        compilerResult.objectUsageList.takeIf { it.size != bizObjectMap.size }?.forEach {
+            if (!bizObjectMap.containsKey(it.api)) compilerResult.errors.add("line:${it.line}，业务对象 ${it.api} 不存在")
         }
 
         //检查使用到的字段
-        val obj2Fields = mutableMapOf<String, MutableList<ScriptCompiler.FieldUsage>>()
-        for (usage in compiler.objectUsageList) {
+        val obj2Fields = mutableMapOf<String, MutableList<CompilerResult.FieldUsage>>()
+        for (usage in compilerResult.objectUsageList) {
             val list = obj2Fields.getOrPut(usage.api) { mutableListOf() }
             for (field in usage.fields) {
                 list.add(field)
@@ -470,13 +437,13 @@ class ScriptServiceImpl : ScriptService {
                     if (fieldApiMap.containsKey(field.api)) {
                         usedBizObjectFieldList.add(fieldApiMap[field.api]!!)
                     } else {
-                        compiler.errors.add("line:${field.line}，字段 [objectApi:${objApi},api:${field.api}] 不存在")
+                        compilerResult.errors.add("line:${field.line}，字段 [objectApi:${objApi},api:${field.api}] 不存在")
                     }
                 }
             }
         }
-        compiler.bizObjectList = bizObjectMap.values.toList()
-        compiler.bizObjectFieldList = usedBizObjectFieldList
+        compilerResult.bizObjectList = bizObjectMap.values.toList()
+        compilerResult.bizObjectFieldList = usedBizObjectFieldList
         return bizObjectMap.values to usedBizObjectFieldList
     }
 }

@@ -15,6 +15,7 @@ internal object ContextWrapperPool :
     GenericObjectPool<ContextWrapper>(ContextWrapperFactory()) {
     init {
         maxTotal = 1000
+        maxIdle = 1000
         testOnCreate = true
         testOnBorrow = true
         testOnReturn = true
@@ -57,7 +58,7 @@ internal object ContextWrapperPool :
         throw InnerException("一个节点最多允许5个用户同时debug")
     }
 
-    fun createDebugContext() {
+    fun createDebugContext(lanIp: String): String {
         val accountId = Session.getInstance().accountId
         debugContextTimeoutDetectionPool.execute {
             while (true) {
@@ -71,13 +72,15 @@ internal object ContextWrapperPool :
                 }
             }
         }
-        debugContextCache[accountId] = WrapperWithTimestamp(
+        val wrapper = WrapperWithTimestamp(
             System.currentTimeMillis(),
             ContextWrapper(
                 debug = true,
-                compile = true
+                lanIp = lanIp,
             )
         )
+        debugContextCache[accountId] = wrapper
+        return wrapper.wrapper.url
     }
 
     fun closeDebugContext() {

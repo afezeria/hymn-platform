@@ -4,8 +4,9 @@ import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.common.exception.InnerException
-import com.github.afezeria.hymn.common.platform.CacheService
+import com.github.afezeria.hymn.common.module.ClusterService
 import com.github.afezeria.hymn.common.platform.Session
+import com.github.afezeria.hymn.common.util.DEFAULT_OFFSET
 import com.github.afezeria.hymn.core.module.service.BizObjectTriggerService
 import com.github.afezeria.hymn.core.module.service.CustomApiService
 import com.github.afezeria.hymn.core.module.service.CustomFunctionService
@@ -28,9 +29,6 @@ import org.springframework.web.bind.annotation.*
 @Api(tags = ["ScriptController"], description = "脚本接口")
 class ScriptController {
     @Autowired
-    private lateinit var cacheService: CacheService
-
-    @Autowired
     private lateinit var triggerService: BizObjectTriggerService
 
     @Autowired
@@ -38,6 +36,9 @@ class ScriptController {
 
     @Autowired
     private lateinit var functionService: CustomFunctionService
+
+    @Autowired
+    private lateinit var clusterService: ClusterService
 
     @Autowired
     private lateinit var scriptServiceImpl: ScriptServiceImpl
@@ -56,8 +57,8 @@ class ScriptController {
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "开启debug模式", notes = "")
     @PostMapping("debug")
-    fun startDebug() {
-        ContextWrapperPool.createDebugContext()
+    fun startDebug(): String {
+        return ContextWrapperPool.createDebugContext(clusterService.lanIp)
     }
 
     @Function(AccountType.ADMIN)
@@ -74,14 +75,14 @@ class ScriptController {
     fun compile(
         @RequestParam("type") type: ScriptType,
         @RequestParam("id") id: String,
-        @RequestParam("baseFun", defaultValue = "false") baseFun: Boolean?,
+        @RequestParam("baseFun", defaultValue = "true") baseFun: Boolean,
         @RequestParam("api") api: String,
         @RequestParam("code") code: String,
     ): List<String> {
         val accountId = Session.getInstance().accountId
         val wrapperWithTimestamp = ContextWrapperPool.debugContextCache[accountId]
             ?: throw InnerException("未启用debug模式，临时脚本不会被处理")
-        val compiler = scriptServiceImpl.getCompiler(
+        val compiler = scriptServiceImpl.getCompilerResult(
             type = type,
             id = id,
             baseFun = baseFun,
@@ -91,6 +92,20 @@ class ScriptController {
         if (compiler.errors.isEmpty()) {
 //            编译没有错误时更新debug上下文中的脚本
             wrapperWithTimestamp.timestamp = System.currentTimeMillis()
+//            将临时脚本依赖的函数添加到上下文
+            for (customFunction in compiler.customFunctionList) {
+                wrapperWithTimestamp.wrapper.evaluated[customFunction.api] = SourceWithTime(
+                    api = customFunction.api,
+                    source = Source.newBuilder(
+                        "js",
+                        customFunction.code,
+                        "fun/${customFunction.api}"
+                    ).build(),
+                    timestamp = customFunction.modifyDate.toInstant(DEFAULT_OFFSET).toEpochMilli(),
+                    functionIds = emptyList()
+                )
+            }
+//            更新脚本
             val name = when (type) {
                 ScriptType.TRIGGER -> "trigger/$api.js"
                 ScriptType.API -> "api/$api.js"
