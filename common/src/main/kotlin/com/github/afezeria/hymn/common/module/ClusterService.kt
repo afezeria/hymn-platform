@@ -8,7 +8,6 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import java.net.InetAddress
 
 /**
  * @author afezeria
@@ -26,8 +25,8 @@ class ClusterService : CommandLineRunner {
         databaseService.getCache("module", 180)
     }
 
-    @Value("\${nodeAddress:}")
-    private lateinit var nodeAddress: String
+    @Value("\${hymn.lanIp}")
+    lateinit var lanIp: String
 
     companion object {
         private val modules = mutableListOf<String>()
@@ -39,12 +38,7 @@ class ClusterService : CommandLineRunner {
 
 
     fun getNodeAddress(): String {
-        return if (nodeAddress.isEmpty()) {
-            val localHost = InetAddress.getLocalHost()
-            localHost.hostAddress + ":" + webServerAppContext.webServer.port
-        } else {
-            nodeAddress
-        }
+        return lanIp + ":" + webServerAppContext.webServer.port
     }
 
     /**
