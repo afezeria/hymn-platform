@@ -11,7 +11,7 @@ io = StringIO.new
 conn.exec Constant::QUERY_TABLE do |r|
   columns = conn.exec(Constant::QUERY_COLUMN)
 
-  r.filter { |i| i['name'] =~ table_regex }
+  r.filter { |i| (i['name'] =~ table_regex) && !(i['comment'] =~ /;;.*no_history(?![\w ]*\]).*/) }
    .each do |t|
     table_name = t['name']
     io.write <<EOM
