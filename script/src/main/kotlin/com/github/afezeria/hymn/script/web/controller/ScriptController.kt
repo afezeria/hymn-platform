@@ -54,6 +54,14 @@ class ScriptController {
         scriptServiceImpl.cleanLocalCache(type, key)
     }
 
+
+    @Function(AccountType.ADMIN)
+    @ApiOperation(value = "开启debug模式", notes = "")
+    @GetMapping("debug")
+    fun debugStatus(): Boolean {
+        return ContextWrapperPool.debugContextCache[Session.getInstance().accountId] != null
+    }
+
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "开启debug模式", notes = "")
     @PostMapping("debug")
