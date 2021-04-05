@@ -10,7 +10,8 @@ import com.github.afezeria.hymn.common.util.execute
 class DbCache(
     val group: String,
     val expiry: Long,
-    private val databaseService: DatabaseService
+    private val databaseService: DatabaseService,
+    private val addCacheCallback: (() -> Unit)? = null,
 ) {
     /**
      * 根据pattern查询[group]中的值，pattern执行like匹配
@@ -34,10 +35,19 @@ class DbCache(
 
     /**
      * 设置值
+     * @param callback 缓存为新增时执行，覆盖时不执行
      */
-    fun set(key: String, value: String) {
+    fun set(key: String, value: String, callback: (() -> Unit)? = null) {
         databaseService.primary().useConnection {
-            it.execute("select hymn.set_cache(?,?,?,?)", group, key, value, expiry)
+            it.execute("select hymn.set_cache(?,?,?,?) as flag", group, key, value, expiry) {
+                requireNotNull(it).apply {
+                    next()
+                    if (getBoolean(1)) {
+                        if (callback != null) callback()
+                        else addCacheCallback?.invoke()
+                    }
+                }
+            }
         }
     }
 

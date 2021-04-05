@@ -86,15 +86,19 @@ begin
 end;
 $$;
 
-create or replace function hymn.set_cache(f_group text, f_key text, f_value text, f_expiry bigint) returns void
+create or replace function hymn.set_cache(f_group text, f_key text, f_value text, f_expiry bigint) returns bool
     language plpgsql as
 $$
+declare
+    is_new_cache bool;
 begin
     insert into hymn.core_cache (c_group, c_key, c_value, last_time, expiry)
     values (f_group, f_key, f_value, now(), f_expiry)
     on conflict (c_group,c_key) do update set c_value=excluded.c_value,
                                               expiry = excluded.expiry,
-                                              last_time=now();
+                                              last_time=now()
+    returning new_cache into is_new_cache;
+    return is_new_cache;
 end;
 $$;
 create or replace function hymn.remove_cache(f_group text, f_key text) returns int
@@ -108,6 +112,32 @@ begin
     return count;
 end;
 $$;
+comment on function hymn.remove_cache is '删除缓存并返回受影响行数';
+create or replace function hymn.core_cache_trigger_fun_before_insert_or_update() returns trigger
+    language plpgsql as
+$$
+declare
+    record_old hymn.core_cache := old;
+    record_new hymn.core_cache := new;
+begin
+    if tg_op = 'UPDATE' then
+        if now() > (record_old.last_time + record_old.expiry * interval '1 second') then
+            record_new.new_cache = true;
+        else
+            record_new.new_cache = false;
+        end if;
+    elseif tg_op = 'INSERT' then
+        record_new.new_cache = true;
+    end if;
+    return record_new;
+end;
+$$;
+comment on function hymn.core_cache_trigger_fun_before_insert_or_update is 'core_cache表更新/插入触发器函数，如果缓存已存在且未过期则设置new_cache字段为false，否则为true';
+create trigger c10_core_cache_before_insert_or_update
+    before insert or update
+    on hymn.core_cache
+    for each row
+execute function hymn.core_cache_trigger_fun_before_insert_or_update();
 
 
 

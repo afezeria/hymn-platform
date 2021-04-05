@@ -29,10 +29,10 @@ class ClusterService : CommandLineRunner {
     lateinit var lanIp: String
 
     companion object {
-        private val modules = mutableListOf<String>()
+        private val modules = mutableListOf<Pair<String, (() -> Unit)?>>()
 
-        internal fun addModule(name: String) {
-            modules.add(name)
+        internal fun addModule(name: String, registerCallback: (() -> Unit)?) {
+            modules.add(name to registerCallback)
         }
     }
 
@@ -46,7 +46,13 @@ class ClusterService : CommandLineRunner {
      */
     @Scheduled(cron = "0 * * * * ?")
     fun register() {
-        modules.forEach { cache.set("$it:${getNodeAddress()}", getNodeAddress()) }
+        modules.forEach { (name, callback) ->
+            cache.set(
+                "$name:${getNodeAddress()}",
+                getNodeAddress(),
+                callback
+            )
+        }
     }
 
     /**

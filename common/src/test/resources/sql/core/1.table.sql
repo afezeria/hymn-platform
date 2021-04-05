@@ -4,6 +4,7 @@
 -- uk:[[field_1 field_2][field_4 field_3]] 表示在field_1和field_2上创建多列唯一索引，字段间以空格分割，一个中括号表示一个索引
 -- idx:[[field_1 field_2][field_4 field_3]] 表示在field_1和field_2上创建多列索引，字段间以空格分割，一个中括号表示一个索引
 -- fk:[[field_1,field_2 table_name:field_1,field_2]] 表示在field_1和field_2上创建多列外键约束，一个中括号表示一个索引
+-- no_history 表示该表不创建历史表及触发器
 -- 当 ;; 出现在字段的注释中时
 -- idx 表示在该字段上创建索引
 -- uk 表示在该字段上创建唯一约束
@@ -1110,8 +1111,10 @@ create table hymn.core_cache
     c_value   text,
     last_time timestamptz,
     expiry    bigint,
+    new_cache bool,
     primary key (c_group, c_key)
 );
 create index cache_c_key_pattern_idx on hymn.core_cache (c_key varchar_pattern_ops);
-comment on table hymn.core_cache is '缓存表';
+comment on table hymn.core_cache is '缓存表，基本是当作注册中心使用 ;;no_history';
+comment on column hymn.core_cache.new_cache is '调用set_cache方法时的返回值，标识set_cache操作是新增的还是更新';
 

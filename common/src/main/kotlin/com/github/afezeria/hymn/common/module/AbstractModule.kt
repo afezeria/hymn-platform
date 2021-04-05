@@ -5,11 +5,11 @@ import mu.KLogging
 /**
  * @author afezeria
  */
-abstract class AbstractModule(name: String) {
+abstract class AbstractModule(name: String, registerCallback: (() -> Unit)? = null) {
     companion object : KLogging()
 
     init {
         logger.info("register $name module")
-        ClusterService.addModule(name)
+        ClusterService.addModule(name, registerCallback)
     }
 }

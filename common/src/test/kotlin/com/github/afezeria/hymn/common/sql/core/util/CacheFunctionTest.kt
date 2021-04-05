@@ -26,8 +26,31 @@ class CacheFunctionTest : BaseDbTest() {
             val key = "abc"
             val value = "bb"
             val expiry = 100
+            val execute =
+                it.execute("select hymn.set_cache(?,?,?,?) as new_cache", group, key, value, expiry)
+            execute.size shouldBe 1
+            execute[0]["new_cache"] shouldBe true
+//            it.execute("select count(*) from hymn.core_cache").size shouldBe 1
+        }
+    }
+
+    @Test
+    fun coverExpiredCache() {
+        adminConn.use {
+            val group = "abc"
+            val key = "abc"
+            var value = "bb"
+            val expiry = 1
             it.execute("select hymn.set_cache(?,?,?,?)", group, key, value, expiry)
-            it.execute("select count(*) from hymn.core_cache").size shouldBe 1
+            val res1 = it.execute("select * from hymn.core_cache")[0]
+            value = "cc"
+            Thread.sleep(1000)
+            val execute =
+                it.execute("select hymn.set_cache(?,?,?,?) as new_cache", group, key, value, expiry)
+            execute[0]["new_cache"] shouldBe true
+            val res2 = it.execute("select * from hymn.core_cache")[0]
+            (res2["last_time"] as LocalDateTime).isAfter((res1["last_time"] as LocalDateTime)) shouldBe true
+            res2["c_value"] shouldBe "cc"
         }
     }
 
@@ -41,7 +64,9 @@ class CacheFunctionTest : BaseDbTest() {
             it.execute("select hymn.set_cache(?,?,?,?)", group, key, value, expiry)
             val res1 = it.execute("select * from hymn.core_cache")[0]
             value = "cc"
-            it.execute("select hymn.set_cache(?,?,?,?)", group, key, value, expiry)
+            val execute =
+                it.execute("select hymn.set_cache(?,?,?,?) as new_cache", group, key, value, expiry)
+            execute[0]["new_cache"] shouldBe false
             val res2 = it.execute("select * from hymn.core_cache")[0]
             (res2["last_time"] as LocalDateTime).isAfter((res1["last_time"] as LocalDateTime)) shouldBe true
             res2["c_value"] shouldBe "cc"

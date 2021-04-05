@@ -1045,59 +1045,6 @@ create trigger core_button_perm_history_del
     on hymn.core_button_perm
     for each row
 execute function hymn.core_button_perm_history_del();
-drop table if exists hymn.core_cache_history cascade;
-create table hymn.core_cache_history
-(
-    operation text,
-    stamp     timestamp,
-    c_group   text,
-    c_key     text,
-    c_value   text,
-    last_time timestamptz,
-    expiry    int8
-);
-create or replace function hymn.core_cache_history_ins() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_cache_history select 'i', now(), new.*;
-    return null;
-end
-$$;
-create or replace function hymn.core_cache_history_upd() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_cache_history select 'u', now(), new.*;
-    return null;
-end
-$$;
-create or replace function hymn.core_cache_history_del() returns trigger
-    language plpgsql as
-$$
-begin
-    insert into hymn.core_cache_history select 'd', now(), old.*;
-    return null;
-end
-$$;
-drop trigger if exists core_cache_history_ins on hymn.core_cache;
-create trigger core_cache_history_ins
-    after insert
-    on hymn.core_cache
-    for each row
-execute function hymn.core_cache_history_ins();
-drop trigger if exists core_cache_history_upd on hymn.core_cache;
-create trigger core_cache_history_upd
-    after update
-    on hymn.core_cache
-    for each row
-execute function hymn.core_cache_history_upd();
-drop trigger if exists core_cache_history_del on hymn.core_cache;
-create trigger core_cache_history_del
-    after delete
-    on hymn.core_cache
-    for each row
-execute function hymn.core_cache_history_del();
 drop table if exists hymn.core_column_field_mapping_history cascade;
 create table hymn.core_column_field_mapping_history
 (
