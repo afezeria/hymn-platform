@@ -5,12 +5,24 @@ import org.graalvm.polyglot.Source
 import org.graalvm.polyglot.Value
 
 /**
+ * graalvm的js上下文的包装
+ * @param debug 是否用于debug
  * @author afezeria
  */
 class ContextWrapper(val debug: Boolean = false, lanIp: String = "") {
     val context: Context
     val bindings: Value
     val url: String
+
+    /**
+     * 当前线程开始使用这个context的时间
+     */
+    var timestamp = 0L
+
+    /**
+     * 当前上下文正在执行的主脚本
+     */
+    var currentMainScriptApi: String? = null
 
     init {
         val pair = buildContext(debug, false, lanIp)
@@ -47,7 +59,12 @@ class ContextWrapper(val debug: Boolean = false, lanIp: String = "") {
         }
 
         val scriptFunction = requireNotNull(bindings.getMember(main.api))
+
+        val last = currentMainScriptApi
+        currentMainScriptApi = main.api
         val result = scriptFunction.execute(*params)
+        currentMainScriptApi = last
+
         return if (result.isNull) {
             null
         } else result

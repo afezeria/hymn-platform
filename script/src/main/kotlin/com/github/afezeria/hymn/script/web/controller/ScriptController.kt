@@ -59,7 +59,7 @@ class ScriptController {
     @ApiOperation(value = "开启debug模式", notes = "")
     @GetMapping("debug")
     fun debugStatus(): Boolean {
-        return ContextWrapperPool.debugContextCache[Session.getInstance().accountId] != null
+        return ContextWrapperPool.debugWrapperCache[Session.getInstance().accountId] != null
     }
 
     @Function(AccountType.ADMIN)
@@ -88,7 +88,7 @@ class ScriptController {
         @RequestParam("code") code: String,
     ): List<String> {
         val accountId = Session.getInstance().accountId
-        val wrapperWithTimestamp = ContextWrapperPool.debugContextCache[accountId]
+        val wrapperWithTimestamp = ContextWrapperPool.debugWrapperCache[accountId]
             ?: throw InnerException("未启用debug模式，临时脚本不会被处理")
         val compiler = scriptServiceImpl.getCompilerResult(
             type = type,
@@ -102,7 +102,7 @@ class ScriptController {
             wrapperWithTimestamp.timestamp = System.currentTimeMillis()
 //            将临时脚本依赖的函数添加到上下文
             for (customFunction in compiler.customFunctionList) {
-                wrapperWithTimestamp.wrapper.evaluated[customFunction.api] = SourceWithTime(
+                wrapperWithTimestamp.evaluated[customFunction.api] = SourceWithTime(
                     api = customFunction.api,
                     source = Source.newBuilder(
                         "js",
@@ -119,7 +119,7 @@ class ScriptController {
                 ScriptType.API -> "api/$api.js"
                 ScriptType.FUNCTION -> "fun/$api.js"
             }
-            wrapperWithTimestamp.wrapper.evaluated[api] = SourceWithTime(
+            wrapperWithTimestamp.evaluated[api] = SourceWithTime(
                 api = api,
                 source = Source.newBuilder("js", code, name).build(),
 //                临时脚本时间戳设置为最大值，避免被正常脚本覆盖

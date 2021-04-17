@@ -41,6 +41,13 @@ val hostAccess =
         )
         .build()
 
+/**
+ * 构建js上下文
+ * @param debug 是否开启debug
+ * @param compile 是否为编译用上下文
+ * @param lanIp 节点ip地址
+ * @return first:Context, second: debugUrl
+ */
 fun buildContext(
     debug: Boolean = false,
     compile: Boolean = false,
