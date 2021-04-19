@@ -1,7 +1,6 @@
 package com.github.afezeria.hymn.core.module.controller
 
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.core.module.dto.BizObjectTypeFieldOptionDto
@@ -16,9 +15,8 @@ import org.springframework.web.bind.annotation.*
 /**
  * @author afezeria
  */
-@ApiVersion
 @RestController
-@RequestMapping("/core/api/{version}/biz-object-type-field-option")
+@RequestMapping("/core/api/biz-object-type-field-option")
 @Api(tags = ["BizObjectTypeOptionsController"], description = "业务对象记录类型可选项限制接口")
 class BizObjectTypeFieldOptionController {
 

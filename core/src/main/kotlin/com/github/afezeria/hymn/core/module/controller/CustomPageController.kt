@@ -1,7 +1,6 @@
 package com.github.afezeria.hymn.core.module.controller
 
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.common.exception.ResourceNotFoundException
@@ -18,9 +17,8 @@ import org.springframework.web.bind.annotation.*
 /**
  * @author afezeria
  */
-@ApiVersion
 @RestController
-@RequestMapping("/core/api/{version}/custom-page")
+@RequestMapping("/core/api/custom-page")
 @Api(
     tags = ["CustomPageController"],
     description = "自定义页面，上传压缩包，解压后存放在工作目录的static-resource/{api}目录下,访问路径为接口"

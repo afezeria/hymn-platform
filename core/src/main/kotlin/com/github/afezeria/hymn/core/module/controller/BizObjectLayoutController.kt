@@ -1,7 +1,6 @@
 package com.github.afezeria.hymn.core.module.controller
 
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.common.exception.ResourceNotFoundException
@@ -19,9 +18,8 @@ import org.springframework.web.bind.annotation.*
 /**
  * @author afezeria
  */
-@ApiVersion
 @RestController
-@RequestMapping("/core/api/{version}/biz-object-layout")
+@RequestMapping("/core/api/biz-object-layout")
 @Api(tags = ["BizObjectLayoutController"], description = "业务对象详情页面布局接口")
 class BizObjectLayoutController {
 

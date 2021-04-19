@@ -1,7 +1,6 @@
 package com.github.afezeria.hymn.core.module.controller
 
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.core.module.dto.BizObjectMappingItemDto
@@ -16,9 +15,8 @@ import org.springframework.web.bind.annotation.*
 /**
  * @author afezeria
  */
-@ApiVersion
 @RestController
-@RequestMapping("/core/api/{version}/biz-object-mapping-item")
+@RequestMapping("/core/api/biz-object-mapping-item")
 @Api(tags = ["BizObjectMappingItemController"], description = "对象映射关系表明细接口")
 class BizObjectMappingItemController {
 

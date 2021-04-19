@@ -1,7 +1,6 @@
 package com.github.afezeria.hymn.core.module.controller
 
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.common.exception.ResourceNotFoundException
@@ -18,9 +17,8 @@ import org.springframework.web.bind.annotation.*
 /**
  * @author afezeria
  */
-@ApiVersion
 @RestController
-@RequestMapping("/core/api/{version}/custom-menu-group")
+@RequestMapping("/core/api/custom-menu-group")
 @Api(tags = ["CustomMenuGroupController"], description = "菜单分组接口")
 class CustomMenuGroupController {
 

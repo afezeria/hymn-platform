@@ -1,6 +1,5 @@
 package com.github.afezeria.hymn.oss.web.controller
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.common.exception.BusinessException
@@ -26,9 +25,8 @@ import javax.servlet.http.HttpServletResponse
 /**
  * @author afezeria
  */
-@ApiVersion
 @Controller
-@RequestMapping("oss/api/{version}")
+@RequestMapping("oss/api")
 @Api(tags = ["文件上传/下载接口"])
 class FileController {
     companion object : KLogging()

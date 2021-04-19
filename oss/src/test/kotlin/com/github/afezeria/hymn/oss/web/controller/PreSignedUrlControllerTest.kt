@@ -31,7 +31,6 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.*
 
 
 /**
@@ -106,7 +105,7 @@ internal class PreSignedUrlControllerTest : BaseDbTest() {
 
     @Test
     fun `invalid token`() {
-        val url = "http://localhost:$port/module/oss/api/v2104/public/pre-signed?token=   "
+        val url = "http://localhost:$port/module/oss/api/public/pre-signed?token=   "
 
         val request = Request.Builder().url(url).build()
         client.newCall(request).execute().use {

@@ -1,6 +1,5 @@
 package com.github.afezeria.hymn.script.platform
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.constant.TriggerEvent
 import com.github.afezeria.hymn.common.exception.DataNotFoundException
 import com.github.afezeria.hymn.common.platform.DatabaseService
@@ -239,7 +238,7 @@ class ScriptServiceImpl : ScriptService {
         val urls = cache.get("script:%")
         urls.forEach {
             httpClient.delete(
-                "http://${it.second}/module/script/api/v${ApiVersion.lowest}/script/cache",
+                "http://${it.second}/module/script/api/script/cache",
                 params = mapOf(
                     "type" to type.name,
                     "key" to key

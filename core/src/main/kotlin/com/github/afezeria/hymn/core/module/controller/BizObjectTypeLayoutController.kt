@@ -1,7 +1,6 @@
 package com.github.afezeria.hymn.core.module.controller
 
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.core.module.dto.BizObjectTypeLayoutDto
@@ -16,9 +15,8 @@ import org.springframework.web.bind.annotation.*
 /**
  * @author afezeria
  */
-@ApiVersion
 @RestController
-@RequestMapping("/core/api/{version}/biz-object-type-layout")
+@RequestMapping("/core/api/biz-object-type-layout")
 @Api(tags = ["BizObjectTypeLayoutController"], description = "业务对象的每个角色的 记录类型-页面布局 映射接口")
 class BizObjectTypeLayoutController {
 

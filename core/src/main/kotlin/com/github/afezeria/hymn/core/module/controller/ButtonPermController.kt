@@ -1,7 +1,6 @@
 package com.github.afezeria.hymn.core.module.controller
 
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.core.module.dto.ButtonPermDto
@@ -18,9 +17,8 @@ import org.springframework.web.bind.annotation.*
 /**
  * @author afezeria
  */
-@ApiVersion
 @RestController
-@RequestMapping("/core/api/{version}/button-perm")
+@RequestMapping("/core/api/button-perm")
 @Api(tags = ["ButtonPermController"], description = "按钮权限接口")
 class ButtonPermController {
 

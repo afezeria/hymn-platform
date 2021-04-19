@@ -1,6 +1,5 @@
 package com.github.afezeria.hymn.oss.module.web
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.oss.module.entity.PreSignedHistory
@@ -16,7 +15,6 @@ import java.time.LocalDateTime
 /**
  * @author afezeria
  */
-@ApiVersion
 @RestController
 @RequestMapping("oss/api/{version}/pre-signed-history")
 @Api(tags = ["创建文件预签url记录接口"])

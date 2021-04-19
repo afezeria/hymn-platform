@@ -1,7 +1,6 @@
 package com.github.afezeria.hymn.core.module.controller
 
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.core.module.dto.ModuleFunctionPermDto
@@ -18,9 +17,8 @@ import org.springframework.web.bind.annotation.*
 /**
  * @author afezeria
  */
-@ApiVersion
 @RestController
-@RequestMapping("/core/api/{version}/module-function-perm")
+@RequestMapping("/core/api/module-function-perm")
 @Api(tags = ["ModuleFunctionPermController"], description = "模块功能权限表接口")
 class ModuleFunctionPermController {
 

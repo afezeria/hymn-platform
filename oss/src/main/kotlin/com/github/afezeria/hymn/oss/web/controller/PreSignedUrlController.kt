@@ -1,6 +1,5 @@
 package com.github.afezeria.hymn.oss.web.controller
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.exception.BusinessException
 import com.github.afezeria.hymn.common.platform.CacheService
 import com.github.afezeria.hymn.common.platform.OssService
@@ -28,9 +27,8 @@ import javax.servlet.http.HttpServletResponse
  * 当 [StorageService.remoteServerSupportHttpAccess] 返回值为 true 时不处理请求，
  * @author afezeria
  */
-@ApiVersion
 @Controller
-@RequestMapping("oss/api/{version}")
+@RequestMapping("oss/api")
 class PreSignedUrlController {
     @Autowired
     private lateinit var storageService: StorageService
@@ -44,14 +42,12 @@ class PreSignedUrlController {
     @Autowired
     private lateinit var fileRecordService: FileRecordService
 
-    private val version = 2104
-
     internal fun generatePreSignedObjectUrl(fileId: String, expiry: Long): String {
         val id = randomUUIDStr()
         val token = Jwt.createJwtToken(mapOf("id" to id), expiry)
         val res = cacheService.setIfAbsent(OssCacheKey.preSigned(id), fileId, expiry)
         if (!res) throw BusinessException("生成对象预签名链接失败")
-        return "module/oss/api/v$version/public/pre-signed?token=$token"
+        return "module/oss/api/public/pre-signed?token=$token"
     }
 
     @GetMapping("public/pre-signed")
