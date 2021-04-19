@@ -16,6 +16,7 @@ class ContextWrapper(val debug: Boolean = false, lanIp: String = "") {
 
     /**
      * 当前线程开始使用这个context的时间
+     * 当 [debug] 为true时表示context开始时间或者最后一次更新临时脚本的时间
      */
     var timestamp = 0L
 

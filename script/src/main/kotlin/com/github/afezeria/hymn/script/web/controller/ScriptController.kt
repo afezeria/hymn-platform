@@ -1,15 +1,11 @@
 package com.github.afezeria.hymn.script.web.controller
 
-import com.github.afezeria.hymn.common.ann.ApiVersion
 import com.github.afezeria.hymn.common.ann.Function
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.common.exception.InnerException
 import com.github.afezeria.hymn.common.module.ClusterService
 import com.github.afezeria.hymn.common.platform.Session
 import com.github.afezeria.hymn.common.util.DEFAULT_OFFSET
-import com.github.afezeria.hymn.core.module.service.BizObjectTriggerService
-import com.github.afezeria.hymn.core.module.service.CustomApiService
-import com.github.afezeria.hymn.core.module.service.CustomFunctionService
 import com.github.afezeria.hymn.core.platform.script.ScriptType
 import com.github.afezeria.hymn.script.platform.ContextWrapperPool
 import com.github.afezeria.hymn.script.platform.ScriptServiceImpl
@@ -23,19 +19,10 @@ import org.springframework.web.bind.annotation.*
 /**
  * @author afezeria
  */
-@ApiVersion
 @RestController
-@RequestMapping("/script/api/{version}/script")
+@RequestMapping("/script/api")
 @Api(tags = ["ScriptController"], description = "脚本接口")
 class ScriptController {
-    @Autowired
-    private lateinit var triggerService: BizObjectTriggerService
-
-    @Autowired
-    private lateinit var apiService: CustomApiService
-
-    @Autowired
-    private lateinit var functionService: CustomFunctionService
 
     @Autowired
     private lateinit var clusterService: ClusterService
@@ -56,7 +43,7 @@ class ScriptController {
 
 
     @Function(AccountType.ADMIN)
-    @ApiOperation(value = "开启debug模式", notes = "")
+    @ApiOperation(value = "是否处于debug模式", notes = "")
     @GetMapping("debug")
     fun debugStatus(): Boolean {
         return ContextWrapperPool.debugWrapperCache[Session.getInstance().accountId] != null
@@ -76,10 +63,9 @@ class ScriptController {
         ContextWrapperPool.closeDebugContext()
     }
 
-    @PostMapping("cache")
+    @PostMapping("compile")
     @Function(AccountType.ADMIN)
     @ApiOperation(value = "编译临时脚本", notes = "")
-    @ResponseBody
     fun compile(
         @RequestParam("type") type: ScriptType,
         @RequestParam("id") id: String,
