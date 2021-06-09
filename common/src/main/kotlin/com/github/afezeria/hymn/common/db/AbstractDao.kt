@@ -11,10 +11,7 @@ import org.ktorm.expression.OrderByExpression
 import org.ktorm.schema.BaseTable
 import org.ktorm.schema.Column
 import org.ktorm.schema.ColumnDeclaring
-import org.ktorm.support.postgresql.BulkInsertOrUpdateOnConflictClauseBuilder
-import org.ktorm.support.postgresql.bulkInsert
-import org.ktorm.support.postgresql.bulkInsertOrUpdate
-import org.ktorm.support.postgresql.insertOrUpdate
+import org.ktorm.support.postgresql.*
 import java.time.LocalDateTime
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
@@ -42,7 +39,7 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
                 isAccessible = true
             }
 
-        private fun BulkInsertOrUpdateOnConflictClauseBuilder.setExclude(column: Column<Any>) {
+        private fun InsertOrUpdateOnConflictClauseBuilder.setExclude(column: Column<Any>) {
             val assignments = field.get(this) as ArrayList<ColumnAssignmentExpression<*>>
             assignments += ColumnAssignmentExpression(
                 column.asExpression(),

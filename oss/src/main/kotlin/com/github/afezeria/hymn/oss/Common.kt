@@ -2,6 +2,7 @@ package com.github.afezeria.hymn.oss
 
 import com.github.afezeria.hymn.common.exception.BusinessException
 import com.github.afezeria.hymn.common.exception.InnerException
+import java.util.*
 
 /**
  * @author afezeria
@@ -18,7 +19,7 @@ fun String.throwIfBucketNameInvalid() =
     takeIf { matches(BUCKET_REGEX) } ?: throw InnerException("$this 不是有效的bucket名称")
 
 fun filename2ContentType(filename: String) =
-    when (filename.substringAfterLast('.', "").toLowerCase()) {
+    when (filename.substringAfterLast('.', "").lowercase(Locale.getDefault())) {
         "tif" -> "image/tiff"
         "tiff" -> "image/tiff"
         "fax" -> "image/fax"
