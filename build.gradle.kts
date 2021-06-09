@@ -35,9 +35,8 @@ subprojects {
 
 
     repositories {
-        jcenter()
         mavenCentral()
-        maven(url = "http://repo.spring.io/libs-release")
+        maven(url = "https://repo.spring.io/libs-release")
     }
 
 

@@ -23,7 +23,7 @@ dependencies {
 
     implementation(Deps.Swagger.core)
 
-    testImplementation(project(":common", "testRuntime"))
+    testImplementation(project(":common", "testArtifacts"))
     testImplementation("com.ninja-squad:springmockk:3.0.1")
 
 }

@@ -1,6 +1,6 @@
 dependencies {
 
-    compile(project(":common"))
+    api(project(":common"))
 
     implementation(kotlin("reflect"))
     implementation(kotlin("stdlib-jdk8"))
@@ -8,10 +8,10 @@ dependencies {
     implementation(Deps.SpringBoot.aop)
     implementation(Deps.SpringBoot.web)
 
-    compile(Deps.Swagger.core)
-    compile(Deps.Swagger.ui)
+    api(Deps.Swagger.core)
+    api(Deps.Swagger.ui)
 
-    compile(Deps.Ktorm.core)
-    compile(Deps.Ktorm.postgresql)
+    api(Deps.Ktorm.core)
+    api(Deps.Ktorm.postgresql)
     testImplementation(project(":common", "testArtifacts"))
 }

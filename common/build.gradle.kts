@@ -35,24 +35,24 @@ dependencies {
     implementation(Deps.Ktorm.core)
     implementation(Deps.Ktorm.postgresql)
 
-    testCompile(Deps.SpringBoot.test)
-    testCompile(Deps.Jdbc.postgresql)
-    testCompile(Deps.Jdbc.hikariCP)
-    testCompile(Deps.Kotest.assertions)
-    testCompile(Deps.Mockk.spring)
+    testApi(Deps.SpringBoot.test)
+    testApi(Deps.Jdbc.postgresql)
+    testApi(Deps.Jdbc.hikariCP)
+    testApi(Deps.Kotest.assertions)
+    testApi(Deps.Mockk.spring)
 
-    testCompile(platform(Deps.Junit.bom))
-    testCompile(Deps.Junit.jupiter)
+    testApi(platform(Deps.Junit.bom))
+    testApi(Deps.Junit.jupiter)
 
-    testCompile(platform(Deps.TestContainers.bom))
-    testCompile(Deps.TestContainers.junit)
+    testApi(platform(Deps.TestContainers.bom))
+    testApi(Deps.TestContainers.junit)
 
 
 }
 
 
 val testConfig = configurations.create("testArtifacts") {
-    extendsFrom(configurations["testCompile"])
+    extendsFrom(configurations["testApi"])
 }
 tasks.register<Jar>("testJar") {
     dependsOn("testClasses")
