@@ -4,7 +4,10 @@ import com.github.afezeria.hymn.common.db.AutoFillType.*
 import com.github.afezeria.hymn.common.exception.DataNotFoundException
 import com.github.afezeria.hymn.common.platform.DatabaseService
 import com.github.afezeria.hymn.common.platform.Session
+import com.github.afezeria.hymn.common.util.Json
+import com.github.afezeria.hymn.common.util.execute
 import org.ktorm.dsl.*
+import org.ktorm.expression.ArgumentExpression
 import org.ktorm.expression.BinaryExpression
 import org.ktorm.expression.ColumnAssignmentExpression
 import org.ktorm.expression.OrderByExpression
@@ -46,6 +49,12 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
                 excluded(column).asExpression()
             )
         }
+    }
+
+    private val defaultOrder = if (table.containsField("createDate")) {
+        listOf(table["create_date"].desc())
+    } else {
+        emptyList()
     }
 
     fun delete(condition: (T) -> ColumnDeclaring<Boolean>): Int {
@@ -202,16 +211,11 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         }
     }
 
-    /**
-     * 如果table有createDate字段则默认按该字段逆序
-     */
-    fun select(
-        columns: List<Column<*>>,
+    fun selectJson(
+        columns: List<Column<*>> = table.columns,
         condition: (() -> ColumnDeclaring<Boolean>)? = null,
-        offset: Int? = null,
-        limit: Int? = null,
         orderBy: List<OrderByExpression> = emptyList(),
-    ): MutableList<MutableMap<String, Any?>> {
+    ): MutableList<Json> {
         var query = databaseService.db().from(table)
             .select(columns)
         if (condition != null) {
@@ -222,98 +226,71 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
             order = listOf(table["create_date"].desc())
         }
 
-        return query.limit(offset, limit)
+        return query
             .orderBy(order)
-            .mapTo(ArrayList()) {
-                val map: MutableMap<String, Any?> = mutableMapOf()
+            .pageableMap {
+                val json = Json()
                 for (column in columns) {
                     val entityField =
                         table.getEntityFieldByColumnName(column.name) ?: continue
-                    map[entityField.field.name] = it[column]
+                    json[entityField.field.name] = it[column]
                 }
-                map
+                json
             }
     }
 
-    /**
-     * 如果table有createDate字段则默认按该字段逆序
-     */
     fun select(
         condition: ((T) -> ColumnDeclaring<Boolean>)? = null,
-        offset: Int? = null,
-        limit: Int? = null,
-        orderBy: List<OrderByExpression> = emptyList(),
+        orderBy: List<OrderByExpression> = defaultOrder,
     ): MutableList<E> {
         var query = databaseService.db().from(table)
             .select(table.columns)
         if (condition != null) {
             query = query.where { condition.invoke(table) }
         }
-        var order = orderBy
-        if (order.isEmpty() && table.containsField("createDate")) {
-            order = listOf(table["create_date"].desc())
-        }
 
-        return query.limit(offset, limit)
-            .orderBy(order)
-            .mapTo(ArrayList()) { table.createEntity(it) }
+        return query
+            .orderBy(orderBy)
+            .pageableMap { table.createEntity(it) }
     }
 
-    fun select(
-        vararg conditions: ColumnDeclaring<Boolean>,
-    ): MutableList<E> {
-        return select(
-            conditions.takeIf { it.isNotEmpty() }?.run { { reduce(and) } },
-        )
-    }
+//    fun select(
+//        columns: List<Column<*>> = table.columns,
+//        orderBy: List<OrderByExpression> = emptyList(),
+//    ): MutableList<MutableMap<String, Any?>> {
+//        return select(columns,null, orderBy)
+//    }
+//
+//    fun select(
+//        vararg columns: Column<*>,
+//        orderBy: List<OrderByExpression> = emptyList(),
+//    ): MutableList<MutableMap<String, Any?>> {
+//        return select(columns.toList(),null, orderBy)
+//    }
 
-    fun select(
-        conditions: List<ColumnDeclaring<Boolean>> = emptyList(),
-        offset: Int? = null,
-        limit: Int? = null,
-        orderBy: List<OrderByExpression> = emptyList(),
-    ): MutableList<E> {
-        return select(
-            conditions.takeIf { it.isNotEmpty() }?.run { { reduce(and) } },
-            offset,
-            limit,
-            orderBy
-        )
-    }
-
-    fun singleRowSelect(
-        conditions: List<ColumnDeclaring<Boolean>> = emptyList(),
-        orderBy: List<OrderByExpression> = emptyList(),
-    ): E? {
-        return select(conditions, 0, 1, orderBy)
-            .firstOrNull()
-    }
-
-    fun singleRowSelect(
-        condition: (T) -> ColumnDeclaring<Boolean>,
-        orderBy: List<OrderByExpression> = emptyList(),
-    ): E? {
-        return select(condition, 0, 1, orderBy)
-            .firstOrNull()
-    }
-
-
-    fun pageSelect(
-        condition: ((T) -> ColumnDeclaring<Boolean>)? = null,
-        pageSize: Int,
-        pageNum: Int,
-        orderBy: List<OrderByExpression> = emptyList(),
-    ): MutableList<E> {
-        if (pageSize < 1) throw IllegalArgumentException("pageSize must be greater than 0, current value $pageSize")
-        if (pageNum < 1) throw IllegalArgumentException("pageNum must be greater than 0, current value $pageNum")
-        return select(condition, (pageNum - 1) * pageSize, pageSize, orderBy)
-    }
-
-    fun selectAll(): MutableList<E> {
-        return databaseService.db().from(table)
-            .select(table.columns)
-            .mapTo(ArrayList()) { table.createEntity(it) }
-    }
+//    fun singleRowSelect(
+//        vararg conditions: ColumnDeclaring<Boolean>,
+//        orderBy: List<OrderByExpression> = emptyList(),
+//    ): E? {
+//        return select(
+//            conditions.takeIf { it.isNotEmpty() }?.run { { reduce(and) } },
+//            orderBy
+//        ).firstOrNull()
+//    }
+//
+//    fun singleRowSelect(
+//        condition: (T) -> ColumnDeclaring<Boolean>,
+//        orderBy: List<OrderByExpression> = emptyList(),
+//    ): E? {
+//        return select(condition, orderBy)
+//            .firstOrNull()
+//    }
+//
+//    fun selectAll(
+//        orderBy: List<OrderByExpression> = emptyList(),
+//    ): MutableList<E> {
+//        return select(null, orderBy)
+//    }
 
     fun selectById(id: String): E? {
         return databaseService.db().from(table)
@@ -356,6 +333,42 @@ abstract class AbstractDao<E : AbstractEntity, T : AbstractTable<E>>(
         return res
     }
 
+    fun <R> Query.pageableMap(transform: (row: QueryRowSet) -> R): MutableList<R> {
+        var query = this
+
+        val total = PageUtil.pageable.get()?.let { (offset, limit, needCount) ->
+            var count: Long? = null
+            if (needCount) {
+                databaseService.db().let { db ->
+                    db.useConnection {
+                        val (sql, params) = db.formatExpression(this.expression)
+                        it.execute(
+                            "select count(*) count from (${sql}) t",
+                            *params.map(ArgumentExpression<*>::value).toTypedArray()
+                        ) { rs ->
+                            rs?.apply {
+                                next()
+                                count = getLong(1)
+                            }
+                        }
+                    }
+                }
+                if (count == 0L) {
+                    return Page.empty()
+                }
+            }
+            query = this.limit(offset, limit)
+            count
+        }
+
+        val destination = ArrayList<R>()
+
+        for (row in query) destination += transform(row)
+        total?.let {
+            return Page(it, destination)
+        }
+        return destination
+    }
 
     inner class AutoFillSelector {
         private val session = Session.getInstance()

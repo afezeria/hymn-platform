@@ -4,11 +4,21 @@
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--      <pattern>${CONSOLE_LOG_PATTERN}</pattern>-->
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36}:%line - %msg%n</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
 
-    <logger name="github.afezeria.hymn" level="debug">
-        <appender-ref ref="stdout"/>
-    </logger>
-    <logger name="p6spy" level="debug">
-        <appender-ref ref="stdout"/>
-    </logger>
+    <!--    <logger name="github.afezeria.hymn" level="debug">-->
+    <!--        <appender-ref ref="stdout"/>-->
+    <!--    </logger>-->
+    <!--    <logger name="p6spy" level="debug">-->
+    <!--        <appender-ref ref="stdout"/>-->
+    <!--    </logger>-->
+    <root level="debug">
+        <appender-ref ref="STDOUT"/>
+    </root>
 </configuration>

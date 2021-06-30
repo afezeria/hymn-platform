@@ -88,13 +88,7 @@ fun Connection.execute(
             try {
                 it.execute()
             } finally {
-                if (logger.isDebugEnabled) {
-                    var warnings = it.warnings
-                    while (warnings != null) {
-                        logger.debug(warnings.message)
-                        warnings = warnings.nextWarning
-                    }
-                }
+                it.debugInfo(sql, *params)
             }
             handler(it.resultSet)
         }
@@ -103,19 +97,28 @@ fun Connection.execute(
             try {
                 it.execute(sql)
             } finally {
-                if (logger.isDebugEnabled) {
-                    var warnings = it.warnings
-                    while (warnings != null) {
-                        logger.debug(warnings.message)
-                        warnings = warnings.nextWarning
-                    }
-                }
+                it.debugInfo(sql, *params)
             }
             handler(it.resultSet)
         }
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
+private inline fun Statement.debugInfo(
+    sql: String,
+    vararg params: Any?,
+) {
+    if (logger.isDebugEnabled) {
+        logger.debug("SQL:{}", sql)
+        logger.debug("Parameters: {}", params)
+        var warnings = warnings
+        while (warnings != null) {
+            logger.debug(warnings.message)
+            warnings = warnings.nextWarning
+        }
+    }
+}
 
 fun ResultSet?.toList(): MutableList<MutableMap<String, Any?>> {
     if (this == null) return mutableListOf()

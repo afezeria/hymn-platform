@@ -1,6 +1,6 @@
 package com.github.afezeria.hymn.common.db
 
-import com.github.afezeria.hymn.common.adminConn
+import com.github.afezeria.hymn.common.*
 import com.github.afezeria.hymn.common.constant.AccountType
 import com.github.afezeria.hymn.common.constant.ClientType
 import com.github.afezeria.hymn.common.exception.DataNotFoundException
@@ -14,6 +14,8 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.instanceOf
+import mu.KotlinLogging
 import org.junit.jupiter.api.*
 import org.ktorm.dsl.and
 import org.ktorm.dsl.asc
@@ -22,6 +24,8 @@ import org.ktorm.dsl.eq
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * @author afezeria
@@ -67,14 +71,14 @@ internal class AbstractDaoTest {
     ).apply {
         id = "cc25e3c045390139d47e1cb6d0c265af"
         lazya = "abc"
-        roleId = "cc25e3c045390139d47e1cb6d0c265af"
-        roleName = "admin"
-        orgId = "cc25e3c045390139d47e1cb6d0c265af"
-        orgName = "admin"
-        createById = "cc25e3c045390139d47e1cb6d0c265af"
-        createBy = "admin"
-        modifyById = "cc25e3c045390139d47e1cb6d0c265af"
-        modifyBy = "admin"
+        roleId = DEFAULT_ROLE_ID
+        roleName = DEFAULT_ROLE_NAME
+        orgId = DEFAULT_ORG_ID
+        orgName = DEFAULT_ROLE_NAME
+        createById = DEFAULT_ACCOUNT_ID
+        createBy = DEFAULT_ACCOUNT_NAME
+        modifyById = DEFAULT_ACCOUNT_ID
+        modifyBy = DEFAULT_ACCOUNT_NAME
         createDate = LocalDateTime.of(2020, 1, 1, 0, 0, 0)
         modifyDate = LocalDateTime.of(2020, 1, 1, 0, 0, 0)
     }
@@ -87,14 +91,14 @@ internal class AbstractDaoTest {
     ).apply {
         id = "d2dbcc6045390139d47f1cb6d0c265af"
         lazya = "abc"
-        roleId = "cc25e3c045390139d47e1cb6d0c265af"
-        roleName = "admin"
-        orgId = "cc25e3c045390139d47e1cb6d0c265af"
-        orgName = "admin"
-        createById = "cc25e3c045390139d47e1cb6d0c265af"
-        createBy = "admin"
-        modifyById = "cc25e3c045390139d47e1cb6d0c265af"
-        modifyBy = "admin"
+        roleId = DEFAULT_ROLE_ID
+        roleName = DEFAULT_ROLE_NAME
+        orgId = DEFAULT_ORG_ID
+        orgName = DEFAULT_ROLE_NAME
+        createById = DEFAULT_ACCOUNT_ID
+        createBy = DEFAULT_ACCOUNT_NAME
+        modifyById = DEFAULT_ACCOUNT_ID
+        modifyBy = DEFAULT_ACCOUNT_NAME
         createDate = LocalDateTime.of(2020, 1, 1, 0, 0, 0)
         modifyDate = LocalDateTime.of(2021, 1, 1, 0, 0, 0)
     }
@@ -104,18 +108,23 @@ internal class AbstractDaoTest {
         adminConn.use {
             it.execute(
                 """
-                    insert into test_dao.test_table (id, inta, longa, doublea, decimala, boola, lazya, create_by_id, create_by,
-                                 modify_by_id, modify_by, role_id, role_name, org_id, org_name, create_date,
-                                 modify_date)
-                    values ('cc25e3c045390139d47e1cb6d0c265af', 2, 42424204040, 3.2, 42.42420913, true, 'abc',
-                            'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin',
-                            'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin', '2020-01-01 00:00:00',
-                            '2020-01-01 00:00:00'),
-                           ('d2dbcc6045390139d47f1cb6d0c265af', 3, null, 3.2, 42.42420913, true, 'abc',
-                            'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin',
-                            'cc25e3c045390139d47e1cb6d0c265af', 'admin', 'cc25e3c045390139d47e1cb6d0c265af', 'admin', '2020-01-02 00:00:00',
-                            '2021-01-01 00:00:00')
-            """
+                    insert into test_dao.test_table (
+                            id, inta, longa, doublea, decimala, boola, lazya, 
+                            create_by_id, create_by, modify_by_id, modify_by, role_id, role_name, org_id, org_name, 
+                            create_date, modify_date)
+                    values (?, 2, 42424204040, 3.2, 42.42420913, true, 'abc', 
+                            ?, ?, ?, ?, ?, ?, ?, ?, 
+                            '2020-01-01 00:00:00', '2020-01-01 00:00:00'), 
+                           (?, 3, null, 3.2, 42.42420913, true, 'abc', 
+                            ?, ?, ?, ?, ?, ?, ?, ?, 
+                            '2020-01-02 00:00:00', '2021-01-01 00:00:00')
+            """,
+                ea.id,
+                DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ROLE_ID,
+                DEFAULT_ROLE_NAME, DEFAULT_ORG_ID, DEFAULT_ORG_NAME,
+                eb.id,
+                DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ACCOUNT_ID, DEFAULT_ACCOUNT_NAME, DEFAULT_ROLE_ID,
+                DEFAULT_ROLE_NAME, DEFAULT_ORG_ID, DEFAULT_ORG_NAME,
             )
         }
 
@@ -137,52 +146,47 @@ internal class AbstractDaoTest {
 
     @Test
     fun deleteById() {
-        dao.deleteById("cc25e3c045390139d47e1cb6d0c265af") shouldBe 1
+        dao.deleteById(ea.id) shouldBe 1
     }
 
 
     @Test
     fun updateEntity() {
-        var entity = dao.selectById("cc25e3c045390139d47e1cb6d0c265af")!!
+        var entity = dao.selectById(ea.id)!!
         entity.apply {
-            assertSoftly {
-                createBy shouldBe "admin"
-                inta shouldNotBe 100
-                modifyBy shouldNotBe "root"
-                modifyById shouldNotBe session.accountId
-                modifyDate.toLocalDate() shouldNotBe LocalDate.now()
-                roleId shouldNotBe session.roleId
-                roleName shouldNotBe session.roleName
-                orgId shouldNotBe session.orgId
-                orgName shouldNotBe session.orgName
-            }
+            inta shouldNotBe 100
+            createBy shouldBe DEFAULT_ACCOUNT_NAME
+            modifyBy shouldNotBe "root"
+            modifyById shouldNotBe session.accountId
+            modifyDate.toLocalDate() shouldNotBe LocalDate.now()
+            roleId shouldNotBe session.roleId
+            roleName shouldNotBe session.roleName
+            orgId shouldNotBe session.orgId
+            orgName shouldNotBe session.orgName
         }
         entity.inta = 100
         dao.update(entity) shouldBe 1
-        entity = dao.selectById("cc25e3c045390139d47e1cb6d0c265af")!!
+        entity = dao.selectById(ea.id)!!
         entity.apply {
-            assertSoftly {
-                inta shouldBe 100
-                createBy shouldBe "admin"
-                modifyBy shouldBe "root"
-                modifyById shouldBe session.accountId
-                modifyDate.toLocalDate() shouldBe LocalDate.now()
-                roleId shouldBe session.roleId
-                roleName shouldBe session.roleName
-                orgId shouldBe session.orgId
-                orgName shouldBe session.orgName
-            }
+            inta shouldBe 100
+            createBy shouldBe DEFAULT_ACCOUNT_NAME
+            modifyBy shouldBe "root"
+            modifyById shouldBe session.accountId
+            modifyDate.toLocalDate() shouldBe LocalDate.now()
+            roleId shouldBe session.roleId
+            roleName shouldBe session.roleName
+            orgId shouldBe session.orgId
+            orgName shouldBe session.orgName
         }
     }
 
     @Test
     fun updateByMap() {
-        var entity = dao.selectById("cc25e3c045390139d47e1cb6d0c265af")!!
+        var entity = dao.selectById(ea.id)!!
         entity.apply {
             assertSoftly {
-                createBy shouldBe "admin"
                 inta shouldNotBe 100
-                modifyBy shouldNotBe "root"
+                modifyBy shouldNotBe session.accountName
                 modifyById shouldNotBe session.accountId
                 modifyDate.toLocalDate() shouldNotBe LocalDate.now()
                 roleId shouldNotBe session.roleId
@@ -191,13 +195,13 @@ internal class AbstractDaoTest {
                 orgName shouldNotBe session.orgName
             }
         }
-        dao.update("cc25e3c045390139d47e1cb6d0c265af", mapOf("inta" to 100))
-        entity = dao.selectById("cc25e3c045390139d47e1cb6d0c265af")!!
+        dao.update(ea.id, mapOf("inta" to 100))
+        entity = dao.selectById(ea.id)!!
         entity.apply {
             assertSoftly {
                 inta shouldBe 100
-                createBy shouldBe "admin"
-                modifyBy shouldBe "root"
+                createBy shouldBe DEFAULT_ACCOUNT_NAME
+                modifyBy shouldBe session.accountName
                 modifyById shouldBe session.accountId
                 modifyDate.toLocalDate() shouldBe LocalDate.now()
                 roleId shouldBe session.roleId
@@ -209,8 +213,8 @@ internal class AbstractDaoTest {
     }
 
     @Test
-    fun `map update will ignore unmutable field`() {
-        val id = "cc25e3c045390139d47e1cb6d0c265af"
+    fun `map update will ignore immutable field`() {
+        val id = ea.id
         val entity = dao.selectById(id)!!
         val boola = entity.boola
         dao.update(id, mapOf("boola" to entity.boola.not()))
@@ -220,11 +224,11 @@ internal class AbstractDaoTest {
 
     @Test
     fun `entity update will ignore unmutable field`() {
-        val entity = dao.selectById("cc25e3c045390139d47e1cb6d0c265af")!!
+        val entity = dao.selectById(ea.id)!!
         val boola = entity.boola
         table.setValueByFieldName(entity, "boola", entity.boola.not())
         dao.update(entity) shouldBe 1
-        val new = dao.selectById("cc25e3c045390139d47e1cb6d0c265af")!!
+        val new = dao.selectById(ea.id)!!
         new.boola shouldBe boola
     }
 
@@ -327,99 +331,107 @@ internal class AbstractDaoTest {
 
     @Test
     fun `specify column query`() {
-        val select = dao.select(listOf(table.id), null, 0, 0).toList()
+        val select = dao.selectJson(listOf(table.id)).toList()
         select.size shouldBe 2
         select.map { it["id"] } shouldContainAll listOf(
-            "cc25e3c045390139d47e1cb6d0c265af",
-            "d2dbcc6045390139d47f1cb6d0c265af"
+            ea.id, eb.id
         )
     }
 
     @Test
-    fun `query default order test`() {
-        val ids = listOf("cc25e3c045390139d47e1cb6d0c265af", "d2dbcc6045390139d47f1cb6d0c265af")
-    }
-
-    @Test
     fun `query order test`() {
-        val ids = listOf("cc25e3c045390139d47e1cb6d0c265af", "d2dbcc6045390139d47f1cb6d0c265af")
+        val ids = listOf(ea.id, eb.id)
         assertSoftly {
-            var res = dao.select(null, 0, 2, listOf(table.id.asc()))
+            var res = dao.select(null, listOf(table.id.asc()))
             res.map { it.id } shouldContainExactly ids
 //            default order
-            res = dao.select(null, 0, 2)
+            res = dao.select()
             res.map { it.id } shouldContainExactly ids.reversed()
 
-            res = dao.select(null, 0, 2, listOf(table.id.desc()))
+            res = dao.select(null, listOf(table.id.desc()))
             res.map { it.id } shouldContainExactly ids.reversed()
 
-            res = dao.select(null, 0, 2, listOf(table.roleName.asc(), table.id.desc()))
+            res = dao.select(null, listOf(table.roleName.asc(), table.id.desc()))
             res.map { it.id } shouldContainExactly ids.reversed()
 
-            res = dao.select(null, 0, 2, listOf(table.modifyDate.asc(), table.id.desc()))
+            res = dao.select(null, listOf(table.modifyDate.asc(), table.id.desc()))
             res.map { it.id } shouldContainExactly ids
         }
     }
 
     @Test
     fun `entity query`() {
-        val select = dao.select({ it.id eq "cc25e3c045390139d47e1cb6d0c265af" })
+        val select = dao.select({ it.id eq ea.id })
         select.size shouldBe 1
         select[0] shouldBe ea
     }
 
     @Test
-    fun `limit and offset test`() {
-        var res = dao.select(null, 0, 1, listOf(table.id.asc()))
-        res.size shouldBe 1
-        res[0] shouldBe ea
-        res = dao.select(null, 1, 1, listOf(table.id.asc()))
-        res.size shouldBe 1
-        res[0] shouldBe eb
-    }
-
-    @Test
     fun `multiple conditions query test`() {
         var select =
-            dao.select({ (table.roleName eq "admin") and (table.modifyDate eq eb.modifyDate) })
+            dao.select({ (table.roleName eq DEFAULT_ROLE_NAME) and (table.modifyDate eq eb.modifyDate) })
         select.size shouldBe 1
         select[0] shouldBe eb
-        select =
-            dao.select(listOf(table.roleName eq "admin", table.modifyDate eq eb.modifyDate))
+        select = dao.select({ (table.roleName eq DEFAULT_ROLE_NAME) and (table.modifyDate eq eb.modifyDate) })
         select.size shouldBe 1
         select[0] shouldBe eb
-    }
-
-    @Test
-    fun singleRowSelectTest() {
-        var select = dao.singleRowSelect({ it.modifyDate eq eb.modifyDate })
-        select shouldBe eb
-        select = dao.singleRowSelect({ it.id eq "abc" })
-        select shouldBe null
     }
 
     @Test
     fun pageSelect() {
-        var res = dao.pageSelect(null, 1, 1, listOf(table.id.asc()))
-        res.size shouldBe 1
-        res[0] shouldBe ea
-        res = dao.pageSelect(null, 1, 2, listOf(table.id.asc()))
-        res.size shouldBe 1
-        res[0] shouldBe eb
 
-        res = dao.pageSelect({ it.boola eq true }, 10, 1, listOf(table.id.asc()))
-        res.size shouldBe 2
-        res[0] shouldBe ea
+        var pageRes = PageUtil.pagination(1, 1) {
+            dao.select(null, listOf(table.id.asc()))
+        }
+        pageRes shouldBe instanceOf(Page::class)
+        pageRes.size shouldBe 1
+        pageRes[0] shouldBe ea
+        pageRes = PageUtil.pagination(2, 1) {
+            dao.select(null, listOf(table.id.asc()))
+        }
+        pageRes.size shouldBe 1
+        pageRes[0] shouldBe eb
+
+        pageRes = PageUtil.pagination(1, 10) {
+            dao.select({ it.boola eq true }, listOf(table.id.asc()))
+        }
+        pageRes.size shouldBe 2
+        pageRes[0] shouldBe ea
+
+        val listRes = PageUtil.limit(0, 1) {
+            dao.select()
+        }
+        listRes shouldBe instanceOf(List::class)
+        listRes.size shouldBe 1
+        listRes[0] shouldBe eb
 
         shouldThrow<IllegalArgumentException> {
-            dao.pageSelect(null, 0, 2, listOf(table.id.asc()))
+            PageUtil.pagination(0, 0) {
+                dao.select(null, listOf(table.id.asc()))
+            }
+        }.apply {
+            message shouldBe "pageNum must be greater than 0, current value 0"
+        }
+        shouldThrow<IllegalArgumentException> {
+            PageUtil.pagination(1, 0) {
+                dao.select(null, listOf(table.id.asc()))
+            }
         }.apply {
             message shouldBe "pageSize must be greater than 0, current value 0"
         }
         shouldThrow<IllegalArgumentException> {
-            dao.pageSelect(null, 1, 0, listOf(table.id.asc()))
+            PageUtil.limit(-1, 0) {
+                dao.select(null, listOf(table.id.asc()))
+            }
         }.apply {
-            message shouldBe "pageNum must be greater than 0, current value 0"
+            message shouldBe "offset must be greater than or equal to 0, current value -1"
+        }
+        shouldThrow<IllegalArgumentException> {
+            PageUtil.limit(1, 0) {
+                dao.select(null, listOf(table.id.asc()))
+            }
+        }.apply {
+            message shouldBe "limit must be greater than 0, current value 0"
         }
     }
 
@@ -433,7 +445,7 @@ internal class AbstractDaoTest {
 
     @Test
     fun `select all`() {
-        dao.selectAll() shouldContainAll listOf(ea, eb)
+        dao.select() shouldContainAll listOf(ea, eb)
     }
 
     @Test
